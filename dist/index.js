@@ -13,9 +13,13 @@ var httpserver = http_1.createServer(app);
 var server = new apollo_server_express_1.ApolloServer({
     schema: schema_1.Schema,
     subscriptions: { path: "/websocket" },
+    context: function (_a) {
+        var req = _a.req;
+        req.headers.authorization;
+    },
     cacheControl: {
         defaultMaxAge: 5,
-    }
+    },
 });
 server.applyMiddleware({ app: app });
 httpserver.listen(PORT, function () {
