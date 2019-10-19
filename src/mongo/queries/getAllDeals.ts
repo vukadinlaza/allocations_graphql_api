@@ -10,4 +10,4 @@ export const getAllDeals = (db: Db, projection?: object | undefined) => {
         .find(q)
         // .project(projection)
         .toArray();
-}
+};

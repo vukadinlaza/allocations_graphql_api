@@ -1,24 +1,13 @@
 import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
+import { IContextType } from "./IContextType";
 import { IDeal } from "./models/Deal";
 import { IInvestor } from "./models/Investor";
+import { getDealById } from "./mongo/queries";
+import { getAllInvestor } from "./mongo/queries/geAlltInvestors";
+import { getAllDeals } from "./mongo/queries/getAllDeals";
 import { IDealType } from "./types/IDealType";
 import { IInvestorType } from "./types/IInvestorType";
-import { getAllDeals } from "./mongo/queries/getAllDeals";
-import { IContextType } from './IContextType';
-import { Db } from "mongodb";
-import { getDealById } from "./mongo/queries";
-
-const deal_data: IDeal[] = [
-    {
-        _id: "123",
-        entity_name: "AS Bruch",
-        deal_name: "Bakkt",
-        amount_wired: 564226,
-        deal_complete_date: Date.now().toString(),
-        total_investors: 6,
-        investors: [],
-    },
-];
+import { getInvestorById } from './mongo/queries/getInvestorById';
 
 const investor_data: IInvestor[] = [
     {
@@ -42,7 +31,6 @@ const investor_data: IInvestor[] = [
     },
 ];
 
-
 export const RootQueryType = new GraphQLObjectType({
     name: "RootQueryType",
     fields: {
@@ -64,15 +52,19 @@ export const RootQueryType = new GraphQLObjectType({
             },
             resolve(obj, args, ctx: IContextType) {
                 return ctx.getDb.then((db: any) => {
-                   return getDealById(db, args.id);
+                    return getDealById(db, args.id);
                 });
             },
         },
         GetInvestors: {
             type: new GraphQLList(IInvestorType),
-            resolve() {
-
-                return investor_data;
+            resolve(obj, args, ctx: IContextType) {
+                ctx.getDb.then((db: any) => {
+                    return getAllInvestor(db).then((data) => {
+                        console.log("All Investors : " + data);
+                        return data;
+                    });
+                });
             },
         },
         GetInvestorById: {
@@ -80,12 +72,10 @@ export const RootQueryType = new GraphQLObjectType({
             args: {
                 id: { type: new GraphQLNonNull(GraphQLString) },
             },
-            resolve(obj, args, ctx) {
-                const data = investor_data.find((investor) => {
-                    return investor._id === args.id;
+            resolve(obj, args, ctx: IContextType) {
+                return ctx.getDb.then((db: any) => {
+                    return getInvestorById(db, args.id);
                 });
-
-                return data;
 
             },
         },
