@@ -34,9 +34,9 @@ export const RootQueryType = new GraphQLObjectType({
         GetInvestors: {
             type: new GraphQLList(IInvestorType),
             resolve(obj, args, ctx: IContextType) {
-                ctx.getDb.then((db: any) => {
+              return  ctx.getDb.then((db: any) => {
                     return getAllInvestor(db).then((data) => {
-                        console.log("All Investors : " + data);
+                        console.log("All Investors : " + JSON.stringify(data));
                         return data;
                     });
                 });

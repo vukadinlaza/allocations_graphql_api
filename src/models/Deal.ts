@@ -9,6 +9,6 @@ export interface IDeal {
     amount_wired: number;
     total_investors: number;
     deal_complete_date: string;
-    investors: IInvestor[];
+    investors?: IInvestor[];
 }
 

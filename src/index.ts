@@ -5,9 +5,9 @@ import express from "express";
 import helmet from "helmet";
 import { createServer } from "http";
 import { Db } from "mongodb";
+import { IContextType } from "./IContextType";
 import { MongoConnnection } from "./mongo/Connector";
 import { Schema } from "./schema";
-import { IContextType } from "./IContextType";
 
 dotenv.config();
 
