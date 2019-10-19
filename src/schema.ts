@@ -3,6 +3,6 @@ import { RootQueryType } from "./RootQueryType";
 
 export const Schema = new GraphQLSchema({
     query: RootQueryType,
-    // mutation: RootMutationType,
+    mutation: RootMutationType,
    // subscription: RootSubscriptionType
   });
