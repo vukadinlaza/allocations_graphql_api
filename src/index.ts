@@ -7,6 +7,7 @@ import { createServer } from "http";
 import { Db } from "mongodb";
 import { MongoConnnection } from "./mongo/Connector";
 import { Schema } from "./schema";
+import { IContextType } from "./IContextType";
 
 dotenv.config();
 
@@ -25,13 +26,16 @@ app.use(helmet());
 const connectionUrl = `mongodb+srv://${mongodb_username}:${password}@allocations-3plbs.gcp.mongodb.net/test?retryWrites=true&w=majority`;
 console.log(connectionUrl);
 const mongoDbCon = new MongoConnnection(connectionUrl);
-const db = mongoDbCon.getDb().then((db: Db) => db).catch((err) => console.log(err));
+const mdb = mongoDbCon.getDb().then((db: Db) => db).catch((err) => console.log(err));
 
+const contextObject: IContextType = {
+  getDb: mdb,
+};
 
 const server = new ApolloServer({
   schema: Schema,
   subscriptions: { path: "/websocket" },
-  context: { db },
+  context: contextObject,
   cacheControl: {
     defaultMaxAge: 5,
   },

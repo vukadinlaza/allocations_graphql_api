@@ -1,1 +1,2 @@
-export * from "./getAllDeals"
+export * from "./getAllDeals";
+export * from "./getDealById";
