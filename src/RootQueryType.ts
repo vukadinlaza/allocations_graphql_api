@@ -3,6 +3,7 @@ import { IDeal } from "./models/Deal";
 import { IInvestor } from "./models/Investor";
 import { IDealType } from "./types/IDealType";
 import { IInvestorType } from "./types/IInvestorType";
+import { getAllDeals } from "./mongo/queries/getAllDeals";
 
 const deal_data: IDeal[] = [
     {
@@ -37,14 +38,22 @@ const investor_data: IInvestor[] = [
 
     },
 ];
+
+
 export const RootQueryType = new GraphQLObjectType({
     name: "RootQueryType",
     fields: {
         GetDeals: {
             type: new GraphQLList(IDealType),
             resolve(obj, args, ctx) {
-
-                return deal_data;
+                return ctx.db.then((db: any) => {
+                    return getAllDeals(db).then(data => {
+                        console.log(data);
+                        return data;
+                    });
+                });
+                // Parse data from database
+                // return deal_data;
             },
         },
         GetDealById: {
@@ -56,6 +65,8 @@ export const RootQueryType = new GraphQLObjectType({
                 const data = deal_data.find((deal) => {
                     return deal._id === args.id;
                 });
+
+                // Seach collections and find documents based on condition
                 return data;
             },
         },

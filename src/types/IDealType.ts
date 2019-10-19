@@ -14,7 +14,7 @@ export const IDealType = new GraphQLObjectType({
         deal_name: { type: GraphQLString },
         amount_wired: { type: GraphQLInt },
         total_investors: { type: GraphQLInt },
-        deal_complete_data: { type: GraphQLString },
+        deal_complete_date: { type: GraphQLString },
         investors: { type: new GraphQLList(InvestorType) },
     },
 });
