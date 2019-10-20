@@ -1,34 +1,40 @@
 import { ApolloServer } from "apollo-server-express";
+import responseCachePlugin from "apollo-server-plugin-response-cache";
+import bodyParser from "body-parser";
+import compression from "compression";
 import cors from "cors";
 import * as dotenv from "dotenv";
 import express from "express";
+import jwt from "express-jwt";
 import helmet from "helmet";
 import { createServer } from "http";
-
-import jwt from "express-jwt";
-import jwksClient from "jwks-rsa";
 import jwksRsa from "jwks-rsa";
+import jwksClient from "jwks-rsa";
 import { Db } from "mongodb";
 import { IContextType } from "./IContextType";
 import { MongoConnnection } from "./mongo/Connector";
 import { Schema } from "./schema";
-
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 app.use(cors());
+app.use(helmet());
+app.use(compression());
+app.use(bodyParser.urlencoded({
+  extended: true,
+}));
+app.use(bodyParser.json());
+
 // tslint:disable-next-line:variable-name
 const mongodb_username = process.env.MONGO_USERNAME || " ";
 const password = process.env.MONGO_PASSWORD || " ";
 
-const httpserver = createServer(app);
-app.use(helmet());
-// Auth0 Middleware ( Check user is authenticated)
 
 // tslint:disable-next-line:max-line-length
 const connectionUrl = `mongodb+srv://${mongodb_username}:${password}@allocations-3plbs.gcp.mongodb.net/test?retryWrites=true&w=majority`;
-console.log(connectionUrl);
+
+
 const mongoDbCon = new MongoConnnection(connectionUrl);
 const mdb = mongoDbCon.getDb().then((db: Db) => db).catch((err) => console.log(err));
 
@@ -57,11 +63,12 @@ const auth = jwt({
 
 const getDb = mdb;
 const server = new ApolloServer({
+
   schema: Schema,
+
   subscriptions: { path: "/websocket" },
   context: ({ req }) => {
     const token = req.headers.authorization || '';
-
 
     return { getDb, token };
   },
@@ -69,12 +76,13 @@ const server = new ApolloServer({
     defaultMaxAge: 5,
   },
   introspection: false,
+  plugins: [responseCachePlugin()],
 });
 if (process.env.NODE_ENV !== "development") {
-   app.use(auth);
+  app.use(auth);
 }
 
-app.use((err, req, res, next) => {
+app.use((err: any, req: any, res: any, next: any) => {
   if (err.name === "UnauthorizedError") {
     console.log(err);
     res.status(401).send("invalid token");
@@ -82,7 +90,7 @@ app.use((err, req, res, next) => {
     next(err);
   }
 });
-
+const httpserver = createServer(app);
 server.applyMiddleware({ app });
 
 httpserver.listen(PORT, () => {
