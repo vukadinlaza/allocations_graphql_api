@@ -14,7 +14,8 @@ export const RootQueryType = new GraphQLObjectType({
             resolve(obj, args, ctx: IContextType) {
                 return ctx.getDb.then((db: any) => {
                     return getAllDeals(db).then((data) => {
-                        console.log(data);
+                       // console.log(data);
+                        console.log(JSON.stringify(ctx));
                         return data;
                     });
                 });
