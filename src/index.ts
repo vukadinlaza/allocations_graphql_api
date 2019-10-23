@@ -75,7 +75,7 @@ const server = new ApolloServer({
   cacheControl: {
     defaultMaxAge: 5,
   },
-  introspection: false,
+  introspection: true,
   plugins: [responseCachePlugin()],
 });
 if (process.env.NODE_ENV !== "development") {
