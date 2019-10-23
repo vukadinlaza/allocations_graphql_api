@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build-ts": "tsc",
+    "tsc": "tsc",
     "postinstall": "npm run build-ts",
     "start": "npm run build && npm run serve",
     "build": "npm run build-ts",
