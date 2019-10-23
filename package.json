@@ -6,7 +6,7 @@
   "scripts": {
     "build-ts": "tsc",
     "tsc": "tsc",
-    "postinstall": "npm run build-ts",
+    "postinstall": "npm run tsc",
     "start": "npm run build && npm run serve",
     "build": "npm run build-ts",
     "serve": "node dist/index.js",
@@ -37,7 +37,8 @@
     "jest": "^24.9.0",
     "nodemon": "^1.19.4",
     "ts-jest": "^24.1.0",
-    "tslint": "^5.20.0"
+    "tslint": "^5.20.0",
+    "typescript": "^3.6.4"
   },
   "dependencies": {
     "@types/assert": "^1.4.3",
