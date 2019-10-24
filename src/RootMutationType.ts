@@ -1,10 +1,12 @@
-import { GraphQLNonNull, GraphQLObjectType } from "graphql";
+import { GraphQLID, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
 import { IContextType } from "./IContextType";
-import { createDeal, createInvestor } from "./mongo/queries";
+import { createDeal, createInvestor, deleteDeal, deleteInvestor } from "./mongo/queries";
 import { IDealInputType } from "./types/IDealInputType";
 import { IDealType } from "./types/IDealType";
 import { IInvestorInputType } from "./types/IInvestorInputType";
 import { IInvestorType } from "./types/IInvestorType";
+
+
 
 export const RootMutationType = new GraphQLObjectType({
     name: "RootMutationType",
@@ -28,6 +30,28 @@ export const RootMutationType = new GraphQLObjectType({
             resolve: (obj, args, ctx: IContextType) => {
                 return ctx.getDb.then((db: any) => {
                     return createInvestor(db, args.input);
+                });
+            },
+        },
+        deleteDealById: {
+            type: GraphQLID,
+            args: {
+                id: { type: new GraphQLNonNull(GraphQLID) },
+            },
+            resolve: (obj, args, ctx: IContextType) => {
+                return ctx.getDb.then((db: any) => {
+                    return deleteDeal(db, args.id);
+                });
+            },
+        },
+        deleteInvestorById: {
+            type: GraphQLID,
+            args: {
+                id: { type: new GraphQLNonNull(GraphQLID) },
+            },
+            resolve: (obj, args, ctx: IContextType) => {
+                return ctx.getDb.then((db: any) => {
+                    return deleteInvestor(db, args.id);
                 });
             },
         },

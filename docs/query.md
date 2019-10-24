@@ -50,14 +50,8 @@ query GetInvestorById {
 #     deal_name
 #   }
 # }
-mutation createDeal {
-  addDeal(input:{
-    entity_name:"Sharding Capital",
-    deal_name:"Securitize",
-    amount_wired:30000,
-    total_investors:7,
-    deal_complete_date: "February 2019",
-  }){
+mutation createDeal($input:IDealInputType!) {
+  addDeal(input:$input){
     _id
     entity_name
     amount_wired
@@ -85,7 +79,29 @@ mutation createInvestor{
     email
   }
 }
+mutation deleteDealById($id: ID!){
+  deleteDealById(id:$id)
+}
 
+mutation deleteInvestorById($id:ID!){
+  deleteInvestorById(id:$id)
+}
+
+```
+
+
+### Query Variable 
+```
+{
+  "input":{
+    "entity_name":"test",
+    "deal_name":"test",
+    "amount_wired":30000,
+    "total_investors":7,
+    "deal_complete_date": "February 2019"
+  },
+  "id": "5db20dde64e2715db09c8ea6"
+}
 ```
 
 https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/deployment
