@@ -6,11 +6,13 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 import express from "express";
 import jwt from "express-jwt";
+import { execute, subscribe } from "graphql";
 import helmet from "helmet";
 import { createServer } from "http";
 import jwksRsa from "jwks-rsa";
 import jwksClient from "jwks-rsa";
 import { Db } from "mongodb";
+import { SubscriptionServer } from "subscriptions-transport-ws";
 import { IContextType } from "./IContextType";
 import { MongoConnnection } from "./mongo/Connector";
 import { Schema } from "./schema";
@@ -18,7 +20,10 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-app.use(cors());
+if (process.env.NODE_ENV === "production") {
+  app.use("*", cors({ origin: `https://api.allocations.co/graphql` }));
+}
+
 app.use(helmet());
 app.use(compression());
 app.use(bodyParser.urlencoded({
@@ -62,11 +67,11 @@ const auth = jwt({
 
 
 const getDb = mdb;
+
 const server = new ApolloServer({
 
   schema: Schema,
-
-  subscriptions: { path: "/websocket" },
+  //  subscriptions: { path: "/websocket" },
   context: ({ req }) => {
     const token = req.headers.authorization || '';
 
@@ -78,7 +83,8 @@ const server = new ApolloServer({
   introspection: true,
   plugins: [responseCachePlugin()],
 });
-if (process.env.NODE_ENV !== "development") {
+
+if (process.env.NODE_ENV === "production") {
   app.use(auth);
 }
 
@@ -90,10 +96,23 @@ app.use((err: any, req: any, res: any, next: any) => {
     next(err);
   }
 });
-const httpserver = createServer(app);
+const ws = createServer(app);
+
+
 server.applyMiddleware({ app });
 
-httpserver.listen(PORT, () => {
+ws.listen(PORT, () => {
+
+  // tslint:disable-next-line:no-unused-expression
+  new SubscriptionServer({
+    execute,
+    subscribe,
+    schema: Schema,
+  }, {
+    server: ws,
+    path: "/subscriptions",
+  });
+
   console.log(
     `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
   );
@@ -101,3 +120,11 @@ httpserver.listen(PORT, () => {
     `🚀 Subscriptions ready at ws://localhost:${PORT}${server.subscriptionsPath}`
   );
 });
+// httpserver.listen(PORT, () => {
+//   console.log(
+//     `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
+//   );
+//   console.log(
+//     `🚀 Subscriptions ready at ws://localhost:${PORT}${server.subscriptionsPath}`
+//   );
+// });
