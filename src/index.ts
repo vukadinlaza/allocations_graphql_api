@@ -16,6 +16,7 @@ import { SubscriptionServer } from "subscriptions-transport-ws";
 import { IContextType } from "./IContextType";
 import { MongoConnnection } from "./mongo/Connector";
 import { Schema } from "./schema";
+import { pubsub } from './RootSubscriptionType';
 dotenv.config();
 
 const app = express();
@@ -46,9 +47,9 @@ const mdb = mongoDbCon.getDb().then((db: Db) => db).catch((err) => console.log(e
 let credential = false;
 console.log(process.env.NODE_ENV)
 if (process.env.NODE_ENV === "production") {
-  credential = true
+  credential = true;
 } else {
-  credential = false
+  credential = false;
 }
 
 const auth = jwt({
@@ -71,11 +72,23 @@ const getDb = mdb;
 const server = new ApolloServer({
 
   schema: Schema,
-  //  subscriptions: { path: "/websocket" },
-  context: ({ req }) => {
-    const token = req.headers.authorization || '';
+  context: async ({ req, connection }) => {
+    if (connection) {
+      return { ...connection.context };
+    } else {
+      const token = req.headers.authorization || "";
+      return { getDb, token };
+    }
 
-    return { getDb, token };
+  },
+  subscriptions: {
+    path: "/subscriptions",
+    onConnect: async (connectionParams, webSocket, context) => {
+      console.log(`Subscription client connected using Apollo server's built-in SubscriptionServer.`)
+    },
+    onDisconnect: async (webSocket, context) => {
+      console.log(`Subscription client disconnected.`);
+    },
   },
   cacheControl: {
     defaultMaxAge: 5,
@@ -93,26 +106,16 @@ app.use((err: any, req: any, res: any, next: any) => {
     console.log(err);
     res.status(401).send("invalid token");
   } else {
+    console.log(err);
     next(err);
   }
 });
-const ws = createServer(app);
-
-
 server.applyMiddleware({ app });
+const httpServer = createServer(app);
 
-ws.listen(PORT, () => {
+server.installSubscriptionHandlers(httpServer);
 
-  // tslint:disable-next-line:no-unused-expression
-  new SubscriptionServer({
-    execute,
-    subscribe,
-    schema: Schema,
-  }, {
-    server: ws,
-    path: "/subscriptions",
-  });
-
+httpServer.listen(PORT, () => {
   console.log(
     `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
   );
@@ -120,11 +123,3 @@ ws.listen(PORT, () => {
     `🚀 Subscriptions ready at ws://localhost:${PORT}${server.subscriptionsPath}`
   );
 });
-// httpserver.listen(PORT, () => {
-//   console.log(
-//     `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
-//   );
-//   console.log(
-//     `🚀 Subscriptions ready at ws://localhost:${PORT}${server.subscriptionsPath}`
-//   );
-// });

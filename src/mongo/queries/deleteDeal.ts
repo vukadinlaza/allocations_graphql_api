@@ -2,6 +2,7 @@
 import { Db, ObjectId } from "mongodb";
 
 export const deleteDeal = (db: Db, dealId: string) => {
+    
     const q = {
         _id: new ObjectId(dealId),
     };
