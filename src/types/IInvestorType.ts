@@ -1,4 +1,4 @@
-import { GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
+import { GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString, GraphQLFloat, GraphQLID } from "graphql";
 
 export const IInvestorType = new GraphQLObjectType({
   name: "IInvestorType",
@@ -20,5 +20,11 @@ export const IInvestorType = new GraphQLObjectType({
     aml_status: { type: GraphQLString },
     score: { type: GraphQLInt },
 
+  },
+});
+export const IInvestorDeleteType = new GraphQLObjectType({
+  name: "IInvestorDeleteType",
+  fields: {
+    _id: { type: GraphQLID },
   },
 });

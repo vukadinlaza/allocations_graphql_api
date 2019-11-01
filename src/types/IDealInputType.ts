@@ -15,6 +15,9 @@ export const IDealInputType = new GraphQLInputObjectType({
         amount_wired: { type: GraphQLInt },
         total_investors: { type: GraphQLInt },
         deal_complete_date: { type: GraphQLString },
+        operations_agreement: { type: GraphQLString },
+        subscription_agreement: { type: GraphQLString },
+        private_placement_memorandum: { type: GraphQLString },
         investors: { type: new GraphQLList(IDealInvestorInputType) },
     },
 });

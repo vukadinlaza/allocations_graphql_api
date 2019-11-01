@@ -7,8 +7,13 @@ export interface IDeal {
     entity_name: string;
     deal_name: string;
     amount_wired: number;
-    total_investors: number;
+    total_investors?: number;
     deal_complete_date: string;
+    operations_agreement?: string;
+    subscription_agreement?: string;
+    private_placement_memorandum?: string;
+    createdAt?: string;
+    updatedAt?: string;
     investors?: IInvestor[];
 }
 

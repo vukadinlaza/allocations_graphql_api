@@ -16,7 +16,6 @@ import { SubscriptionServer } from "subscriptions-transport-ws";
 import { IContextType } from "./IContextType";
 import { MongoConnnection } from "./mongo/Connector";
 import { Schema } from "./schema";
-import { pubsub } from './RootSubscriptionType';
 dotenv.config();
 
 const app = express();

@@ -3,9 +3,9 @@ import { IContextType } from "./IContextType";
 import { createDeal, createInvestor, deleteDeal, deleteInvestor } from "./mongo/queries";
 import { DEAL_ADDED, pubsub, DEAL_DELETED } from "./RootSubscriptionType";
 import { IDealInputType } from "./types/IDealInputType";
-import { IDealType } from "./types/IDealType";
+import { IDealType, IDealDeleteType } from "./types/IDealType";
 import { IInvestorInputType } from "./types/IInvestorInputType";
-import { IInvestorType } from "./types/IInvestorType";
+import { IInvestorType, IInvestorDeleteType } from "./types/IInvestorType";
 
 
 
@@ -41,7 +41,7 @@ export const RootMutationType = new GraphQLObjectType({
             },
         },
         deleteDealById: {
-            type: GraphQLID,
+            type: IDealDeleteType,
             args: {
                 id: { type: new GraphQLNonNull(GraphQLID) },
             },
@@ -50,19 +50,29 @@ export const RootMutationType = new GraphQLObjectType({
 
                     return deleteDeal(db, args.id).then((res) => {
                         pubsub.publish(DEAL_DELETED, { DealAdded: "Deleted successfully" });
-                        return args.id;
+                        const data = {
+                            _id: args.id,
+                        };
+                        return data;
                     });
                 });
             },
         },
         deleteInvestorById: {
-            type: GraphQLID,
+            type: IInvestorDeleteType,
             args: {
                 id: { type: new GraphQLNonNull(GraphQLID) },
             },
             resolve: (obj, args, ctx: IContextType) => {
                 return ctx.getDb.then((db: any) => {
-                    return deleteInvestor(db, args.id);
+                    return deleteInvestor(db, args.id).then((res) => {
+                        console.log(res);
+                        console.log(args.id);
+                        const data = {
+                            _id: args.id,
+                        };
+                        return data;
+                    });
                 });
             },
         },

@@ -1,4 +1,4 @@
-import { GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString, graphqlSync } from "graphql";
+import { GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString, graphqlSync, GraphQLID } from "graphql";
 
 const IdealInvestorType = new GraphQLObjectType({
     name: "IdealInvestorType",
@@ -15,6 +15,18 @@ export const IDealType = new GraphQLObjectType({
         amount_wired: { type: GraphQLInt },
         total_investors: { type: GraphQLInt },
         deal_complete_date: { type: GraphQLString },
+        operations_agreement: { type: GraphQLString },
+        subscription_agreement: { type: GraphQLString },
+        private_placement_memorandum: { type: GraphQLString },
+        createdAt: { type: GraphQLString },
+        updatedAt: { type: GraphQLString },
         investors: { type: new GraphQLList(IdealInvestorType) },
     },
 });
+export const IDealDeleteType = new GraphQLObjectType({
+    name: "IDealDeleteType",
+    fields: {
+        _id: { type: GraphQLID },
+    },
+});
+

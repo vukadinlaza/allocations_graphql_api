@@ -8,6 +8,9 @@ export const getAllDeals = (db: Db, projection?: object | undefined) => {
     return db
         .collection<IDeal>("deals")
         .find(q)
+        .sort({createdAt: -1})
         // .project(projection)
         .toArray();
 };
+
+// Sorty data by timestamp
