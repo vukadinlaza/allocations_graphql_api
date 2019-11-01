@@ -77,6 +77,7 @@ const server = new ApolloServer({
       return { ...connection.context };
     } else {
       const token = req.headers.authorization || "";
+     // console.log(token);
       return { getDb, token };
     }
 

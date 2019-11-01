@@ -49,7 +49,8 @@ export const RootMutationType = new GraphQLObjectType({
                 return ctx.getDb.then((db: any) => {
 
                     return deleteDeal(db, args.id).then((res) => {
-                        pubsub.publish(DEAL_DELETED, { DealAdded: "Deleted successfully" })
+                        pubsub.publish(DEAL_DELETED, { DealAdded: "Deleted successfully" });
+                        return args.id;
                     });
                 });
             },
