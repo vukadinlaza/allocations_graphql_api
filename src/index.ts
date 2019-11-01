@@ -22,7 +22,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 if (process.env.NODE_ENV === "production") {
-  app.use("*", cors({ origin: `https://api.allocations.co/graphql` }));
+  app.use("*", cors({ origin: `https://admin.allocations.co` }));
 }
 
 app.use(helmet());
