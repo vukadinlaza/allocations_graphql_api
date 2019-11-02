@@ -1,3 +1,4 @@
+import assert from "assert";
 import { Db, Timestamp } from "mongodb";
 import { IDeal } from "../../models/Deal";
 
@@ -15,8 +16,13 @@ export const createDeal = (db: Db, deal: IDeal) => {
     deal.createdAt = Date.now().toString();
     return db
         .collection<IDeal>("deals")
-        .insertOne(deal, { w: 1 })
+        .insertOne(deal, { w: 1, wtimeout: 10000, serializeFunctions: true })
         .then((res) => {
+            assert.equal(1, res.insertedCount);
+            
             return res.ops[0];
+        }).catch((err) => {
+            console.log(err);
+            return err;
         });
 };

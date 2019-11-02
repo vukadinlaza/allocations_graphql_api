@@ -17,6 +17,7 @@ export class MongoConnnection {
             });
             client.connect()
                 .then((db) => {
+                    
                     resolve(db.db("allocations"));
                 })
                 .catch((err) => reject(err));

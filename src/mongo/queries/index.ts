@@ -6,6 +6,6 @@ export * from "./createDeal";
 export * from "./createInvestor";
 export * from "./deleteDeal";
 export * from "./deleteInvestor";
-
+export * from "./updateDeal";
 
 

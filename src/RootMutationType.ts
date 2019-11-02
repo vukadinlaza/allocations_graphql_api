@@ -1,11 +1,11 @@
 import { GraphQLID, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
 import { IContextType } from "./IContextType";
-import { createDeal, createInvestor, deleteDeal, deleteInvestor } from "./mongo/queries";
-import { DEAL_ADDED, pubsub, DEAL_DELETED } from "./RootSubscriptionType";
+import { createDeal, createInvestor, deleteDeal, deleteInvestor, updateDeal } from "./mongo/queries";
+import { DEAL_ADDED, DEAL_DELETED, pubsub } from "./RootSubscriptionType";
 import { IDealInputType } from "./types/IDealInputType";
-import { IDealType, IDealDeleteType } from "./types/IDealType";
+import { IDealDeleteType, IDealType } from "./types/IDealType";
 import { IInvestorInputType } from "./types/IInvestorInputType";
-import { IInvestorType, IInvestorDeleteType } from "./types/IInvestorType";
+import { IInvestorDeleteType, IInvestorType } from "./types/IInvestorType";
 
 
 
@@ -76,5 +76,24 @@ export const RootMutationType = new GraphQLObjectType({
                 });
             },
         },
+
+
+        updateDeal: {
+            type: IDealType,
+            args: {
+                input: { type: new GraphQLNonNull(IDealInputType) },
+            },
+            resolve: (obj, args, ctx: IContextType) => {
+                return ctx.getDb.then((db: any) => {
+                    return updateDeal(db, args.input).then(res => {
+                        console.log("Mutation: " + res)
+                        return res;
+                    })
+                });
+            },
+        },
+
+
     },
+
 });

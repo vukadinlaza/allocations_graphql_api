@@ -1,4 +1,4 @@
-import { GraphQLInputObjectType, GraphQLInt, GraphQLList, GraphQLString } from "graphql";
+import { GraphQLID, GraphQLInputObjectType, GraphQLInt, GraphQLList, GraphQLString } from "graphql";
 
 export const IDealInvestorInputType = new GraphQLInputObjectType({
     name: "IDealInvestorInputType",
@@ -10,6 +10,7 @@ export const IDealInvestorInputType = new GraphQLInputObjectType({
 export const IDealInputType = new GraphQLInputObjectType({
     name: "IDealInputType",
     fields: {
+        _id: { type: GraphQLID },
         entity_name: { type: GraphQLString },
         deal_name: { type: GraphQLString },
         amount_wired: { type: GraphQLInt },
