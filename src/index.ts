@@ -56,11 +56,11 @@ const auth = jwt({
     cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
+    jwksUri: `https://allocations1.auth0.com/.well-known/jwks.json`
   }),
 
   audience: "https://api.graphql.com",
-  issuer: `https://${process.env.AUTH0_DOMAIN}/`,
+  issuer: `https://allocations1.auth0.com/`,
   algorithms: ["RS256"],
   credentialsRequired: false,
 });
@@ -76,7 +76,7 @@ const server = new ApolloServer({
       return { ...connection.context };
     } else {
       const token = req.headers.authorization || "";
-      // console.log(token);
+     // console.log(token);
       return { getDb, token };
     }
 
