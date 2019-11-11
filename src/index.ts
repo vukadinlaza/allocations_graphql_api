@@ -20,6 +20,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
 if (process.env.NODE_ENV === "production") {
   app.use("*", cors({ origin: `https://admin.allocations.co` }));
 }
@@ -56,7 +57,7 @@ const auth = jwt({
     cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
+    jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`
   }),
 
   audience: "https://api.graphql.com",
@@ -96,7 +97,7 @@ const server = new ApolloServer({
   introspection: true,
   plugins: [responseCachePlugin()],
 });
-
+console.log(process.env.NODE_ENV)
 if (process.env.NODE_ENV === "production") {
   app.use(auth);
 }

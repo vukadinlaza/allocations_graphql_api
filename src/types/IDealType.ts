@@ -1,4 +1,4 @@
-import { GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString, graphqlSync, GraphQLID } from "graphql";
+import { GraphQLID, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from "graphql";
 
 const IdealInvestorType = new GraphQLObjectType({
     name: "IdealInvestorType",
