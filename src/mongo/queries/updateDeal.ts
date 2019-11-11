@@ -2,9 +2,13 @@
 import assert from "assert";
 import { Db, DBRef, ObjectID } from "mongodb";
 import { IDeal } from "../../models/Deal";
-
+/**
+ * 
+ * @param db MongoDB database connection instance
+ * @param deal  IDeal  object
+ */
 export const updateDeal = (db: Db, deal: IDeal) => {
-  //  console.log(deal);
+    //  console.log(deal);
     const f = { _id: new ObjectID(deal._id) };
 
     const data: IDeal = {
@@ -19,7 +23,7 @@ export const updateDeal = (db: Db, deal: IDeal) => {
     };
     console.log(data);
     return db.collection("deals")
-        .findOneAndUpdate({ _id: deal._id }, { $set: { ...data } }, { returnOriginal: false})
+        .findOneAndUpdate({ _id: deal._id }, { $set: { ...data } }, { returnOriginal: false })
         .then((res) => {
 
             //  assert.equal(1, res.ok);

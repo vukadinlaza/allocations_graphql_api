@@ -20,5 +20,11 @@ export const IDealInputType = new GraphQLInputObjectType({
         subscription_agreement: { type: GraphQLString },
         private_placement_memorandum: { type: GraphQLString },
         investors: { type: new GraphQLList(IDealInvestorInputType) },
+        bank_account: { type: GraphQLString },
+        formation_certificate_filing: { type: GraphQLString },
+        ein_filing: { type: GraphQLString },
+        form_d_filing: { type: GraphQLString },
+        form_1065_filing: { type: GraphQLString },
+        w9_filing: { type: GraphQLString },
     },
 });

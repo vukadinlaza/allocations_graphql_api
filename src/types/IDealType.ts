@@ -21,6 +21,12 @@ export const IDealType = new GraphQLObjectType({
         createdAt: { type: GraphQLString },
         updatedAt: { type: GraphQLString },
         investors: { type: new GraphQLList(IdealInvestorType) },
+        bank_account: { type: GraphQLString},
+        formation_certificate_filing: { type: GraphQLString},
+        ein_filing: { type: GraphQLString},
+        form_d_filing: { type: GraphQLString},
+        form_1065_filing: {type: GraphQLString},
+        w9_filing: {type: GraphQLString},
     },
 });
 export const IDealDeleteType = new GraphQLObjectType({

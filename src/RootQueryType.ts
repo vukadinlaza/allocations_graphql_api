@@ -4,8 +4,6 @@ import { getAllDeals, getAllInvestor, getDealById, getInvestorById } from "./mon
 import { IDealType } from "./types/IDealType";
 import { IInvestorType } from "./types/IInvestorType";
 
-
-
 export const RootQueryType = new GraphQLObjectType({
     name: "RootQueryType",
     fields: {
@@ -32,6 +30,7 @@ export const RootQueryType = new GraphQLObjectType({
                 });
             },
         },
+
         GetInvestors: {
             type: new GraphQLList(IInvestorType),
             resolve(obj, args, ctx: IContextType) {
@@ -43,6 +42,7 @@ export const RootQueryType = new GraphQLObjectType({
                 });
             },
         },
+        
         GetInvestorById: {
             type: IInvestorType,
             args: {

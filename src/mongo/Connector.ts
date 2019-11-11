@@ -1,6 +1,8 @@
 import { Db, MongoClient } from "mongodb";
 
-
+/**
+ * Returns mongo connection instance from mongodb native li
+ */
 export class MongoConnnection {
     private url: string;
 
