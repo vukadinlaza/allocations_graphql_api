@@ -1,5 +1,5 @@
 import { Db } from "mongodb";
 export interface IContextType {
-  getDb: Promise<void | Db>;
+  db: Db;
   token: string;
 }
