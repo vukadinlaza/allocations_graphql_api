@@ -33,16 +33,6 @@ async function run () {
   app.use(bodyParser.urlencoded({extended: true}));
   app.use(bodyParser.json());
 
-  // tslint:disable-next-line:variable-name
-  const mongodb_username = process.env.MONGO_USERNAME || " ";
-  const password = process.env.MONGO_PASSWORD || " ";
-
-  // tslint:disable-next-line:max-line-length
-  const connectionUrl = `mongodb+srv://${mongodb_username}:${password}@allocations-3plbs.gcp.mongodb.net/test?retryWrites=true&w=majority`;
-
-  const mongoDbCon = new MongoConnnection(connectionUrl);
-  // const mdb = mongoDbCon.getDb().then((db: Db) => db).catch((err) => console.log(err));
-
   const db = await connect() 
 
   let credential = false;
