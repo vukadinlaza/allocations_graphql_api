@@ -50,12 +50,13 @@ async function run () {
       next(err);
     }
   });
-  graphqlServer.applyMiddleware({ app });
-  graphqlServer.installSubscriptionHandlers(httpServer);
-
 
   // start HTTP server
   const httpServer = createServer(app);
+  
+  graphqlServer.applyMiddleware({ app });
+  graphqlServer.installSubscriptionHandlers(httpServer);
+
   httpServer.listen(PORT, () => {
     console.log(
       `🚀 Server ready at http://localhost:${PORT}${graphqlServer.graphqlPath}`
