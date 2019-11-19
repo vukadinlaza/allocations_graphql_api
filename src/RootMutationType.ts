@@ -18,14 +18,12 @@ export const RootMutationType = new GraphQLObjectType({
                 input: { type: new GraphQLNonNull(IDealInputType) },
             },
             resolve: (obj, args, ctx: IContextType) => {
-                return ctx.getDb.then((db: any) => {
-                    return createDeal(db, args.input).then((res) => {
-                        pubsub.publish(DEAL_ADDED, { DealAdded: res });
-                        return res;
-                    }).catch((err) => {
-                        console.log(err);
-                        return err;
-                    });
+                return createDeal(ctx.db, args.input).then((res) => {
+                    pubsub.publish(DEAL_ADDED, { DealAdded: res });
+                    return res;
+                }).catch((err) => {
+                    console.log(err);
+                    return err;
                 });
             },
         },
@@ -35,9 +33,7 @@ export const RootMutationType = new GraphQLObjectType({
                 input: { type: new GraphQLNonNull(IInvestorInputType) },
             },
             resolve: (obj, args, ctx: IContextType) => {
-                return ctx.getDb.then((db: any) => {
-                    return createInvestor(db, args.input);
-                });
+                return createInvestor(ctx.db, args.input);
             },
         },
         deleteDealById: {
@@ -46,15 +42,12 @@ export const RootMutationType = new GraphQLObjectType({
                 id: { type: new GraphQLNonNull(GraphQLID) },
             },
             resolve: (obj, args, ctx: IContextType) => {
-                return ctx.getDb.then((db: any) => {
-
-                    return deleteDeal(db, args.id).then((res) => {
-                        pubsub.publish(DEAL_DELETED, { DealAdded: "Deleted successfully" });
-                        const data = {
-                            _id: args.id,
-                        };
-                        return data;
-                    });
+                return deleteDeal(ctx.db, args.id).then((res) => {
+                    pubsub.publish(DEAL_DELETED, { DealAdded: "Deleted successfully" });
+                    const data = {
+                        _id: args.id,
+                    };
+                    return data;
                 });
             },
         },
@@ -64,15 +57,13 @@ export const RootMutationType = new GraphQLObjectType({
                 id: { type: new GraphQLNonNull(GraphQLID) },
             },
             resolve: (obj, args, ctx: IContextType) => {
-                return ctx.getDb.then((db: any) => {
-                    return deleteInvestor(db, args.id).then((res) => {
-                        console.log(res);
-                        console.log(args.id);
-                        const data = {
-                            _id: args.id,
-                        };
-                        return data;
-                    });
+                return deleteInvestor(ctx.db, args.id).then((res) => {
+                    console.log(res);
+                    console.log(args.id);
+                    const data = {
+                        _id: args.id,
+                    };
+                    return data;
                 });
             },
         },
@@ -84,12 +75,10 @@ export const RootMutationType = new GraphQLObjectType({
                 input: { type: new GraphQLNonNull(IDealInputType) },
             },
             resolve: (obj, args, ctx: IContextType) => {
-                return ctx.getDb.then((db: any) => {
-                    return updateDeal(db, args.input).then(res => {
-                        console.log("Mutation: " + res)
-                        return res;
-                    })
-                });
+                return updateDeal(ctx.db, args.input).then(res => {
+                    console.log("Mutation: " + res)
+                    return res;
+                })
             },
         },
 

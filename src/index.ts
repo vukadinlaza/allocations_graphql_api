@@ -16,111 +16,111 @@ import { SubscriptionServer } from "subscriptions-transport-ws";
 import { IContextType } from "./IContextType";
 import { MongoConnnection } from "./mongo/Connector";
 import { Schema } from "./schema";
+
+import { connect } from './mongo'
 dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT || 4000;
+async function run () {
+  const app = express();
+  const PORT = process.env.PORT || 4000;
 
-if (process.env.NODE_ENV === "production") {
-  app.use("*", cors({ origin: `https://admin.allocations.co` }));
-}
-
-app.use(helmet());
-app.use(compression());
-app.use(bodyParser.urlencoded({
-  extended: true,
-}));
-app.use(bodyParser.json());
-
-// tslint:disable-next-line:variable-name
-const mongodb_username = process.env.MONGO_USERNAME || " ";
-const password = process.env.MONGO_PASSWORD || " ";
-
-
-// tslint:disable-next-line:max-line-length
-const connectionUrl = `mongodb+srv://${mongodb_username}:${password}@allocations-3plbs.gcp.mongodb.net/test?retryWrites=true&w=majority`;
-
-
-const mongoDbCon = new MongoConnnection(connectionUrl);
-const mdb = mongoDbCon.getDb().then((db: Db) => db).catch((err) => console.log(err));
-
-let credential = false;
-console.log(process.env.NODE_ENV)
-if (process.env.NODE_ENV === "production") {
-  credential = true;
-} else {
-  credential = false;
-}
-
-const auth = jwt({
-  secret: jwksRsa.expressJwtSecret({
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
-    jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`
-  }),
-
-  audience: "https://api.graphql.com",
-  issuer: `https://${process.env.AUTH0_DOMAIN}/`,
-  algorithms: ["RS256"],
-  credentialsRequired: false,
-});
-
-
-const getDb = mdb;
-
-const server = new ApolloServer({
-
-  schema: Schema,
-  context: async ({ req, connection }) => {
-    if (connection) {
-      return { ...connection.context };
-    } else {
-      const token = req.headers.authorization || "";
-      // console.log(token);
-      return { getDb, token };
-    }
-
-  },
-  subscriptions: {
-    path: "/subscriptions",
-    onConnect: async (connectionParams, webSocket, context) => {
-      console.log(`Subscription client connected using Apollo server's built-in SubscriptionServer.`)
-    },
-    onDisconnect: async (webSocket, context) => {
-      console.log(`Subscription client disconnected.`);
-    },
-  },
-  cacheControl: {
-    defaultMaxAge: 5,
-  },
-  introspection: true,
-  plugins: [responseCachePlugin()],
-});
-console.log(process.env.NODE_ENV)
-if (process.env.NODE_ENV === "production") {
-  app.use(auth);
-}
-
-app.use((err: any, req: any, res: any, next: any) => {
-  if (err.name === "UnauthorizedError") {
-    console.log(err);
-    res.status(401).send("invalid token");
-  } else {
-    console.log(err);
-    next(err);
+  if (process.env.NODE_ENV === "production") {
+    app.use("*", cors({ origin: `https://admin.allocations.co` }));
   }
-});
-server.applyMiddleware({ app });
-const httpServer = createServer(app);
 
-server.installSubscriptionHandlers(httpServer);
+  app.use(helmet());
+  app.use(compression());
+  app.use(bodyParser.urlencoded({extended: true}));
+  app.use(bodyParser.json());
 
-httpServer.listen(PORT, () => {
-  console.log(
-    `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
-  );
-  console.log(
-    `🚀 Subscriptions ready at ws://localhost:${PORT}${server.subscriptionsPath}`
-  );
-});
+  // tslint:disable-next-line:variable-name
+  const mongodb_username = process.env.MONGO_USERNAME || " ";
+  const password = process.env.MONGO_PASSWORD || " ";
+
+  // tslint:disable-next-line:max-line-length
+  const connectionUrl = `mongodb+srv://${mongodb_username}:${password}@allocations-3plbs.gcp.mongodb.net/test?retryWrites=true&w=majority`;
+
+  const mongoDbCon = new MongoConnnection(connectionUrl);
+  // const mdb = mongoDbCon.getDb().then((db: Db) => db).catch((err) => console.log(err));
+
+  const db = await connect() 
+
+  let credential = false;
+  if (process.env.NODE_ENV === "production") {
+    credential = true;
+  } else {
+    credential = false;
+  }
+
+  const auth = jwt({
+    secret: jwksRsa.expressJwtSecret({
+      cache: true,
+      rateLimit: true,
+      jwksRequestsPerMinute: 5,
+      jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`
+    }),
+
+    audience: "https://api.graphql.com",
+    issuer: `https://${process.env.AUTH0_DOMAIN}/`,
+    algorithms: ["RS256"],
+    credentialsRequired: false,
+  });
+
+  const server = new ApolloServer({
+    schema: Schema,
+    context: async ({ req, connection }) => {
+      if (connection) {
+        return { ...connection.context };
+      } else {
+        const token = req.headers.authorization || "";
+        // console.log(token);
+        return { db, token };
+      }
+
+    },
+    subscriptions: {
+      path: "/subscriptions",
+      onConnect: async (connectionParams, webSocket, context) => {
+        console.log(`Subscription client connected using Apollo server's built-in SubscriptionServer.`)
+      },
+      onDisconnect: async (webSocket, context) => {
+        console.log(`Subscription client disconnected.`);
+      },
+    },
+    cacheControl: {
+      defaultMaxAge: 5,
+    },
+    introspection: true,
+    plugins: [responseCachePlugin()],
+  });
+
+  console.log("⛰️ Environment: ", process.env.NODE_ENV)
+  if (process.env.NODE_ENV === "production") {
+    app.use(auth);
+  }
+
+  app.use((err: any, req: any, res: any, next: any) => {
+    if (err.name === "UnauthorizedError") {
+      console.log(err);
+      res.status(401).send("invalid token");
+    } else {
+      console.log(err);
+      next(err);
+    }
+  });
+  server.applyMiddleware({ app });
+  const httpServer = createServer(app);
+
+  server.installSubscriptionHandlers(httpServer);
+
+  httpServer.listen(PORT, () => {
+    console.log(
+      `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
+    );
+    console.log(
+      `🚀 Subscriptions ready at ws://localhost:${PORT}${server.subscriptionsPath}`
+    );
+  });
+}
+
+run().then(() => console.log(`Server Successfully Started`))
