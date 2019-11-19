@@ -13,9 +13,8 @@ import jwksRsa from "jwks-rsa";
 import jwksClient from "jwks-rsa";
 import { Db } from "mongodb";
 import { SubscriptionServer } from "subscriptions-transport-ws";
-import { IContextType } from "./IContextType";
-import { MongoConnnection } from "./mongo/Connector";
-import { Schema } from "./schema";
+import { IContextType } from "./graphql/IContextType";
+import { Schema } from "./graphql/schema";
 
 import { connect } from './mongo'
 dotenv.config();

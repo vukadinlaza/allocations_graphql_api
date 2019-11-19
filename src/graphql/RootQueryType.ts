@@ -1,8 +1,8 @@
 import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
 import { IContextType } from "./IContextType";
-import { getAllDeals, getAllInvestor, getDealById, getInvestorById } from "./mongo/queries";
-import { IDealType } from "./types/IDealType";
-import { IInvestorType } from "./types/IInvestorType";
+import { getAllDeals, getAllInvestor, getDealById, getInvestorById } from "../mongo/queries";
+import { IDealType } from "../types/IDealType";
+import { IInvestorType } from "../types/IInvestorType";
 
 export const RootQueryType = new GraphQLObjectType({
     name: "RootQueryType",
