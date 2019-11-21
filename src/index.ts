@@ -17,10 +17,10 @@ async function run () {
   const app = express();
   const PORT = process.env.PORT || 4000;
 
-  // only prevent CORS if in production
-  if (process.env.NODE_ENV === "production") {
-    app.use("*", cors({ origin: `https://admin.allocations.co` }));
-  }
+  // // only prevent CORS if in production
+  // if (process.env.NODE_ENV === "production") {
+  //   app.use("*", cors({ origin: `https://admin.allocations.co` }));
+  // }
 
   // standard express middlewares
   app.use(helmet());
@@ -37,15 +37,16 @@ async function run () {
   // auth handling (only prod for now)
   console.log("⛰️ Environment: ", process.env.NODE_ENV)
   const credential = process.env.NODE_ENV === "production"
-  if (process.env.NODE_ENV === "production") {
-    app.use(auth);
-  }
+  // if (process.env.NODE_ENV === "production") {
+  app.use(auth);
+  // }
 
   app.use((err: any, req: any, res: any, next: any) => {
     if (err.name === "UnauthorizedError") {
       console.log(err);
       res.status(401).send("invalid token");
     } else {
+      console.log("Uncaught Error")
       console.log(err);
       next(err);
     }
