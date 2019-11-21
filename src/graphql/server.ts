@@ -2,11 +2,16 @@ import { ApolloServer } from "apollo-server-express";
 import { Schema } from "./schema";
 import { Db } from "mongodb";
 import responseCachePlugin from "apollo-server-plugin-response-cache";
+import { Request } from "express"
+
+export interface IRequest extends Request {
+  user: any // or any other type
+}
 
 export default function server(db: Db) {
     return new ApolloServer({
         schema: Schema,
-        context: async ({ req, connection }) => {
+        context: async ({ req, connection }: { req: IRequest, connection: any }) => {
           if (connection) {
             return { ...connection.context };
           } else {

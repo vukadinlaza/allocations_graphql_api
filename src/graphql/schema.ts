@@ -6,5 +6,5 @@ import { RootSubscriptionType } from "./RootSubscriptionType";
 export const Schema = new GraphQLSchema({
     query: RootQueryType,
     mutation: RootMutationType,
-    subscription: RootSubscriptionType,
-  });
+    subscription: RootSubscriptionType
+});

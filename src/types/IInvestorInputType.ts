@@ -1,6 +1,4 @@
-
 import { GraphQLInputObjectType, GraphQLInt, GraphQLList, GraphQLString } from "graphql";
-
 
 export const IInvestorInputType = new GraphQLInputObjectType({
     name: "IInvestorInputType",

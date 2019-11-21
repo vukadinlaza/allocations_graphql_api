@@ -1,14 +1,20 @@
-
 export interface IInvestor {
     _id: string;
 }
+
 export interface IDeal {
     _id?: string;
-    entity_name: string;
-    deal_name: string;
-    amount_wired: number;
+    entity_name?: string;
+    deal_name?: string;
+    company_name?: string;
+    company_description?: string;
+    investment_documents?: string;
+    user_id?: string;
+    amount?: string;
+    amount_wired?: number;
     total_investors?: number;
-    deal_complete_date: string;
+    date_closed?: string;
+    deal_complete_date?: string;
     operations_agreement?: string;
     subscription_agreement?: string;
     private_placement_memorandum?: string;
