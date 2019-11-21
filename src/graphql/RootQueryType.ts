@@ -4,6 +4,8 @@ import { getAllDeals, getAllInvestor, getDealById, getInvestorById } from "../mo
 import { IDealType } from "../types/IDealType";
 import { IInvestorType } from "../types/IInvestorType";
 
+import * as investors from "../mongo/investors"
+
 export const RootQueryType = new GraphQLObjectType({
     name: "RootQueryType",
     fields: {
@@ -12,7 +14,7 @@ export const RootQueryType = new GraphQLObjectType({
             resolve(obj, args, ctx: IContextType) {
                 return getAllDeals(ctx.db).then((data) => {
                     return data;
-                });
+                }).catch(err => console.log(err))
             },
         },
         GetDealById: {
@@ -28,7 +30,7 @@ export const RootQueryType = new GraphQLObjectType({
         GetInvestors: {
             type: new GraphQLList(IInvestorType),
             resolve(obj, args, ctx: IContextType) {
-                return getAllInvestor(ctx.db).then((data) => {
+                return investors.all(ctx.db).then((data) => {
                     return data;
                 });
             },
@@ -40,7 +42,7 @@ export const RootQueryType = new GraphQLObjectType({
                 id: { type: new GraphQLNonNull(GraphQLString) },
             },
             resolve(obj, args, ctx: IContextType) {
-                return getInvestorById(ctx.db, args.id);
+                return investors.get(ctx.db, args.id);
             },
         },
     },
