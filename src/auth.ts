@@ -1,7 +1,9 @@
 import jwt from "express-jwt";
 import jwksRsa from "jwks-rsa";
 
-const domain = process.env.AUTH0_DOMAIN
+const audience = "https://api.graphql.com"
+// const domain = "allocations1.auth0.com"
+const domain = "login.allocations.co"
 
 export default jwt({
   secret: jwksRsa.expressJwtSecret({
@@ -11,7 +13,7 @@ export default jwt({
     jwksUri: `https://${domain}/.well-known/jwks.json`
   }),
 
-  audience: "https://api.graphql.com",
+  audience,
   issuer: `https://${domain}/`,
   algorithms: ["RS256"],
   credentialsRequired: false,
