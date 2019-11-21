@@ -10,5 +10,5 @@ export async function connect() {
 
     const conn = await client.connect()
     console.log("🔗 Connected to Mongo")
-    return conn.db("allocations")
+    return conn.db("allocations-prod")
 }
