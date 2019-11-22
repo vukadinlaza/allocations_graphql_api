@@ -1,5 +1,6 @@
 import { Db, ObjectId } from "mongodb";
 import { IInvestor } from "../models/Investor";
+import { IContextType } from "../graphql/IContextType"
 
 /**
  * Return investor which matches provided ID
@@ -7,12 +8,21 @@ import { IInvestor } from "../models/Investor";
  * @param investorId investor documents ID (MongoDB Object ID)
  * @param projection (Optional) Mongodb projection - default null
  */
-export const get = async (db: Db, investorId: string, projection?: object | undefined) => {
-    const q = { _id: new ObjectId(investorId) };
-    const investor = await db.collection("investors").findOne(q, { fields: projection });
-    investor.deals = await db.collection("deals").find({ user_id: investor.email }).toArray();
+export const get = async (investorId: string, ctx: IContextType) => {
+    const _id = new ObjectId(investorId) 
 
-    return investor
+    // authorize - can only get if admin or is the actual investor
+    if (ctx.user && (ctx.user.admin || ctx.user._id === _id)) {
+        const investor = await ctx.db.collection("users").findOne({ _id });
+        const investments = await ctx.db.collection("deals").find({ user_id: _id }).toArray();
+        for (let i = 0; i < investments.length; i++) {
+            investments[i].deal = await ctx.db.collection("deals").findOne({_id: investments[i].deal_id })
+            investments[i].user = await ctx.db.collection("users").findOne({_id: investments[i].user_id })
+        }
+        investor.investments = investments
+        return investor
+    }
+    return { error: "unauthorized" }
 };
 
 /**
@@ -20,11 +30,14 @@ export const get = async (db: Db, investorId: string, projection?: object | unde
  * @param db Database connection instance
  * @param projection MongoDB projection
  */
-export const all = (db: Db, projection?: object | undefined) => {
-    return db
-        .collection<IInvestor>("investors")
-        .find({})
-        .toArray();
+export const all = (ctx: IContextType) => {
+    if (ctx.user && ctx.user.admin) {
+        return ctx.db
+            .collection("investors")
+            .find({})
+            .toArray();
+    }
+    return { error: "unauthorized" }
 };
 
 /**
