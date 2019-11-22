@@ -7,7 +7,7 @@ import { execute, subscribe } from "graphql";
 import helmet from "helmet";
 import { createServer } from "http";
 import initGraphqlServer from "./graphql/server"
-import auth from "./auth"
+import { checkToken } from "./auth"
 import { connect } from './mongo'
 
 // import ENVs from .env (gitignored)
@@ -37,9 +37,9 @@ async function run () {
   // auth handling (only prod for now)
   console.log("⛰️ Environment: ", process.env.NODE_ENV)
   const credential = process.env.NODE_ENV === "production"
-  // if (process.env.NODE_ENV === "production") {
-  // app.use(auth);
-  // }
+  if (process.env.NODE_ENV === "production") {
+    app.use(checkToken);
+  }
 
   app.use((err: any, req: any, res: any, next: any) => {
     if (err.name === "UnauthorizedError") {
