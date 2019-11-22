@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@types/assert": "^1.4.3",
+    "@types/auth0": "^2.9.23",
     "@types/check-types": "^7.3.1",
     "@types/helmet": "0.0.44",
     "@types/mongodb": "^3.3.4",
@@ -51,6 +52,7 @@
     "apollo-server-express": "^2.9.4",
     "apollo-server-plugin-response-cache": "^0.3.5",
     "assert": "^2.0.0",
+    "auth0": "^2.20.0",
     "body-parser": "^1.19.0",
     "check-types": "^10.0.0",
     "compression": "^1.7.4",
