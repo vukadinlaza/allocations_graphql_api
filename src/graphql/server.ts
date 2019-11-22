@@ -3,9 +3,24 @@ import { Schema } from "./schema";
 import { Db } from "mongodb";
 import responseCachePlugin from "apollo-server-plugin-response-cache";
 import { Request } from "express"
+import auth0 from 'auth0'
+
+const auth0Client = new auth0.AuthenticationClient({
+  domain: "login.allocations.co",
+  clientId: "" 
+})
 
 export interface IRequest extends Request {
   user: any // or any other type
+}
+
+async function getUserFromToken (token: string, db: Db) {
+  try {
+    const { email } = await auth0Client.getProfile(token.slice(7))
+    return db.collection("users").findOne({ email })
+  } catch (e) {
+    return null
+  }
 }
 
 export default function server(db: Db) {
@@ -16,7 +31,9 @@ export default function server(db: Db) {
             return { ...connection.context };
           } else {
             const token = req.headers.authorization || "";
-            return { db, token };
+            // get profile info via auth0
+            const user = await getUserFromToken(token, db)
+            return { db, token, user };
           }
         },
         subscriptions: {
