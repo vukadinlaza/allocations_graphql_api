@@ -5,7 +5,7 @@ const audience = "https://api.graphql.com"
 // const domain = "allocations1.auth0.com"
 const domain = "login.allocations.co"
 
-export default jwt({
+export const checkToken = jwt({
   secret: jwksRsa.expressJwtSecret({
     cache: true,
     rateLimit: true,
