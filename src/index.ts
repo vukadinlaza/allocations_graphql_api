@@ -38,7 +38,7 @@ async function run () {
   console.log("⛰️ Environment: ", process.env.NODE_ENV)
   const credential = process.env.NODE_ENV === "production"
   // if (process.env.NODE_ENV === "production") {
-  app.use(auth);
+  // app.use(auth);
   // }
 
   app.use((err: any, req: any, res: any, next: any) => {
