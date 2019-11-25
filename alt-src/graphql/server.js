@@ -38,7 +38,6 @@ const typeDefs = gql`
 
   type Query {
     investor(email: String!): User
-    current_user: User
     allDeals: [Deal]
     allInvestors: [User]
   }
@@ -68,7 +67,7 @@ module.exports = function initServer (db) {
         isAdminOrSameUser(args, ctx)
         return db.collection("users").findOne({ email: args.email })        
       },
-      current_user: (_, _, ctx) => db.collection("users").findOne({ email: get(ctx, 'user.email')})
+      // current_user: (_, __, ctx) => db.collection("users").findOne({ email: get(ctx, 'user.email')}),
 
       // admin API
       allDeals: (_, args, ctx) => {
