@@ -9,7 +9,7 @@ yarn-error.log*
 lerna-debug.log*
 
 tmp/*
-src/mongo/seed.js
+src/mongo/seed*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

@@ -20,6 +20,7 @@ export const getInvestorById = async (db: Db, investorId: string, projection?: o
     // projection = projection || { _id: 1 };
 
     const investor = await db.collection("investors").findOne(q, { fields: projection });
+    console.log({investor})
     investor.deals = await db.collection("deals").find({ user_id: investor.email });
 
     return investor
