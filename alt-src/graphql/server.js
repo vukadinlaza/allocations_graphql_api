@@ -1,4 +1,5 @@
 const { ApolloServer, gql, AuthenticationError } = require('apollo-server-express')
+const { ObjectId } = require("mongodb")
 const auth0 = require('auth0')
 const { get } = require('lodash')
 
@@ -37,7 +38,7 @@ const typeDefs = gql`
   }
 
   type Query {
-    investor(email: String!): User
+    investor(email: String, _id: String): User
     allDeals: [Deal]
     allInvestors: [User]
   }
@@ -63,9 +64,16 @@ module.exports = function initServer (db) {
   const resolvers = {
     Query: {
       // user API
-      investor: (_, args, ctx) => {
+      investor: async (_, args, ctx) => {
         isAdminOrSameUser(args, ctx)
-        return db.collection("users").findOne({ email: args.email })        
+
+        // ensure one query param sent
+        if (!args._id && !args.email) {
+          throw new AuthenticationError('permission denied');
+        }
+
+        const query = args._id ? { _id: ObjectId(args._id) } : { email: args.email }
+        return db.collection("users").findOne(query)        
       },
       // current_user: (_, __, ctx) => db.collection("users").findOne({ email: get(ctx, 'user.email')}),
 
