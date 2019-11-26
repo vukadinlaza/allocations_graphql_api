@@ -23,6 +23,8 @@ const typeDefs = gql`
     company_description: String
     investment_documents: String
     date_closed: String
+    deal_lead: String
+    pledge_link: String
     closed: Boolean
     amount: Int
     investments: [Investment]
@@ -35,6 +37,7 @@ const typeDefs = gql`
     email: String
     admin: Boolean
     investments: [Investment]
+    invitedDeals: [Deal]
   }
 
   type Query {
@@ -90,6 +93,9 @@ module.exports = function initServer (db) {
     User: {
       investments: (user) => {
         return db.collection("investments").find({ user_id: user._id }).toArray()
+      },
+      invitedDeals: (user) => {
+        return db.collection("deals").find({ closed: false }).toArray()
       }
     },
     Investment: {
