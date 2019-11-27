@@ -28,6 +28,7 @@ const typeDefs = gql`
     closed: Boolean
     amount: Int
     investments: [Investment]
+    invitedInvestors: [User]
   }
 
   type User {
@@ -42,8 +43,16 @@ const typeDefs = gql`
 
   type Query {
     investor(email: String, _id: String): User
+    deal(_id: String): Deal
     allDeals: [Deal]
     allInvestors: [User]
+    searchUsers(q: String!, limit: Int): [User]
+  }
+
+  type Mutation {
+    inviteInvestor(user_id: String!, deal_id: String!): Deal
+    uninviteInvestor(user_id: String!, deal_id: String!): Deal
+    updateDeal(_id: String!, company_name: String, company_description: String, deal_lead: String, date_closed: String): Deal
   }
 `
 
@@ -53,7 +62,7 @@ const unauthorized = {
 }
 
 const isAdmin = ctx => {
-  if (!ctx.user.admin) {
+  if (!ctx.user || !ctx.user.admin) {
     throw new AuthenticationError('permission denied');
   }
 }
@@ -80,6 +89,11 @@ module.exports = function initServer (db) {
       },
       // current_user: (_, __, ctx) => db.collection("users").findOne({ email: get(ctx, 'user.email')}),
 
+      deal: (_, args, ctx) => {
+        isAdmin(ctx)
+        return db.collection("deals").findOne({ _id: ObjectId(args._id) })
+      },
+
       // admin API
       allDeals: (_, args, ctx) => {
         isAdmin(ctx)
@@ -88,6 +102,16 @@ module.exports = function initServer (db) {
       allInvestors: (_, args, ctx) => {
         isAdmin(ctx)
         return db.collection("users").find({}).toArray()
+      },
+      searchUsers: (_, {q, limit}, ctx) => {
+        isAdmin(ctx)
+        return db.collection("users").find({ 
+          $or: [
+            {first_name: { $regex: new RegExp(q), $options: "i" }},
+            {last_name: { $regex: q, $options: "i" }},
+            {email: { $regex: q, $options: "i" }}
+          ]
+        }).limit(limit || 10).toArray()
       }
     },
     User: {
@@ -109,6 +133,34 @@ module.exports = function initServer (db) {
     Deal: {
       investments: (deal) => {
         return db.collection("investments").find({ deal_id: deal._id })
+      },
+      invitedInvestors: async (deal) => {
+        return db.collection("users").find({ _id: { $in: deal.invitedInvestors || [] }}).toArray()
+      }
+    },
+    Mutation: {
+      inviteInvestor: (_, { user_id, deal_id }, ctx) => {
+        isAdmin(ctx)
+        return db.collection("deals").updateOne(
+          { _id: ObjectId(deal_id) },
+          { $push: { invitedInvestors: ObjectId(user_id) } }
+        )
+      },
+      uninviteInvestor: (_, { user_id, deal_id }, ctx) => {
+        isAdmin(ctx)
+        return db.collection("deals").updateOne(
+          { _id: ObjectId(deal_id) },
+          { $pull: { invitedInvestors: ObjectId(user_id) } }
+        )
+      },
+      updateDeal: async (_, {_id, ...deal}, ctx) => {
+        isAdmin(ctx)
+        const res = await db.collection("deals").findOneAndUpdate(
+          { _id: ObjectId(_id) },
+          { $set: deal },
+          { returnOriginal: false }
+        )
+        return res.value
       }
     }
   }
