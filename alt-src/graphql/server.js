@@ -37,6 +37,7 @@ const typeDefs = gql`
     last_name: String
     email: String
     admin: Boolean
+    documents: String
     investments: [Investment]
     invitedDeals: [Deal]
   }
@@ -50,9 +51,11 @@ const typeDefs = gql`
   }
 
   type Mutation {
+    createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String): Deal
     inviteInvestor(user_id: String!, deal_id: String!): Deal
     uninviteInvestor(user_id: String!, deal_id: String!): Deal
     updateDeal(_id: String!, company_name: String, company_description: String, deal_lead: String, date_closed: String): Deal
+    updateInvestor(_id: String!, first_name: String, last_name: String, email: String, documents: String): User
   }
 `
 
@@ -142,6 +145,11 @@ module.exports = function initServer (db) {
       }
     },
     Mutation: {
+      createDeal: async (_, deal, ctx) => {
+        isAdmin(ctx)
+        const res = await db.collection("deals").insertOne(deal)
+        return res.ops[0]
+      },
       inviteInvestor: (_, { user_id, deal_id }, ctx) => {
         isAdmin(ctx)
         return db.collection("deals").updateOne(
@@ -161,6 +169,18 @@ module.exports = function initServer (db) {
         const res = await db.collection("deals").findOneAndUpdate(
           { _id: ObjectId(_id) },
           { $set: deal },
+          { returnOriginal: false }
+        )
+        return res.value
+      },
+      updateInvestor: async (_, {_id, ...investor}, ctx) => {
+        isAdmin(ctx)
+
+        const documents = await Uploader.putUserFile({}, investor.documents)
+
+        const res = await db.collection("users").findOneAndUpdate(
+          { _id: ObjectId(_id) },
+          { $set: {...investor, documents} },
           { returnOriginal: false }
         )
         return res.value
