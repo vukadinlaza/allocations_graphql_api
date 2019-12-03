@@ -25,6 +25,8 @@ const typeDefs = gql`
     date_closed: String
     deal_lead: String
     pledge_link: String
+    onboarding_link: String
+    embed_code: String
     closed: Boolean
     amount: Int
     investments: [Investment]
@@ -51,10 +53,10 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String): Deal
+    createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
     inviteInvestor(user_id: String!, deal_id: String!): Deal
     uninviteInvestor(user_id: String!, deal_id: String!): Deal
-    updateDeal(_id: String!, company_name: String, company_description: String, deal_lead: String, date_closed: String): Deal
+    updateDeal(_id: String!, company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
     updateInvestor(_id: String!, first_name: String, last_name: String, email: String, documents: String): User
   }
 `
