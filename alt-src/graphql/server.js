@@ -124,10 +124,7 @@ module.exports = function initServer (db) {
         return db.collection("investments").find({ user_id: user._id }).toArray()
       },
       invitedDeals: (user) => {
-        if (user.admin) {
-          return db.collection("deals").find({ closed: false }).toArray()
-        }
-        return db.collection("deals").find({ closed: false, invitedInvestors: ObjectId(user._id) }).toArray()
+        return db.collection("deals").find({ closed: { $ne: true }, invitedInvestors: ObjectId(user._id) }).toArray()
       }
     },
     Investment: {
