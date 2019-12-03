@@ -3,6 +3,8 @@ const { ObjectId } = require("mongodb")
 const auth0 = require('auth0')
 const { get } = require('lodash')
 
+const { isAdmin, isAdminOrSameUser } = require('./permissions')
+
 const auth0Client = new auth0.AuthenticationClient({
   domain: "login.allocations.co",
   clientId: process.env.AUTH0_CLIENT_ID 
@@ -60,22 +62,6 @@ const typeDefs = gql`
     updateInvestor(_id: String!, first_name: String, last_name: String, email: String, documents: String): User
   }
 `
-
-const unauthorized = {
-  message: "UNAUTHORIZED",
-  statusCode: 401
-}
-
-const isAdmin = ctx => {
-  if (!ctx.user || !ctx.user.admin) {
-    throw new AuthenticationError('permission denied');
-  }
-}
-
-const isAdminOrSameUser = (args, ctx) => {
-  if (ctx.user && (ctx.user.email === args.email || ctx.user.admin)) return
-  throw new AuthenticationError('permission denied');
-}
 
 module.exports = function initServer (db) {
   const resolvers = {
