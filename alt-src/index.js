@@ -7,20 +7,34 @@ const cors = require('cors')
 const express = require('express')
 const { execute, subscribe } = require('graphql')
 const helmet = require('helmet')
-const { createServer } = require('http')
 const initGraphQlServer = require('./graphql/server')
 const authenticate = require('./auth')
 const { connect } = require('./mongo')
 const { ApolloServer, gql } = require('apollo-server-express');
 
+const { NODE_ENV } = process.env
+
+function forceSSL (req, res, next) {
+  if (req.secure) {
+    next()
+  } else {
+    res.redirect('https://' + req.headers.host + req.url)
+  }
+}
+
 async function run () {
   const app = express();
   const port = process.env.PORT || 4000;
 
-  // // only prevent CORS if in production
-  // if (process.env.NODE_ENV === "production") {
-  //   app.use("*", cors({ origin: `https://admin.allocations.co` }));
-  // }
+
+  // only prevent CORS if in production
+  if (NODE_ENV === "production") {
+    app.use("*", cors({ origin: `https://dashboard.allocations.co` }));
+  }
+
+  if (NODE_ENV === "staging") {
+    app.use("*", cors({ origin: `https://staging.allocations.co` }));
+  }
 
   // standard express middlewares
   app.use(helmet());
@@ -52,11 +66,12 @@ async function run () {
     }
   });
 
-  // // start HTTP server
-  // const httpServer = createServer(app);
+  // force SSL
+  if (["production", "staging"].includes(NODE_ENV)) {
+    app.use(forceSSL)
+  }  
   
   graphqlServer.applyMiddleware({ app });
-  // graphqlServer.installSubscriptionHandlers(httpServer);
 
   app.listen({ port }, () =>
     console.log(`🚀 Server ready at http://localhost:4000${graphqlServer.graphqlPath}`)
