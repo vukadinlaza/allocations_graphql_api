@@ -14,14 +14,6 @@ const { ApolloServer, gql } = require('apollo-server-express');
 
 const { NODE_ENV } = process.env
 
-function forceSSL (req, res, next) {
-  if (req.secure) {
-    next()
-  } else {
-    res.redirect('https://' + req.headers.host + req.url)
-  }
-}
-
 async function run () {
   const app = express();
   const port = process.env.PORT || 4000;
@@ -64,12 +56,7 @@ async function run () {
       console.log(err);
       next(err);
     }
-  });
-
-  // force SSL
-  if (["production", "staging"].includes(NODE_ENV)) {
-    app.use(forceSSL)
-  }  
+  }); 
   
   graphqlServer.applyMiddleware({ app });
 
