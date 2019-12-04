@@ -4,6 +4,8 @@ const auth0 = require('auth0')
 const { get } = require('lodash')
 
 const { isAdmin, isAdminOrSameUser } = require('./permissions')
+const Cloudfront = require('../cloudfront')
+const Uploader = require('../uploaders/investor-docs')
 
 const auth0Client = new auth0.AuthenticationClient({
   domain: "login.allocations.co",
@@ -16,7 +18,8 @@ const typeDefs = gql`
     amount: Int
     deal: Deal
     user: User
-    documents: String
+    documents: [String]
+    investor: User
   }
 
   type Deal {
@@ -49,8 +52,10 @@ const typeDefs = gql`
   type Query {
     investor(email: String, _id: String): User
     deal(_id: String): Deal
+    investment(_id: String): Investment
     allDeals: [Deal]
     allInvestors: [User]
+    allInvestments: [Investment]
     searchUsers(q: String!, limit: Int): [User]
   }
 
@@ -59,7 +64,23 @@ const typeDefs = gql`
     inviteInvestor(user_id: String!, deal_id: String!): Deal
     uninviteInvestor(user_id: String!, deal_id: String!): Deal
     updateDeal(_id: String!, company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
-    updateInvestor(_id: String!, first_name: String, last_name: String, email: String, documents: String): User
+    updateInvestor(investment: InvestmentInput): User
+    addInvestmentDoc(investment_id: String!, doc: Upload!): String
+    rmInvestmentDoc(investment_id: String!, file: String!): Boolean
+  }
+
+  input InvestmentInput {
+    _id: String
+    amount: Int
+    deal_id: String
+    user_id: String
+    documents: String
+  }
+
+  type File {
+    filename: String!
+    mimetype: String!
+    encoding: String!
   }
 `
 
@@ -85,6 +106,11 @@ module.exports = function initServer (db) {
         return db.collection("deals").findOne({ _id: ObjectId(args._id) })
       },
 
+      investment: (_, args, ctx) => {
+        isAdmin(ctx)
+        return db.collection("investments").findOne({ _id: ObjectId(args._id) })
+      },
+
       // admin API
       allDeals: (_, args, ctx) => {
         isAdmin(ctx)
@@ -93,6 +119,10 @@ module.exports = function initServer (db) {
       allInvestors: (_, args, ctx) => {
         isAdmin(ctx)
         return db.collection("users").find({}).toArray()
+      },
+      allInvestments: (_, __, ctx) => {
+        isAdmin(ctx)
+        return db.collection("investments").find({}).toArray()
       },
       searchUsers: (_, {q, limit}, ctx) => {
         isAdmin(ctx)
@@ -117,8 +147,11 @@ module.exports = function initServer (db) {
       deal: (investment) => {
         return db.collection("deals").findOne({ _id: investment.deal_id })
       },
-      user: (investment) => {
+      investor: (investment) => {
         return db.collection("users").findOne({ _id: investment.user_id })
+      },
+      documents: (investment) => {
+        return investment.documents.map(Cloudfront.getSignedUrl)
       }
     },
     Deal: {
@@ -169,6 +202,28 @@ module.exports = function initServer (db) {
           { returnOriginal: false }
         )
         return res.value
+      },
+      addInvestmentDoc: async (_, {investment_id, doc}, ctx) => {
+        isAdmin(ctx)
+
+        const file = await doc
+        const s3Path = await Uploader.putInvestmentDoc(investment_id, file)
+
+        await db.collection("investments").updateOne(
+          { _id: ObjectId(investment_id) },
+          { $push: { documents: s3Path } }
+        )
+
+        return Cloudfront.getSignedUrl(s3Path)
+      },
+      rmInvestmentDoc: async (_, {investment_id, file}, ctx) => {
+        isAdmin(ctx)
+        await Uploader.rmInvestmentDoc(investment_id, file)
+        await db.collection("deals").updateOne(
+          { _id: ObjectId(deal_id) },
+          { $pull: { documents: `${investment_id}/${file}` } }
+        )
+        return true
       }
     }
   }
