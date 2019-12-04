@@ -151,7 +151,11 @@ module.exports = function initServer (db) {
         return db.collection("users").findOne({ _id: investment.user_id })
       },
       documents: (investment) => {
-        return investment.documents.map(Cloudfront.getSignedUrl)
+        if (Array.isArray(investment.documents)) {
+          return investment.documents.map(Cloudfront.getSignedUrl)
+        } else {
+          return []
+        }
       }
     },
     Deal: {
