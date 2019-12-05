@@ -223,8 +223,8 @@ module.exports = function initServer (db) {
       rmInvestmentDoc: async (_, {investment_id, file}, ctx) => {
         isAdmin(ctx)
         await Uploader.rmInvestmentDoc(investment_id, file)
-        await db.collection("deals").updateOne(
-          { _id: ObjectId(deal_id) },
+        await db.collection("investments").updateOne(
+          { _id: ObjectId(investment_id) },
           { $pull: { documents: `${investment_id}/${file}` } }
         )
         return true
