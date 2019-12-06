@@ -1,6 +1,6 @@
 const S3 = require('aws-sdk/clients/s3')
 
-const Bucket = "allocations-investor-docs-test"
+const Bucket = process.env.S3_INVESTMENT_DOCS_BUCKET || "allocations-investor-docs-test"
 const url = `https://${Bucket}.s3.us-east-2.amazonaws.com`
 
 const s3 = new S3({apiVersion: '2006-03-01'})
@@ -11,7 +11,7 @@ async function putUserFile (user, file) {
   const obj = {Bucket, Key, Body: file}
   await s3.putObject(obj).promise()
 
-  return `https://allocations-investor-docs-test.s3.us-east-2.amazonaws.com/${Key}`
+  return `https://${Bucket}.s3.us-east-2.amazonaws.com/${Key}`
 }
 
 function rmInvestmentDoc (investment_id, filename) {
