@@ -237,17 +237,23 @@ module.exports = function initServer (db) {
     resolvers,
     context: async ({ req }) => {
       const token = req.headers.authorization || "";
-      // get profile info via auth0
       const user = await getUserFromToken(token, db)
       return { user }
     }
   })
 }
 
+const tokenCache = new Map()
+
 async function getUserFromToken (token, db) {
+  const cached = tokenCache.get(token)
+  if (cached) return cached
+
   try {
     const { email } = await auth0Client.getProfile(token.slice(7))
-    return db.collection("users").findOne({ email })
+    const user = await db.collection("users").findOne({ email })
+    tokenCache.set(token, user)
+    return user
   } catch (e) {
     return null
   }
