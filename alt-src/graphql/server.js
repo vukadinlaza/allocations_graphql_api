@@ -60,6 +60,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
+    signUp: User
     createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
     inviteInvestor(user_id: String!, deal_id: String!): Deal
     uninviteInvestor(user_id: String!, deal_id: String!): Deal
@@ -167,6 +168,15 @@ module.exports = function initServer (db) {
       }
     },
     Mutation: {
+      signUp: async (_, __, ctx) => {
+        if (ctx.user) return ctx.user
+
+        // get auth0 creds
+        const { email } = await auth0Client.getProfile(ctx.token.slice(7))
+        const res = await db.collection("users").insertOne({ email })
+        return res.ops[0]        
+      },
+
       createDeal: async (_, deal, ctx) => {
         isAdmin(ctx)
         const res = await db.collection("deals").insertOne(deal)
@@ -238,7 +248,7 @@ module.exports = function initServer (db) {
     context: async ({ req }) => {
       const token = req.headers.authorization || "";
       const user = await getUserFromToken(token, db)
-      return { user }
+      return { user, token }
     }
   })
 }
