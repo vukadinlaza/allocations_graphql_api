@@ -61,6 +61,7 @@ const typeDefs = gql`
 
   type Mutation {
     signUp: User
+    updateUser(_id: String!, first_name: String!, last_name: String!, email: String!): User
     createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
     inviteInvestor(user_id: String!, deal_id: String!): Deal
     uninviteInvestor(user_id: String!, deal_id: String!): Deal
@@ -175,6 +176,15 @@ module.exports = function initServer (db) {
         const { email } = await auth0Client.getProfile(ctx.token.slice(7))
         const res = await db.collection("users").insertOne({ email })
         return res.ops[0]        
+      },
+
+      updateUser: async (_, {_id, ...user}, ctx) => {
+        isAdminOrSameUser(user, ctx)
+
+        return db.collection("users").updateOne(
+          { _id: ObjectId(_id) },
+          { $set: user }
+        )        
       },
 
       createDeal: async (_, deal, ctx) => {
