@@ -36,6 +36,7 @@ const typeDefs = gql`
     amount: Int
     investments: [Investment]
     invitedInvestors: [User]
+    inviteKey: String
   }
 
   type User {
@@ -60,7 +61,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    signUp: User
+    signUp(inviteKey: String): User
     updateUser(_id: String!, first_name: String!, last_name: String!, email: String!): User
     createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
     inviteInvestor(user_id: String!, deal_id: String!): Deal
@@ -169,13 +170,26 @@ module.exports = function initServer (db) {
       }
     },
     Mutation: {
-      signUp: async (_, __, ctx) => {
-        if (ctx.user) return ctx.user
+      // inviteKey refers to a deal the user has been invited too
+      signUp: async (_, { inviteKey }, ctx) => {
+        let user;
+        if (ctx.user) {
+          user = ctx.user
+        } else {
+          // get auth0 creds
+          const { email } = await auth0Client.getProfile(ctx.token.slice(7))
+          const res = await db.collection("users").insertOne({ email })
+          user = res.ops[0]
+        }
 
-        // get auth0 creds
-        const { email } = await auth0Client.getProfile(ctx.token.slice(7))
-        const res = await db.collection("users").insertOne({ email })
-        return res.ops[0]        
+        // invite user to Deal if key correct
+        if (inviteKey) {
+          await db.collection("deals").updateOne(
+            { inviteKey: inviteKey },
+            { $push: { invitedInvestors: ObjectId(user._id) } }
+          )
+        }
+        return user     
       },
 
       updateUser: async (_, {_id, ...user}, ctx) => {
