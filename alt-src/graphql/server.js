@@ -18,7 +18,7 @@ const typeDefs = gql`
     amount: Int
     deal: Deal
     user: User
-    documents: [String]
+    documents: [Document]
     investor: User
   }
 
@@ -41,13 +41,22 @@ const typeDefs = gql`
 
   type User {
     _id: String
+    investor_type: String
+    country: String
     first_name: String
     last_name: String
+    signer_full_name: String
+    accredited_investor_status: String
     email: String
     admin: Boolean
-    documents: String
+    documents: [Document]
     investments: [Investment]
     invitedDeals: [Deal]
+  }
+
+  type Document {
+    path: String
+    link: String
   }
 
   type Query {
@@ -62,7 +71,8 @@ const typeDefs = gql`
 
   type Mutation {
     signUp(inviteKey: String): User
-    updateUser(_id: String!, first_name: String!, last_name: String!, email: String!): User
+
+    updateUser(input: UserInput): User
     createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
     inviteInvestor(user_id: String!, deal_id: String!): Deal
     uninviteInvestor(user_id: String!, deal_id: String!): Deal
@@ -78,6 +88,17 @@ const typeDefs = gql`
     deal_id: String
     user_id: String
     documents: String
+  }
+
+  input UserInput {
+    _id: String!
+    investor_type: String
+    country: String
+    first_name: String
+    last_name: String
+    signer_full_name: String
+    accredited_investor_status: String
+    email: String
   }
 
   type File {
@@ -155,7 +176,9 @@ module.exports = function initServer (db) {
       },
       documents: (investment) => {
         if (Array.isArray(investment.documents)) {
-          return investment.documents.map(Cloudfront.getSignedUrl)
+          return investment.documents.map(path => {
+            return { link: Cloudfront.getSignedUrl(path), path }
+          })
         } else {
           return []
         }
@@ -192,7 +215,7 @@ module.exports = function initServer (db) {
         return user     
       },
 
-      updateUser: async (_, {_id, ...user}, ctx) => {
+      updateUser: async (_, {input: {_id, ...user}}, ctx) => {
         isAdminOrSameUser(user, ctx)
 
         return db.collection("users").updateOne(
