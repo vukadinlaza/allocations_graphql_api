@@ -272,7 +272,7 @@ module.exports = function initServer (db) {
 
         await db.collection("investments").updateOne(
           { _id: ObjectId(investment_id) },
-          { $push: { documents: s3Path } }
+          { $addToSet: { documents: s3Path } }
         )
 
         return Cloudfront.getSignedUrl(s3Path)
