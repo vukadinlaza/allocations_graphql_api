@@ -45,6 +45,7 @@ const typeDefs = gql`
     country: String
     first_name: String
     last_name: String
+    entity_name: String
     signer_full_name: String
     accredited_investor_status: String
     email: String
@@ -96,6 +97,7 @@ const typeDefs = gql`
     country: String
     first_name: String
     last_name: String
+    entity_name: String
     signer_full_name: String
     accredited_investor_status: String
     email: String
