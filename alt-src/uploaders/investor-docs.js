@@ -18,6 +18,21 @@ function rmInvestmentDoc (investment_id, filename) {
   return s3.deleteObject({ Bucket, Key: `${investment_id}/${filename}` }).promise()
 }
 
+async function putInvestorDoc (_id, doc) {
+  const {createReadStream, filename} = doc
+
+  const obj = {
+    Bucket, 
+    Key: `investors/${_id}/passport`, 
+    Body: createReadStream(),
+    ContentType: "application/pdf",
+    ContentDisposition: "inline"
+  }
+  await s3.upload(obj).promise()
+
+  return `investors/${_id}/passport`
+}
+
 async function putInvestmentDoc (investment_id, doc) {
   const {createReadStream, filename} = doc
 
@@ -33,4 +48,4 @@ async function putInvestmentDoc (investment_id, doc) {
   return `${investment_id}/${filename}`
 }
 
-module.exports = { putUserFile, putInvestmentDoc, rmInvestmentDoc }
+module.exports = { putUserFile, putInvestmentDoc, rmInvestmentDoc, putInvestorDoc }

@@ -51,6 +51,7 @@ const typeDefs = gql`
     email: String
     admin: Boolean
     documents: [Document]
+    passport: Document
     investments: [Investment]
     invitedDeals: [Deal]
   }
@@ -101,6 +102,7 @@ const typeDefs = gql`
     signer_full_name: String
     accredited_investor_status: String
     email: String
+    passport: Upload
   }
 
   type File {
@@ -167,6 +169,9 @@ module.exports = function initServer (db) {
       },
       invitedDeals: (user) => {
         return db.collection("deals").find({ closed: { $ne: true }, invitedInvestors: ObjectId(user._id) }).toArray()
+      },
+      passport: (user) => {
+        return user.passport ? { link: Cloudfront.getSignedUrl(user.passport), path: user.passport } : null
       }
     },
     Investment: {
@@ -217,13 +222,24 @@ module.exports = function initServer (db) {
         return user     
       },
 
-      updateUser: async (_, {input: {_id, ...user}}, ctx) => {
+      updateUser: async (_, {input: {_id, passport, ...user}}, ctx) => {
         isAdminOrSameUser(user, ctx)
+
+        // upload passport if passed
+        if (passport && !passport.link) {
+          const file = await passport
+          const s3Path = await Uploader.putInvestorDoc(_id, file)
+
+          return db.collection("users").updateOne(
+            { _id: ObjectId(_id) },
+            { $set: { ...user, passport: s3Path } }
+          )
+        }
 
         return db.collection("users").updateOne(
           { _id: ObjectId(_id) },
           { $set: user }
-        )        
+        )                
       },
 
       createDeal: async (_, deal, ctx) => {
