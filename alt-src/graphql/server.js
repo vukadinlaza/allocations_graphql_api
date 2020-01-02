@@ -202,7 +202,7 @@ module.exports = function initServer (db) {
     },
     Deal: {
       investments: (deal) => {
-        return db.collection("investments").find({ deal_id: deal._id })
+        return db.collection("investments").find({ deal_id: deal._id }).toArray()
       },
       invitedInvestors: async (deal) => {
         return db.collection("users").find({ _id: { $in: deal.invitedInvestors || [] }}).toArray()
