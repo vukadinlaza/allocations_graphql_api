@@ -81,6 +81,8 @@ const typeDefs = gql`
     uninviteInvestor(user_id: String!, deal_id: String!): Deal
     updateDeal(_id: String!, company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
     updateInvestor(investment: InvestmentInput): User
+
+    createInvestment(investment: InvestmentInput!): Investment
     addInvestmentDoc(investment_id: String!, doc: Upload!): String
     rmInvestmentDoc(investment_id: String!, file: String!): Boolean
   }
@@ -289,6 +291,16 @@ module.exports = function initServer (db) {
         )
         return res.value
       },
+      createInvestment: async (_, { investment: { user_id, deal_id, ...investment }}, ctx) => {
+        isAdmin(ctx)
+        const res = await db.collection("investments").insertOne({
+          ...investment,
+          user_id: ObjectId(user_id),
+          deal_id: ObjectId(deal_id)
+        })
+        return res.ops[0]        
+      },
+
       addInvestmentDoc: async (_, {investment_id, doc}, ctx) => {
         isAdmin(ctx)
 
