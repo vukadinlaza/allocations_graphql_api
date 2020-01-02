@@ -69,6 +69,7 @@ const typeDefs = gql`
     allInvestors: [User]
     allInvestments: [Investment]
     searchUsers(q: String!, limit: Int): [User]
+    searchDeals(q: String!, limit: Int): [Deal]
   }
 
   type Mutation {
@@ -160,6 +161,12 @@ module.exports = function initServer (db) {
             {last_name: { $regex: q, $options: "i" }},
             {email: { $regex: q, $options: "i" }}
           ]
+        }).limit(limit || 10).toArray()
+      },
+      searchDeals: (_, {q, limit}, ctx) => {
+        isAdmin(ctx)
+        return db.collection("deals").find({
+          company_name: { $regex: new RegExp(q), $options: "i" }
         }).limit(limit || 10).toArray()
       }
     },
