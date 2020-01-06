@@ -7,6 +7,8 @@ const { isAdmin, isAdminOrSameUser } = require('./permissions')
 const Cloudfront = require('../cloudfront')
 const Uploader = require('../uploaders/investor-docs')
 
+const InvestorsResolver = require('../resolvers/investors')
+
 const auth0Client = new auth0.AuthenticationClient({
   domain: "login.allocations.co",
   clientId: process.env.AUTH0_CLIENT_ID 
@@ -81,6 +83,8 @@ const typeDefs = gql`
     uninviteInvestor(user_id: String!, deal_id: String!): Deal
     updateDeal(_id: String!, company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
     updateInvestor(investment: InvestmentInput): User
+
+    deleteInvestor(_id: String!): Boolean
 
     createInvestment(investment: InvestmentInput!): Investment
     addInvestmentDoc(investment_id: String!, doc: Upload!): String
@@ -209,6 +213,8 @@ module.exports = function initServer (db) {
       }
     },
     Mutation: {
+      ...InvestorsResolver.Mutations,
+
       // inviteKey refers to a deal the user has been invited too
       signUp: async (_, { inviteKey }, ctx) => {
         let user;
@@ -332,7 +338,7 @@ module.exports = function initServer (db) {
     context: async ({ req }) => {
       const token = req.headers.authorization || "";
       const user = await getUserFromToken(token, db)
-      return { user, token }
+      return { user, token, db }
     }
   })
 }
