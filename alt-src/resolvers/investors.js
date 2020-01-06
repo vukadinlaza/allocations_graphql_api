@@ -1,6 +1,13 @@
 const { ObjectId } = require("mongodb")
 const { isAdmin, isAdminOrSameUser } = require('../graphql/permissions')
 
+async function createInvestor (_, { user }, ctx) {
+  isAdmin(ctx)
+
+  const res = await ctx.db.collection("users").insertOne(user)
+  return res.ops[0]
+}
+
 async function deleteInvestor (_, { _id }, ctx) {
   isAdmin(ctx)
 
@@ -16,6 +23,7 @@ async function deleteInvestor (_, { _id }, ctx) {
 
 module.exports = {
   Mutations: {
+    createInvestor,
     deleteInvestor
   }
 }

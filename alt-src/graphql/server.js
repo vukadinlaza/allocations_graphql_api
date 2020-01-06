@@ -78,6 +78,7 @@ const typeDefs = gql`
   type Mutation {
     signUp(inviteKey: String): User
 
+    createInvestor(user: UserInput): User
     updateUser(input: UserInput): User
     createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
     inviteInvestor(user_id: String!, deal_id: String!): Deal
@@ -102,7 +103,7 @@ const typeDefs = gql`
   }
 
   input UserInput {
-    _id: String!
+    _id: String
     investor_type: String
     country: String
     first_name: String
