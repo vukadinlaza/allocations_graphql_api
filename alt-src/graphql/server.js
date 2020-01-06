@@ -8,6 +8,7 @@ const Cloudfront = require('../cloudfront')
 const Uploader = require('../uploaders/investor-docs')
 
 const InvestorsResolver = require('../resolvers/investors')
+const InvestmentsResolver = require('../resolvers/investors')
 
 const auth0Client = new auth0.AuthenticationClient({
   domain: "login.allocations.co",
@@ -85,6 +86,7 @@ const typeDefs = gql`
     updateInvestor(investment: InvestmentInput): User
 
     deleteInvestor(_id: String!): Boolean
+    deleteInvestment(_id: String!): Boolean
 
     createInvestment(investment: InvestmentInput!): Investment
     addInvestmentDoc(investment_id: String!, doc: Upload!): String
@@ -214,6 +216,7 @@ module.exports = function initServer (db) {
     },
     Mutation: {
       ...InvestorsResolver.Mutations,
+      ...InvestmentsResolver.Mutations,
 
       // inviteKey refers to a deal the user has been invited too
       signUp: async (_, { inviteKey }, ctx) => {
