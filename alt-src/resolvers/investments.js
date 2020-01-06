@@ -5,10 +5,10 @@ async function deleteInvestment (_, { _id }, ctx) {
   isAdmin(ctx)
 
   try {
-    await ctx.db
+    const res = await ctx.db
       .collection("investments")
       .deleteOne({ _id: ObjectId(_id) })
-    return true
+    return res.deletedCount === 1
   } catch (e) {
     return false
   }

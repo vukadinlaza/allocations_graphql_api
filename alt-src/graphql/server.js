@@ -8,7 +8,7 @@ const Cloudfront = require('../cloudfront')
 const Uploader = require('../uploaders/investor-docs')
 
 const InvestorsResolver = require('../resolvers/investors')
-const InvestmentsResolver = require('../resolvers/investors')
+const InvestmentsResolver = require('../resolvers/investments')
 
 const auth0Client = new auth0.AuthenticationClient({
   domain: "login.allocations.co",
