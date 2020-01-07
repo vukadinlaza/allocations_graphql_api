@@ -43,9 +43,6 @@ async function run () {
   // auth handling (only prod for now)
   console.log("⛰️ Environment: ", process.env.NODE_ENV)
   const credential = process.env.NODE_ENV === "production"
-  if (process.env.NODE_ENV === "production") {
-    app.use(authenticate);
-  }
 
   app.use((err, req, res, next) => {
     if (err.name === "UnauthorizedError") {
