@@ -1,20 +1,46 @@
-const jwt = require("express-jwt")
-const jwksRsa = require("jwks-rsa")
+const ms = require('ms')
+const jwt = require('jsonwebtoken')
+const jwksClient = require('jwks-rsa')
+const logger = require('pino')({ prettyPrint: process.env.NODE_ENV !== "production" })
 
-const audience = "https://api.graphql.com"
-// const domain = "allocations1.auth0.com"
-const domain = "login.allocations.co"
+const client = jwksClient({
+  cache: true,
+  cacheMaxEntries: 1000,
+  cacheMaxAge: ms('10h'),
+  jwksUri: `https://login.allocations.co/.well-known/jwks.json`
+})
 
-module.exports = jwt({
-  secret: jwksRsa.expressJwtSecret({
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
-    jwksUri: `https://${domain}/.well-known/jwks.json`
-  }),
+const options = {
+  domain: "login.allocations.co",
+  client_id: "R2iJsfjNPGNjIdPmRoE3IcKd9UvVrsp1"
+}
 
-  audience,
-  issuer: `https://${domain}/`,
-  algorithms: ["RS256"],
-  credentialsRequired: false,
-});
+function getKey(header, cb){
+  client.getSigningKey(header.kid, function(err, key) {
+    var signingKey = key.publicKey || key.rsaPublicKey;
+    cb(null, signingKey);
+  })
+}
+
+async function verify(token) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, getKey, options, (err, decoded) => {
+      if (err) {
+        return reject(AuthenticationError)
+      }
+      return resolve(decoded)
+    })
+  })
+}
+
+async function authenticate({ req, db }) {
+  const token = (req.headers.authorization || "").slice(7)
+
+  let start = Date.now()
+  const data = await verify(token)
+  logger.info("Verify took:", Date.now() - start, "ms")
+
+  return db.collection("users").findOne({ email: data["https://dashboard.allocations.co/email"] })
+}
+
+module.exports = { verify, authenticate }

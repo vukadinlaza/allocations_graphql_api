@@ -2,6 +2,7 @@ const { ApolloServer, gql, AuthenticationError } = require('apollo-server-expres
 const { ObjectId } = require("mongodb")
 const auth0 = require('auth0')
 const { get } = require('lodash')
+const { authenticate } = require('../auth')
 
 const { isAdmin, isAdminOrSameUser } = require('./permissions')
 const Cloudfront = require('../cloudfront')
@@ -10,10 +11,7 @@ const Uploader = require('../uploaders/investor-docs')
 const InvestorsResolver = require('../resolvers/investors')
 const InvestmentsResolver = require('../resolvers/investments')
 
-const auth0Client = new auth0.AuthenticationClient({
-  domain: "login.allocations.co",
-  clientId: process.env.AUTH0_CLIENT_ID 
-})
+const logger = require('pino')({ prettyPrint: process.env.NODE_ENV !== "production" })
 
 const typeDefs = gql`
   type Investment {
@@ -40,23 +38,6 @@ const typeDefs = gql`
     investments: [Investment]
     invitedInvestors: [User]
     inviteKey: String
-  }
-
-  type User {
-    _id: String
-    investor_type: String
-    country: String
-    first_name: String
-    last_name: String
-    entity_name: String
-    signer_full_name: String
-    accredited_investor_status: String
-    email: String
-    admin: Boolean
-    documents: [Document]
-    passport: Document
-    investments: [Investment]
-    invitedDeals: [Deal]
   }
 
   type Document {
@@ -337,28 +318,14 @@ module.exports = function initServer (db) {
   }
 
   return new ApolloServer({ 
-    typeDefs, 
+    typeDefs: [typeDefs, InvestorsResolver.Schema], 
     resolvers,
     context: async ({ req }) => {
-      const token = req.headers.authorization || "";
-      const user = await getUserFromToken(token, db)
-      return { user, token, db }
+      let start = Date.now()
+      const user = await authenticate({ req, db })
+      logger.info("Context took:", Date.now() - start, "ms")
+
+      return { user, db }
     }
   })
-}
-
-const tokenCache = new Map()
-
-async function getUserFromToken (token, db) {
-  const cached = tokenCache.get(token)
-  if (cached) return cached
-
-  try {
-    const { email } = await auth0Client.getProfile(token.slice(7))
-    const user = await db.collection("users").findOne({ email })
-    tokenCache.set(token, user)
-    return user
-  } catch (e) {
-    return null
-  }
 }

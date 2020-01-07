@@ -36,6 +36,7 @@
     "concurrently": "^5.0.0",
     "jest": "^24.9.0",
     "nodemon": "^1.19.4",
+    "pino-pretty": "^3.5.0",
     "ts-jest": "^24.1.0",
     "tslint": "^5.20.0",
     "typescript": "^3.6.4"
@@ -74,6 +75,8 @@
     "jwks-rsa": "^1.6.0",
     "mongo-getdb": "^4.1.0",
     "mongodb": "^3.3.2",
+    "ms": "^2.1.2",
+    "pino": "^5.15.0",
     "subscriptions-transport-ws": "^0.9.16",
     "winston": "^3.2.1"
   },
