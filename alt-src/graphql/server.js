@@ -4,7 +4,7 @@ const auth0 = require('auth0')
 const { get } = require('lodash')
 const { authenticate } = require('../auth')
 
-const { isAdmin, isAdminOrSameUser } = require('./permissions')
+const { isAdmin } = require('./permissions')
 const Cloudfront = require('../cloudfront')
 const Uploader = require('../uploaders/investor-docs')
 
@@ -107,18 +107,7 @@ module.exports = function initServer (db) {
   const resolvers = {
     Query: {
       // user API
-      investor: async (_, args, ctx) => {
-        isAdminOrSameUser(args, ctx)
-
-        // ensure one query param sent
-        if (!args._id && !args.email) {
-          throw new AuthenticationError('permission denied');
-        }
-
-        const query = args._id ? { _id: ObjectId(args._id) } : { email: args.email }
-        return db.collection("users").findOne(query)        
-      },
-      // current_user: (_, __, ctx) => db.collection("users").findOne({ email: get(ctx, 'user.email')}),
+      ...InvestorsResolver.Queries,
 
       deal: (_, args, ctx) => {
         isAdmin(ctx)
@@ -324,8 +313,11 @@ module.exports = function initServer (db) {
       let start = Date.now()
       const user = await authenticate({ req, db })
       logger.info("Context took:", Date.now() - start, "ms")
-
       return { user, db }
+    },
+    formatError: (err) => {
+      logger.error(err)
+      return err
     }
   })
 }

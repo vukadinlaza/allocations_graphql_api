@@ -1,6 +1,7 @@
 const ms = require('ms')
 const jwt = require('jsonwebtoken')
 const jwksClient = require('jwks-rsa')
+const { AuthenticationError } = require('apollo-server-express')
 const logger = require('pino')({ prettyPrint: process.env.NODE_ENV !== "production" })
 
 const client = jwksClient({
@@ -34,13 +35,17 @@ async function verify(token) {
 }
 
 async function authenticate({ req, db }) {
-  const token = (req.headers.authorization || "").slice(7)
+  try {
+    const token = (req.headers.authorization || "").slice(7)
 
-  let start = Date.now()
-  const data = await verify(token)
-  logger.info("Verify took:", Date.now() - start, "ms")
+    let start = Date.now()
+    const data = await verify(token)
+    logger.info("Verify took:", Date.now() - start, "ms")
 
-  return db.collection("users").findOne({ email: data["https://dashboard.allocations.co/email"] })
+    return db.collection("users").findOne({ email: data["https://dashboard.allocations.co/email"] })
+  } catch (e) {
+    throw new AuthenticationError()
+  }
 }
 
 module.exports = { verify, authenticate }

@@ -6,9 +6,4 @@ const isAdmin = ctx => {
   }
 }
 
-const isAdminOrSameUser = (args, ctx) => {
-  if (ctx.user && (ctx.user.email === args.email || ctx.user.admin)) return
-  throw new AuthenticationError('permission denied');
-}
-
-module.exports = { isAdmin, isAdminOrSameUser }
+module.exports = { isAdmin }

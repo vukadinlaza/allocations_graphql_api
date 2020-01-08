@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb")
-const { AuthenticationError, gql } = require('apollo-server-express')
-const { isAdmin, isAdminOrSameUser } = require('../graphql/permissions')
+const { gql } = require('apollo-server-express')
+const { isAdmin } = require('../graphql/permissions')
 
 const Schema = gql`
   type User {
@@ -22,16 +22,11 @@ const Schema = gql`
 `
 
 async function investor (_, args, ctx) {
-  // admin or the _correct_ user
-  isAdminOrSameUser(args, ctx)
+  // only admins can arbitrarily query
+  if (args._id) isAdmin(ctx)
 
-  // ensure one query param sent
-  if (!args._id && !args.email) {
-    throw new AuthenticationError('permission denied');
-  }
-
-  const query = args._id ? { _id: ObjectId(args._id) } : { email: args.email }
-  return db.collection("users").findOne(query)        
+  const query = args._id ? { _id: ObjectId(args._id) } : { email: ctx.user.email }
+  return ctx.db.collection("users").findOne(query)        
 }
 
 async function createInvestor (_, { user }, ctx) {
@@ -54,7 +49,7 @@ async function deleteInvestor (_, { _id }, ctx) {
 
 module.exports = {
   Schema,
-  Query: {
+  Queries: {
     investor
   },
   Mutations: {
