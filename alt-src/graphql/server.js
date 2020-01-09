@@ -33,6 +33,7 @@ const typeDefs = gql`
     pledge_link: String
     onboarding_link: String
     embed_code: String
+    status: String
     closed: Boolean
     amount: Int
     investments: [Investment]
@@ -158,7 +159,8 @@ module.exports = function initServer (db) {
       },
       passport: (user) => {
         return user.passport ? { link: Cloudfront.getSignedUrl(user.passport), path: user.passport } : null
-      }
+      },
+      ...InvestorsResolver.User
     },
     Investment: {
       deal: (investment) => {

@@ -1,6 +1,7 @@
 const { ObjectId } = require("mongodb")
 const { gql } = require('apollo-server-express')
 const { isAdmin } = require('../graphql/permissions')
+const { AuthenticationError } = require('apollo-server-express')
 
 const Schema = gql`
   type User {
@@ -18,8 +19,17 @@ const Schema = gql`
     passport: Document
     investments: [Investment]
     invitedDeals: [Deal]
+    invitedDeal(company_name: String!): Deal
   }
 `
+
+const User = {
+  invitedDeal: async (user, { company_name }, { db }) => {
+    const deal = await db.collection("deals").findOne({ company_name, invitedInvestors: ObjectId(user._id) })
+    if (deal) return deal
+    throw new AuthenticationError()
+  }
+}
 
 async function investor (_, args, ctx) {
   // only admins can arbitrarily query
@@ -49,6 +59,7 @@ async function deleteInvestor (_, { _id }, ctx) {
 
 module.exports = {
   Schema,
+  User,
   Queries: {
     investor
   },
