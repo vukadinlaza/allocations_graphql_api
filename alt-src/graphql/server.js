@@ -8,6 +8,7 @@ const { isAdmin } = require('./permissions')
 const Cloudfront = require('../cloudfront')
 const Uploader = require('../uploaders/investor-docs')
 
+const DealsResolver = require('../resolvers/deals')
 const InvestorsResolver = require('../resolvers/investors')
 const InvestmentsResolver = require('../resolvers/investments')
 
@@ -21,24 +22,6 @@ const typeDefs = gql`
     user: User
     documents: [Document]
     investor: User
-  }
-
-  type Deal {
-    _id: String
-    company_name: String
-    company_description: String
-    investment_documents: String
-    date_closed: String
-    deal_lead: String
-    pledge_link: String
-    onboarding_link: String
-    embed_code: String
-    status: String
-    closed: Boolean
-    amount: Int
-    investments: [Investment]
-    invitedInvestors: [User]
-    inviteKey: String
   }
 
   type Document {
@@ -65,7 +48,6 @@ const typeDefs = gql`
     createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
     inviteInvestor(user_id: String!, deal_id: String!): Deal
     uninviteInvestor(user_id: String!, deal_id: String!): Deal
-    updateDeal(_id: String!, company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
     updateInvestor(investment: InvestmentInput): User
 
     deleteInvestor(_id: String!): Boolean
@@ -109,11 +91,7 @@ module.exports = function initServer (db) {
     Query: {
       // user API
       ...InvestorsResolver.Queries,
-
-      deal: (_, args, ctx) => {
-        isAdmin(ctx)
-        return db.collection("deals").findOne({ _id: ObjectId(args._id) })
-      },
+      ...DealsResolver.Queries,
 
       investment: (_, args, ctx) => {
         isAdmin(ctx)
@@ -121,10 +99,6 @@ module.exports = function initServer (db) {
       },
 
       // admin API
-      allDeals: (_, args, ctx) => {
-        isAdmin(ctx)
-        return db.collection("deals").find({}).toArray()
-      },
       allInvestors: (_, args, ctx) => {
         isAdmin(ctx)
         return db.collection("users").find({}).toArray()
@@ -150,18 +124,7 @@ module.exports = function initServer (db) {
         }).limit(limit || 10).toArray()
       }
     },
-    User: {
-      investments: (user) => {
-        return db.collection("investments").find({ user_id: user._id }).toArray()
-      },
-      invitedDeals: (user) => {
-        return db.collection("deals").find({ closed: { $ne: true }, invitedInvestors: ObjectId(user._id) }).toArray()
-      },
-      passport: (user) => {
-        return user.passport ? { link: Cloudfront.getSignedUrl(user.passport), path: user.passport } : null
-      },
-      ...InvestorsResolver.User
-    },
+    User: InvestorsResolver.User,
     Investment: {
       deal: (investment) => {
         return db.collection("deals").findOne({ _id: investment.deal_id })
@@ -179,15 +142,9 @@ module.exports = function initServer (db) {
         }
       }
     },
-    Deal: {
-      investments: (deal) => {
-        return db.collection("investments").find({ deal_id: deal._id }).toArray()
-      },
-      invitedInvestors: async (deal) => {
-        return db.collection("users").find({ _id: { $in: deal.invitedInvestors || [] }}).toArray()
-      }
-    },
+    Deal: DealsResolver.Deal,
     Mutation: {
+      ...DealsResolver.Mutations,
       ...InvestorsResolver.Mutations,
       ...InvestmentsResolver.Mutations,
 
@@ -232,12 +189,6 @@ module.exports = function initServer (db) {
           { $set: user }
         )                
       },
-
-      createDeal: async (_, deal, ctx) => {
-        isAdmin(ctx)
-        const res = await db.collection("deals").insertOne(deal)
-        return res.ops[0]
-      },
       inviteInvestor: (_, { user_id, deal_id }, ctx) => {
         isAdmin(ctx)
         return db.collection("deals").updateOne(
@@ -251,15 +202,6 @@ module.exports = function initServer (db) {
           { _id: ObjectId(deal_id) },
           { $pull: { invitedInvestors: ObjectId(user_id) } }
         )
-      },
-      updateDeal: async (_, {_id, ...deal}, ctx) => {
-        isAdmin(ctx)
-        const res = await db.collection("deals").findOneAndUpdate(
-          { _id: ObjectId(_id) },
-          { $set: deal },
-          { returnOriginal: false }
-        )
-        return res.value
       },
       updateInvestor: async (_, {_id, ...investor}, ctx) => {
         isAdmin(ctx)
@@ -282,7 +224,6 @@ module.exports = function initServer (db) {
         })
         return res.ops[0]        
       },
-
       addInvestmentDoc: async (_, {investment_id, doc}, ctx) => {
         isAdmin(ctx)
 
@@ -309,7 +250,7 @@ module.exports = function initServer (db) {
   }
 
   return new ApolloServer({ 
-    typeDefs: [typeDefs, InvestorsResolver.Schema], 
+    typeDefs: [typeDefs, InvestorsResolver.Schema, DealsResolver.Schema], 
     resolvers,
     context: async ({ req }) => {
       let start = Date.now()
