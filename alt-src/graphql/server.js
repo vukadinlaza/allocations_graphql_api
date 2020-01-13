@@ -15,15 +15,6 @@ const InvestmentsResolver = require('../resolvers/investments')
 const logger = require('pino')({ prettyPrint: process.env.NODE_ENV !== "production" })
 
 const typeDefs = gql`
-  type Investment {
-    _id: String
-    amount: Int
-    deal: Deal
-    user: User
-    documents: [Document]
-    investor: User
-  }
-
   type Document {
     path: String
     link: String
@@ -56,14 +47,6 @@ const typeDefs = gql`
     createInvestment(investment: InvestmentInput!): Investment
     addInvestmentDoc(investment_id: String!, doc: Upload!): String
     rmInvestmentDoc(investment_id: String!, file: String!): Boolean
-  }
-
-  input InvestmentInput {
-    _id: String
-    amount: Int
-    deal_id: String
-    user_id: String
-    documents: String
   }
 
   input UserInput {
@@ -215,15 +198,6 @@ module.exports = function initServer (db) {
         )
         return res.value
       },
-      createInvestment: async (_, { investment: { user_id, deal_id, ...investment }}, ctx) => {
-        isAdmin(ctx)
-        const res = await db.collection("investments").insertOne({
-          ...investment,
-          user_id: ObjectId(user_id),
-          deal_id: ObjectId(deal_id)
-        })
-        return res.ops[0]        
-      },
       addInvestmentDoc: async (_, {investment_id, doc}, ctx) => {
         isAdmin(ctx)
 
@@ -250,7 +224,7 @@ module.exports = function initServer (db) {
   }
 
   return new ApolloServer({ 
-    typeDefs: [typeDefs, InvestorsResolver.Schema, DealsResolver.Schema], 
+    typeDefs: [typeDefs, InvestorsResolver.Schema, DealsResolver.Schema, InvestmentsResolver.Schema], 
     resolvers,
     context: async ({ req }) => {
       let start = Date.now()

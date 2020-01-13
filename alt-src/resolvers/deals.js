@@ -17,6 +17,7 @@ const Schema = gql`
     status: String
     closed: Boolean
     amount: Int
+    investment: Investment
     investments: [Investment]
     invitedInvestors: [User]
     inviteKey: String
@@ -42,6 +43,13 @@ const Schema = gql`
 `
 
 const Deal = {
+  // investment denotes the `ctx.user` investment in this deal (can only be one)
+  investment: (deal, _, { db, user }) => {
+    return db.collection("investments").findOne({ 
+      deal_id: ObjectId(deal._id),
+      user_id: ObjectId(user._id)  
+    })
+  },
   investments: (deal, _, { db }) => {
     return db.collection("investments").find({ deal_id: deal._id }).toArray()
   },
