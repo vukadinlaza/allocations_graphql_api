@@ -69,10 +69,17 @@ const Queries = {
   }
 }
 
+function uuid () {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+}
+
 const Mutations = {
   createDeal: async (_, deal, ctx) => {
     isAdmin(ctx)
-    const res = await ctx.db.collection("deals").insertOne(deal)
+    const res = await ctx.db.collection("deals").insertOne({
+      ...deal,
+      inviteKey: uuid()
+    })
     return res.ops[0]
   },
   updateDeal: async (_, {deal: { _id, ...deal}}, ctx) => {
