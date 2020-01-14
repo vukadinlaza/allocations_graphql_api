@@ -6,4 +6,12 @@ const isAdmin = ctx => {
   }
 }
 
-module.exports = { isAdmin }
+const isAdminOrSameUser = (user, ctx) => {
+  console.log({user, ctx})
+  if (ctx.user && (ctx.user._id.toString() === user._id.toString() || ctx.user.admin)) {
+    return
+  }
+  throw new AuthenticationError('permission denied')
+}
+
+module.exports = { isAdmin, isAdminOrSameUser }

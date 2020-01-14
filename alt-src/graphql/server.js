@@ -4,7 +4,7 @@ const auth0 = require('auth0')
 const { get } = require('lodash')
 const { authenticate } = require('../auth')
 
-const { isAdmin } = require('./permissions')
+const { isAdmin, isAdminOrSameUser } = require('./permissions')
 const Cloudfront = require('../cloudfront')
 const Uploader = require('../uploaders/investor-docs')
 
@@ -154,7 +154,7 @@ module.exports = function initServer (db) {
       },
 
       updateUser: async (_, {input: {_id, passport, ...user}}, ctx) => {
-        isAdminOrSameUser(user, ctx)
+        isAdminOrSameUser({ _id }, ctx)
 
         // upload passport if passed
         if (passport && !passport.link) {
