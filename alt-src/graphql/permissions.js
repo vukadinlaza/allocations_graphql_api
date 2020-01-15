@@ -7,7 +7,6 @@ const isAdmin = ctx => {
 }
 
 const isAdminOrSameUser = (user, ctx) => {
-  console.log({user, ctx})
   if (ctx.user && (ctx.user._id.toString() === user._id.toString() || ctx.user.admin)) {
     return
   }
