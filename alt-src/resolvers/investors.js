@@ -9,6 +9,7 @@ const Schema = gql`
     _id: String
     investor_type: String
     country: String
+    name: String
     first_name: String
     last_name: String
     entity_name: String
@@ -39,6 +40,11 @@ const User = {
   passport: (user) => {
     return user.passport ? { link: Cloudfront.getSignedUrl(user.passport), path: user.passport } : null
   },
+  name: (user) => {
+    return user.investor_type === "entity"
+      ?  user.entity_name
+      : `${user.first_name} ${user.last_name}`
+  }
 }
 
 const Queries = {
