@@ -65,6 +65,7 @@ async function run () {
 process.on('unhandledRejection', error => {
   // Will print "unhandledRejection err is not defined"
   console.log('unhandledRejection', error);
+  throw new Error(error)
 });
 
 run().then()

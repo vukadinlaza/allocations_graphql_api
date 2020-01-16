@@ -23,8 +23,17 @@ const Schema = gql`
     inviteKey: String
   }
 
+  extend type Query {
+    deal(_id: String): Deal
+    allDeals: [Deal]
+    searchDeals(q: String!, limit: Int): [Deal]
+  }
+
   extend type Mutation {
     updateDeal(deal: DealInput!): Deal
+    createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
+    inviteInvestor(user_id: String!, deal_id: String!): Deal
+    uninviteInvestor(user_id: String!, deal_id: String!): Deal
   }
 
   input DealInput {
@@ -66,6 +75,12 @@ const Queries = {
   allDeals: (_, args, ctx) => {
     isAdmin(ctx)
     return ctx.db.collection("deals").find({}).toArray()
+  },
+  searchDeals: (_, {q, limit}, ctx) => {
+    isAdmin(ctx)
+    return ctx.db.collection("deals").find({
+      company_name: { $regex: new RegExp(q), $options: "i" }
+    }).limit(limit || 10).toArray()
   }
 }
 
@@ -90,6 +105,20 @@ const Mutations = {
       { returnOriginal: false }
     )
     return res.value
+  },
+  inviteInvestor: (_, { user_id, deal_id }, ctx) => {
+    isAdmin(ctx)
+    return ctx.db.collection("deals").updateOne(
+      { _id: ObjectId(deal_id) },
+      { $push: { invitedInvestors: ObjectId(user_id) } }
+    )
+  },
+  uninviteInvestor: (_, { user_id, deal_id }, ctx) => {
+    isAdmin(ctx)
+    return ctx.db.collection("deals").updateOne(
+      { _id: ObjectId(deal_id) },
+      { $pull: { invitedInvestors: ObjectId(user_id) } }
+    )
   }
 }
 

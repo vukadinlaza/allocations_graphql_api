@@ -22,13 +22,12 @@ const typeDefs = gql`
 
   type Query {
     investor(email: String, _id: String): User
-    deal(_id: String): Deal
+    
     investment(_id: String): Investment
-    allDeals: [Deal]
+    
     allInvestors: [User]
     allInvestments: [Investment]
     searchUsers(q: String!, limit: Int): [User]
-    searchDeals(q: String!, limit: Int): [Deal]
   }
 
   type Mutation {
@@ -36,17 +35,9 @@ const typeDefs = gql`
 
     createInvestor(user: UserInput): User
     updateUser(input: UserInput): User
-    createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
-    inviteInvestor(user_id: String!, deal_id: String!): Deal
-    uninviteInvestor(user_id: String!, deal_id: String!): Deal
     updateInvestor(investment: InvestmentInput): User
 
     deleteInvestor(_id: String!): Boolean
-    deleteInvestment(_id: String!): Boolean
-
-    createInvestment(investment: InvestmentInput!): Investment
-    addInvestmentDoc(investment_id: String!, doc: Upload!): String
-    rmInvestmentDoc(investment_id: String!, file: String!): Boolean
   }
 
   input UserInput {
@@ -99,32 +90,10 @@ module.exports = function initServer (db) {
             {email: { $regex: q, $options: "i" }}
           ]
         }).limit(limit || 10).toArray()
-      },
-      searchDeals: (_, {q, limit}, ctx) => {
-        isAdmin(ctx)
-        return db.collection("deals").find({
-          company_name: { $regex: new RegExp(q), $options: "i" }
-        }).limit(limit || 10).toArray()
       }
     },
     User: InvestorsResolver.User,
-    Investment: {
-      deal: (investment) => {
-        return db.collection("deals").findOne({ _id: investment.deal_id })
-      },
-      investor: (investment) => {
-        return db.collection("users").findOne({ _id: investment.user_id })
-      },
-      documents: (investment) => {
-        if (Array.isArray(investment.documents)) {
-          return investment.documents.map(path => {
-            return { link: Cloudfront.getSignedUrl(path), path }
-          })
-        } else {
-          return []
-        }
-      }
-    },
+    Investment: InvestmentsResolver.Investment,
     Deal: DealsResolver.Deal,
     Mutation: {
       ...DealsResolver.Mutations,
@@ -172,20 +141,6 @@ module.exports = function initServer (db) {
           { $set: user }
         )                
       },
-      inviteInvestor: (_, { user_id, deal_id }, ctx) => {
-        isAdmin(ctx)
-        return db.collection("deals").updateOne(
-          { _id: ObjectId(deal_id) },
-          { $push: { invitedInvestors: ObjectId(user_id) } }
-        )
-      },
-      uninviteInvestor: (_, { user_id, deal_id }, ctx) => {
-        isAdmin(ctx)
-        return db.collection("deals").updateOne(
-          { _id: ObjectId(deal_id) },
-          { $pull: { invitedInvestors: ObjectId(user_id) } }
-        )
-      },
       updateInvestor: async (_, {_id, ...investor}, ctx) => {
         isAdmin(ctx)
 
@@ -197,28 +152,6 @@ module.exports = function initServer (db) {
           { returnOriginal: false }
         )
         return res.value
-      },
-      addInvestmentDoc: async (_, {investment_id, doc}, ctx) => {
-        isAdmin(ctx)
-
-        const file = await doc
-        const s3Path = await Uploader.putInvestmentDoc(investment_id, file)
-
-        await db.collection("investments").updateOne(
-          { _id: ObjectId(investment_id) },
-          { $addToSet: { documents: s3Path } }
-        )
-
-        return Cloudfront.getSignedUrl(s3Path)
-      },
-      rmInvestmentDoc: async (_, {investment_id, file}, ctx) => {
-        isAdmin(ctx)
-        await Uploader.rmInvestmentDoc(investment_id, file)
-        await db.collection("investments").updateOne(
-          { _id: ObjectId(investment_id) },
-          { $pull: { documents: `${investment_id}/${file}` } }
-        )
-        return true
       }
     }
   }
