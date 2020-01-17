@@ -112,8 +112,17 @@ const Mutations = {
     )
     return res.value
   },
-  inviteInvestor: (_, { user_id, deal_id }, ctx) => {
+  inviteInvestor: async (_, { user_id, deal_id }, ctx) => {
     isAdmin(ctx)
+
+    // we  need to create an empty investment
+    await ctx.db.collection("investments").insertOne({
+      deal_id: ObjectId(deal_id),
+      user_id: ObjectId(user_id),
+      status: "invited"
+    })
+
+    // add investor to invitedInvestors
     return ctx.db.collection("deals").updateOne(
       { _id: ObjectId(deal_id) },
       { $push: { invitedInvestors: ObjectId(user_id) } }
