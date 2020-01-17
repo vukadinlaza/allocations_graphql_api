@@ -87,6 +87,7 @@ module.exports = function initServer (db) {
           $or: [
             {first_name: { $regex: new RegExp(q), $options: "i" }},
             {last_name: { $regex: q, $options: "i" }},
+            {entity_name: { $regex: q, $options: "i" }},
             {email: { $regex: q, $options: "i" }}
           ]
         }).limit(limit || 10).toArray()
