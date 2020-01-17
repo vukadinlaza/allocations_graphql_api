@@ -14,13 +14,18 @@ const Schema = gql`
     pledge_link: String
     onboarding_link: String
     embed_code: String
-    status: String
-    closed: Boolean
+    status: DealStatus
     amount: Int
     investment: Investment
     investments: [Investment]
     invitedInvestors: [User]
     inviteKey: String
+  }
+
+  enum DealStatus {
+    onboarding
+    closing
+    closed
   }
 
   extend type Query {
@@ -93,6 +98,7 @@ const Mutations = {
     isAdmin(ctx)
     const res = await ctx.db.collection("deals").insertOne({
       ...deal,
+      status: "onboarding",
       inviteKey: uuid()
     })
     return res.ops[0]
