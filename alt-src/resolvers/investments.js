@@ -25,6 +25,7 @@ const Schema = gql`
 
   extend type Mutation {
     createInvestment(investment: InvestmentInput!): Investment
+    updateInvestment(investment: InvestmentInput!): Investment
     deleteInvestment(_id: String!): Boolean
 
     addInvestmentDoc(investment_id: String!, doc: Upload!): String
@@ -36,6 +37,7 @@ const Schema = gql`
     amount: Int
     deal_id: String
     user_id: String
+    status: String
     documents: String
   }
 `
@@ -61,13 +63,22 @@ const Investment = {
 const Mutations = {
   createInvestment: async (_, { investment: { user_id, deal_id, ...investment }}, ctx) => {
     isAdmin(ctx)
-    const res = await db.collection("investments").insertOne({
+    const res = await ctx.db.collection("investments").insertOne({
       ...investment,
       user_id: ObjectId(user_id),
       deal_id: ObjectId(deal_id),
       status: "invited"
     })
     return res.ops[0]        
+  },
+  updateInvestment: async (_, { investment: { _id, ...investment }}, ctx) => {
+    isAdmin(ctx)
+    const res = await ctx.db.collection("investments").findOneAndUpdate(
+      { _id: ObjectId(_id) },
+      { $set: investment },
+      { returnOriginal: false }
+    )
+    return res.value
   },
   deleteInvestment: async (_, { _id }, ctx) => {
     isAdmin(ctx)
