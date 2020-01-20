@@ -10,7 +10,7 @@ lerna-debug.log*
 
 tmp/*
 src/mongo/seed*
-alt-src/priv/*
+src/priv/*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
