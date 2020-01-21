@@ -29,7 +29,7 @@ const User = {
   invitedDeal: async (user, { company_name }, { db }) => {
     const deal = await db.collection("deals").findOne({ company_name, invitedInvestors: ObjectId(user._id) })
     if (deal) return deal
-    throw new AuthenticationError()
+    throw new AuthenticationError("REDIRECT")
   },
   investments: (user, _, { db }) => {
     return db.collection("investments").find({ user_id: user._id }).toArray()
