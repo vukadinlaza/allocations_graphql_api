@@ -19,6 +19,7 @@ const Schema = gql`
     investment: Investment
     investments: [Investment]
     invitedInvestors: [User]
+    allInvited: Boolean
     inviteKey: String
   }
 

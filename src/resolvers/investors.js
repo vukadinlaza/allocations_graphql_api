@@ -27,7 +27,10 @@ const Schema = gql`
 
 const User = {
   invitedDeal: async (user, { company_name }, { db }) => {
-    const deal = await db.collection("deals").findOne({ company_name, invitedInvestors: ObjectId(user._id) })
+    const deal = await db.collection("deals").findOne({ 
+      company_name,
+      $or: [{ invitedInvestors: ObjectId(user._id) }, { allInvited: true }]
+    })
     if (deal) return deal
     throw new AuthenticationError("REDIRECT")
   },
@@ -35,7 +38,10 @@ const User = {
     return db.collection("investments").find({ user_id: user._id }).toArray()
   },
   invitedDeals: (user, _, { db }) => {
-    return db.collection("deals").find({ closed: { $ne: true }, invitedInvestors: ObjectId(user._id) }).toArray()
+    return db.collection("deals").find({ 
+      status: { $ne: 'closed' },
+      $or: [{ invitedInvestors: ObjectId(user._id) }, { allInvited: true }] 
+    }).toArray()
   },
   passport: (user) => {
     return user.passport ? { link: Cloudfront.getSignedUrl(user.passport), path: user.passport } : null
