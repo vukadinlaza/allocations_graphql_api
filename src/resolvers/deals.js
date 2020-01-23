@@ -6,6 +6,7 @@ const { AuthenticationError } = require('apollo-server-express')
 const Schema = gql`
   type Deal {
     _id: String
+    created_at: Int
     company_name: String
     company_description: String
     investment_documents: String
@@ -100,6 +101,7 @@ const Mutations = {
     const res = await ctx.db.collection("deals").insertOne({
       ...deal,
       status: "onboarding",
+      created_at: Date.now(),
       inviteKey: uuid()
     })
     return res.ops[0]
