@@ -54,6 +54,7 @@ const Schema = gql`
     embed_code: String
     status: String
     closed: Boolean
+    allInvited: Boolean
     amount: Int
   }
 `

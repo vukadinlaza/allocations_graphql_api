@@ -8,6 +8,12 @@ const Uploader = require('../uploaders/investor-docs')
 const Schema = gql`
   type Investment {
     _id: String
+
+    invited_at: Int
+    pledged_at: Int
+    onboarded_at: Int
+    completed_at: Int
+
     amount: Int
     deal: Deal
     user: User
@@ -64,15 +70,23 @@ const Mutations = {
   createInvestment: async (_, { investment: { user_id, deal_id, ...investment }}, ctx) => {
     isAdmin(ctx)
     const res = await ctx.db.collection("investments").insertOne({
+      status: "invited",
+      invited_at: Date.now(),
       ...investment,
       user_id: ObjectId(user_id),
-      deal_id: ObjectId(deal_id),
-      status: "invited"
+      deal_id: ObjectId(deal_id)
     })
     return res.ops[0]        
   },
   updateInvestment: async (_, { investment: { _id, ...investment }}, ctx) => {
     isAdmin(ctx)
+
+    // we need to track status changes
+    const savedInvestment = await ctx.db.collection("investments").findOne({ _id: ObjectId(_id) })
+    if (savedInvestment.status !== investment.status) {
+      investment[`${investment.status}_at`] = Date.now()
+    }
+
     const res = await ctx.db.collection("investments").findOneAndUpdate(
       { _id: ObjectId(_id) },
       { $set: investment },
