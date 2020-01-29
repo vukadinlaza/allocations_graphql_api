@@ -7,6 +7,7 @@ const Cloudfront = require('../cloudfront')
 const Schema = gql`
   type User {
     _id: String
+    created_at: Int
     investor_type: String
     country: String
     name: String
@@ -67,7 +68,7 @@ const Mutations = {
   createInvestor: async (_, { user }, ctx) => {
     isAdmin(ctx)
 
-    const res = await ctx.db.collection("users").insertOne(user)
+    const res = await ctx.db.collection("users").insertOne({ ...user, created_at: Date.now() })
     return res.ops[0]
   },
   deleteInvestor: async (_, { _id }, ctx) => {
