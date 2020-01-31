@@ -51,6 +51,7 @@ const typeDefs = gql`
     accredited_investor_status: String
     email: String
     passport: Upload
+    accredidation_doc: Upload
   }
 
   type File {
@@ -123,17 +124,28 @@ module.exports = function initServer (db) {
         return user     
       },
 
-      updateUser: async (_, {input: {_id, passport, ...user}}, ctx) => {
+      updateUser: async (_, {input: {_id, passport, accredidation_doc, ...user}}, ctx) => {
         isAdminOrSameUser({ _id }, ctx)
 
         // upload passport if passed
         if (passport && !passport.link) {
           const file = await passport
-          const s3Path = await Uploader.putInvestorDoc(_id, file)
+          const s3Path = await Uploader.putInvestorDoc(_id, file, "passport")
 
           return db.collection("users").updateOne(
             { _id: ObjectId(_id) },
             { $set: { ...user, passport: s3Path } }
+          )
+        }
+
+        // upload accredidation_doc if passed
+        if (accredidation_doc && !accredidation_doc.link) {
+          const file = await accredidation_doc
+          const s3Path = await Uploader.putInvestorDoc(_id, file, "accredidation_doc")
+
+          return db.collection("users").updateOne(
+            { _id: ObjectId(_id) },
+            { $set: { ...user, accredidation_doc: s3Path } }
           )
         }
 

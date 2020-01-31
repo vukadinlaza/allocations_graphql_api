@@ -20,6 +20,7 @@ const Schema = gql`
     admin: Boolean
     documents: [Document]
     passport: Document
+    accredidation_doc: Document
     investments: [Investment]
     invitedDeals: [Deal]
     invitedDeal(company_name: String!): Deal
@@ -46,6 +47,9 @@ const User = {
   },
   passport: (user) => {
     return user.passport ? { link: Cloudfront.getSignedUrl(user.passport), path: user.passport } : null
+  },
+  accredidation_doc: (user) => {
+    return user.accredidation_doc ? { link: Cloudfront.getSignedUrl(user.accredidation_doc), path: user.accredidation_doc } : null
   },
   name: (user) => {
     return user.investor_type === "entity"
