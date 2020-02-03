@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb")
 const { isAdmin, isAdminOrSameUser } = require('../graphql/permissions')
-const { gql } = require('apollo-server-express')
+const { gql, AuthenticationError } = require('apollo-server-express')
 
 const Cloudfront = require('../cloudfront')
 const Uploader = require('../uploaders/investor-docs')
@@ -67,16 +67,19 @@ const Investment = {
 }
 
 const Mutations = {
-  createInvestment: async (_, { investment: { user_id, deal_id, ...investment }}, ctx) => {
-    isAdmin(ctx)
-    const res = await ctx.db.collection("investments").insertOne({
-      status: "invited",
-      invited_at: Date.now(),
-      ...investment,
-      user_id: ObjectId(user_id),
-      deal_id: ObjectId(deal_id)
-    })
-    return res.ops[0]        
+  createInvestment: async (_, { investment: { user_id, deal_id, ...investment }}, { user, db }) => {
+    const deal = await db.collection("deals").findOne({ _id: ObjectId(deal_id) })
+    if (user.admin || deal.allInvited) {
+      const res = await db.collection("investments").insertOne({
+        status: "invited",
+        invited_at: Date.now(),
+        ...investment,
+        user_id: ObjectId(user_id),
+        deal_id: ObjectId(deal_id)
+      })
+      return res.ops[0]
+    }
+    throw new AuthenticationError('permission denied');
   },
   updateInvestment: async (_, { investment: { _id, ...investment }}, ctx) => {
     isAdmin(ctx)
