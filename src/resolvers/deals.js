@@ -1,6 +1,8 @@
 const { ObjectId } = require("mongodb")
 const { gql } = require('apollo-server-express')
 const { isAdmin } = require('../graphql/permissions')
+const Cloudfront = require('../cloudfront')
+const DealDocUploader = require('../uploaders/deal-docs')
 const { AuthenticationError } = require('apollo-server-express')
 
 const Schema = gql`
@@ -22,6 +24,7 @@ const Schema = gql`
     invitedInvestors: [User]
     allInvited: Boolean
     inviteKey: String
+    documents: [Document]
   }
 
   enum DealStatus {
@@ -41,6 +44,7 @@ const Schema = gql`
     createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
     inviteInvestor(user_id: String!, deal_id: String!): Deal
     uninviteInvestor(user_id: String!, deal_id: String!): Deal
+    addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
   }
 
   input DealInput {
@@ -72,6 +76,9 @@ const Deal = {
   },
   invitedInvestors: async (deal, _, { db }) => {
     return db.collection("users").find({ _id: { $in: deal.invitedInvestors || [] }}).toArray()
+  },
+  documents: async (deal, _, { db }) => {
+    return deal.documents ? deal.documents.map(d => ({ link: Cloudfront.getSignedUrl(d), path: d.split('/')[2] })) : null
   }
 }
 
@@ -137,6 +144,15 @@ const Mutations = {
     return ctx.db.collection("deals").updateOne(
       { _id: ObjectId(deal_id) },
       { $pull: { invitedInvestors: ObjectId(user_id) } }
+    )
+  },
+  addDealDoc: async (_, params, ctx) => {
+    isAdmin(ctx)
+    console.log(params)
+    const path = await DealDocUploader.addDoc(params)
+    return ctx.db.collection("deals").updateOne(
+      { _id: ObjectId(params.deal_id) },
+      { $push: { documents: path } }
     )
   }
 }
