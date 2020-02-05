@@ -45,6 +45,7 @@ const Schema = gql`
     inviteInvestor(user_id: String!, deal_id: String!): Deal
     uninviteInvestor(user_id: String!, deal_id: String!): Deal
     addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
+    rmDealDoc(deal_id: String!, title: String!): Deal
   }
 
   input DealInput {
@@ -148,11 +149,18 @@ const Mutations = {
   },
   addDealDoc: async (_, params, ctx) => {
     isAdmin(ctx)
-    console.log(params)
     const path = await DealDocUploader.addDoc(params)
     return ctx.db.collection("deals").updateOne(
       { _id: ObjectId(params.deal_id) },
       { $push: { documents: path } }
+    )
+  },
+  rmDealDoc: async (_, params, ctx) => {
+    isAdmin(ctx)
+    const path = await DealDocUploader.rmDoc(params)
+    return ctx.db.collection("deals").updateOne(
+      { _id: ObjectId(params.deal_id) },
+      { $pull: { documents: path } }
     )
   }
 }

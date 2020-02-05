@@ -22,4 +22,10 @@ async function addDoc ({ doc, title, deal_id }) {
   return Key
 }
 
-module.exports = { addDoc }
+async function rmDoc ({ title, deal_id }) {
+  const Key = `${path}/${deal_id}/${title}`
+  await s3.deleteObject({ Bucket, Key }).promise()
+  return Key
+}
+
+module.exports = { addDoc, rmDoc }
