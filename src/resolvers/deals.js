@@ -24,6 +24,7 @@ const Schema = gql`
     invitedInvestors: [User]
     allInvited: Boolean
     inviteKey: String
+    memo: String
     documents: [Document]
   }
 
@@ -41,7 +42,7 @@ const Schema = gql`
 
   extend type Mutation {
     updateDeal(deal: DealInput!): Deal
-    createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String): Deal
+    createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String, memo: String): Deal
     inviteInvestor(user_id: String!, deal_id: String!): Deal
     uninviteInvestor(user_id: String!, deal_id: String!): Deal
     addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
@@ -60,6 +61,7 @@ const Schema = gql`
     status: String
     closed: Boolean
     allInvited: Boolean
+    memo: String
     amount: Int
   }
 `
