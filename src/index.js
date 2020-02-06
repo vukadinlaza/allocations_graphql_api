@@ -7,7 +7,7 @@ const cors = require('cors')
 const express = require('express')
 const { execute, subscribe } = require('graphql')
 const helmet = require('helmet')
-const initGraphQlServer = require('./graphql/server')
+const { authedServer } = require('./graphql/server')
 const authenticate = require('./auth')
 const { connect } = require('./mongo')
 const { ApolloServer, gql } = require('apollo-server-express');
@@ -37,9 +37,6 @@ async function run () {
   // connect to MongoDB
   const db = await connect()
 
-  // init graphql server
-  const graphqlServer = initGraphQlServer(db)
-
   // auth handling (only prod for now)
   console.log("⛰️ Environment: ", process.env.NODE_ENV)
   const credential = process.env.NODE_ENV === "production"
@@ -55,10 +52,12 @@ async function run () {
     }
   }); 
   
-  graphqlServer.applyMiddleware({ app });
+  // init auth graphql server
+  const authedGraphqlServer = authedServer(db)
+  authedGraphqlServer.applyMiddleware({ app });
 
   app.listen({ port }, () =>
-    console.log(`🚀 Server ready at http://localhost:4000${graphqlServer.graphqlPath}`)
+    console.log(`🚀 Server ready at http://localhost:4000${authedGraphqlServer.graphqlPath}`)
   );
 }
 

@@ -3,6 +3,7 @@ const { ObjectId } = require("mongodb")
 const auth0 = require('auth0')
 const { get } = require('lodash')
 const { authenticate } = require('../auth')
+const { parse } = require('graphql')
 
 const { isAdmin, isAdminOrSameUser } = require('./permissions')
 const Cloudfront = require('../cloudfront')
@@ -28,6 +29,8 @@ const typeDefs = gql`
     allInvestors: [User]
     allInvestments: [Investment]
     searchUsers(q: String!, limit: Int): [User]
+
+    publicDeal(company_name: String!, invite_code: String!): Deal
   }
 
   type Mutation {
@@ -61,7 +64,7 @@ const typeDefs = gql`
   }
 `
 
-module.exports = function initServer (db) {
+function authedServer (db) {
   const resolvers = {
     Query: {
       // user API
@@ -71,6 +74,14 @@ module.exports = function initServer (db) {
       investment: (_, args, ctx) => {
         isAdmin(ctx)
         return db.collection("investments").findOne({ _id: ObjectId(args._id) })
+      },
+
+      publicDeal: async (_, { company_name, invite_code }) => {
+        const deal = await db.collection("deals").findOne({ company_name })
+        if (deal && deal.inviteKey === invite_code) {
+          return deal
+        }
+        throw new AuthenticationError()
       },
 
       // admin API
@@ -169,10 +180,15 @@ module.exports = function initServer (db) {
     }
   }
 
+  const publicEndpoints = ["PublicDeal"]
+
   return new ApolloServer({ 
     typeDefs: [typeDefs, InvestorsResolver.Schema, DealsResolver.Schema, InvestmentsResolver.Schema], 
     resolvers,
     context: async ({ req }) => {
+      if (publicEndpoints.includes(req.body.operationName)) {
+        return {}
+      }
       let start = Date.now()
       const user = await authenticate({ req, db })
       logger.info("Context took:", Date.now() - start, "ms")
@@ -184,3 +200,5 @@ module.exports = function initServer (db) {
     }
   })
 }
+
+module.exports = { authedServer }
