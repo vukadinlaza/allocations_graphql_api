@@ -14,6 +14,7 @@ const Schema = gql`
     onboarded_at: Int
     completed_at: Int
 
+    organization: String
     amount: Int
     deal: Deal
     user: User

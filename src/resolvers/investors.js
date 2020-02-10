@@ -18,6 +18,8 @@ const Schema = gql`
     accredited_investor_status: String
     email: String
     admin: Boolean
+    organizations: [String]
+    organizations_admin: [Organization]
     documents: [Document]
     passport: Document
     accredidation_doc: Document
@@ -63,7 +65,10 @@ const Queries = {
     // only admins can arbitrarily query
     if (args._id) isAdmin(ctx)
 
-    const query = args._id ? { _id: ObjectId(args._id) } : { email: ctx.user.email }
+    const query = args._id 
+      ? { _id: ObjectId(args._id) } 
+      : { email: ctx.user.email }
+
     return ctx.db.collection("users").findOne(query)        
   }
 }

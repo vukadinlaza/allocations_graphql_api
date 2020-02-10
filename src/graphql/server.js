@@ -16,6 +16,16 @@ const InvestmentsResolver = require('../resolvers/investments')
 const logger = require('pino')({ prettyPrint: process.env.NODE_ENV !== "production" })
 
 const typeDefs = gql`
+  type Organization {
+    name: String
+    slug: String
+    logo: String
+    admins: [User]
+    users: [User]
+    deals: [Deal]
+    investments: [Investment]
+  }
+
   type Document {
     path: String
     link: String
@@ -189,9 +199,8 @@ function authedServer (db) {
       if (publicEndpoints.includes(req.body.operationName)) {
         return {}
       }
-      let start = Date.now()
+
       const user = await authenticate({ req, db })
-      logger.info("Context took:", Date.now() - start, "ms")
       return { user, db }
     },
     formatError: (err) => {

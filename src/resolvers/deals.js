@@ -9,6 +9,7 @@ const Schema = gql`
   type Deal {
     _id: String
     created_at: Int
+    organization: String
     company_name: String
     company_description: String
     investment_documents: String
@@ -16,6 +17,7 @@ const Schema = gql`
     deal_lead: String
     pledge_link: String
     onboarding_link: String
+    wireInstructions: String
     embed_code: String
     status: DealStatus
     amount: Int
@@ -61,6 +63,7 @@ const Schema = gql`
     status: String
     closed: Boolean
     allInvited: Boolean
+    wireDoc: Upload
     memo: String
     amount: Int
   }
@@ -79,6 +82,9 @@ const Deal = {
   },
   invitedInvestors: async (deal, _, { db }) => {
     return db.collection("users").find({ _id: { $in: deal.invitedInvestors || [] }}).toArray()
+  },
+  wireInstructions: (deal, _, { db }) => {
+    return deal.wireInstructions ? Cloudfront.getSignedUrl(deal.wireInstructions) : null
   },
   documents: async (deal, _, { db }) => {
     return deal.documents ? deal.documents.map(d => ({ link: Cloudfront.getSignedUrl(d), path: d.split('/')[2] })) : null
@@ -117,8 +123,14 @@ const Mutations = {
     })
     return res.ops[0]
   },
-  updateDeal: async (_, {deal: { _id, ...deal}}, ctx) => {
+  updateDeal: async (_, {deal: { _id, wireDoc, ...deal}}, ctx) => {
     isAdmin(ctx)
+
+    if (wireDoc) {
+      // upload wireDoc
+      deal.wireInstructions = await DealDocUploader.addDoc({ doc: wireDoc, title: "wire-instructions" , deal_id: _id })
+    }
+
     const res = await ctx.db.collection("deals").findOneAndUpdate(
       { _id: ObjectId(_id) },
       { $set: deal },
