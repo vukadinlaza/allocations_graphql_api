@@ -2,7 +2,7 @@ const { ApolloServer, gql, AuthenticationError } = require('apollo-server-expres
 const { ObjectId } = require("mongodb")
 const auth0 = require('auth0')
 const { get } = require('lodash')
-const { authenticate } = require('../auth')
+const { verify, authenticate } = require('../auth')
 const { parse } = require('graphql')
 
 const { isAdmin, isAdminOrSameUser } = require('./permissions')
@@ -115,16 +115,7 @@ function authedServer (db) {
 
       // inviteKey refers to a deal the user has been invited too
       signUp: async (_, { inviteKey }, ctx) => {
-        let user;
-        if (ctx.user) {
-          user = ctx.user
-        } else {
-          // get auth0 creds
-          const { email } = await auth0Client.getProfile(ctx.token.slice(7))
-          const res = await db.collection("users").insertOne({ email })
-          user = res.ops[0]
-        }
-
+        const user = ctx.user
         // invite user to Deal if key correct
         if (inviteKey) {
           await db.collection("deals").updateOne(
@@ -192,7 +183,7 @@ function authedServer (db) {
       let start = Date.now()
       const user = await authenticate({ req, db })
       logger.info("Context took:", Date.now() - start, "ms")
-      return { user, db }
+      return { user, db, token: req.headers.authorization || "" }
     },
     formatError: (err) => {
       logger.error(err)
