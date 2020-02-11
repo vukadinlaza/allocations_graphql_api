@@ -57,6 +57,11 @@ const User = {
     return user.investor_type === "entity"
       ?  user.entity_name
       : `${user.first_name} ${user.last_name}`
+  },
+  organizations_admin: (user, _, { db }) => {
+    return db.collection("organizations").find({
+      _id: { $in: (user.organizations_admin || []).map(ObjectId) }
+    }).toArray()
   }
 }
 

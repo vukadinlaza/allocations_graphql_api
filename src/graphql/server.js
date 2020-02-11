@@ -17,11 +17,12 @@ const logger = require('pino')({ prettyPrint: process.env.NODE_ENV !== "producti
 
 const typeDefs = gql`
   type Organization {
+    _id: String
     name: String
     slug: String
     logo: String
     admins: [User]
-    users: [User]
+    investors: [User]
     deals: [Deal]
     investments: [Investment]
   }
@@ -35,6 +36,8 @@ const typeDefs = gql`
     investor(email: String, _id: String): User
     
     investment(_id: String): Investment
+
+    organization(slug: String!): Organization
     
     allInvestors: [User]
     allInvestments: [Investment]
@@ -86,6 +89,14 @@ function authedServer (db) {
         return db.collection("investments").findOne({ _id: ObjectId(args._id) })
       },
 
+      organization: async (_, { slug }, { user, db }) => {
+        const org = await db.collection("organizations").findOne({ slug })
+        if (org && user && user.organizations_admin.map(id => id.toString()).includes(org._id.toString())) {
+          return org
+        }
+        throw new AuthenticationError()
+      },
+
       publicDeal: async (_, { company_name, invite_code }) => {
         const deal = await db.collection("deals").findOne({ company_name })
         if (deal && deal.inviteKey === invite_code) {
@@ -115,6 +126,19 @@ function authedServer (db) {
         }).limit(limit || 10).toArray()
       }
     },
+    Organization: {
+      deals: (org, _, { db }) => {
+        return db.collection("deals").find({ organization: org._id }).toArray()
+      },
+      investors: (org, _, { db }) => {
+        return db.collection("users").find({ organizations: org._id }).toArray()
+      },
+      investments: async (org, _, { db }) => {
+        const deals = await db.collection("deals").find({ organization: org._id }).toArray()
+        return db.collection("investments").find({ deal_id: { $in: deals.map(d => d._id) } }).toArray()
+      }
+    },
+
     User: InvestorsResolver.User,
     Investment: InvestmentsResolver.Investment,
     Deal: DealsResolver.Deal,
