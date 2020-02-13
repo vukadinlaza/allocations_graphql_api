@@ -42,8 +42,16 @@ async function authenticate({ req, db }) {
     const data = await verify(token)
     logger.info("Verify took:", Date.now() - start, "ms")
 
-    return db.collection("users").findOne({ email: data["https://dashboard.allocations.co/email"] })
+    const user = await db.collection("users").findOne({ email: data["https://dashboard.allocations.co/email"] })
+    if (user) {
+      return user
+    }
+
+    // else create user
+    const res = await db.collection("users").insertOne({ email:  data["https://dashboard.allocations.co/email"] })
+    return res.ops[0]
   } catch (e) {
+    logger.error(e)
     throw new AuthenticationError()
   }
 }
