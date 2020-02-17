@@ -23,8 +23,11 @@ const typeDefs = gql`
     logo: String
     admins: [User]
     investors: [User]
+    investor(_id: String): User
     deals: [Deal]
+    deal(_id: String): Deal
     investments: [Investment]
+    investment(_id: String): Investment
   }
 
   type Document {
@@ -130,12 +133,21 @@ function authedServer (db) {
       deals: (org, _, { db }) => {
         return db.collection("deals").find({ organization: org._id }).toArray()
       },
+      deal: (org, { _id }, { db }) => {
+        return db.collection("deals").findOne({ _id: ObjectId(_id), organization: org._id })
+      },
       investors: (org, _, { db }) => {
         return db.collection("users").find({ organizations: org._id }).toArray()
+      },
+      investor: (org, { _id }, { db }) => {
+        return db.collection("users").findOne({ _id: ObjectId(_id), organization: org._id })
       },
       investments: async (org, _, { db }) => {
         const deals = await db.collection("deals").find({ organization: org._id }).toArray()
         return db.collection("investments").find({ deal_id: { $in: deals.map(d => d._id) } }).toArray()
+      },
+      investment: (org, { _id }, { db }) => {
+        return db.collection("investments").findOne({ _id: ObjectId(_id), organization: org._id })
       }
     },
 

@@ -37,13 +37,15 @@ async function verify(token) {
 async function authenticate({ req, db }) {
   try {
     const token = (req.headers.authorization || "").slice(7)
-
-    let start = Date.now()
     const data = await verify(token)
-    logger.info("Verify took:", Date.now() - start, "ms")
 
     const user = await db.collection("users").findOne({ email: data["https://dashboard.allocations.co/email"] })
     if (user) {
+      // attaches .orgs to org admins
+      if (user.organizations_admin) {
+        user.orgs = await db.collection("organizations").find({ _id: { $in: user.organizations_admin } }).toArray()
+      }
+
       return user
     }
 

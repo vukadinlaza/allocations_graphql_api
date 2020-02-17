@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb")
 const { gql } = require('apollo-server-express')
-const { isAdmin } = require('../graphql/permissions')
+const { isAdmin, isOrgAdmin } = require('../graphql/permissions')
 const Cloudfront = require('../cloudfront')
 const DealDocUploader = require('../uploaders/deal-docs')
 const { AuthenticationError } = require('apollo-server-express')
@@ -11,6 +11,7 @@ const Schema = gql`
     created_at: Int
     organization: String
     company_name: String
+    slug: String
     company_description: String
     investment_documents: String
     date_closed: String
@@ -21,6 +22,7 @@ const Schema = gql`
     embed_code: String
     status: DealStatus
     amount: Int
+    target: String
     investment: Investment
     investments: [Investment]
     invitedInvestors: [User]
@@ -43,13 +45,14 @@ const Schema = gql`
   }
 
   extend type Mutation {
-    updateDeal(deal: DealInput!): Deal
-    createDeal(company_name: String, company_description: String, deal_lead: String, date_closed: String, pledge_link: String, onboarding_link: String, memo: String): Deal
+    updateDeal(org: String!, deal: DealInput!): Deal
+    createDeal(org: String!, deal: DealInput!): Deal
     inviteInvestor(user_id: String!, deal_id: String!): Deal
     uninviteInvestor(user_id: String!, deal_id: String!): Deal
     addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
     rmDealDoc(deal_id: String!, title: String!): Deal
   }
+
 
   input DealInput {
     _id: String
@@ -66,6 +69,7 @@ const Schema = gql`
     wireDoc: Upload
     memo: String
     amount: Int
+    target: String
   }
 `
 
@@ -113,18 +117,19 @@ function uuid () {
 }
 
 const Mutations = {
-  createDeal: async (_, deal, ctx) => {
-    isAdmin(ctx)
+  createDeal: async (_, { deal, org: orgSlug }, ctx) => {
+    const org = isOrgAdmin(orgSlug, ctx)
     const res = await ctx.db.collection("deals").insertOne({
       ...deal,
+      organization: org._id,
       status: "onboarding",
       created_at: Date.now(),
       inviteKey: uuid()
     })
     return res.ops[0]
   },
-  updateDeal: async (_, {deal: { _id, wireDoc, ...deal}}, ctx) => {
-    isAdmin(ctx)
+  updateDeal: async (_, {org, deal: { _id, wireDoc, ...deal}}, ctx) => {
+    isOrgAdmin(org, ctx)
 
     if (wireDoc) {
       // upload wireDoc
