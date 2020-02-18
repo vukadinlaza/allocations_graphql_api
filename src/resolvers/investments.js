@@ -70,19 +70,22 @@ const Investment = {
 const Mutations = {
   createInvestment: async (_, { investment: { user_id, deal_id, ...investment }}, { user, db }) => {
     const deal = await db.collection("deals").findOne({ _id: ObjectId(deal_id) })
-    if (user.admin || deal.allInvited) {
+
+    // superadmin OR all are invited OR is org admin
+    if (user.admin || deal.allInvited || user.orgs.find(o => o._id.toString() === deal.organization.toString())) {
       const res = await db.collection("investments").insertOne({
         status: "invited",
         invited_at: Date.now(),
         ...investment,
         user_id: ObjectId(user_id),
-        deal_id: ObjectId(deal_id)
+        deal_id: ObjectId(deal_id),
+        organization: ObjectId(deal.organization)
       })
       return res.ops[0]
     }
     throw new AuthenticationError('permission denied');
   },
-  updateInvestment: async (_, { investment: { _id, ...investment }}, ctx) => {
+  updateInvestment: async (_, { org, investment: { _id, ...investment }}, ctx) => {
     isAdmin(ctx)
 
     // we need to track status changes
