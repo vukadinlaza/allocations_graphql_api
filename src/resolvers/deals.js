@@ -47,8 +47,8 @@ const Schema = gql`
   extend type Mutation {
     updateDeal(org: String!, deal: DealInput!): Deal
     createDeal(org: String!, deal: DealInput!): Deal
-    inviteInvestor(user_id: String!, deal_id: String!): Deal
-    uninviteInvestor(user_id: String!, deal_id: String!): Deal
+    inviteInvestor(org: String!, user_id: String!, deal_id: String!): Deal
+    uninviteInvestor(org: String!, user_id: String!, deal_id: String!): Deal
     addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
     rmDealDoc(deal_id: String!, title: String!): Deal
   }
@@ -143,13 +143,15 @@ const Mutations = {
     )
     return res.value
   },
-  inviteInvestor: async (_, { user_id, deal_id }, ctx) => {
+  inviteInvestor: async (_, { org, user_id, deal_id }, ctx) => {
+    const orgRecord = isOrgAdmin(org, ctx)
     isAdmin(ctx)
 
     // we  need to create an empty investment
     await ctx.db.collection("investments").insertOne({
       deal_id: ObjectId(deal_id),
       user_id: ObjectId(user_id),
+      organization_id: orgRecord._id,
       status: "invited"
     })
 
@@ -159,8 +161,8 @@ const Mutations = {
       { $push: { invitedInvestors: ObjectId(user_id) } }
     )
   },
-  uninviteInvestor: (_, { user_id, deal_id }, ctx) => {
-    isAdmin(ctx)
+  uninviteInvestor: (_, { org, user_id, deal_id }, ctx) => {
+    isOrgAdmin(org, ctx)
     return ctx.db.collection("deals").updateOne(
       { _id: ObjectId(deal_id) },
       { $pull: { invitedInvestors: ObjectId(user_id) } }
