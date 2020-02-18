@@ -5,7 +5,7 @@ const { get } = require('lodash')
 const { verify, authenticate } = require('../auth')
 const { parse } = require('graphql')
 
-const { isAdmin, isAdminOrSameUser } = require('./permissions')
+const { isAdmin, isAdminOrSameUser, isOrgAdmin } = require('./permissions')
 const Cloudfront = require('../cloudfront')
 const Uploader = require('../uploaders/investor-docs')
 
@@ -44,7 +44,7 @@ const typeDefs = gql`
     
     allInvestors: [User]
     allInvestments: [Investment]
-    searchUsers(q: String!, limit: Int): [User]
+    searchUsers(org: String!, q: String!, limit: Int): [User]
 
     publicDeal(company_name: String!, invite_code: String!): Deal
   }
@@ -114,9 +114,10 @@ function authedServer (db) {
         isAdmin(ctx)
         return db.collection("investments").find({}).toArray()
       },
-      searchUsers: (_, {q, limit}, ctx) => {
-        isAdmin(ctx)
-        return db.collection("users").find({ 
+      searchUsers: async (_, {org, q, limit}, ctx) => {
+        const orgRecord = await isOrgAdmin(org, ctx)
+        return db.collection("users").find({
+          organizations: orgRecord._id,
           $or: [
             {first_name: { $regex: new RegExp(q), $options: "i" }},
             {last_name: { $regex: q, $options: "i" }},
