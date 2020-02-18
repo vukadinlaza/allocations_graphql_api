@@ -52,11 +52,8 @@ const typeDefs = gql`
   type Mutation {
     signUp(inviteKey: String): User
 
-    createInvestor(user: UserInput): User
     updateUser(input: UserInput): User
     updateInvestor(investment: InvestmentInput): User
-
-    deleteInvestor(_id: String!): Boolean
   }
 
   input UserInput {

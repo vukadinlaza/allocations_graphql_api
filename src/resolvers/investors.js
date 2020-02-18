@@ -27,6 +27,11 @@ const Schema = gql`
     invitedDeals: [Deal]
     invitedDeal(company_name: String!): Deal
   }
+
+  extend type Mutation {
+    createInvestor(org: String!, user: UserInput): User
+    deleteInvestor(_id: String!): Boolean
+  }
 `
 
 const User = {
