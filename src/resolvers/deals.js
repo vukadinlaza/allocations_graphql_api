@@ -3,6 +3,8 @@ const { gql } = require('apollo-server-express')
 const { isAdmin, isOrgAdmin } = require('../graphql/permissions')
 const Cloudfront = require('../cloudfront')
 const DealDocUploader = require('../uploaders/deal-docs')
+const DealMailer = require('../mailers/deal-mailer')
+const logger = require('../utils/logger')
 const { AuthenticationError } = require('apollo-server-express')
 
 const Schema = gql`
@@ -156,10 +158,16 @@ const Mutations = {
     })
 
     // add investor to invitedInvestors
-    return ctx.db.collection("deals").updateOne(
+    const deal = await ctx.db.collection("deals").updateOne(
       { _id: ObjectId(deal_id) },
       { $push: { invitedInvestors: ObjectId(user_id) } }
     )
+
+    // // send email invite
+    // const mailerRes = await DealMailer.sendInvite({ deal, user: ctx.user })
+    // logger.info(`Email Invite Status: ${mailerRes.status}`)
+
+    return deal
   },
   uninviteInvestor: (_, { org, user_id, deal_id }, ctx) => {
     isOrgAdmin(org, ctx)
