@@ -14,18 +14,28 @@ const { ApolloServer, gql } = require('apollo-server-express');
 
 const { NODE_ENV } = process.env
 
+function corsWhitelist (whitelist) {
+  const origin = (origin, cb) => {
+    if (whitelist.includes(origin)) {
+      cb(null, true)
+    } else {
+      cb(new Error('Not allowed by CORS'))
+    }
+  }
+  return cors({ origin })
+}
+
 async function run () {
   const app = express();
   const port = process.env.PORT || 4000;
 
-
   // only prevent CORS if in production
   if (NODE_ENV === "production") {
-    app.use("*", cors({ origin: `https://dashboard.allocations.co` }));
+    app.use("*", corsWhitelist(["https://dashboard.allocations.co", "https://dashboard.allocations.com"]))
   }
 
   if (NODE_ENV === "staging") {
-    app.use("*", cors({ origin: `https://staging.allocations.co` }));
+    app.use("*", corsWhitelist(["https://staging.allocations.co", "https://staging.allocations.com"]))
   }
 
   // standard express middlewares
