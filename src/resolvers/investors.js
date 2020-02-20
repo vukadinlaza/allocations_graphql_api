@@ -1,8 +1,9 @@
 const { ObjectId } = require("mongodb")
 const { gql } = require('apollo-server-express')
-const { isAdmin } = require('../graphql/permissions')
+const { isAdmin, isOrgAdmin } = require('../graphql/permissions')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../cloudfront')
+const Uploader = require('../uploaders/investor-docs')
 
 const Schema = gql`
   type User {
@@ -26,6 +27,11 @@ const Schema = gql`
     investments: [Investment]
     invitedDeals: [Deal]
     invitedDeal(company_name: String!): Deal
+  }
+
+  extend type Query {
+    investor(email: String, _id: String): User
+    searchUsers(org: String!, q: String!, limit: Int): [User]
   }
 
   extend type Mutation {
@@ -80,6 +86,24 @@ const Queries = {
       : { email: ctx.user.email }
 
     return ctx.db.collection("users").findOne(query)        
+  },
+  searchUsers: async (_, {org, q, limit}, ctx) => {
+    const orgRecord = await isOrgAdmin(org, ctx)
+
+    const searchQ = {
+      $or: [
+        {first_name: { $regex: new RegExp(q), $options: "i" }},
+        {last_name: { $regex: q, $options: "i" }},
+        {entity_name: { $regex: q, $options: "i" }},
+        {email: { $regex: q, $options: "i" }}
+      ]
+    }
+    const orgCheck = ctx.user.admin ? {} : { organizations: orgRecord._id }
+
+    return ctx.db.collection("users").find({
+      ...orgCheck,
+      ...searchQ
+    }).limit(limit || 10).toArray()
   }
 }
 
@@ -89,6 +113,48 @@ const Mutations = {
 
     const res = await ctx.db.collection("users").insertOne({ ...user, created_at: Date.now() })
     return res.ops[0]
+  },
+  updateUser: async (_, {input: {_id, passport, accredidation_doc, ...user}}, ctx) => {
+    isAdminOrSameUser({ _id }, ctx)
+
+    // upload passport if passed
+    if (passport && !passport.link) {
+      const file = await passport
+      const s3Path = await Uploader.putInvestorDoc(_id, file, "passport")
+
+      return ctx.db.collection("users").updateOne(
+        { _id: ObjectId(_id) },
+        { $set: { ...user, passport: s3Path } }
+      )
+    }
+
+    // upload accredidation_doc if passed
+    if (accredidation_doc && !accredidation_doc.link) {
+      const file = await accredidation_doc
+      const s3Path = await Uploader.putInvestorDoc(_id, file, "accredidation_doc")
+
+      return ctx.db.collection("users").updateOne(
+        { _id: ObjectId(_id) },
+        { $set: { ...user, accredidation_doc: s3Path } }
+      )
+    }
+
+    return ctx.db.collection("users").updateOne(
+      { _id: ObjectId(_id) },
+      { $set: user }
+    )                
+  },
+  updateInvestor: async (_, {_id, ...investor}, ctx) => {
+    isAdmin(ctx)
+
+    const documents = await Uploader.putUserFile({}, investor.documents)
+
+    const res = await ctx.db.collection("users").findOneAndUpdate(
+      { _id: ObjectId(_id) },
+      { $set: {...investor, documents} },
+      { returnOriginal: false }
+    )
+    return res.value
   },
   deleteInvestor: async (_, { _id }, ctx) => {
     isAdmin(ctx)

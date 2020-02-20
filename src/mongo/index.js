@@ -1,6 +1,8 @@
 const { MongoClient } = require("mongodb")
 const { MONGO_URL, MONGO_DB } = process.env
 
+const cols = ["investments", "deals", "organizations", "users"]
+
 async function connect() {
     const client = new MongoClient(MONGO_URL, {
         useUnifiedTopology: true,
@@ -9,7 +11,13 @@ async function connect() {
 
     const conn = await client.connect()
     console.log("🔗 Connected to Mongo")
-    return conn.db(MONGO_DB)
+    const db = conn.db(MONGO_DB)
+
+    // attach collections directly to db
+    cols.forEach(col => {
+      db[col] = db.collection(col)
+    })
+    return db
 }
 
 module.exports = { connect }

@@ -12,6 +12,7 @@ const Uploader = require('../uploaders/investor-docs')
 const DealsResolver = require('../resolvers/deals')
 const InvestorsResolver = require('../resolvers/investors')
 const InvestmentsResolver = require('../resolvers/investments')
+const OrganizationsResolver = require('../resolvers/organizations')
 
 const logger = require('pino')({ prettyPrint: process.env.NODE_ENV !== "production" })
 
@@ -36,15 +37,12 @@ const typeDefs = gql`
   }
 
   type Query {
-    investor(email: String, _id: String): User
-    
     investment(_id: String): Investment
 
     organization(slug: String!): Organization
     
     allInvestors: [User]
     allInvestments: [Investment]
-    searchUsers(org: String!, q: String!, limit: Int): [User]
 
     publicDeal(company_name: String!, invite_code: String!): Deal
   }
@@ -80,21 +78,13 @@ const typeDefs = gql`
 function authedServer (db) {
   const resolvers = {
     Query: {
-      // user API
-      ...InvestorsResolver.Queries,
       ...DealsResolver.Queries,
+      ...InvestorsResolver.Queries,
+      ...OrganizationsResolver.Queries,
 
       investment: (_, args, ctx) => {
         isAdmin(ctx)
         return db.collection("investments").findOne({ _id: ObjectId(args._id) })
-      },
-
-      organization: async (_, { slug }, { user, db }) => {
-        const org = await db.collection("organizations").findOne({ slug })
-        if (org && user && user.organizations_admin.map(id => id.toString()).includes(org._id.toString())) {
-          return org
-        }
-        throw new AuthenticationError()
       },
 
       publicDeal: async (_, { company_name, invite_code }) => {
@@ -113,45 +103,12 @@ function authedServer (db) {
       allInvestments: (_, __, ctx) => {
         isAdmin(ctx)
         return db.collection("investments").find({}).toArray()
-      },
-      searchUsers: async (_, {org, q, limit}, ctx) => {
-        const orgRecord = await isOrgAdmin(org, ctx)
-        return db.collection("users").find({
-          organizations: orgRecord._id,
-          $or: [
-            {first_name: { $regex: new RegExp(q), $options: "i" }},
-            {last_name: { $regex: q, $options: "i" }},
-            {entity_name: { $regex: q, $options: "i" }},
-            {email: { $regex: q, $options: "i" }}
-          ]
-        }).limit(limit || 10).toArray()
       }
     },
-    Organization: {
-      deals: (org, _, { db }) => {
-        return db.collection("deals").find({ organization: org._id }).toArray()
-      },
-      deal: (org, { _id }, { db }) => {
-        return db.collection("deals").findOne({ _id: ObjectId(_id), organization: org._id })
-      },
-      investors: (org, _, { db }) => {
-        return db.collection("users").find({ organizations: org._id }).toArray()
-      },
-      investor: (org, { _id }, { db }) => {
-        return db.collection("users").findOne({ _id: ObjectId(_id), organization: org._id })
-      },
-      investments: async (org, _, { db }) => {
-        const deals = await db.collection("deals").find({ organization: org._id }).toArray()
-        return db.collection("investments").find({ deal_id: { $in: deals.map(d => d._id) } }).toArray()
-      },
-      investment: (org, { _id }, { db }) => {
-        return db.collection("investments").findOne({ _id: ObjectId(_id), organization: org._id })
-      }
-    },
-
+    Deal: DealsResolver.Deal,
     User: InvestorsResolver.User,
     Investment: InvestmentsResolver.Investment,
-    Deal: DealsResolver.Deal,
+    Organization: OrganizationsResolver.Organization,
     Mutation: {
       ...DealsResolver.Mutations,
       ...InvestorsResolver.Mutations,
@@ -168,49 +125,6 @@ function authedServer (db) {
           )
         }
         return user     
-      },
-
-      updateUser: async (_, {input: {_id, passport, accredidation_doc, ...user}}, ctx) => {
-        isAdminOrSameUser({ _id }, ctx)
-
-        // upload passport if passed
-        if (passport && !passport.link) {
-          const file = await passport
-          const s3Path = await Uploader.putInvestorDoc(_id, file, "passport")
-
-          return db.collection("users").updateOne(
-            { _id: ObjectId(_id) },
-            { $set: { ...user, passport: s3Path } }
-          )
-        }
-
-        // upload accredidation_doc if passed
-        if (accredidation_doc && !accredidation_doc.link) {
-          const file = await accredidation_doc
-          const s3Path = await Uploader.putInvestorDoc(_id, file, "accredidation_doc")
-
-          return db.collection("users").updateOne(
-            { _id: ObjectId(_id) },
-            { $set: { ...user, accredidation_doc: s3Path } }
-          )
-        }
-
-        return db.collection("users").updateOne(
-          { _id: ObjectId(_id) },
-          { $set: user }
-        )                
-      },
-      updateInvestor: async (_, {_id, ...investor}, ctx) => {
-        isAdmin(ctx)
-
-        const documents = await Uploader.putUserFile({}, investor.documents)
-
-        const res = await db.collection("users").findOneAndUpdate(
-          { _id: ObjectId(_id) },
-          { $set: {...investor, documents} },
-          { returnOriginal: false }
-        )
-        return res.value
       }
     }
   }
