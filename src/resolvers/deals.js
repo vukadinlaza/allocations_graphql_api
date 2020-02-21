@@ -25,6 +25,7 @@ const Schema = gql`
     status: DealStatus
     amount: Int
     target: String
+    amount_raised: String
     investment: Investment
     investments: [Investment]
     invitedInvestors: [User]
@@ -72,6 +73,7 @@ const Schema = gql`
     memo: String
     amount: Int
     target: String
+    amount_raised: String
   }
 `
 
