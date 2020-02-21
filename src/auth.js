@@ -7,7 +7,7 @@ const logger = require('pino')({ prettyPrint: process.env.NODE_ENV !== "producti
 const client = jwksClient({
   cache: true,
   cacheMaxEntries: 1000,
-  cacheMaxAge: ms('10h'),
+  cacheMaxAge: ms('30d'),
   jwksUri: `https://login.allocations.co/.well-known/jwks.json`
 })
 
