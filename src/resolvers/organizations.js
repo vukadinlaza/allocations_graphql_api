@@ -20,7 +20,11 @@ const Organization = {
     }
   },
   deal: (org, { _id }, { db }) => {
-    return db.deals.findOne({ _id: ObjectId(_id), organization: org._id })
+    if (org.slug === "allocations") {
+      return db.deals.findOne({ _id: ObjectId(_id), organization: { $in: [org._id, null] }})
+    } else {
+      return db.deals.findOne({ _id: ObjectId(_id), organization: org._id })
+    }
   },
   investors: (org, _, { db }) => {
     if (org.slug === "allocations") {
