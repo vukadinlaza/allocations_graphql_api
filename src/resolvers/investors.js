@@ -29,6 +29,20 @@ const Schema = gql`
     invitedDeal(company_name: String!): Deal
   }
 
+  input UserInput {
+    _id: String
+    investor_type: String
+    country: String
+    first_name: String
+    last_name: String
+    entity_name: String
+    signer_full_name: String
+    accredited_investor_status: String
+    email: String
+    passport: Upload
+    accredidation_doc: Upload
+  }
+
   extend type Query {
     investor(email: String, _id: String): User
     searchUsers(org: String!, q: String!, limit: Int): [User]
@@ -37,6 +51,8 @@ const Schema = gql`
   extend type Mutation {
     createInvestor(org: String!, user: UserInput): User
     deleteInvestor(_id: String!): Boolean
+    updateUser(input: UserInput): User
+    updateInvestor(investment: InvestmentInput): User
   }
 `
 

@@ -17,20 +17,6 @@ const OrganizationsResolver = require('../resolvers/organizations')
 const logger = require('pino')({ prettyPrint: process.env.NODE_ENV !== "production" })
 
 const typeDefs = gql`
-  type Organization {
-    _id: String
-    name: String
-    slug: String
-    logo: String
-    admins: [User]
-    investors: [User]
-    investor(_id: String): User
-    deals: [Deal]
-    deal(_id: String): Deal
-    investments: [Investment]
-    investment(_id: String): Investment
-  }
-
   type Document {
     path: String
     link: String
@@ -38,8 +24,6 @@ const typeDefs = gql`
 
   type Query {
     investment(_id: String): Investment
-
-    organization(slug: String!): Organization
     
     allInvestors: [User]
     allInvestments: [Investment]
@@ -49,23 +33,6 @@ const typeDefs = gql`
 
   type Mutation {
     signUp(inviteKey: String): User
-
-    updateUser(input: UserInput): User
-    updateInvestor(investment: InvestmentInput): User
-  }
-
-  input UserInput {
-    _id: String
-    investor_type: String
-    country: String
-    first_name: String
-    last_name: String
-    entity_name: String
-    signer_full_name: String
-    accredited_investor_status: String
-    email: String
-    passport: Upload
-    accredidation_doc: Upload
   }
 
   type File {
@@ -113,6 +80,7 @@ function authedServer (db) {
       ...DealsResolver.Mutations,
       ...InvestorsResolver.Mutations,
       ...InvestmentsResolver.Mutations,
+      ...OrganizationsResolver.Mutations,
 
       // inviteKey refers to a deal the user has been invited too
       signUp: async (_, { inviteKey }, ctx) => {
@@ -132,7 +100,13 @@ function authedServer (db) {
   const publicEndpoints = ["PublicDeal"]
 
   return new ApolloServer({ 
-    typeDefs: [typeDefs, InvestorsResolver.Schema, DealsResolver.Schema, InvestmentsResolver.Schema], 
+    typeDefs: [
+      typeDefs, 
+      InvestorsResolver.Schema, 
+      DealsResolver.Schema, 
+      InvestmentsResolver.Schema,
+      OrganizationsResolver.Schema
+    ], 
     resolvers,
     context: async ({ req }) => {
       if (publicEndpoints.includes(req.body.operationName)) {
