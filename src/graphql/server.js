@@ -14,7 +14,7 @@ const InvestorsResolver = require('../resolvers/investors')
 const InvestmentsResolver = require('../resolvers/investments')
 const OrganizationsResolver = require('../resolvers/organizations')
 
-const logger = require('pino')({ prettyPrint: process.env.NODE_ENV !== "production" })
+const logger = require('../utils/logger')
 
 const typeDefs = gql`
   type Document {

@@ -60,7 +60,10 @@ const User = {
   invitedDeal: async (user, { company_name }, { db }) => {
     const deal = await db.collection("deals").findOne({ 
       company_name,
-      $or: [{ invitedInvestors: ObjectId(user._id) }, { allInvited: true }]
+      $or: [
+        { invitedInvestors: ObjectId(user._id) }, 
+        { allInvited: true, organization: { $in: user.organizations } }
+      ]
     })
     if (deal) return deal
     throw new AuthenticationError("REDIRECT")
@@ -71,7 +74,11 @@ const User = {
   invitedDeals: (user, _, { db }) => {
     return db.collection("deals").find({ 
       status: { $ne: 'closed' },
-      $or: [{ invitedInvestors: ObjectId(user._id) }, { allInvited: true }] 
+      $or: [
+        { invitedInvestors: ObjectId(user._id) },
+        // if allInvited and user is part of this org
+        { allInvited: true, organization: { $in: user.organizations } }
+      ] 
     }).toArray()
   },
   passport: (user) => {
