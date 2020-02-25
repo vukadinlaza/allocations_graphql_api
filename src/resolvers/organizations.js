@@ -21,7 +21,7 @@ const Schema = gql`
   input OrganizationInput {
     name: String!
     slug: String!
-    logo: Upload!
+    logo: Upload
   }
 
   extend type Query {
@@ -48,7 +48,9 @@ const Mutations = {
     isAdmin(ctx)
 
     // upload logo
-    await PublicUploader.upload({ doc: logo, path: `organizations/${organization.slug}.png` })
+    if (logo) {
+      await PublicUploader.upload({ doc: logo, path: `organizations/${organization.slug}.png` })
+    }
 
     const res = await ctx.db.organizations.insertOne({
       ...organization,
