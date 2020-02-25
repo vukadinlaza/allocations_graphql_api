@@ -179,11 +179,11 @@ const Mutations = {
   },
   inviteInvestor: async (_, { org, user_id, deal_id }, ctx) => {
     const orgRecord = isOrgAdmin(org, ctx)
-    isAdmin(ctx)
+    const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
 
     // ensure deal is of the org
-    if (deal_id.toString() !== orgRecord._id.toString()) {
-      throw AuthenticationError()
+    if (deal.organization.toString() !== orgRecord._id.toString()) {
+      throw new AuthenticationError()
     }
 
     // we  need to create an empty investment
@@ -195,12 +195,12 @@ const Mutations = {
     })
 
     // add investor to invitedInvestors
-    const deal = await ctx.db.collection("deals").updateOne(
+    const updatedDeal = await ctx.db.collection("deals").updateOne(
       { _id: ObjectId(deal_id) },
       { $push: { invitedInvestors: ObjectId(user_id) } }
     )
 
-    return deal
+    return updatedDeal
   },
   uninviteInvestor: (_, { org, user_id, deal_id }, ctx) => {
     isOrgAdmin(org, ctx)
