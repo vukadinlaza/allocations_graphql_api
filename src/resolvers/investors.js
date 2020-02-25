@@ -62,7 +62,7 @@ const User = {
       company_name,
       $or: [
         { invitedInvestors: ObjectId(user._id) }, 
-        { allInvited: true, organization: { $in: user.organizations } }
+        { allInvited: true, organization: { $in: user.organizations || [] } }
       ]
     })
     if (deal) return deal
@@ -77,7 +77,7 @@ const User = {
       $or: [
         { invitedInvestors: ObjectId(user._id) },
         // if allInvited and user is part of this org
-        { allInvited: true, organization: { $in: user.organizations } }
+        { allInvited: true, organization: { $in: user.organizations || [] } }
       ] 
     }).toArray()
   },
