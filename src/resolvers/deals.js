@@ -28,11 +28,20 @@ const Schema = gql`
     amount_raised: String
     investment: Investment
     investments: [Investment]
+    emailInvites: [EmailInvite]
     invitedInvestors: [User]
     allInvited: Boolean
     inviteKey: String
     memo: String
     documents: [Document]
+  }
+
+  type EmailInvite {
+    status: String
+    sent_at: Float
+    to: String
+    opened: Boolean
+    opened_at: Float
   }
 
   enum DealStatus {
@@ -50,12 +59,12 @@ const Schema = gql`
   extend type Mutation {
     updateDeal(org: String!, deal: DealInput!): Deal
     createDeal(org: String!, deal: DealInput!): Deal
+    inviteNewUser(org: String!, deal_id: String!, email: String!): EmailInvite
     inviteInvestor(org: String!, user_id: String!, deal_id: String!): Deal
     uninviteInvestor(org: String!, user_id: String!, deal_id: String!): Deal
     addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
     rmDealDoc(deal_id: String!, title: String!): Deal
   }
-
 
   input DealInput {
     _id: String
@@ -147,9 +156,35 @@ const Mutations = {
     )
     return res.value
   },
+  inviteNewUser: async (_, { org, email, deal_id }, ctx) => {
+    const orgRecord = isOrgAdmin(org, ctx)
+    const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
+
+    // ensure deal is of the org
+    if (deal.organization.toString() !== orgRecord._id.toString()) {
+      throw new AuthenticationError()
+    }
+
+    // this user does not exist yet on the platform - we are *NOT* going to
+    // create an account for them yet because they have not consented to that
+    const invite = await DealMailer.sendInvite({ deal, org: orgRecord, sender: ctx.user, to: email })
+
+    // pop email onto deal invites
+    await ctx.db.collection("deals").updateOne(
+      { _id: ObjectId(deal_id) },
+      { $push: { emailInvites: invite } }
+    ) 
+
+    return invite
+  },
   inviteInvestor: async (_, { org, user_id, deal_id }, ctx) => {
     const orgRecord = isOrgAdmin(org, ctx)
     isAdmin(ctx)
+
+    // ensure deal is of the org
+    if (deal_id.toString() !== orgRecord._id.toString()) {
+      throw AuthenticationError()
+    }
 
     // we  need to create an empty investment
     await ctx.db.collection("investments").insertOne({
@@ -164,10 +199,6 @@ const Mutations = {
       { _id: ObjectId(deal_id) },
       { $push: { invitedInvestors: ObjectId(user_id) } }
     )
-
-    // // send email invite
-    // const mailerRes = await DealMailer.sendInvite({ deal, user: ctx.user })
-    // logger.info(`Email Invite Status: ${mailerRes.status}`)
 
     return deal
   },
