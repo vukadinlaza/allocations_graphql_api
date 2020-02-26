@@ -11,7 +11,7 @@ const Schema = gql`
   type Deal {
     _id: String
     created_at: Int
-    organization: String
+    organization: Organization
     company_name: String
     slug: String
     company_description: String
@@ -105,6 +105,9 @@ const Deal = {
   },
   documents: async (deal, _, { db }) => {
     return deal.documents ? deal.documents.map(d => ({ link: Cloudfront.getSignedUrl(d), path: d.split('/')[2] })) : null
+  },
+  organization: (deal, _, { db }) => {
+    return db.organizations.findOne({ _id: deal.organization })
   }
 }
 
