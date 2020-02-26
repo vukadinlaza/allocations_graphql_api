@@ -36,6 +36,15 @@ const Schema = gql`
     documents: [Document]
   }
 
+  type ExchangeDeal {
+    _id: String
+    created_at: Int
+    company_name: String
+    company_description: String
+    organization: Organization
+    slug: String
+  }
+
   type EmailInvite {
     status: String
     sent_at: Float
@@ -53,6 +62,8 @@ const Schema = gql`
   extend type Query {
     deal(_id: String): Deal
     allDeals: [Deal]
+    exchangeDeals: [ExchangeDeal]
+    exchangeDeal(slug: String!): ExchangeDeal
     searchDeals(q: String!, limit: Int): [Deal]
   }
 
@@ -86,6 +97,17 @@ const Schema = gql`
   }
 `
 
+function slugify (str) {
+  return str.toLowerCase().replace(' ', '-')
+}
+
+const ExchangeDeal = {
+  slug: (deal, _, { db }) => deal.slug || slugify(deal.company_name),
+  organization: (deal, _, { db }) => {
+    return db.organizations.findOne({ _id: deal.organization })
+  }
+}
+
 const Deal = {
   // investment denotes the `ctx.user` investment in this deal (can only be one)
   investment: (deal, _, { db, user }) => {
@@ -114,15 +136,23 @@ const Deal = {
 const Queries = {
   deal: (_, args, ctx) => {
     isAdmin(ctx)
-    return ctx.db.collection("deals").findOne({ _id: ObjectId(args._id) })
+    return ctx.db.deals.findOne({ _id: ObjectId(args._id) })
   },
   allDeals: (_, args, ctx) => {
     isAdmin(ctx)
-    return ctx.db.collection("deals").find({}).toArray()
+    return ctx.db.deals.find({}).toArray()
+  },
+  exchangeDeals: (_, __, ctx) => {
+    isAdmin(ctx)
+    return ctx.db.deals.find({}).toArray()
+  },
+  exchangeDeal: (_, { slug }, ctx) => {
+    isAdmin(ctx)
+    return ctx.db.deals.findOne({ slug })
   },
   searchDeals: (_, {q, limit}, ctx) => {
     isAdmin(ctx)
-    return ctx.db.collection("deals").find({
+    return ctx.db.deals.find({
       company_name: { $regex: new RegExp(q), $options: "i" }
     }).limit(limit || 10).toArray()
   }
@@ -135,7 +165,7 @@ function uuid () {
 const Mutations = {
   createDeal: async (_, { deal, org: orgSlug }, ctx) => {
     const org = isOrgAdmin(orgSlug, ctx)
-    const res = await ctx.db.collection("deals").insertOne({
+    const res = await ctx.db.deals.insertOne({
       ...deal,
       organization: org._id,
       status: "onboarding",
@@ -152,7 +182,7 @@ const Mutations = {
       deal.wireInstructions = await DealDocUploader.addDoc({ doc: wireDoc, title: "wire-instructions" , deal_id: _id })
     }
 
-    const res = await ctx.db.collection("deals").findOneAndUpdate(
+    const res = await ctx.db.deals.findOneAndUpdate(
       { _id: ObjectId(_id) },
       { $set: deal },
       { returnOriginal: false }
@@ -173,7 +203,7 @@ const Mutations = {
     const invite = await DealMailer.sendInvite({ deal, org: orgRecord, sender: ctx.user, to: email })
 
     // pop email onto deal invites
-    await ctx.db.collection("deals").updateOne(
+    await ctx.db.deals.updateOne(
       { _id: ObjectId(deal_id) },
       { $push: { emailInvites: invite } }
     ) 
@@ -198,7 +228,7 @@ const Mutations = {
     })
 
     // add investor to invitedInvestors
-    const updatedDeal = await ctx.db.collection("deals").updateOne(
+    const updatedDeal = await ctx.db.deals.updateOne(
       { _id: ObjectId(deal_id) },
       { $push: { invitedInvestors: ObjectId(user_id) } }
     )
@@ -207,7 +237,7 @@ const Mutations = {
   },
   uninviteInvestor: (_, { org, user_id, deal_id }, ctx) => {
     isOrgAdmin(org, ctx)
-    return ctx.db.collection("deals").updateOne(
+    return ctx.db.deals.updateOne(
       { _id: ObjectId(deal_id) },
       { $pull: { invitedInvestors: ObjectId(user_id) } }
     )
@@ -215,7 +245,7 @@ const Mutations = {
   addDealDoc: async (_, params, ctx) => {
     isAdmin(ctx)
     const path = await DealDocUploader.addDoc(params)
-    return ctx.db.collection("deals").updateOne(
+    return ctx.db.deals.updateOne(
       { _id: ObjectId(params.deal_id) },
       { $push: { documents: path } }
     )
@@ -223,11 +253,11 @@ const Mutations = {
   rmDealDoc: async (_, params, ctx) => {
     isAdmin(ctx)
     const path = await DealDocUploader.rmDoc(params)
-    return ctx.db.collection("deals").updateOne(
+    return ctx.db.deals.updateOne(
       { _id: ObjectId(params.deal_id) },
       { $pull: { documents: path } }
     )
   }
 }
 
-module.exports = { Schema, Deal, Queries, Mutations }
+module.exports = { Schema, Deal, Queries, Mutations, ExchangeDeal }

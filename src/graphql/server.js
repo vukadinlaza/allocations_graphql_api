@@ -74,6 +74,7 @@ function authedServer (db) {
     },
     Deal: DealsResolver.Deal,
     User: InvestorsResolver.User,
+    ExchangeDeal: DealsResolver.ExchangeDeal,
     Investment: InvestmentsResolver.Investment,
     Organization: OrganizationsResolver.Organization,
     Mutation: {
