@@ -169,6 +169,7 @@ const Mutations = {
       ...deal,
       organization: org._id,
       status: "onboarding",
+      slug: slugify(deal.company_name),
       created_at: Date.now(),
       inviteKey: uuid()
     })
@@ -202,11 +203,13 @@ const Mutations = {
     // create an account for them yet because they have not consented to that
     const invite = await DealMailer.sendInvite({ deal, org: orgRecord, sender: ctx.user, to: email })
 
-    // pop email onto deal invites
-    await ctx.db.deals.updateOne(
-      { _id: ObjectId(deal_id) },
-      { $push: { emailInvites: invite } }
-    ) 
+    if (invite.status === "sent") {
+      // pop email onto deal invites
+      await ctx.db.deals.updateOne(
+        { _id: ObjectId(deal_id) },
+        { $push: { emailInvites: invite } }
+      ) 
+    }
 
     return invite
   },
