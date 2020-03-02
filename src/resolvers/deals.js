@@ -199,7 +199,8 @@ const Mutations = {
       throw new AuthenticationError()
     }
 
-    // this user does not exist yet on the platform - we are *NOT* going to
+    // if this user does not exist yet on the platform - we are *NOT* going to
+    // thats why the emails are tagged with just an email in the non user case
     // create an account for them yet because they have not consented to that
     const invite = await DealMailer.sendInvite({ deal, org: orgRecord, sender: ctx.user, to: email })
 
