@@ -8,7 +8,7 @@ mailer.setApiKey(process.env.SENDGRID_API_KEY)
 
 async function sendInvite ({ deal, sender, to, org }) {
   sender.name = User.name(sender)
-  const link = `dashboard.allocations.com/public/${org.slug}/${deal.company_name}?invite_code=${deal.inviteKey}`
+  const link = `dashboard.allocations.com/public/${org.slug}/deals/${deal.company_name}?invite_code=${deal.inviteKey}`
   const html = dealInviteTemplate({ deal, sender, org, link })
 
   const msg = {
