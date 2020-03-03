@@ -10,6 +10,7 @@ const Cloudfront = require('../cloudfront')
 const Uploader = require('../uploaders/investor-docs')
 
 const DealsResolver = require('../resolvers/deals')
+const ExchangeResolver = require('../resolvers/exchange')
 const InvestorsResolver = require('../resolvers/investors')
 const InvestmentsResolver = require('../resolvers/investments')
 const OrganizationsResolver = require('../resolvers/organizations')
@@ -46,6 +47,7 @@ function authedServer (db) {
   const resolvers = {
     Query: {
       ...DealsResolver.Queries,
+      ...ExchangeResolver.Queries,
       ...InvestorsResolver.Queries,
       ...OrganizationsResolver.Queries,
 
@@ -74,7 +76,7 @@ function authedServer (db) {
     },
     Deal: DealsResolver.Deal,
     User: InvestorsResolver.User,
-    ExchangeDeal: DealsResolver.ExchangeDeal,
+    ExchangeDeal: ExchangeResolver.ExchangeDeal,
     Investment: InvestmentsResolver.Investment,
     Organization: OrganizationsResolver.Organization,
     Mutation: {
@@ -104,7 +106,8 @@ function authedServer (db) {
     typeDefs: [
       typeDefs, 
       InvestorsResolver.Schema, 
-      DealsResolver.Schema, 
+      DealsResolver.Schema,
+      ExchangeResolver.Schema,
       InvestmentsResolver.Schema,
       OrganizationsResolver.Schema
     ], 

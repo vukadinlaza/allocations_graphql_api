@@ -36,15 +36,6 @@ const Schema = gql`
     documents: [Document]
   }
 
-  type ExchangeDeal {
-    _id: String
-    created_at: Int
-    company_name: String
-    company_description: String
-    organization: Organization
-    slug: String
-  }
-
   type EmailInvite {
     status: String
     sent_at: Float
@@ -62,8 +53,6 @@ const Schema = gql`
   extend type Query {
     deal(_id: String): Deal
     allDeals: [Deal]
-    exchangeDeals: [ExchangeDeal]
-    exchangeDeal(slug: String!): ExchangeDeal
     searchDeals(q: String!, limit: Int): [Deal]
   }
 
@@ -101,13 +90,6 @@ function slugify (str) {
   return str.toLowerCase().replace(' ', '-')
 }
 
-const ExchangeDeal = {
-  slug: (deal, _, { db }) => deal.slug || slugify(deal.company_name),
-  organization: (deal, _, { db }) => {
-    return db.organizations.findOne({ _id: deal.organization })
-  }
-}
-
 const Deal = {
   // investment denotes the `ctx.user` investment in this deal (can only be one)
   investment: (deal, _, { db, user }) => {
@@ -141,14 +123,6 @@ const Queries = {
   allDeals: (_, args, ctx) => {
     isAdmin(ctx)
     return ctx.db.deals.find({}).toArray()
-  },
-  exchangeDeals: (_, __, ctx) => {
-    isAdmin(ctx)
-    return ctx.db.deals.find({}).toArray()
-  },
-  exchangeDeal: (_, { slug }, ctx) => {
-    isAdmin(ctx)
-    return ctx.db.deals.findOne({ slug })
   },
   searchDeals: (_, {q, limit}, ctx) => {
     isAdmin(ctx)
@@ -264,4 +238,4 @@ const Mutations = {
   }
 }
 
-module.exports = { Schema, Deal, Queries, Mutations, ExchangeDeal }
+module.exports = { Schema, Deal, Queries, Mutations }
