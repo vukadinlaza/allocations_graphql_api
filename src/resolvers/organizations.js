@@ -26,10 +26,13 @@ const Schema = gql`
 
   extend type Query {
     organization(slug: String!): Organization
+    organizationMembers(slug: String!): [User]
   }
 
   extend type Mutation {
     createOrganization(organization: OrganizationInput!): Organization
+    addOrganizationMembership(slug: String!, user_id: String!): User
+    revokeOrganizationMembership(slug: String!, user_id: String!): User
   }
 `
 
@@ -40,6 +43,12 @@ const Queries = {
       return org
     }
     throw new AuthenticationError()
+  },
+  organizationMembers: async (_, { slug }, { user, db }) => {
+    isAdmin({user, db})
+    const org = await db.organizations.findOne({ slug })
+
+    return db.users.find({ organizations_admin: org._id }).toArray()
   }
 }
 
@@ -64,6 +73,22 @@ const Mutations = {
       { $push: { organizations_admin: org._id } }
     )
     return org
+  },
+  addOrganizationMembership: async (_, { slug, user_id }, ctx) => {
+    isAdmin(ctx)
+    const { _id } = await ctx.db.organizations.findOne({ slug })
+    return ctx.db.users.updateOne(
+      { _id: ObjectId(user_id) },
+      { $push: { organizations_admin: _id } }
+    )
+  },
+  revokeOrganizationMembership: async (_, { slug, user_id }, ctx) => {
+    isAdmin(ctx)
+    const { _id } = await ctx.db.organizations.findOne({ slug })
+    return ctx.db.users.updateOne(
+      { _id: ObjectId(user_id) },
+      { $pull: { organizations_admin: _id } }
+    )
   }
 }
 
