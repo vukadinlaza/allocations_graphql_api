@@ -29,6 +29,7 @@ const Schema = gql`
     side: TradeSide
     settled_at: Int
     matched_at: Int
+    deal_id: String
   }
 
   enum TradeSide {
@@ -45,11 +46,25 @@ const Schema = gql`
     created_at: Int
     cancelled: Boolean
     cancelled_at: Int
+    deal_id: String
+  }
+
+  input OrderInput {
+    _id: String!
+    user_id: String
+    deal_id: String!
+    side: OrderSide!
+    price: Float!
+    amount: Float!
   }
 
   enum OrderSide {
     bid
     ask
+  }
+
+  extend type Mutation {
+    createOrder(order: OrderInput!): Order
   }
 
   extend type Query {
@@ -64,6 +79,20 @@ const ExchangeDeal = {
   slug: (deal, _, { db }) => deal.slug || slugify(deal.company_name),
   organization: (deal, _, { db }) => {
     return db.organizations.findOne({ _id: deal.organization })
+  }
+}
+
+const Mutations = {
+  createOrder: async (_, { order }, ctx) => {
+    // TODO => check that user has sufficient inventory
+
+    const res = await ctx.db.orders.insertOne({
+      ...order,
+      created_at: Date.now(),
+      cancelled: false
+    })
+
+    return res.ops[0]
   }
 }
 

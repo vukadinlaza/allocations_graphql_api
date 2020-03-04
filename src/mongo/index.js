@@ -1,7 +1,7 @@
 const { MongoClient } = require("mongodb")
 const { MONGO_URL, MONGO_DB } = process.env
 
-const cols = ["investments", "deals", "organizations", "users"]
+const cols = ["investments", "deals", "organizations", "users", "orders", "trades"]
 
 async function connect() {
     const client = new MongoClient(MONGO_URL, {
