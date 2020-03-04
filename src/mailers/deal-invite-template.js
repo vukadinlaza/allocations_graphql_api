@@ -156,7 +156,7 @@ module.exports = function template ({ sender, deal, link, org }) {
       <tbody>
         <tr>
           <td style="padding:18px 20px 18px 20px; line-height:22px; text-align:inherit;" height="100%" valign="top" bgcolor="" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="font-size: 20px">
-            ${org.name} is Investing in ${deal.company_name}
+            ${org.name} is investing in ${deal.company_name}
           </span></div><div></div></div></td>
         </tr>
       </tbody>
