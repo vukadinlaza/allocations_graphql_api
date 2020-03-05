@@ -1,6 +1,7 @@
 const { ObjectId } = require('mongodb')
 const { isAdmin } = require('../graphql/permissions')
 const PublicUploader = require('../uploaders/public-docs')
+const AdminMailer = require('../mailers/admin-mailer')
 const { AuthenticationError, gql } = require('apollo-server-express')
 
 const Schema = gql`
@@ -16,6 +17,7 @@ const Schema = gql`
     deal(_id: String): Deal
     investments: [Investment]
     investment(_id: String): Investment
+    adminInvites: [EmailInvite]
   }
 
   input OrganizationInput {
@@ -33,6 +35,7 @@ const Schema = gql`
     createOrganization(organization: OrganizationInput!): Organization
     addOrganizationMembership(slug: String!, user_id: String!): User
     revokeOrganizationMembership(slug: String!, user_id: String!): User
+    sendAdminInvite(slug: String!, user_id: String!): EmailInvite
   }
 `
 
@@ -89,6 +92,19 @@ const Mutations = {
       { _id: ObjectId(user_id) },
       { $pull: { organizations_admin: _id } }
     )
+  },
+  sendAdminInvite: async (_, { slug, user_id }, ctx) => {
+    isAdmin(ctx)
+
+    const org = await ctx.db.organizations.findOne({ slug })
+    const { email } = await ctx.db.users.findOne({ _id: ObjectId(user_id) })
+    const invite = await AdminMailer.sendInvite({ org, to: email })
+
+    await ctx.db.organizations.updateOne(
+      { slug },
+      { $push: { adminInvites: invite } }
+    )
+    return invite
   }
 }
 
@@ -131,6 +147,9 @@ const Organization = {
   },
   investment: (org, { _id }, { db }) => {
     return db.investments.findOne({ _id: ObjectId(_id), organization: org._id })
+  },
+  adminInvites: (org) => {
+    return org.adminInvites || []
   }
 }
 

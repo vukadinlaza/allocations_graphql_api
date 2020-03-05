@@ -1,10 +1,7 @@
-const mailer = require('@sendgrid/mail')
+const mailer = require('./mailer')
 const logger = require('../utils/logger')
 const dealInviteTemplate = require('./deal-invite-template')
 const { User } = require('../resolvers/investors')
-
-// configure with API key
-mailer.setApiKey(process.env.SENDGRID_API_KEY)
 
 async function sendInvite ({ deal, sender, to, org }) {
   sender.name = User.name(sender)
