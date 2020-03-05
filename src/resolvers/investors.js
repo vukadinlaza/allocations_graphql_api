@@ -49,7 +49,7 @@ const Schema = gql`
   }
 
   extend type Mutation {
-    createInvestor(org: String!, user: UserInput): User
+    createInvestor(user: UserInput): User
     deleteInvestor(_id: String!): Boolean
     updateUser(input: UserInput): User
     updateInvestor(investment: InvestmentInput): User
