@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb")
 const { gql } = require('apollo-server-express')
-const { isAdmin, isOrgAdmin } = require('../graphql/permissions')
+const { isAdmin, isOrgAdmin, isAdminOrSameUser } = require('../graphql/permissions')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../cloudfront')
 const Uploader = require('../uploaders/investor-docs')
