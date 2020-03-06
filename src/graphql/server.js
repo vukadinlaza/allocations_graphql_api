@@ -81,6 +81,7 @@ function authedServer (db) {
     Organization: OrganizationsResolver.Organization,
     Mutation: {
       ...DealsResolver.Mutations,
+      ...ExchangeResolver.Mutations,
       ...InvestorsResolver.Mutations,
       ...InvestmentsResolver.Mutations,
       ...OrganizationsResolver.Mutations,

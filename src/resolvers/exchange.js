@@ -16,6 +16,7 @@ const Schema = gql`
     organization: Organization
     slug: String
     deal: Deal
+    shares: Int
     trades: [Trade]
     orders: [Order]
   }
@@ -41,21 +42,26 @@ const Schema = gql`
     _id: String
     user: User
     side: OrderSide
+    order_type: OrderType
+    status: OrderStatus
     price: Float
     amount: Float
-    created_at: Int
+    created_at: String
     cancelled: Boolean
-    cancelled_at: Int
+    cancelled_at: String
     deal_id: String
   }
 
-  input OrderInput {
-    _id: String!
-    user_id: String
-    deal_id: String!
-    side: OrderSide!
-    price: Float!
-    amount: Float!
+  enum OrderStatus {
+    open
+    filled
+    partiallyfilled
+    cancelled
+  }
+
+  enum OrderType {
+    limit
+    market
   }
 
   enum OrderSide {
@@ -63,8 +69,18 @@ const Schema = gql`
     ask
   }
 
+  input OrderInput {
+    _id: String
+    user_id: String!
+    deal_id: String!
+    side: OrderSide!
+    price: Float!
+    amount: Float!
+  }
+
   extend type Mutation {
     createOrder(order: OrderInput!): Order
+    cancelOrder(order_id: String!): Order
   }
 
   extend type Query {
@@ -79,20 +95,42 @@ const ExchangeDeal = {
   slug: (deal, _, { db }) => deal.slug || slugify(deal.company_name),
   organization: (deal, _, { db }) => {
     return db.organizations.findOne({ _id: deal.organization })
+  },
+  shares: async (deal, _, { db, user }) => {
+    const investments = await db.investments.find({ 
+      user_id: ObjectId(user._id),
+      deal_id: deal._id,
+      status: "complete"
+    }).toArray()
+
+    return investments.reduce((a, x) => a + x.amount, 0)
+  },
+  orders: (deal, _, { db, user }) => {
+    // return db.orders.find({}).toArray()
+    return db.orders.find({ deal_id: deal._id.toString(), status: "open" }).toArray()
   }
 }
 
 const Mutations = {
   createOrder: async (_, { order }, ctx) => {
+    isAdmin(ctx)
     // TODO => check that user has sufficient inventory
 
     const res = await ctx.db.orders.insertOne({
       ...order,
       created_at: Date.now(),
+      status: "open",
       cancelled: false
     })
-
     return res.ops[0]
+  },
+  cancelOrder: (_, { order_id }, ctx) => {
+    isAdmin(ctx)
+
+    return ctx.db.orders.updateOne(
+      { _id: ObjectId(order_id) },
+      { $set: { cancelled: true, status: "cancelled" } }
+    )
   }
 }
 
@@ -107,4 +145,4 @@ const Queries = {
   }
 }
 
-module.exports = { Schema, Queries, ExchangeDeal }
+module.exports = { Schema, Queries, ExchangeDeal, Mutations }
