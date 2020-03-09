@@ -19,6 +19,7 @@ const Schema = gql`
     shares: Int
     trades: [Trade]
     orders: [Order]
+    matchRequests: [MatchRequest]
   }
 
   type Trade {
@@ -79,9 +80,28 @@ const Schema = gql`
     amount: Float!
   }
 
+  type MatchRequest {
+    _id: String
+    user_id: String
+    deal_id: String
+    order_id: String
+    submitted_at: String
+    status: MatchRequestStatus
+    trade_id: String
+    order: Order
+  }
+
+  enum MatchRequestStatus {
+    submitted
+    accepted
+    clearing
+    complete
+  }
+
   extend type Mutation {
     createOrder(order: OrderInput!): Order
     cancelOrder(order_id: String!): Order
+    newMatchRequest(order_id: String!): MatchRequest
   }
 
   extend type Query {
@@ -107,8 +127,15 @@ const ExchangeDeal = {
     return investments.reduce((a, x) => a + x.amount, 0)
   },
   orders: (deal, _, { db, user }) => {
-    // return db.orders.find({}).toArray()
     return db.orders.find({ deal_id: deal._id.toString(), status: "open" }).toArray()
+  },
+  matchRequests: async (deal, _, { db, user }) => {
+    const reqs = await db.matchrequests.find({ deal_id: deal._id.toString(), user_id: user._id, status: { $ne: "complete" } }).toArray()
+
+    for (let i = 0; i < reqs.length; i++) {
+      reqs[i].order = await db.orders.findOne({ _id: reqs[i].order_id })
+    }
+    return reqs
   }
 }
 
@@ -132,6 +159,19 @@ const Mutations = {
       { _id: ObjectId(order_id) },
       { $set: { cancelled: true, status: "cancelled" } }
     )
+  },
+  newMatchRequest: async (_, { order_id }, ctx) => {
+    isAdmin(ctx)
+
+    const order = await ctx.db.orders.findOne({ _id: ObjectId(order_id) })
+    const res = await ctx.db.matchrequests.insertOne({
+      order_id: order._id,
+      deal_id: order.deal_id,
+      user_id: ctx.user._id,
+      submitted_at: Date.now(),
+      status: "submitted"
+    })
+    return res.ops[0]
   }
 }
 
