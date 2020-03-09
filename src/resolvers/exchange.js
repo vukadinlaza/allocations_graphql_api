@@ -41,6 +41,7 @@ const Schema = gql`
   type Order {
     _id: String
     user: User
+    user_id: String
     side: OrderSide
     order_type: OrderType
     status: OrderStatus
