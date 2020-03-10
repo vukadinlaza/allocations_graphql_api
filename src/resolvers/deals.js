@@ -1,4 +1,5 @@
 const { ObjectId } = require("mongodb")
+const _ = require('lodash')
 const { gql } = require('apollo-server-express')
 const { isAdmin, isOrgAdmin } = require('../graphql/permissions')
 const Cloudfront = require('../cloudfront')
@@ -169,7 +170,9 @@ const Mutations = {
     const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
 
     // ensure deal is of the org
-    if (deal.organization.toString() !== orgRecord._id.toString()) {
+    const isAllocations = !deal.organization && orgRecord.slug === "allocations"
+    const isSameOrg = (deal.organization || 0).toString() === orgRecord._id.toString()
+    if (!isAllocations && !isSameOrg) {
       throw new AuthenticationError()
     }
 
@@ -193,7 +196,9 @@ const Mutations = {
     const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
 
     // ensure deal is of the org
-    if (deal.organization.toString() !== orgRecord._id.toString()) {
+    const isAllocations = !deal.organization && orgRecord.slug === "allocations"
+    const isSameOrg = (deal.organization || 0).toString() === orgRecord._id.toString()
+    if (!isAllocations && !isSameOrg) {
       throw new AuthenticationError()
     }
 
