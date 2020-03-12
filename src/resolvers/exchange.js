@@ -107,6 +107,7 @@ const Schema = gql`
   extend type Query {
     exchangeDeals: [ExchangeDeal]
     exchangeDeal(slug: String!): ExchangeDeal
+    matchRequests(org: String!): [MatchRequest]
   }
 `
 
@@ -183,6 +184,18 @@ const Queries = {
   exchangeDeal: (_, { slug }, ctx) => {
     isAdmin(ctx)
     return ctx.db.deals.findOne({ slug })
+  },
+  matchRequests: async (_, { org }, ctx) => {
+    const organization = isOrgAdmin(org, ctx)
+    const deals = await ctx.db.deals.find({ organization }).toArray()
+
+    const requests = []
+    for (let i = 0; i < deals.length; i ++) {
+      const deal = deals[i]
+      const reqs = await ctx.db.matchRequests.find({ deal_id: deal._id }).toArray()
+      requests.push(reqs) 
+    }
+    return requests
   }
 }
 
