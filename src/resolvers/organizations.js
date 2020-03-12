@@ -1,5 +1,5 @@
 const { ObjectId } = require('mongodb')
-const { isAdmin } = require('../graphql/permissions')
+const { isAdmin, isOrgAdmin } = require('../graphql/permissions')
 const PublicUploader = require('../uploaders/public-docs')
 const AdminMailer = require('../mailers/admin-mailer')
 const { AuthenticationError, gql } = require('apollo-server-express')
@@ -18,6 +18,29 @@ const Schema = gql`
     investments: [Investment]
     investment(_id: String): Investment
     adminInvites: [EmailInvite]
+    complianceTasks: [ComplianceTask]
+  }
+
+  type ComplianceTask {
+    _id: String
+    task: String
+    status: ComplianceTaskStatus
+    completed: Boolean
+    organization_id: String
+  }
+
+  enum ComplianceTaskStatus {
+    not_started
+    waiting
+    in_progress
+    done
+  }
+
+  input ComplianceTaskInput {
+    _id: String
+    task: String
+    status: ComplianceTaskStatus
+    completed: Boolean
   }
 
   input OrganizationInput {
@@ -36,6 +59,7 @@ const Schema = gql`
     addOrganizationMembership(slug: String!, user_id: String!): User
     revokeOrganizationMembership(slug: String!, user_id: String!): User
     sendAdminInvite(slug: String!, user_id: String!): EmailInvite
+    updateComplianceTask(slug: String!, complianceTask: ComplianceTaskInput!): ComplianceTask
   }
 `
 
@@ -105,6 +129,14 @@ const Mutations = {
       { $push: { adminInvites: invite } }
     )
     return invite
+  },
+  updateComplianceTask: async (_, { slug, complianceTask: { _id, ...rest } }, ctx) => {
+    isAdmin(ctx)
+
+    return ctx.db.compliancetasks.updateOne(
+      { _id: ObjectId(_id) },
+      { $set: rest }
+    )
   }
 }
 
@@ -150,6 +182,9 @@ const Organization = {
   },
   adminInvites: (org) => {
     return org.adminInvites || []
+  },
+  complianceTasks: (org, _, { db }) => {
+    return db.compliancetasks.find({ organization_id: org._id }).toArray()
   }
 }
 
