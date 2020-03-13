@@ -59,7 +59,10 @@ const Schema = gql`
     addOrganizationMembership(slug: String!, user_id: String!): User
     revokeOrganizationMembership(slug: String!, user_id: String!): User
     sendAdminInvite(slug: String!, user_id: String!): EmailInvite
+
+    createComplianceTask(slug: String!, complianceTask: ComplianceTaskInput!): ComplianceTask
     updateComplianceTask(slug: String!, complianceTask: ComplianceTaskInput!): ComplianceTask
+    deleteComplianceTask(_id: String!): Boolean
   }
 `
 
@@ -130,6 +133,13 @@ const Mutations = {
     )
     return invite
   },
+  createComplianceTask: async (_, { slug, complianceTask }, ctx) => {
+    isAdmin(ctx)
+
+    const org = await ctx.db.organizations.findOne({ slug })
+    const res = await ctx.db.compliancetasks.insertOne({ ...complianceTask, organization_id: org._id })
+    return res.ops[0]
+  },
   updateComplianceTask: async (_, { slug, complianceTask: { _id, ...rest } }, ctx) => {
     isAdmin(ctx)
 
@@ -137,6 +147,16 @@ const Mutations = {
       { _id: ObjectId(_id) },
       { $set: rest }
     )
+  },
+  deleteComplianceTask: async (_, { _id }, ctx) => {
+    isAdmin(ctx)
+
+    try {
+      const res = await ctx.db.compliancetasks.deleteOne({ _id: ObjectId(_id) })
+      return res.deletedCount === 1
+    } catch (e) {
+      return false
+    }
   }
 }
 
