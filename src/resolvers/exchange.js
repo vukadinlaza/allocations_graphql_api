@@ -1,4 +1,5 @@
 const { ObjectId } = require("mongodb")
+const { sumBy } = require('lodash')
 const { gql } = require('apollo-server-express')
 const { isAdmin, isOrgAdmin } = require('../graphql/permissions')
 const Cloudfront = require('../cloudfront')
@@ -13,10 +14,14 @@ const Schema = gql`
     created_at: Int
     company_name: String
     company_description: String
+    date_closed: String
+    last_valuation: String
     organization: Organization
     slug: String
     deal: Deal
+    volume: Float
     shares: Int
+    nTrades: Int
     trades: [Trade]
     orders: [Order]
     matchRequests: [MatchRequest]
@@ -127,6 +132,13 @@ const ExchangeDeal = {
 
     return investments.reduce((a, x) => a + x.amount, 0)
   },
+  volume: async (deal, _, { db, user }) => {
+    const trades = await db.trades.find({ deal_id: deal._id }).toArray()
+    return sumBy(trades, ({ price, amount }) => price * amount)
+  },
+  nTrades: async (deal, _, { db, user }) => {
+    return db.trades.count({ deal_id: deal._id })
+  },
   orders: (deal, _, { db, user }) => {
     return db.orders.find({ deal_id: deal._id.toString(), status: "open" }).toArray()
   },
@@ -179,7 +191,7 @@ const Mutations = {
 const Queries = {
   exchangeDeals: (_, __, ctx) => {
     isAdmin(ctx)
-    return ctx.db.deals.find({}).toArray()
+    return ctx.db.deals.find({ status: "closed", no_exchange: { $ne: true } }).toArray()
   },
   exchangeDeal: (_, { slug }, ctx) => {
     isAdmin(ctx)
