@@ -89,11 +89,14 @@ const Schema = gql`
     _id: String
     user_id: String
     deal_id: String
+    deal: Deal
     order_id: String
     submitted_at: String
     status: MatchRequestStatus
     trade_id: String
     order: Order
+    seller: User
+    buyer: User
   }
 
   enum MatchRequestStatus {
@@ -140,10 +143,10 @@ const ExchangeDeal = {
     return db.trades.count({ deal_id: deal._id })
   },
   orders: (deal, _, { db, user }) => {
-    return db.orders.find({ deal_id: deal._id.toString(), status: "open" }).toArray()
+    return db.orders.find({ deal_id: deal._id, status: "open" }).toArray()
   },
   matchRequests: async (deal, _, { db, user }) => {
-    const reqs = await db.matchrequests.find({ deal_id: deal._id.toString(), user_id: user._id, status: { $ne: "complete" } }).toArray()
+    const reqs = await db.matchrequests.find({ deal_id: deal._id, user_id: user._id, status: { $ne: "complete" } }).toArray()
 
     for (let i = 0; i < reqs.length; i++) {
       reqs[i].order = await db.orders.findOne({ _id: reqs[i].order_id })
@@ -152,13 +155,41 @@ const ExchangeDeal = {
   }
 }
 
+const MatchRequest = {
+  order: (matchRequest, _, { db }) => {
+    return db.orders.findOne({ _id: matchRequest.order_id })
+  },
+  seller: async (matchRequest, _, ctx) => {
+    const order = await ctx.db.orders.findOne({ _id: matchRequest.order_id })
+    if (order.side === "ask") {
+      return ctx.db.users.findOne({ _id: order.user_id })
+    }
+    return ctx.db.users.findOne({ _id: matchRequest.user_id })
+  },
+  buyer: async (matchRequest, _, ctx) => {
+    const order = await ctx.db.orders.findOne({ _id: matchRequest.order_id })
+    if (order.side === "bid") {
+      return ctx.db.users.findOne({ _id: order._id })
+    }
+    return ctx.db.users.findOne({ _id: matchRequest.user_id })
+  },
+  deal: ({ deal_id }, _, { db }) => {
+    return db.deals.findOne({ _id: deal_id })
+  }
+}
+
 const Mutations = {
-  createOrder: async (_, { order }, ctx) => {
+  createOrder: async (_, { order: { user_id, deal_id, ...order } }, ctx) => {
     isAdmin(ctx)
     // TODO => check that user has sufficient inventory
 
+    const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
+
     const res = await ctx.db.orders.insertOne({
       ...order,
+      user_id: ObjectId(user_id),
+      organization_id: deal.organization,
+      deal_id: deal._id,
       created_at: Date.now(),
       status: "open",
       cancelled: false
@@ -179,6 +210,7 @@ const Mutations = {
     const order = await ctx.db.orders.findOne({ _id: ObjectId(order_id) })
     const res = await ctx.db.matchrequests.insertOne({
       order_id: order._id,
+      organization_id: order.organization_id,
       deal_id: order.deal_id,
       user_id: ctx.user._id,
       submitted_at: Date.now(),
@@ -197,18 +229,10 @@ const Queries = {
     isAdmin(ctx)
     return ctx.db.deals.findOne({ slug })
   },
-  matchRequests: async (_, { org }, ctx) => {
-    const organization = isOrgAdmin(org, ctx)
-    const deals = await ctx.db.deals.find({ organization }).toArray()
-
-    const requests = []
-    for (let i = 0; i < deals.length; i ++) {
-      const deal = deals[i]
-      const reqs = await ctx.db.matchRequests.find({ deal_id: deal._id }).toArray()
-      requests.push(reqs) 
-    }
-    return requests
+  matchRequests: async (_, { org: orgSlug }, ctx) => {
+    const org = isOrgAdmin(orgSlug, ctx)
+    return ctx.db.matchrequests.find({ organization_id: org._id }).toArray()
   }
 }
 
-module.exports = { Schema, Queries, ExchangeDeal, Mutations }
+module.exports = { Schema, Queries, ExchangeDeal, Mutations, MatchRequest }

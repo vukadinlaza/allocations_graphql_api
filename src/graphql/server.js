@@ -77,6 +77,7 @@ function authedServer (db) {
     Deal: DealsResolver.Deal,
     User: InvestorsResolver.User,
     ExchangeDeal: ExchangeResolver.ExchangeDeal,
+    MatchRequest: ExchangeResolver.MatchRequest,
     Investment: InvestmentsResolver.Investment,
     Organization: OrganizationsResolver.Organization,
     Mutation: {
