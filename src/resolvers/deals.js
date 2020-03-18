@@ -55,6 +55,7 @@ const Schema = gql`
     deal(_id: String): Deal
     allDeals: [Deal]
     searchDeals(q: String!, limit: Int): [Deal]
+    searchDealsByOrg(q: String!, org: String!, limit: Int): [Deal]
   }
 
   extend type Mutation {
@@ -128,6 +129,13 @@ const Queries = {
   searchDeals: (_, {q, limit}, ctx) => {
     isAdmin(ctx)
     return ctx.db.deals.find({
+      company_name: { $regex: new RegExp(q), $options: "i" }
+    }).limit(limit || 10).toArray()
+  },
+  searchDealsByOrg: (_, {q, org: orgSlug, limit}, ctx) => {
+    const org = isOrgAdmin(orgSlug, ctx)
+    return ctx.db.deals.find({
+      organization: org._id,
       company_name: { $regex: new RegExp(q), $options: "i" }
     }).limit(limit || 10).toArray()
   }
