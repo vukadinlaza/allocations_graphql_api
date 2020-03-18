@@ -140,11 +140,17 @@ function uuid () {
 const Mutations = {
   createDeal: async (_, { deal, org: orgSlug }, ctx) => {
     const org = isOrgAdmin(orgSlug, ctx)
+    let slug = slugify(deal.company_name)
+    const collisions = await ctx.db.deals.countDocuments({ slug: { $regex: new RegExp(slug) } })
+    if (collisions > 0) {
+      slug = `${slug}-${collisions}` 
+    }
+
     const res = await ctx.db.deals.insertOne({
       ...deal,
       organization: org._id,
       status: "onboarding",
-      slug: slugify(deal.company_name),
+      slug,
       created_at: Date.now(),
       inviteKey: uuid()
     })
