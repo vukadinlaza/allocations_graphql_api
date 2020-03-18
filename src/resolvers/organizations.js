@@ -19,6 +19,11 @@ const Schema = gql`
     investment(_id: String): Investment
     adminInvites: [EmailInvite]
     complianceTasks: [ComplianceTask]
+    
+    exchangeDeals: [ExchangeDeal]
+    matchRequests: [MatchRequest]
+    trades: [Trade]
+    orders: [Order]
   }
 
   type ComplianceTask {
@@ -205,6 +210,18 @@ const Organization = {
   },
   complianceTasks: (org, _, { db }) => {
     return db.compliancetasks.find({ organization_id: org._id }).toArray()
+  },
+  exchangeDeals: (org, _, { db }) => {
+    return db.deals.find({ status: "closed", no_exchange: { $ne: true } }).toArray()
+  },
+  matchRequests: (org, _, { db }) => {
+    return db.matchrequests.find({ organization_id: org._id }).toArray()
+  },
+  trades: (org, _, { db }) => {
+    return db.trades.find({ organization_id: org._id }).toArray()
+  },
+  orders: (org, _, { db }) => {
+    return db.orders.find({ organization_id: org._id }).toArray()
   }
 }
 
