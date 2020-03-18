@@ -76,6 +76,7 @@ function authedServer (db) {
     },
     Deal: DealsResolver.Deal,
     User: InvestorsResolver.User,
+    Trade: ExchangeResolver.Trade,
     ExchangeDeal: ExchangeResolver.ExchangeDeal,
     MatchRequest: ExchangeResolver.MatchRequest,
     Investment: InvestmentsResolver.Investment,

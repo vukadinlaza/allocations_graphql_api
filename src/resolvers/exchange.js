@@ -29,14 +29,14 @@ const Schema = gql`
 
   type Trade {
     _id: String
+    deal: Deal
     buyer: User
     seller: User
     price: Float
     amount: Float
     side: TradeSide
-    settled_at: Int
-    matched_at: Int
-    deal_id: String
+    settled_at: String
+    matched_at: String
   }
 
   enum TradeSide {
@@ -106,10 +106,23 @@ const Schema = gql`
     complete
   }
 
+  input TradeInput {
+    _id: String
+    buyer_id: String
+    seller_id: String
+    price: Float
+    amount: Float
+    side: TradeSide
+    settled_at: String
+    matched_at: String
+    deal_id: String
+  }
+
   extend type Mutation {
     createOrder(order: OrderInput!): Order
     cancelOrder(order_id: String!): Order
     newMatchRequest(order_id: String!): MatchRequest
+    createTrade(org: String!, trade: TradeInput!): Trade
   }
 
   extend type Query {
@@ -153,6 +166,12 @@ const ExchangeDeal = {
     }
     return reqs
   }
+}
+
+const Trade = {
+  buyer: ({ buyer_id }, _, { db }) => db.users.findOne({ _id: buyer_id }),
+  seller: ({ seller_id }, _, { db }) => db.users.findOne({ _id: seller_id }),
+  deal: ({ deal_id }, _, { db }) => db.deals.findOne({ _id: deal_id }),
 }
 
 const MatchRequest = {
@@ -217,6 +236,17 @@ const Mutations = {
       status: "submitted"
     })
     return res.ops[0]
+  },
+  createTrade: async (_, { org: orgSlug, trade: { seller_id, buyer_id, deal_id, ...trade  } }, ctx) => {
+    const org = isOrgAdmin(orgSlug, ctx)
+
+    return ctx.db.trades.insertOne({
+      ...trade,
+      deal_id: ObjectId(deal_id),
+      buyer_id: ObjectId(buyer_id),
+      seller_id: ObjectId(seller_id),
+      organization_id: org._id
+    })
   }
 }
 
@@ -235,4 +265,4 @@ const Queries = {
   }
 }
 
-module.exports = { Schema, Queries, ExchangeDeal, Mutations, MatchRequest }
+module.exports = { Schema, Queries, ExchangeDeal, Mutations, MatchRequest, Trade }
