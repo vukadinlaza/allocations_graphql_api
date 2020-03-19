@@ -35,6 +35,9 @@ const Schema = gql`
     inviteKey: String
     memo: String
     documents: [Document]
+
+    last_valuation: String
+    no_exchange: Boolean
   }
 
   type EmailInvite {
@@ -85,6 +88,8 @@ const Schema = gql`
     amount: Int
     target: String
     amount_raised: String
+    last_valuation: String
+    no_exchange: Boolean
   }
 `
 
