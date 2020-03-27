@@ -81,6 +81,7 @@ function authedServer (db) {
     MatchRequest: ExchangeResolver.MatchRequest,
     Investment: InvestmentsResolver.Investment,
     Organization: OrganizationsResolver.Organization,
+    ComplianceTask: OrganizationsResolver.ComplianceTask,
     Mutation: {
       ...DealsResolver.Mutations,
       ...ExchangeResolver.Mutations,

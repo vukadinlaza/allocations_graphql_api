@@ -3,6 +3,7 @@ const { isAdmin, isOrgAdmin } = require('../graphql/permissions')
 const PublicUploader = require('../uploaders/public-docs')
 const AdminMailer = require('../mailers/admin-mailer')
 const { AuthenticationError, gql } = require('apollo-server-express')
+const Hellosign = require('../hellosign')
 
 const Schema = gql`
   type Organization {
@@ -19,11 +20,29 @@ const Schema = gql`
     investment(_id: String): Investment
     adminInvites: [EmailInvite]
     complianceTasks: [ComplianceTask]
+    signingRequests: [SigningRequest]
+
+    completedProvisionOfServices: Boolean
+    provisionOfServicesURL: String
+    documentTemplates: [DocumentTemplate]
     
     exchangeDeals: [ExchangeDeal]
     matchRequests: [MatchRequest]
     trades: [Trade]
     orders: [Order]
+  }
+
+  type DocumentTemplate {
+    _id: String
+    title: String
+  }
+
+  type SigningRequest {
+    _id: String
+    title: String
+    url: String
+    status: String
+    due: String
   }
 
   type ComplianceTask {
@@ -32,6 +51,10 @@ const Schema = gql`
     status: ComplianceTaskStatus
     completed: Boolean
     organization_id: String
+
+    is_signature: Boolean
+    signature_template: String
+    signature_url: String
   }
 
   enum ComplianceTaskStatus {
@@ -46,6 +69,10 @@ const Schema = gql`
     task: String
     status: ComplianceTaskStatus
     completed: Boolean
+
+    is_signature: Boolean
+    signature_template: String
+    signature_url: String
   }
 
   input OrganizationInput {
@@ -141,8 +168,16 @@ const Mutations = {
   createComplianceTask: async (_, { slug, complianceTask }, ctx) => {
     isAdmin(ctx)
 
+    // if compliance task is a signature -> create signature request and 
+    // store it in the compliance record
+    if (complianceTask.is_signature) {
+      const { signatures } = await Hellosign.createRequest(ctx.user, complianceTask.signature_template)
+      complianceTask.signature_request_id = signatures[0].signature_id
+    }
+
     const org = await ctx.db.organizations.findOne({ slug })
     const res = await ctx.db.compliancetasks.insertOne({ ...complianceTask, organization_id: org._id })
+
     return res.ops[0]
   },
   updateComplianceTask: async (_, { slug, complianceTask: { _id, ...rest } }, ctx) => {
@@ -222,7 +257,41 @@ const Organization = {
   },
   orders: (org, _, { db }) => {
     return db.orders.find({ organization_id: org._id }).toArray()
+  },
+  documentTemplates: async (org, _, ctx) => {
+    isAdmin(ctx)
+    return Hellosign.listTemplates()
+  },
+  signingRequests: async (org, _, { db, user }) => {
+    const reqs = await hellosign.signatureRequest.list()
+
+    const userRequests = reqs.signature_requests.filter(req => {
+      return req.test_mode === true 
+        && req.signatures.find(s => s.signer_email_address === "willsheehan95@gmail.com")
+        && !req.is_complete
+        && !req.is_declined
+    })
+
+    const formattedUserRequests = userRequests.map(async req => {
+      const _id = req.signatures.find(s => s.signer_email_address === "willsheehan95@gmail.com").signature_id
+      const { embedded } = await hellosign.embedded.getSignUrl(_id)
+      return {
+        _id,
+        status: req.is_declined ? "declined" : (req.is_complete ? "complete" : "incomplete"),
+        title: req.title,
+        due: null,
+        url: embedded.sign_url
+      }
+    })
+
+    return Promise.all(formattedUserRequests)
   }
 }
 
-module.exports = { Organization, Queries, Schema, Mutations }
+const ComplianceTask = {
+  signature_url: (task) => {
+    return task.is_signature && task.status !== "done" ? Hellosign.getSignUrl(task.signature_request_id) : null
+  }
+}
+
+module.exports = { Organization, Queries, Schema, Mutations, ComplianceTask }
