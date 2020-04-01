@@ -11,7 +11,7 @@ const { AuthenticationError } = require('apollo-server-express')
 const Schema = gql`
   type Deal {
     _id: String
-    created_at: Int
+    created_at: String
     organization: Organization
     company_name: String
     slug: String
@@ -153,10 +153,12 @@ function uuid () {
 const Mutations = {
   createDeal: async (_, { deal, org: orgSlug }, ctx) => {
     const org = isOrgAdmin(orgSlug, ctx)
-    let slug = slugify(deal.company_name)
-    const collisions = await ctx.db.deals.countDocuments({ slug: { $regex: new RegExp(slug) } })
-    if (collisions > 0) {
-      slug = `${slug}-${collisions}` 
+    const slug = slugify(deal.company_name)
+
+    // ensure that deal name with org doesn't exist
+    const collision = await ctx.db.deals.findOne({ slug, organization: org._id })
+    if (collision) {
+      throw new Error("Deal with same name already exists")
     }
 
     const res = await ctx.db.deals.insertOne({
