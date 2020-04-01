@@ -21,12 +21,12 @@ const Schema = gql`
     admin: Boolean
     organizations: [String]
     organizations_admin: [Organization]
+    terms_of_service: Boolean
     documents: [Document]
     passport: Document
     accredidation_doc: Document
     investments: [Investment]
     invitedDeals: [Deal]
-    invitedDeal(company_name: String!): Deal
     invitedDeal(deal_slug: String!, fund_slug: String!): Deal
   }
 
@@ -42,6 +42,7 @@ const Schema = gql`
     email: String
     passport: Upload
     accredidation_doc: Upload
+    terms_of_service: Boolean
   }
 
   extend type Query {
