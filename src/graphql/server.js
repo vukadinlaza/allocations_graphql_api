@@ -30,7 +30,7 @@ const typeDefs = gql`
     allInvestors: [User]
     allInvestments: [Investment]
 
-    publicDeal(company_name: String!, invite_code: String!): Deal
+    publicDeal(deal_slug: String!, fund_slug: String!, invite_code: String!): Deal
   }
 
   type Mutation {
@@ -58,8 +58,9 @@ function authedServer (db) {
         return db.collection("investments").findOne({ _id: ObjectId(args._id) })
       },
 
-      publicDeal: async (_, { company_name, invite_code }) => {
-        const deal = await db.collection("deals").findOne({ company_name })
+      publicDeal: async (_, { deal_slug, fund_slug, invite_code }) => {
+        const fund = await db.organizations.findOne({ slug: fund_slug })
+        const deal = await db.deals.findOne({ slug: deal_slug, organization: fund._id })
         if (deal && deal.inviteKey === invite_code) {
           return deal
         }
