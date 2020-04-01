@@ -27,6 +27,7 @@ const Schema = gql`
     investments: [Investment]
     invitedDeals: [Deal]
     invitedDeal(company_name: String!): Deal
+    invitedDeal(deal_slug: String!, fund_slug: String!): Deal
   }
 
   input UserInput {
@@ -57,9 +58,12 @@ const Schema = gql`
 `
 
 const User = {
-  invitedDeal: async (user, { company_name }, { db }) => {
-    const deal = await db.collection("deals").findOne({ 
-      company_name,
+  invitedDeal: async (user, { deal_slug, fund_slug }, { db }) => {
+    const fund = await db.organizations.findOne({ slug: fund_slug })
+    
+    const deal = await db.deals.findOne({ 
+      slug: deal_slug,
+      organization: fund._id,
       $or: [
         { invitedInvestors: ObjectId(user._id) }, 
         { allInvited: true, organization: { $in: user.organizations || [] } }
@@ -69,10 +73,10 @@ const User = {
     throw new AuthenticationError("REDIRECT")
   },
   investments: (user, _, { db }) => {
-    return db.collection("investments").find({ user_id: user._id }).toArray()
+    return db.investments.find({ user_id: user._id }).toArray()
   },
   invitedDeals: (user, _, { db }) => {
-    return db.collection("deals").find({ 
+    return db.deals.find({ 
       status: { $ne: 'closed' },
       $or: [
         { invitedInvestors: ObjectId(user._id) },
