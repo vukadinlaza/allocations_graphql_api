@@ -12,6 +12,7 @@ const Uploader = require('../uploaders/investor-docs')
 const DealsResolver = require('../resolvers/deals')
 const ExchangeResolver = require('../resolvers/exchange')
 const InvestorsResolver = require('../resolvers/investors')
+const SuperAdminResolver = require('../resolvers/superadmin')
 const InvestmentsResolver = require('../resolvers/investments')
 const OrganizationsResolver = require('../resolvers/organizations')
 
@@ -49,6 +50,7 @@ function authedServer (db) {
       ...DealsResolver.Queries,
       ...ExchangeResolver.Queries,
       ...InvestorsResolver.Queries,
+      ...SuperAdminResolver.Queries,
       ...OrganizationsResolver.Queries,
 
       investment: (_, args, ctx) => {
@@ -80,6 +82,7 @@ function authedServer (db) {
     ExchangeDeal: ExchangeResolver.ExchangeDeal,
     MatchRequest: ExchangeResolver.MatchRequest,
     Investment: InvestmentsResolver.Investment,
+    SuperAdmin: SuperAdminResolver.SuperAdmin,
     Organization: OrganizationsResolver.Organization,
     ComplianceTask: OrganizationsResolver.ComplianceTask,
     Mutation: {
@@ -113,7 +116,8 @@ function authedServer (db) {
       DealsResolver.Schema,
       ExchangeResolver.Schema,
       InvestmentsResolver.Schema,
-      OrganizationsResolver.Schema
+      OrganizationsResolver.Schema,
+      SuperAdminResolver.Schema
     ], 
     resolvers,
     context: async ({ req }) => {
