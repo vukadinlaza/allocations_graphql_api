@@ -5,7 +5,7 @@ const { User } = require('../resolvers/investors')
 
 async function sendInvite ({ deal, sender, to, org }) {
   sender.name = User.name(sender)
-  const link = `https://dashboard.allocations.com/public/${org.slug}/deals/${deal.company_name}?invite_code=${deal.inviteKey}`
+  const link = `https://dashboard.allocations.com/public/${org.slug}/deals/${deal.slug}?invite_code=${deal.inviteKey}`
   const html = dealInviteTemplate({ deal, sender, org, link })
 
   const msg = {
