@@ -18,6 +18,7 @@ const Schema = gql`
     investor(_id: String): User
     deals: [Deal]
     deal(_id: String): Deal
+    n_deals: Int
     investments: [Investment]
     investment(_id: String): Investment
     adminInvites: [EmailInvite]
@@ -215,6 +216,13 @@ const Organization = {
       return db.deals.findOne({ _id: ObjectId(_id), organization: { $in: [org._id, null] }})
     } else {
       return db.deals.findOne({ _id: ObjectId(_id), organization: org._id })
+    }
+  },
+  n_deals: (org, _, { db }) => {
+    if (org.slug === "allocations") {
+      return db.deals.count({ organization: { $in: [org._id, null] }})
+    } else {
+      return db.deals.count({ organization: org._id })
     }
   },
   investors: (org, _, { db }) => {
