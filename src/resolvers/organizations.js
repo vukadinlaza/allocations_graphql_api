@@ -11,6 +11,8 @@ const Schema = gql`
     name: String
     slug: String
     logo: String
+    created_at: String
+
     admins: [User]
     investors: [User]
     investor(_id: String): User

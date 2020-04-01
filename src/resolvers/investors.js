@@ -8,7 +8,7 @@ const Uploader = require('../uploaders/investor-docs')
 const Schema = gql`
   type User {
     _id: String
-    created_at: Int
+    created_at: String
     investor_type: String
     country: String
     name: String
