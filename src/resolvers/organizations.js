@@ -16,7 +16,7 @@ const Schema = gql`
     admins: [User]
     investors: [User]
     investor(_id: String): User
-    deals: [Deal]
+    deals(order_by: String, order_dir: String): [Deal]
     deal(_id: String): Deal
     n_deals: Int
     investments: [Investment]
@@ -204,12 +204,12 @@ const Mutations = {
 }
 
 const Organization = {
-  deals: (org, _, { db }) => {
-    if (org.slug === "allocations") {
-      return db.deals.find({ organization: { $in: [org._id, null] }}).toArray()
-    } else {
-      return db.deals.find({ organization: org._id }).toArray()
-    }
+  deals: (org, { order_by = "created_at", order_dir = -1 }, { db }) => {
+    // default sort order is descending by created_at
+    return db.deals
+      .find({ organization: org._id })
+      .sort({ [order_by]: order_dir })
+      .toArray()
   },
   deal: (org, { _id }, { db }) => {
     if (org.slug === "allocations") {
