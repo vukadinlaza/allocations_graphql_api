@@ -39,18 +39,18 @@ async function authenticate({ req, db }) {
     const token = (req.headers.authorization || "").slice(7)
     const data = await verify(token)
 
-    const user = await db.collection("users").findOne({ email: data["https://dashboard.allocations.co/email"] })
+    const user = await db.users.findOne({ email: data["https://dashboard.allocations.co/email"] })
     if (user) {
       // attaches .orgs to org admins
       if (user.organizations_admin) {
-        user.orgs = await db.collection("organizations").find({ _id: { $in: user.organizations_admin } }).toArray()
+        user.orgs = await db.organizations.find({ _id: { $in: user.organizations_admin } }).toArray()
       }
 
       return user
     }
 
     // else create user
-    const res = await db.collection("users").insertOne({ email:  data["https://dashboard.allocations.co/email"] })
+    const res = await db.users.insertOne({ email:  data["https://dashboard.allocations.co/email"] })
     return res.ops[0]
   } catch (e) {
     logger.error(e)
