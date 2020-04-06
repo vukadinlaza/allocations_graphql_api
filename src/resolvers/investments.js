@@ -30,6 +30,11 @@ const Schema = gql`
     complete
   }
 
+  extend type Query {
+    investment(_id: String): Investment
+    allInvestments: [Investment]
+  }
+
   extend type Mutation {
     createInvestment(investment: InvestmentInput!): Investment
     updateInvestment(investment: InvestmentInput!): Investment
@@ -64,6 +69,17 @@ const Investment = {
     } else {
       return []
     }
+  }
+}
+
+const Queries = {
+  investment: (_, args, ctx) => {
+    isAdmin(ctx)
+    return db.investments.findOne({ _id: ObjectId(args._id) })
+  },
+  allInvestments: (_, __, ctx) => {
+    isAdmin(ctx)
+    return db.investments.find({}).toArray()
   }
 }
 
@@ -137,4 +153,8 @@ const Mutations = {
   }
 }
 
-module.exports = { Schema, Mutations, Investment }
+module.exports = { 
+  Schema, 
+  Mutations, 
+  subResolvers: { Investment }
+}

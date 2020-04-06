@@ -47,6 +47,7 @@ const Schema = gql`
 
   extend type Query {
     investor(email: String, _id: String): User
+    allInvestors: [User]
     searchUsers(org: String!, q: String!, limit: Int): [User]
   }
 
@@ -114,6 +115,10 @@ const Queries = {
       : { email: ctx.user.email }
 
     return ctx.db.collection("users").findOne(query)        
+  },
+  allInvestors: (_, args, ctx) => {
+    isAdmin(ctx)
+    return db.collection("users").find({}).toArray()
   },
   searchUsers: async (_, {org, q, limit}, ctx) => {
     const orgRecord = await isOrgAdmin(org, ctx)
@@ -196,4 +201,9 @@ const Mutations = {
   }
 }
 
-module.exports = { Schema, User, Queries, Mutations }
+module.exports = { 
+  Schema,
+  Queries,
+  Mutations,
+  subResolvers: { User } 
+}

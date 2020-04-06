@@ -304,4 +304,10 @@ const ComplianceTask = {
   }
 }
 
-module.exports = { Organization, Queries, Schema, Mutations, ComplianceTask }
+module.exports = { 
+  Organization,
+  Queries,
+  Schema,
+  Mutations,
+  subResolvers: { Organization, ComplianceTask }
+}

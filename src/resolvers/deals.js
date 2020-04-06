@@ -54,14 +54,15 @@ const Schema = gql`
     closed
   }
 
-  extend type Query {
+  type Query {
     deal(_id: String): Deal
     allDeals: [Deal]
+    publicDeal(deal_slug: String!, fund_slug: String!, invite_code: String!): Deal
     searchDeals(q: String!, limit: Int): [Deal]
     searchDealsByOrg(q: String!, org: String!, limit: Int): [Deal]
   }
 
-  extend type Mutation {
+  type Mutation {
     updateDeal(org: String!, deal: DealInput!): Deal
     createDeal(org: String!, deal: DealInput!): Deal
     inviteNewUser(org: String!, deal_id: String!, email: String!): EmailInvite
@@ -143,6 +144,14 @@ const Queries = {
       organization: org._id,
       company_name: { $regex: new RegExp(q), $options: "i" }
     }).limit(limit || 10).toArray()
+  },
+  publicDeal: async (_, { deal_slug, fund_slug, invite_code }, { db }) => {
+    const fund = await db.organizations.findOne({ slug: fund_slug })
+    const deal = await db.deals.findOne({ slug: deal_slug, organization: fund._id })
+    if (deal && deal.inviteKey === invite_code) {
+      return deal
+    }
+    throw new AuthenticationError()
   }
 }
 
@@ -151,9 +160,9 @@ function uuid () {
 }
 
 const Mutations = {
-  createDeal: async (_, { deal, org: orgSlug }, ctx) => {
+  createDeal: async (_parent, { deal, org: orgSlug }, ctx) => {
     const org = isOrgAdmin(orgSlug, ctx)
-    const slug = slugify(deal.company_name)
+    const slug = _.kebabCase(deal.company_name)
 
     // ensure that deal name with org doesn't exist
     const collision = await ctx.db.deals.findOne({ slug, organization: org._id })
@@ -264,4 +273,9 @@ const Mutations = {
   }
 }
 
-module.exports = { Schema, Deal, Queries, Mutations }
+module.exports = { 
+  Schema, 
+  Queries,
+  Mutations,
+  subResolvers: { Deal } 
+}

@@ -265,4 +265,9 @@ const Queries = {
   }
 }
 
-module.exports = { Schema, Queries, ExchangeDeal, Mutations, MatchRequest, Trade }
+module.exports = { 
+  Schema, 
+  Queries,
+  Mutations,
+  subResolvers: { ExchangeDeal, MatchRequest, Trade }
+}

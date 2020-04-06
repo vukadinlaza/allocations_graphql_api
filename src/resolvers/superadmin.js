@@ -32,4 +32,8 @@ const SuperAdmin = {
   }
 }
 
-module.exports = { SuperAdmin, Queries, Schema }
+module.exports = { 
+  Schema,
+  Queries,
+  subResolvers: { SuperAdmin }
+}
