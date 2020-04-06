@@ -7,10 +7,10 @@ const isAdmin = ctx => {
 }
 
 const isOrgAdmin = (orgSlug, { user }) => {
-  const org = user.orgs.find(o => o.slug === orgSlug)
+  const org = (user.orgs || []).find(o => o.slug === orgSlug)
   if (org) return org
 
-  throw new AuthenticationError()
+  throw new AuthenticationError("permission denied")
 }
 
 const isAdminOrSameUser = (user, ctx) => {
