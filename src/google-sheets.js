@@ -4,7 +4,7 @@ const _ = require('lodash')
 const MASTER_FILING = "14sk7GkobeqrjkR1lk7NxoDSa9UNmG5OzcpnjfzfrNWM"
 
 const auth = ["production", "staging"].includes(process.env.NODE_ENV)
-  ? { client_email: "sheet-read-write@dashboard-273517.iam.gserviceaccount.com", private_key: process.env.GOOGLE_SHEETS_PRIVATE_KEY }
+  ? { client_email: "sheet-read-write@dashboard-273517.iam.gserviceaccount.com", private_key: JSON.parse(process.env.GOOGLE_CREDENTIALS).private_key }
   : require('./priv/google-sheets-service-account.json')
 
 const subCategories = ["Getting started", "Entity", "Pre bank account", "Bank Account", "Crypto Wires", "SPV", "EDGAR", "Reg D"]
