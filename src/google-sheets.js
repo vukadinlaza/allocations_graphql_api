@@ -3,7 +3,7 @@ const _ = require('lodash')
 
 const MASTER_FILING = "14sk7GkobeqrjkR1lk7NxoDSa9UNmG5OzcpnjfzfrNWM"
 
-const auth = process.env.NODE_ENV === "production"
+const auth = ["production", "staging"].includes(process.env.NODE_ENV)
   ? { client_email: "sheet-read-write@dashboard-273517.iam.gserviceaccount.com", private_key: process.env.GOOGLE_SHEETS_PRIVATE_KEY }
   : require('./priv/google-sheets-service-account.json')
 
