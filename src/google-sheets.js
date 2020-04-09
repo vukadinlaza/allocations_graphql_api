@@ -3,7 +3,9 @@ const _ = require('lodash')
 
 const MASTER_FILING = "14sk7GkobeqrjkR1lk7NxoDSa9UNmG5OzcpnjfzfrNWM"
 
-const serviceAccount = require('./priv/google-sheets-service-account.json')
+const auth = process.env.NODE_ENV === "production"
+  ? { client_email: "sheet-read-write@dashboard-273517.iam.gserviceaccount.com", private_key: process.env.GOOGLE_SHEETS_PRIVATE_KEY }
+  : require('./priv/google-sheets-service-account.json')
 
 const subCategories = ["Getting started", "Entity", "Pre bank account", "Bank Account", "Crypto Wires", "SPV", "EDGAR", "Reg D"]
 
@@ -12,7 +14,7 @@ async function masterFund () {
   const doc = new GoogleSpreadsheet(MASTER_FILING)
 
   // auth
-  await doc.useServiceAccountAuth(serviceAccount)
+  await doc.useServiceAccountAuth(auth)
 
   await doc.loadInfo()
   const sheet = doc.sheetsByIndex[0]
