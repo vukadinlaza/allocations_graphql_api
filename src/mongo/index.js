@@ -24,7 +24,7 @@ async function connect() {
 async function drop(db) {
     // THIS SHOULD ONLY HAPPEN IN TEST
     if (NODE_ENV === "test" && MONGO_URL === "mongodb://localhost:27017") {
-        await Promise.all(cols.map(col => db[col].remove()))
+        await Promise.all(cols.map(col => db[col].deleteMany()))
     }
 }
 
