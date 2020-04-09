@@ -58,7 +58,7 @@ describe('Deal Resolver', () => {
     expect(error.message).toBe("permission denied")
   })
 
-  test.only('cant create deal with same slug and org', async () => {
+  test('cant create deal with same slug and org', async () => {
     const { query } = testClient(apolloServer, "fundAdmin")
     const { data: { createDeal } } = await query(CREATE_DEAL, 
       {
