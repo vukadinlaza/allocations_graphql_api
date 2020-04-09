@@ -56,7 +56,7 @@ async function masterFund () {
         // not first column so could be filled
         const fund = funds[j]
         if (fund && step) {
-          const newStep = { step, status: cell === "x" ? 1 : 0, subCategory }
+          const newStep = { step, status: cell === "x" ? 1 : 0, subCategory, _id: `${subCategory}-${step}` }
           fund.steps = [...fund.steps, newStep]
         }
       }

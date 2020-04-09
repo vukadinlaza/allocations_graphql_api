@@ -41,6 +41,7 @@ const Schema = gql`
   }
 
   type Filing {
+    _id: String
     subCategory: String
     step: String
     status: Int
