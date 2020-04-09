@@ -1,14 +1,17 @@
 const { ObjectId } = require('mongodb')
+const _ = require('lodash')
 const { isAdmin, isOrgAdmin } = require('../graphql/permissions')
 const PublicUploader = require('../uploaders/public-docs')
 const AdminMailer = require('../mailers/admin-mailer')
 const { AuthenticationError, gql } = require('apollo-server-express')
 const Hellosign = require('../hellosign')
+const gSheets = require('../google-sheets')
 
 const Schema = gql`
   type Organization {
     _id: String
     name: String
+    legal_name: String
     slug: String
     logo: String
     created_at: String
@@ -25,6 +28,8 @@ const Schema = gql`
     complianceTasks: [ComplianceTask]
     signingRequests: [SigningRequest]
 
+    masterFiling: [Filing]
+
     completedProvisionOfServices: Boolean
     provisionOfServicesURL: String
     documentTemplates: [DocumentTemplate]
@@ -33,6 +38,12 @@ const Schema = gql`
     matchRequests: [MatchRequest]
     trades: [Trade]
     orders: [Order]
+  }
+
+  type Filing {
+    subCategory: String
+    step: String
+    status: Int
   }
 
   type DocumentTemplate {
@@ -295,6 +306,10 @@ const Organization = {
     })
 
     return Promise.all(formattedUserRequests)
+  },
+  masterFiling: async (org) => {
+    const funds = await gSheets.throttledMasterFund()
+    return _.get(funds.find(f => f.name === org.legal_name), 'steps') || []
   }
 }
 
