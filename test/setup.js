@@ -16,11 +16,15 @@ const seeds = {
   }
 }
 
-const testClient = (apolloServer, userType) => {
+// user can be a string for a fixture or an actual user record
+const testClient = (apolloServer, user) => {
+
+  const authorization = user.email ? user.email.split('@')[0] : user
+
   return createTestClient({ 
     apolloServer,
     extendMockRequest: {
-      headers: { authorization: userType }
+      headers: { authorization }
     }
   })
 }
