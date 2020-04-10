@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const { gql } = require('apollo-server')
 const { testClient, testServer } = require('../setup')
 
@@ -144,6 +145,50 @@ describe('Deal Resolver', () => {
         variables: { deal_slug: "puma", fund_slug: fund.slug }
       })
       expect(invitedDeal).toMatchObject({ company_name: "Puma" })
+    })
+  })
+
+  /* Fund Admin */
+
+  describe('fund admin', () => {
+    const FUND_ADMINS = gql`
+      query Investor($email: String) {
+        investor(email: $email) {
+          _id
+          name
+          organizations_admin {
+            slug
+          }
+        }
+      }
+    `
+
+    test('super admin can see all funds', async () => {
+      const { ops: [user] } = await db.users.insertOne({ email: "newSuperAdmin@allocations.com", admin: true })
+
+      const { query } = testClient(apolloServer, user)
+      const { data: { investor: { organizations_admin } } } = await query(FUND_ADMINS)
+      expect(organizations_admin[0]).toMatchObject({ slug: "cool-fund" })
+    })
+
+    test('fund admin can see their fund', async () => {
+      const { query } = testClient(apolloServer, "fundAdmin")
+      const { data: { investor: { organizations_admin } } } = await query(FUND_ADMINS)
+      expect(organizations_admin[0]).toMatchObject({ slug: "cool-fund" })
+    })
+
+    test('fund admin cant see other fund', async () => {
+      const { ops: [fund] } = await db.organizations.insertOne({ name: "Athena Capital", slug: "athena" })
+      const { ops: [user] } = await db.users.insertOne({ 
+        email: "randomFundManager@allocations.com", 
+        organizations_admin: [fund._id] 
+      })
+
+      const { query } = testClient(apolloServer, user)
+      const { data: { investor: { organizations_admin } } } = await query(FUND_ADMINS)
+
+      // does NOT include cool-fund
+      expect(_.map(organizations_admin, 'slug')).toEqual(["athena"])
     })
   })
 })
