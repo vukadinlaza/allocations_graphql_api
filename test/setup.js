@@ -32,8 +32,9 @@ async function testServer () {
   await drop(db)
 
   await seeds.standard(db)
+  console.log("SEEDED")
 
-  return new ApolloServer({ 
+  const server = new ApolloServer({ 
     typeDefs,
     resolvers,
     context: async ({ req }) => {
@@ -46,6 +47,10 @@ async function testServer () {
       return { user, db }
     }
   })
+
+  // expose db for tests to access
+  server.db = db
+  return server
 }
 
 module.exports = { testServer, testClient }

@@ -20,4 +20,17 @@ const isAdminOrSameUser = (user, ctx) => {
   throw new AuthenticationError('permission denied')
 }
 
-module.exports = { isAdmin, isAdminOrSameUser, isOrgAdmin }
+// fundAdmin gives boolean for if they are a fund admin
+const isFundAdmin = (slug, user) => {
+  return Boolean((user.orgs || []).find(o => o.slug === slug))
+}
+
+module.exports = { 
+  isAdmin, 
+  isAdminOrSameUser, 
+  isOrgAdmin,
+
+  // transitioning to more accurate phrasing 
+  ensureFundAdmin: isOrgAdmin,
+  isFundAdmin 
+}
