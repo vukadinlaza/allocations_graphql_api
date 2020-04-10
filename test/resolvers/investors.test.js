@@ -49,7 +49,7 @@ describe('Deal Resolver', () => {
 
   // FAILING
   test.skip('fund admin can fetch an investor that is part of their fund', async () => {
-    const fund = await db.organizations.findOne()
+    const fund = await db.organizations.findOne({ slug: "cool-fund" })
     const { _id } = await db.users.findOne({ email: "investor@allocations.com" })
 
     const { ops: [newInvestor] } = await db.users.insertOne({ 
@@ -93,7 +93,7 @@ describe('Deal Resolver', () => {
     `
 
     test('super admin can see any deal even if not invited', async () => {
-      const fund = await db.organizations.findOne()
+      const fund = await db.organizations.findOne({ slug: "cool-fund" })
 
       // insert deal
       await db.deals.insertOne({ company_name: "Nike", organization: fund._id, slug: "nike" })
@@ -106,7 +106,7 @@ describe('Deal Resolver', () => {
     })
 
     test('invited investor can see deal ', async () => {
-      const fund = await db.organizations.findOne()
+      const fund = await db.organizations.findOne({ slug: "cool-fund" })
       const user = await db.users.findOne({ email: "investor@allocations.com" })
 
       // insert deal with invite
@@ -120,7 +120,7 @@ describe('Deal Resolver', () => {
     })
 
     test('investor cant see deal they havent been invited to', async () => {
-      const fund = await db.organizations.findOne()
+      const fund = await db.organizations.findOne({ slug: "cool-fund" })
 
       // insert deal with invite
       await db.deals.insertOne({ company_name: "Reebok", organization: fund._id, slug: "reebok", invitedInvestors: [] })
@@ -135,7 +135,7 @@ describe('Deal Resolver', () => {
     })
 
     test('fund admin can see deal without inviting themselves', async () => {
-      const fund = await db.organizations.findOne()
+      const fund = await db.organizations.findOne({ slug: "cool-fund" })
 
       // insert deal with invite
       await db.deals.insertOne({ company_name: "Puma", organization: fund._id, slug: "puma" })

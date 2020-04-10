@@ -1,7 +1,7 @@
 const { ObjectId } = require("mongodb")
 const _ = require('lodash')
 const { gql } = require('apollo-server-express')
-const { isAdmin, isOrgAdmin } = require('../graphql/permissions')
+const { isAdmin, isOrgAdmin, ensureFundAdmin } = require('../graphql/permissions')
 const Cloudfront = require('../cloudfront')
 const DealDocUploader = require('../uploaders/deal-docs')
 const DealMailer = require('../mailers/deal-mailer')
@@ -138,8 +138,8 @@ const Queries = {
       company_name: { $regex: new RegExp(q), $options: "i" }
     }).limit(limit || 10).toArray()
   },
-  searchDealsByOrg: (_, {q, org: orgSlug, limit}, ctx) => {
-    const org = isOrgAdmin(orgSlug, ctx)
+  searchDealsByOrg: async (_, {q, org: orgSlug, limit}, ctx) => {
+    const org =  await ensureFundAdmin(orgSlug, ctx)
     return ctx.db.deals.find({
       organization: org._id,
       company_name: { $regex: new RegExp(q), $options: "i" }
@@ -161,7 +161,7 @@ function uuid () {
 
 const Mutations = {
   createDeal: async (_parent, { deal, org: orgSlug }, ctx) => {
-    const org = isOrgAdmin(orgSlug, ctx)
+    const org = await ensureFundAdmin(orgSlug, ctx)
     const slug = _.kebabCase(deal.company_name)
 
     // ensure that deal name with org doesn't exist
@@ -181,7 +181,7 @@ const Mutations = {
     return res.ops[0]
   },
   updateDeal: async (_, {org, deal: { _id, wireDoc, ...deal}}, ctx) => {
-    isOrgAdmin(org, ctx)
+    await ensureFundAdmin(org, ctx)
 
     if (wireDoc) {
       // upload wireDoc
@@ -196,7 +196,7 @@ const Mutations = {
     return res.value
   },
   inviteNewUser: async (_, { org, email, deal_id }, ctx) => {
-    const orgRecord = isOrgAdmin(org, ctx)
+    const orgRecord = await ensureFundAdmin(org, ctx)
     const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
 
     // ensure deal is of the org
@@ -222,7 +222,7 @@ const Mutations = {
     return invite
   },
   inviteInvestor: async (_, { org, user_id, deal_id }, ctx) => {
-    const orgRecord = isOrgAdmin(org, ctx)
+    const orgRecord = await ensureFundAdmin(org, ctx)
     const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
 
     // ensure deal is of the org
@@ -248,8 +248,8 @@ const Mutations = {
 
     return updatedDeal
   },
-  uninviteInvestor: (_, { org, user_id, deal_id }, ctx) => {
-    isOrgAdmin(org, ctx)
+  uninviteInvestor: async (_, { org, user_id, deal_id }, ctx) => {
+    await ensureFundAdmin(org, ctx)
     return ctx.db.deals.updateOne(
       { _id: ObjectId(deal_id) },
       { $pull: { invitedInvestors: ObjectId(user_id) } }

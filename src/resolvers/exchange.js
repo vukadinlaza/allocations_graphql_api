@@ -1,7 +1,7 @@
 const { ObjectId } = require("mongodb")
 const { sumBy } = require('lodash')
 const { gql } = require('apollo-server-express')
-const { isAdmin, isOrgAdmin } = require('../graphql/permissions')
+const { isAdmin, isOrgAdmin, ensureFundAdmin } = require('../graphql/permissions')
 const Cloudfront = require('../cloudfront')
 const DealDocUploader = require('../uploaders/deal-docs')
 const DealMailer = require('../mailers/deal-mailer')
@@ -238,7 +238,7 @@ const Mutations = {
     return res.ops[0]
   },
   createTrade: async (_, { org: orgSlug, trade: { seller_id, buyer_id, deal_id, ...trade  } }, ctx) => {
-    const org = isOrgAdmin(orgSlug, ctx)
+    const org = await ensureFundAdmin(orgSlug, ctx)
 
     return ctx.db.trades.insertOne({
       ...trade,
@@ -260,7 +260,7 @@ const Queries = {
     return ctx.db.deals.findOne({ slug })
   },
   matchRequests: async (_, { org: orgSlug }, ctx) => {
-    const org = isOrgAdmin(orgSlug, ctx)
+    const org = await ensureFundAdmin(orgSlug, ctx)
     return ctx.db.matchrequests.find({ organization_id: org._id }).toArray()
   }
 }

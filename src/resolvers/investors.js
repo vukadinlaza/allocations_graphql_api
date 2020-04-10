@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb")
 const { gql } = require('apollo-server-express')
-const { isAdmin, isOrgAdmin, isFundAdmin, isAdminOrSameUser } = require('../graphql/permissions')
+const { isAdmin, isOrgAdmin, isFundAdmin, isAdminOrSameUser, ensureFundAdmin } = require('../graphql/permissions')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../cloudfront')
 const Uploader = require('../uploaders/investor-docs')
@@ -132,7 +132,7 @@ const Queries = {
     return db.collection("users").find({}).toArray()
   },
   searchUsers: async (_, {org, q, limit}, ctx) => {
-    const orgRecord = await isOrgAdmin(org, ctx)
+    const orgRecord = await ensureFundAdmin(org, ctx)
 
     const searchQ = {
       $or: [

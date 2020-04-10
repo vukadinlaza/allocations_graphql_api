@@ -1,6 +1,6 @@
 const { ObjectId } = require('mongodb')
 const _ = require('lodash')
-const { isAdmin, isOrgAdmin } = require('../graphql/permissions')
+const { isAdmin } = require('../graphql/permissions')
 const PublicUploader = require('../uploaders/public-docs')
 const AdminMailer = require('../mailers/admin-mailer')
 const { AuthenticationError, gql } = require('apollo-server-express')
