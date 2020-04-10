@@ -105,7 +105,12 @@ const User = {
       : `${user.first_name} ${user.last_name}`
   },
   organizations_admin: (user, _, { db }) => {
-    return db.collection("organizations").find({
+    if (user.admin) {
+      // super admin can see all funds
+      return db.organizations.find().toArray()
+    }
+
+    return db.organizations.find({
       _id: { $in: (user.organizations_admin || []).map(ObjectId) }
     }).toArray()
   }

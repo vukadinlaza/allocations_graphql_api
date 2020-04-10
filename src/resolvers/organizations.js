@@ -116,6 +116,10 @@ const Schema = gql`
 const Queries = {
   organization: async (_, { slug }, { user, db }) => {
     const org = await db.organizations.findOne({ slug })
+    
+    // short circuit with fund if superadmin
+    if (user.admin) return org
+
     if (org && user && (user.organizations_admin || []).map(id => id.toString()).includes(org._id.toString())) {
       return org
     }
