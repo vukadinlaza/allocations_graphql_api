@@ -12,7 +12,7 @@ function authedServer (db) {
     resolvers,
     context: async ({ req }) => {      
       if (publicEndpoints.includes(req.body.operationName)) {
-        return {}
+        return { db }
       }
 
       const user = await authenticate({ req, db })
