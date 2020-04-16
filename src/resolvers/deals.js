@@ -36,8 +36,28 @@ const Schema = gql`
     memo: String
     documents: [Document]
 
+    dealParams: DealParams
+
     last_valuation: String
     no_exchange: Boolean
+  }
+
+  type DealParams {
+    totalRoundSize: String
+    allocation: String
+    estimatedSetupCosts: String
+    totalCarry: String
+    totalManagementFee: String
+    minimumInvestment: String
+  }
+
+  input DealParamsInput {
+    totalRoundSize: String
+    allocation: String
+    estimatedSetupCosts: String
+    totalCarry: String
+    totalManagementFee: String
+    minimumInvestment: String
   }
 
   type EmailInvite {
@@ -89,6 +109,7 @@ const Schema = gql`
     amount: Int
     target: String
     amount_raised: String
+    dealParams: DealParamsInput
     last_valuation: String
     no_exchange: Boolean
   }
@@ -120,6 +141,9 @@ const Deal = {
   },
   organization: (deal, _, { db }) => {
     return db.organizations.findOne({ _id: deal.organization })
+  },
+  dealParams: (deal) => {
+    return deal.dealParams || {}
   }
 }
 
@@ -174,6 +198,7 @@ const Mutations = {
       ...deal,
       organization: org._id,
       status: "onboarding",
+      dealParams: {},
       slug,
       created_at: Date.now(),
       inviteKey: uuid()
