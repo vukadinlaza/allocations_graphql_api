@@ -36,6 +36,9 @@ const Schema = gql`
     memo: String
     documents: [Document]
 
+    appLink: String
+    publicLink: String
+
     dealParams: DealParams
 
     last_valuation: String
@@ -144,6 +147,14 @@ const Deal = {
   },
   dealParams: (deal) => {
     return deal.dealParams || {}
+  },
+  appLink: async (deal, _, { db }) => {
+    const { slug } = await db.organizations.findOne({ _id: deal.organization })
+    return slug && slug !== "allocations" ? `/deals/${slug}/${deal.slug}` : `/deals/${deal.slug}`
+  },
+  publicLink: async (deal, _, { db }) => {
+    const { slug } = await db.organizations.findOne({ _id: deal.organization })
+    return `/public/${slug}/deals/${deal.slug}?invite_code=${deal.inviteKey}`
   }
 }
 
