@@ -1,6 +1,6 @@
 const S3 = require('aws-sdk/clients/s3')
 
-const Bucket = process.env.S3_INVESTMENT_DOCS_BUCKET || "allocations-investor-docs-test"
+const Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
 const url = `https://${Bucket}.s3.us-east-2.amazonaws.com`
 
 const s3 = new S3({apiVersion: '2006-03-01'})
@@ -15,7 +15,7 @@ async function putUserFile (user, file) {
 }
 
 function rmInvestmentDoc (investment_id, filename) {
-  return s3.deleteObject({ Bucket, Key: `${investment_id}/${filename}` }).promise()
+  return s3.deleteObject({ Bucket, Key: `investments/${investment_id}/${filename}` }).promise()
 }
 
 async function putInvestorDoc (_id, doc, extension) {
@@ -38,7 +38,7 @@ async function putInvestmentDoc (investment_id, doc) {
 
   const obj = {
     Bucket, 
-    Key: `${investment_id}/${filename}`, 
+    Key: `investments/${investment_id}/${filename}`, 
     Body: createReadStream(),
     ContentType: "application/pdf",
     ContentDisposition: "inline"
