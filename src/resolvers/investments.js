@@ -147,7 +147,7 @@ const Mutations = {
     await Uploader.rmInvestmentDoc(investment_id, file)
     await ctx.db.collection("investments").updateOne(
       { _id: ObjectId(investment_id) },
-      { $pull: { documents: `${investment_id}/${file}` } }
+      { $pull: { documents: `investments/${investment_id}/${file}` } }
     )
     return true
   }

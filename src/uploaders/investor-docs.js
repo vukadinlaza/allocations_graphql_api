@@ -20,32 +20,34 @@ function rmInvestmentDoc (investment_id, filename) {
 
 async function putInvestorDoc (_id, doc, extension) {
   const {createReadStream, filename} = doc
+  const Key = `investors/${_id}/${extension}`
 
   const obj = {
     Bucket, 
-    Key: `investors/${_id}/${extension}`, 
+    Key, 
     Body: createReadStream(),
     ContentType: "application/pdf",
     ContentDisposition: "inline"
   }
   await s3.upload(obj).promise()
 
-  return `investors/${_id}/${extension}`
+  return Key
 }
 
 async function putInvestmentDoc (investment_id, doc) {
   const {createReadStream, filename} = doc
+  const Key = `investments/${investment_id}/${filename}`
 
   const obj = {
     Bucket, 
-    Key: `investments/${investment_id}/${filename}`, 
+    Key, 
     Body: createReadStream(),
     ContentType: "application/pdf",
     ContentDisposition: "inline"
   }
   await s3.upload(obj).promise()
 
-  return `${investment_id}/${filename}`
+  return Key
 }
 
 module.exports = { putUserFile, putInvestmentDoc, rmInvestmentDoc, putInvestorDoc }
