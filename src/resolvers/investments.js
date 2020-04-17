@@ -75,7 +75,7 @@ const Investment = {
 const Queries = {
   investment: (_, args, ctx) => {
     isAdmin(ctx)
-    return db.investments.findOne({ _id: ObjectId(args._id) })
+    return ctx.db.investments.findOne({ _id: ObjectId(args._id) })
   },
   allInvestments: (_, __, ctx) => {
     isAdmin(ctx)
@@ -154,7 +154,8 @@ const Mutations = {
 }
 
 module.exports = { 
-  Schema, 
+  Schema,
+  Queries, 
   Mutations, 
   subResolvers: { Investment }
 }
