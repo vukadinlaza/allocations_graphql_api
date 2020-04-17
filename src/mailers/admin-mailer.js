@@ -6,7 +6,7 @@ async function sendInvite ({ org, to }) {
 
   const msg = {
     to,
-    from: "invites@allocations.co",
+    from: "invites@allocations.com",
     subject: `You have been added as an admin for ${org.name} on Allocations`,
     text: `You have been added as an admin for ${org.name} on Allocations`,
     html
