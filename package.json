@@ -83,6 +83,7 @@
     "mongodb": "^3.3.2",
     "ms": "^2.1.2",
     "pino": "^5.15.0",
+    "rollbar": "^2.15.1",
     "subscriptions-transport-ws": "^0.9.16",
     "winston": "^3.2.1"
   },

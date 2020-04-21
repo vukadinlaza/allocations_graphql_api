@@ -11,6 +11,7 @@ const { authedServer } = require('./graphql/server')
 const authenticate = require('./auth')
 const { connect } = require('./mongo')
 const { ApolloServer, gql } = require('apollo-server-express');
+const rollbar = require('./utils/rollbar')
 
 const { NODE_ENV } = process.env
 
@@ -43,6 +44,9 @@ async function run () {
   app.use(compression());
   app.use(bodyParser.urlencoded({extended: true}));
   app.use(bodyParser.json());
+
+  // rollbar
+  app.use(rollbar.errorHandler())
 
   // connect to MongoDB
   const db = await connect()
