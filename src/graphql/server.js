@@ -2,7 +2,6 @@ const { ApolloServer} = require('apollo-server-express')
 const { verify, authenticate } = require('../auth')
 
 const logger = require('../utils/logger')
-const rollbar = require('../utils/rollbar')
 const { typeDefs, resolvers } = require('../resolvers')
 
 function authedServer (db) {
@@ -19,11 +18,18 @@ function authedServer (db) {
       const user = await authenticate({ req, db })
       return { user, db }
     },
-    formatError: (err) => {
-      logger.error(err)
-      rollbar.error(err)
-      return err
-    }
+    plugins: [
+      {
+        requestDidStart: (r) => {
+          return {
+            didEncounterErrors: ({ context, operationName, errors }) => {
+              logger.error(errors[0])
+              logger.error({ user: context.user || {}, operationName })
+            }
+          }
+        }
+      }
+    ]
   })
 }
 

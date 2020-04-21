@@ -186,7 +186,7 @@ const Queries = {
     if (deal && deal.inviteKey === invite_code) {
       return deal
     }
-    throw new AuthenticationError()
+    throw new AuthenticationError("permission denied")
   }
 }
 
