@@ -11,7 +11,7 @@ async function sendInvite ({ deal, sender, to, org }) {
   const msg = {
     to,
     from: "invites@allocations.com",
-    subject: `${org.name} has invited to Participate in the ${deal.company_name} Deal`,
+    subject: `${org.name} has invited you to Participate in the ${deal.company_name} Deal`,
     text: `Access the deal here ... ${link}`,
     html
   }
