@@ -10,7 +10,7 @@ function expiry () {
   return Date.now() + (4 * hour)
 }
 
-const cachedPrivateKey = null
+let cachedPrivateKey = null
 async function getSignedUrl (path) {
   const privateKeyString = cachedPrivateKey || await getPrivKey()
 
