@@ -10,28 +10,37 @@ const client = new MongoClient(MONGO_URL, {
   useNewUrlParser: true,
 })
 
-test('ensure all public links work', async () => {
-  let driver = await new Builder()
-    .forBrowser('chrome')
-    .build()
+const browsers = ['chrome', 'safari']
 
-  const db = (await client.connect()).db("allocations-dashboard")
-  const deals = await db.collection("deals").find({ status: { $ne: "closed" }}).toArray()
+test('ensure all public links work and speed test', async () => {
+  const times = []
+  for (const browser of browsers) {
+    const driver = await new Builder().forBrowser(browser).build()
+    const db = (await client.connect()).db("allocations-dashboard")
+    const deals = await db.collection("deals").find({ status: { $ne: "closed" }}).toArray()
 
-  const links = await Promise.all(deals.map(async d => {
-    const { slug } = await db.collection("organizations").findOne({ _id: d.organization })
-    return [d.slug, slug, `https://dashboard.allocations.com/public/${slug}/deals/${d.slug}?invite_code=${d.inviteKey}`]
-  }))
+    const links = await Promise.all(deals.map(async d => {
+      const { slug } = await db.collection("organizations").findOne({ _id: d.organization })
+      return [d.slug, slug, `https://dashboard.allocations.com/public/${slug}/deals/${d.slug}?invite_code=${d.inviteKey}`]
+    }))
 
-  for (let [deal, fund, link] of links) {
-    try {
-      await driver.get(link)
-      await driver.wait(until.elementLocated(By.className("Deal")), 5000)
-      console.log(`✅ ${deal} (${fund})`)
-    } catch (e) {
-      console.log(`❌ ${deal} (${fund})`)
-    } 
+    for (let [deal, fund, link] of links) {
+      try {
+        let start_ts = Date.now()
+        await driver.get(link)
+        await driver.wait(until.elementLocated(By.className("Deal")), 5000)
+        // console.log(`✅ ${deal} (${fund})`)
+        times.push(Date.now() - start_ts)
+      } catch (e) {
+        console.log(`❌ ${deal} (${fund}), browser: ${browser}`)
+        console.log(link)
+      } 
+    }
+      
+    await driver.quit()
   }
-    
-  return driver.quit()
-}, 60000)
+
+  const avg_time = times.reduce((n, x) => n + x, 0) / times.length
+  console.log("AVG LOAD:", avg_time, "ms")
+
+}, 60000 * 2)
