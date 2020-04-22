@@ -15,7 +15,7 @@ async function getSignedUrl (path) {
   const privateKeyString = cachedPrivateKey || await getPrivKey()
 
   // currently there are 2 cloudfronts, 1 for encrypted one for legacy w/ diff paths
-  const baseUrl = path.slice(0, 12) === "investments/" ? CLOUDFRONT_ENCRYPTED_URL : CLOUDFRONT_URL 
+  const baseURL = path.slice(0, 12) === "investments/" ? CLOUDFRONT_ENCRYPTED_URL : CLOUDFRONT_URL 
 
   return cloudfrontSign.getSignedUrl(
     baseURL + "/" + path,
