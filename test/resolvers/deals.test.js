@@ -29,7 +29,7 @@ describe('Deal Resolver', () => {
         }
       } 
     )
-    expect(createDeal).toMatchObject({ company_name: "Crazy Test Deal", slug: "crazy-test-deal", dealParams: {} })
+    expect(createDeal).toMatchObject({ company_name: "Crazy Test Deal", slug: "crazy-test-deal" })
   })
 
   test('fund admin can create deal', async () => {

@@ -45,4 +45,4 @@ function rmInvestmentDoc (investment_id, filename) {
   return s3.deleteObject({ Bucket, Key: `investments/${investment_id}/${filename}` }).promise()
 }
 
-module.exports = { putUserFile, putInvestmentDoc, rmInvestmentDoc, putInvestorDoc }
+module.exports = { putInvestmentDoc, rmInvestmentDoc, putInvestorDoc }

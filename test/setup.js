@@ -35,8 +35,8 @@ async function testServer () {
   // reset db because its test
   await drop(db)
 
+  // seed db
   await seeds.standard(db)
-  console.log("SEEDED")
 
   const server = new ApolloServer({ 
     typeDefs,

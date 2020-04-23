@@ -12,7 +12,7 @@ const client = new MongoClient(MONGO_URL, {
 
 const browsers = ['chrome', 'safari']
 
-test('ensure all public links work and speed test', async () => {
+test.skip('ensure all public links work and speed test', async () => {
   const times = []
   for (const browser of browsers) {
     const driver = await new Builder().forBrowser(browser).build()
