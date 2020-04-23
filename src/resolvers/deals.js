@@ -34,6 +34,7 @@ const Schema = gql`
     allInvited: Boolean
     inviteKey: String
     memo: String
+    pledges: [PubPledge]
     documents: [Document]
 
     appLink: String
@@ -61,6 +62,11 @@ const Schema = gql`
     totalCarry: String
     totalManagementFee: String
     minimumInvestment: String
+  }
+
+  type PubPledge {
+    amount: Int
+    timestamp: String
   }
 
   type EmailInvite {
@@ -131,10 +137,10 @@ const Deal = {
     })
   },
   investments: (deal, _, { db }) => {
-    return db.collection("investments").find({ deal_id: deal._id }).toArray()
+    return db.investments.find({ deal_id: deal._id }).toArray()
   },
   invitedInvestors: async (deal, _, { db }) => {
-    return db.collection("users").find({ _id: { $in: deal.invitedInvestors || [] }}).toArray()
+    return db.users.find({ _id: { $in: deal.invitedInvestors || [] }}).toArray()
   },
   wireInstructions: (deal, _, { db }) => {
     return deal.wireInstructions ? Cloudfront.getSignedUrl(deal.wireInstructions) : null
@@ -155,6 +161,10 @@ const Deal = {
   publicLink: async (deal, _, { db }) => {
     const { slug } = await db.organizations.findOne({ _id: deal.organization })
     return `/public/${slug}/deals/${deal.slug}?invite_code=${deal.inviteKey}`
+  },
+  pledges: async (deal, _, { db }) => {
+    const pledges = await db.investments.find({ deal_id: deal._id, status: { $ne: "invited" } }).toArray()
+    return pledges.map(p => ({ amount: p.amount, timestamp: p.pledged_at }))
   }
 }
 
