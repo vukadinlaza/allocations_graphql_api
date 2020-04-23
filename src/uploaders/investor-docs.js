@@ -5,18 +5,7 @@ const url = `https://${Bucket}.s3.us-east-2.amazonaws.com`
 
 const s3 = new S3({apiVersion: '2006-03-01'})
 
-async function putUserFile (user, file) {
-  const Key = "test1.pdf"
-
-  const obj = {Bucket, Key, Body: file}
-  await s3.putObject(obj).promise()
-
-  return `https://${Bucket}.s3.us-east-2.amazonaws.com/${Key}`
-}
-
-function rmInvestmentDoc (investment_id, filename) {
-  return s3.deleteObject({ Bucket, Key: `investments/${investment_id}/${filename}` }).promise()
-}
+/** Investor docs like kyc docs **/
 
 async function putInvestorDoc (_id, doc, extension) {
   const {createReadStream, filename} = doc
@@ -34,6 +23,8 @@ async function putInvestorDoc (_id, doc, extension) {
   return Key
 }
 
+/** Investment Docs for individual investments **/
+
 async function putInvestmentDoc (investment_id, doc) {
   const {createReadStream, filename} = doc
   const Key = `investments/${investment_id}/${filename}`
@@ -48,6 +39,10 @@ async function putInvestmentDoc (investment_id, doc) {
   await s3.upload(obj).promise()
 
   return Key
+}
+
+function rmInvestmentDoc (investment_id, filename) {
+  return s3.deleteObject({ Bucket, Key: `investments/${investment_id}/${filename}` }).promise()
 }
 
 module.exports = { putUserFile, putInvestmentDoc, rmInvestmentDoc, putInvestorDoc }
