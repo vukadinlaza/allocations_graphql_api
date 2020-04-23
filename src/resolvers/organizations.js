@@ -288,30 +288,6 @@ const Organization = {
     isAdmin(ctx)
     return Hellosign.listTemplates()
   },
-  signingRequests: async (org, _, { db, user }) => {
-    const reqs = await hellosign.signatureRequest.list()
-
-    const userRequests = reqs.signature_requests.filter(req => {
-      return req.test_mode === true 
-        && req.signatures.find(s => s.signer_email_address === "willsheehan95@gmail.com")
-        && !req.is_complete
-        && !req.is_declined
-    })
-
-    const formattedUserRequests = userRequests.map(async req => {
-      const _id = req.signatures.find(s => s.signer_email_address === "willsheehan95@gmail.com").signature_id
-      const { embedded } = await hellosign.embedded.getSignUrl(_id)
-      return {
-        _id,
-        status: req.is_declined ? "declined" : (req.is_complete ? "complete" : "incomplete"),
-        title: req.title,
-        due: null,
-        url: embedded.sign_url
-      }
-    })
-
-    return Promise.all(formattedUserRequests)
-  },
   masterFiling: async (org) => {
     const funds = await gSheets.throttledMasterFund()
     return _.get(funds.find(f => f.name === org.legal_name), 'steps') || []
