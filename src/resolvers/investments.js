@@ -89,7 +89,7 @@ const Mutations = {
 
     // superadmin OR all are invited OR is org admin
     if (user.admin || deal.allInvited || user.orgs.find(o => o._id.toString() === deal.organization.toString())) {
-      const res = await db.collection("investments").insertOne({
+      const res = await db.investments.insertOne({
         status: "invited",
         invited_at: Date.now(),
         ...investment,
@@ -105,12 +105,12 @@ const Mutations = {
     isAdmin(ctx)
 
     // we need to track status changes
-    const savedInvestment = await ctx.db.collection("investments").findOne({ _id: ObjectId(_id) })
+    const savedInvestment = await ctx.db.investments.findOne({ _id: ObjectId(_id) })
     if (savedInvestment.status !== investment.status) {
       investment[`${investment.status}_at`] = Date.now()
     }
 
-    const res = await ctx.db.collection("investments").findOneAndUpdate(
+    const res = await ctx.db.investments.findOneAndUpdate(
       { _id: ObjectId(_id) },
       { $set: investment },
       { returnOriginal: false }
@@ -121,7 +121,7 @@ const Mutations = {
     isAdmin(ctx)
 
     try {
-      const res = await ctx.db.collection("investments").deleteOne({ _id: ObjectId(_id) })
+      const res = await ctx.db.investments.deleteOne({ _id: ObjectId(_id) })
       return res.deletedCount === 1
     } catch (e) {
       return false
@@ -135,7 +135,7 @@ const Mutations = {
     const file = await doc
     const s3Path = await Uploader.putInvestmentDoc(investment_id, file)
 
-    await ctx.db.collection("investments").updateOne(
+    await ctx.db.investments.updateOne(
       { _id: ObjectId(investment_id) },
       { $addToSet: { documents: s3Path } }
     )
@@ -145,7 +145,7 @@ const Mutations = {
   rmInvestmentDoc: async (_, {investment_id, file}, ctx) => {
     isAdmin(ctx)
     await Uploader.rmInvestmentDoc(investment_id, file)
-    await ctx.db.collection("investments").updateOne(
+    await ctx.db.investments.updateOne(
       { _id: ObjectId(investment_id) },
       { $pull: { documents: `investments/${investment_id}/${file}` } }
     )
