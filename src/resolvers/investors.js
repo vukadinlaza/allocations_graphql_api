@@ -166,7 +166,7 @@ const Mutations = {
       const file = await passport
       const s3Path = await Uploader.putInvestorDoc(_id, file, "passport")
 
-      return ctx.db.collection("users").updateOne(
+      return ctx.db.users.updateOne(
         { _id: ObjectId(_id) },
         { $set: { ...user, passport: s3Path } }
       )
@@ -177,34 +177,22 @@ const Mutations = {
       const file = await accredidation_doc
       const s3Path = await Uploader.putInvestorDoc(_id, file, "accredidation_doc")
 
-      return ctx.db.collection("users").updateOne(
+      return ctx.db.users.updateOne(
         { _id: ObjectId(_id) },
         { $set: { ...user, accredidation_doc: s3Path } }
       )
     }
 
-    return ctx.db.collection("users").updateOne(
+    return ctx.db.users.updateOne(
       { _id: ObjectId(_id) },
       { $set: user }
     )                
-  },
-  updateInvestor: async (_, {_id, ...investor}, ctx) => {
-    isAdmin(ctx)
-
-    const documents = await Uploader.putUserFile({}, investor.documents)
-
-    const res = await ctx.db.collection("users").findOneAndUpdate(
-      { _id: ObjectId(_id) },
-      { $set: {...investor, documents} },
-      { returnOriginal: false }
-    )
-    return res.value
   },
   deleteInvestor: async (_, { _id }, ctx) => {
     isAdmin(ctx)
 
     try {
-      const res = await ctx.db.collection("users").deleteOne({ _id: ObjectId(_id) })
+      const res = await ctx.db.users.deleteOne({ _id: ObjectId(_id) })
       return res.deletedCount === 1
     } catch (e) {
       return false
