@@ -44,6 +44,9 @@ module.exports = function template ({ sender, deal, link, org }) {
           -moz-text-size-adjust: 100%;
           -ms-text-size-adjust: 100%;
         }
+        .im {
+          color: #333 !important;
+        }
         img.max-width {
           max-width: 100% !important;
         }
@@ -145,15 +148,10 @@ module.exports = function template ({ sender, deal, link, org }) {
           </span></div><div></div></div></td>
         </tr>
       </tbody>
-    </table><table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="3fc59ac8-7e02-4c15-9ab5-6e4462ffc4be" data-mc-module-version="2019-10-22">
-      <tbody>
-        <tr>
-          <td style="padding:18px 18px 18px 18px; line-height:22px; text-align:inherit; background-color:#ededed;" height="100%" valign="top" bgcolor="#ededed" role="module-content"><div><div style="font-family: inherit; text-align: inherit"><span style="color: #333333">Strictly Confidential</span></div>
-  <div style="font-family: inherit; text-align: inherit"><span style="color: #333333">If you disclose information about this deal, you will be removed from Allocations</span></div><div></div></div></td>
-        </tr>
-      </tbody>
-    </table><table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="3e6c1f9d-413b-4330-9a39-44fca4c3aa97" data-mc-module-version="2019-10-22">
-    </table><table border="0" cellpadding="0" cellspacing="0" class="module" data-role="module-button" data-type="button" role="module" style="table-layout:fixed;" width="100%" data-muid="6d69c10b-d25e-48f4-93c4-b96b049077d9">
+    </table>
+    <table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="3e6c1f9d-413b-4330-9a39-44fca4c3aa97" data-mc-module-version="2019-10-22">
+    </table>
+    <table border="0" cellpadding="0" cellspacing="0" class="module" data-role="module-button" data-type="button" role="module" style="table-layout:fixed;" width="100%" data-muid="6d69c10b-d25e-48f4-93c4-b96b049077d9">
         <tbody>
           <tr>
             <td align="center" bgcolor="" class="outer-td" style="padding:0px 0px 0px 0px;">
@@ -169,6 +167,21 @@ module.exports = function template ({ sender, deal, link, org }) {
                 </tbody>
               </table>
             </td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="module" role="module" data-type="spacer" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="d13ed318-e363-46cd-bb41-10d12348955e">
+        <tbody>
+          <tr>
+            <td style="padding:0px 0px 30px 0px;" role="module-content" bgcolor="">
+            </td>
+          </tr>
+        </tbody>
+      </table><table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="e458197e-0a71-4758-8251-344c387368fd" data-mc-module-version="2019-10-22">
+        <tbody>
+          <tr>
+            <td style="padding:18px 10px 18px 10px; line-height:12px; text-align:inherit; background-color:#ebebeb;" height="100%" valign="top" bgcolor="#ebebeb" role="module-content"><div><div style="font-family: inherit; text-align: inherit"><span style="font-size: 9px">CONFIDENTIALITY: The information transmitted is intended only for the addressee and may contain confidential or privileged material. Any review, retransmission, dissemination or other use of, or taking of any action in reliance upon, this information by anyone other than the intended recipient is prohibited. If you received this message in error, please contact the sender and delete the material from all computers.<br>
+    E-mail transmissions cannot be guaranteed to be secure or error-free, and we accept no liability for any errors or omissions. We screen for viruses on a routine basis; however, we make no representation or warranty as to the absence of viruses in this e-mail or any attachments. Please note that for regulatory and compliance reasons we may monitor and read e-mails sent to and from our servers.</span></div><div></div></div></td>
           </tr>
         </tbody>
       </table>
