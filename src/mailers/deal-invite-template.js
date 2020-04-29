@@ -153,13 +153,6 @@ module.exports = function template ({ sender, deal, link, org }) {
         </tr>
       </tbody>
     </table><table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="3e6c1f9d-413b-4330-9a39-44fca4c3aa97" data-mc-module-version="2019-10-22">
-      <tbody>
-        <tr>
-          <td style="padding:18px 20px 18px 20px; line-height:22px; text-align:inherit;" height="100%" valign="top" bgcolor="" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="font-size: 20px">
-            ${org.name} is investing in ${deal.company_name}
-          </span></div><div></div></div></td>
-        </tr>
-      </tbody>
     </table><table border="0" cellpadding="0" cellspacing="0" class="module" data-role="module-button" data-type="button" role="module" style="table-layout:fixed;" width="100%" data-muid="6d69c10b-d25e-48f4-93c4-b96b049077d9">
         <tbody>
           <tr>
