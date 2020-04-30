@@ -110,12 +110,10 @@ const Mutations = {
       investment[`${investment.status}_at`] = Date.now()
     }
 
-    const res = await ctx.db.investments.findOneAndUpdate(
+    return ctx.db.investments.updateOne(
       { _id: ObjectId(_id) },
-      { $set: investment },
-      { returnOriginal: false }
+      { $set: investment }
     )
-    return res.value
   },
   deleteInvestment: async (_, { _id }, ctx) => {
     isAdmin(ctx)
