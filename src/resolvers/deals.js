@@ -94,6 +94,7 @@ const Schema = gql`
   type Mutation {
     updateDeal(org: String!, deal: DealInput!): Deal
     createDeal(org: String!, deal: DealInput!): Deal
+    deleteDeal(_id: String!): Boolean
     inviteNewUser(org: String!, deal_id: String!, email: String!): EmailInvite
     inviteInvestor(org: String!, user_id: String!, deal_id: String!): Deal
     uninviteInvestor(org: String!, user_id: String!, deal_id: String!): Deal
@@ -240,6 +241,18 @@ const Mutations = {
       { returnOriginal: false }
     )
     return res.value
+  },
+  deleteDeal: async (_, { _id }, ctx) => {
+    isAdmin(ctx)
+
+    try {
+      // delete deal and all investments in deal
+      await ctx.db.deals.deleteOne({ _id: ObjectId(_id) })
+      await ctx.investments.deleteMany({ deal_id: ObjectId(_id) })
+      return true
+    } catch (e) {
+      return false
+    }
   },
   inviteNewUser: async (_, { org, email, deal_id }, ctx) => {
     const orgRecord = await ensureFundAdmin(org, ctx)
