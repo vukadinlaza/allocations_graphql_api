@@ -67,6 +67,7 @@ const Schema = gql`
   type PubPledge {
     amount: Int
     timestamp: String
+    initials: String
   }
 
   type EmailInvite {
@@ -129,6 +130,10 @@ function slugify (str) {
   return str.toLowerCase().replace(' ', '-')
 }
 
+function investorInitials (investor) {
+  return ((investor.first_name || "").slice(0, 1) + (investor.last_name || "").slice(0, 1)).toUpperCase()
+}
+
 const Deal = {
   // investment denotes the `ctx.user` investment in this deal (can only be one)
   investment: (deal, _, { db, user }) => {
@@ -165,7 +170,12 @@ const Deal = {
   },
   pledges: async (deal, _, { db }) => {
     const pledges = await db.investments.find({ deal_id: deal._id, status: { $ne: "invited" } }).toArray()
-    return pledges.map(p => ({ amount: p.amount, timestamp: p.pledged_at }))
+    return Promise.all(
+      pledges.map(async p => {
+        const investor = await db.users.findOne({ _id: p.user_id })
+        return { amount: p.amount, timestamp: p.pledged_at, initials: investorInitials(investor) }
+      })
+    )
   }
 }
 
