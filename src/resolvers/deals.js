@@ -12,6 +12,7 @@ const Schema = gql`
   type Deal {
     _id: String
     created_at: String
+    approved: Boolean
     organization: Organization
     company_name: String
     slug: String
@@ -96,6 +97,7 @@ const Schema = gql`
     updateDeal(org: String!, deal: DealInput!): Deal
     createDeal(org: String!, deal: DealInput!): Deal
     deleteDeal(_id: String!): Boolean
+    createOrgAndDeal(orgName: String!, deal: DealInput!): Deal
     inviteNewUser(org: String!, deal_id: String!, email: String!): EmailInvite
     inviteInvestor(org: String!, user_id: String!, deal_id: String!): Deal
     uninviteInvestor(org: String!, user_id: String!, deal_id: String!): Deal
@@ -156,6 +158,10 @@ const Deal = {
   },
   organization: (deal, _, { db }) => {
     return db.organizations.findOne({ _id: deal.organization })
+  },
+  approved: async (deal, _, { db }) => {
+    const org = await db.organizations.findOne({ _id: deal.organization })
+    return org.approved !== false
   },
   dealParams: (deal) => {
     return deal.dealParams || {}
@@ -263,6 +269,33 @@ const Mutations = {
     } catch (e) {
       return false
     }
+  },
+  createOrgAndDeal: async (_parent, { orgName, deal }, { db, user }) => {
+    // no auth required for this (anyone can do it once signed in)
+
+    const { ops: [org] } = await db.organizations.insertOne({
+      name: orgName,
+      created_at: Date.now(),
+      slug: _.kebabCase(orgName),
+      approved: false
+    })
+
+    // add user to org admin
+    await db.users.updateOne(
+      { _id: user._id }, 
+      { $push: { organizations_admin: org._id } }
+    )
+
+    const res = await db.deals.insertOne({ 
+      ...deal,
+      slug: _.kebabCase(deal.company_name),
+      organization: org._id,
+      status: "onboarding",
+      dealParams: {},
+      created_at: Date.now(),
+      inviteKey: uuid()
+    })
+    return res.ops[0]
   },
   inviteNewUser: async (_, { org, email, deal_id }, ctx) => {
     const orgRecord = await ensureFundAdmin(org, ctx)

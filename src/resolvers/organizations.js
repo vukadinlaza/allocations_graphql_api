@@ -16,6 +16,8 @@ const Schema = gql`
     logo: String
     created_at: String
 
+    approved: Boolean
+
     admins: [User]
     investors: [User]
     investor(_id: String): User
@@ -91,8 +93,10 @@ const Schema = gql`
   }
 
   input OrganizationInput {
-    name: String!
-    slug: String!
+    _id: String
+    name: String
+    slug: String
+    approved: Boolean
     logo: Upload
   }
 
@@ -103,6 +107,9 @@ const Schema = gql`
 
   extend type Mutation {
     createOrganization(organization: OrganizationInput!): Organization
+    updateOrganization(organization: OrganizationInput!): Organization
+    deleteOrganization(_id: String!): Boolean
+
     addOrganizationMembership(slug: String!, user_id: String!): User
     revokeOrganizationMembership(slug: String!, user_id: String!): User
     sendAdminInvite(slug: String!, user_id: String!): EmailInvite
@@ -154,6 +161,25 @@ const Mutations = {
       { $push: { organizations_admin: org._id } }
     )
     return org
+  },
+  updateOrganization: async (_, { organization: { _id, ...organization }}, ctx) => {
+    isAdmin(ctx)    
+    return ctx.db.organizations.updateOne(
+      { _id: ObjectId(_id) },
+      { $set: organization }
+    )
+  },
+  deleteOrganization: async (_, { _id }, ctx) => {
+    isAdmin(ctx)
+
+    /** 
+     * we need to delete a number of things here
+     * 1) the org
+     * 2) any deals from the org
+     * 3) any investments originating from the org
+     * 4) any user permission references the the org
+     **/
+     return true
   },
   addOrganizationMembership: async (_, { slug, user_id }, ctx) => {
     isAdmin(ctx)
@@ -291,6 +317,10 @@ const Organization = {
   masterFiling: async (org) => {
     const funds = await gSheets.throttledMasterFund()
     return _.get(funds.find(f => f.name === org.legal_name), 'steps') || []
+  },
+  // since approved was added on later, we're going to assume any previous one IS approved
+  approved: (org) => {
+    return org.approved !== false
   }
 }
 
