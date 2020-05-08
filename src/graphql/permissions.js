@@ -1,11 +1,13 @@
 const { AuthenticationError } = require('apollo-server-express')
 
+/** checks if superadmin otherwise throws **/
 const isAdmin = ctx => {
   if (!ctx.user || !ctx.user.admin) {
     throw new AuthenticationError('permission denied');
   }
 }
 
+/** checks if fund admin and returns fund if they are **/
 const ensureFundAdmin = async (slug, { user, db }) => {
   if (user.admin) {
     return db.organizations.findOne({ slug })
@@ -17,6 +19,7 @@ const ensureFundAdmin = async (slug, { user, db }) => {
   }
 }
 
+/** fund admin guard **/
 const isOrgAdmin = (orgSlug, { user }) => {
   const org = (user.orgs || []).find(o => o.slug === orgSlug)
   if (org) return org
@@ -24,6 +27,7 @@ const isOrgAdmin = (orgSlug, { user }) => {
   throw new AuthenticationError("permission denied")
 }
 
+/** checks if superadmin or is same user as ctx.user **/
 const isAdminOrSameUser = (user, ctx) => {
   if (ctx.user && (ctx.user._id.toString() === user._id.toString() || ctx.user.admin)) {
     return

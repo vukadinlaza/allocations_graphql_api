@@ -3,6 +3,7 @@ const { MONGO_URL, MONGO_DB, NODE_ENV } = process.env
 
 const cols = ["investments", "deals", "organizations", "users", "orders", "trades", "matchrequests", "compliancetasks"]
 
+/** connects and attaches name of cols to db **/
 async function connect() {
     const client = new MongoClient(MONGO_URL, {
         useUnifiedTopology: true,

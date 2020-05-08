@@ -7,6 +7,12 @@ const { AuthenticationError, gql } = require('apollo-server-express')
 const Hellosign = require('../hellosign')
 const gSheets = require('../google-sheets')
 
+/** 
+
+  all organization handling (sometimes called funds)
+
+ **/
+
 const Schema = gql`
   type Organization {
     _id: String
@@ -132,6 +138,7 @@ const Queries = {
     }
     throw new AuthenticationError()
   },
+  /** members must have the org id on their .organizations_admin key **/
   organizationMembers: async (_, { slug }, { user, db }) => {
     isAdmin({user, db})
     const org = await db.organizations.findOne({ slug })
@@ -141,6 +148,7 @@ const Queries = {
 }
 
 const Mutations = {
+  /** creates org and adds the creator to the fund automatically  **/
   createOrganization: async (_, { organization: { logo, ...organization } }, ctx) => {
     isAdmin(ctx)
 
@@ -162,6 +170,7 @@ const Mutations = {
     )
     return org
   },
+  /** simple update **/
   updateOrganization: async (_, { organization: { _id, ...organization }}, ctx) => {
     isAdmin(ctx)    
     return ctx.db.organizations.updateOne(
@@ -169,6 +178,7 @@ const Mutations = {
       { $set: organization }
     )
   },
+  /** TODO -> deletes org and all associations **/
   deleteOrganization: async (_, { _id }, ctx) => {
     isAdmin(ctx)
 
@@ -181,6 +191,7 @@ const Mutations = {
      **/
      return true
   },
+  /** add member to org **/
   addOrganizationMembership: async (_, { slug, user_id }, ctx) => {
     isAdmin(ctx)
     const { _id } = await ctx.db.organizations.findOne({ slug })
@@ -189,6 +200,7 @@ const Mutations = {
       { $push: { organizations_admin: _id } }
     )
   },
+  /** rm member from org **/
   revokeOrganizationMembership: async (_, { slug, user_id }, ctx) => {
     isAdmin(ctx)
     const { _id } = await ctx.db.organizations.findOne({ slug })
@@ -197,6 +209,7 @@ const Mutations = {
       { $pull: { organizations_admin: _id } }
     )
   },
+  /** sends invite, mail and db **/
   sendAdminInvite: async (_, { slug, user_id }, ctx) => {
     isAdmin(ctx)
 
@@ -210,6 +223,7 @@ const Mutations = {
     )
     return invite
   },
+  /** add compliance task **/
   createComplianceTask: async (_, { slug, complianceTask }, ctx) => {
     isAdmin(ctx)
 

@@ -14,6 +14,7 @@ const Schema = gql`
 `
 
 const Queries = {
+  /** empty obj that allows super to resolve all the deals, investors, orgs  **/
   superadmin: (_, __, ctx) => {
     isAdmin(ctx)
     return {}

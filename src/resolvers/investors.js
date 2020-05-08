@@ -5,6 +5,12 @@ const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../cloudfront')
 const Uploader = require('../uploaders/investor-docs')
 
+/**  
+
+  handles all investor flow
+
+**/
+
 const Schema = gql`
   type User {
     _id: String
@@ -60,6 +66,7 @@ const Schema = gql`
 `
 
 const User = {
+  /** invited deal show deal info based on ctx (if invited) **/
   invitedDeal: async (user, { deal_slug, fund_slug }, ctx) => {
     const fund = await ctx.db.organizations.findOne({ slug: fund_slug })
 
@@ -117,6 +124,7 @@ const User = {
 }
 
 const Queries = {
+  /** admin or investor themselves can query **/
   investor: async (_, args, ctx) => {
     // only admins can arbitrarily query
     if (args._id) isAdmin(ctx)
@@ -152,12 +160,14 @@ const Queries = {
 }
 
 const Mutations = {
+  /** creates investor w/ created_at **/
   createInvestor: async (_, { user }, ctx) => {
     isAdmin(ctx)
 
     const res = await ctx.db.collection("users").insertOne({ ...user, created_at: Date.now() })
     return res.ops[0]
   },
+  /** updates user and handles file uploads **/
   updateUser: async (_, {input: {_id, passport, accredidation_doc, ...user}}, ctx) => {
     isAdminOrSameUser({ _id }, ctx)
 
@@ -188,6 +198,7 @@ const Mutations = {
       { $set: user }
     )                
   },
+  /** deletes investor -> TODO delete their investment as well **/
   deleteInvestor: async (_, { _id }, ctx) => {
     isAdmin(ctx)
 

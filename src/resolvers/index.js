@@ -1,3 +1,9 @@
+/** 
+  
+  merges all the resolvers into one typeDef and resolver
+
+ **/
+
 const resolversRaw = [
   'auth',
   'deals',

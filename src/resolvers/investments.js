@@ -5,6 +5,12 @@ const { gql, AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../cloudfront')
 const Uploader = require('../uploaders/investor-docs')
 
+/** 
+
+  handles all the investment flow
+
+ **/
+
 const Schema = gql`
   type Investment {
     _id: String
@@ -84,6 +90,7 @@ const Queries = {
 }
 
 const Mutations = {
+  /** inits investment with appropriate status **/
   createInvestment: async (_, { investment: { user_id, deal_id, ...investment }}, { user, db }) => {
     const deal = await db.collection("deals").findOne({ _id: ObjectId(deal_id) })
 
@@ -101,6 +108,7 @@ const Mutations = {
     }
     throw new AuthenticationError('permission denied');
   },
+  /** updates investment and tracks the status change **/
   updateInvestment: async (_, { org, investment: { _id, ...investment }}, ctx) => {
     isAdmin(ctx)
 
@@ -115,6 +123,7 @@ const Mutations = {
       { $set: investment }
     )
   },
+  /** delete investment **/
   deleteInvestment: async (_, { _id }, ctx) => {
     isAdmin(ctx)
 
@@ -127,6 +136,8 @@ const Mutations = {
   },
 
   // Document Handling
+
+  /** uploads investment document, S3 & db path **/
   addInvestmentDoc: async (_, {investment_id, doc}, ctx) => {
     isAdmin(ctx)
 
@@ -140,6 +151,7 @@ const Mutations = {
 
     return Cloudfront.getSignedUrl(s3Path)
   },
+  /** deletes investment document, S3 & db path **/
   rmInvestmentDoc: async (_, {investment_id, file}, ctx) => {
     isAdmin(ctx)
     await Uploader.rmInvestmentDoc(investment_id, file)

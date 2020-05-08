@@ -8,6 +8,12 @@ const DealMailer = require('../mailers/deal-mailer')
 const logger = require('../utils/logger')
 const { AuthenticationError } = require('apollo-server-express')
 
+/** 
+  
+  Handles all exchange related requests
+  
+ **/
+
 const Schema = gql`
   type ExchangeDeal {
     _id: String
@@ -198,6 +204,7 @@ const MatchRequest = {
 }
 
 const Mutations = {
+  /** Add order w/ proper associations **/
   createOrder: async (_, { order: { user_id, deal_id, ...order } }, ctx) => {
     isAdmin(ctx)
     // TODO => check that user has sufficient inventory
@@ -215,6 +222,7 @@ const Mutations = {
     })
     return res.ops[0]
   },
+  /** cancels order, so that it can no longer be matched **/
   cancelOrder: (_, { order_id }, ctx) => {
     isAdmin(ctx)
 
@@ -223,6 +231,7 @@ const Mutations = {
       { $set: { cancelled: true, status: "cancelled" } }
     )
   },
+  /** creates match request that musts be approved to create a trade **/
   newMatchRequest: async (_, { order_id }, ctx) => {
     isAdmin(ctx)
 
@@ -237,6 +246,7 @@ const Mutations = {
     })
     return res.ops[0]
   },
+  /** creates and settles a trade -> TODO add balance transfer **/
   createTrade: async (_, { org: orgSlug, trade: { seller_id, buyer_id, deal_id, ...trade  } }, ctx) => {
     const org = await ensureFundAdmin(orgSlug, ctx)
 

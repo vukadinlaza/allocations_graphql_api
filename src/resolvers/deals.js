@@ -8,6 +8,12 @@ const DealMailer = require('../mailers/deal-mailer')
 const logger = require('../utils/logger')
 const { AuthenticationError } = require('apollo-server-express')
 
+/** 
+  
+  Handles all deal logic
+
+ **/
+
 const Schema = gql`
   type Deal {
     _id: String
@@ -200,6 +206,7 @@ const Queries = {
       company_name: { $regex: new RegExp(q), $options: "i" }
     }).limit(limit || 10).toArray()
   },
+  /** Search query for any deals on an org **/
   searchDealsByOrg: async (_, {q, org: orgSlug, limit}, ctx) => {
     const org =  await ensureFundAdmin(orgSlug, ctx)
     return ctx.db.deals.find({
@@ -207,6 +214,7 @@ const Queries = {
       company_name: { $regex: new RegExp(q), $options: "i" }
     }).limit(limit || 10).toArray()
   },
+  /** Public Deal fetches the deal info WITHOUT auth **/
   publicDeal: async (_, { deal_slug, fund_slug, invite_code }, { db }) => {
     const fund = await db.organizations.findOne({ slug: fund_slug })
     const deal = await db.deals.findOne({ slug: deal_slug, organization: fund._id })
@@ -222,6 +230,7 @@ function uuid () {
 }
 
 const Mutations = {
+  /** create deal ensures there isn't already a deal form org with same name **/
   createDeal: async (_parent, { deal, org: orgSlug }, ctx) => {
     const org = await ensureFundAdmin(orgSlug, ctx)
     const slug = _.kebabCase(deal.company_name)
@@ -243,6 +252,7 @@ const Mutations = {
     })
     return res.ops[0]
   },
+  /** special handling for wire instructions upload **/
   updateDeal: async (_, {org, deal: { _id, wireDoc, ...deal}}, ctx) => {
     await ensureFundAdmin(org, ctx)
 
@@ -258,6 +268,7 @@ const Mutations = {
     )
     return res.value
   },
+  /** delete Deal and all associated investment records **/
   deleteDeal: async (_, { _id }, ctx) => {
     isAdmin(ctx)
 
@@ -270,6 +281,7 @@ const Mutations = {
       return false
     }
   },
+  /** case where new user is creating an org & a deal simultaneously **/
   createOrgAndDeal: async (_parent, { orgName, deal }, { db, user }) => {
     // no auth required for this (anyone can do it once signed in)
 
@@ -297,6 +309,7 @@ const Mutations = {
     })
     return res.ops[0]
   },
+  /** invites user who isn't on platform to a deal and sends them an email invite **/
   inviteNewUser: async (_, { org, email, deal_id }, ctx) => {
     const orgRecord = await ensureFundAdmin(org, ctx)
     const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
@@ -323,6 +336,7 @@ const Mutations = {
 
     return invite
   },
+  /** invites investor to a deal and initializes investment record **/
   inviteInvestor: async (_, { org, user_id, deal_id }, ctx) => {
     const orgRecord = await ensureFundAdmin(org, ctx)
     const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
@@ -350,6 +364,7 @@ const Mutations = {
 
     return updatedDeal
   },
+  /** unintive investor from deal **/
   uninviteInvestor: async (_, { org, user_id, deal_id }, ctx) => {
     await ensureFundAdmin(org, ctx)
     return ctx.db.deals.updateOne(
@@ -357,6 +372,7 @@ const Mutations = {
       { $pull: { invitedInvestors: ObjectId(user_id) } }
     )
   },
+  /** upload deal doc, S3 & db **/
   addDealDoc: async (_, params, ctx) => {
     isAdmin(ctx)
     const path = await DealDocUploader.addDoc(params)
@@ -365,6 +381,7 @@ const Mutations = {
       { $push: { documents: path } }
     )
   },
+  /** delete deal doc, S3 & db **/
   rmDealDoc: async (_, params, ctx) => {
     isAdmin(ctx)
     const path = await DealDocUploader.rmDoc(params)

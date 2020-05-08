@@ -5,6 +5,13 @@ const { CLOUDFRONT_URL, CLOUDFRONT_ENCRYPTED_URL, CLOUDFRONT_PUBLIC_KEY, CLOUDFR
 
 const s3 = new S3({apiVersion: '2006-03-01'})
 
+/** 
+
+  Cloudfront signs s3 urls and serves to user with an expiry to
+  increase security of the links
+
+ **/
+
 const hour = 60 * 60 * 1000
 function expiry () {
   return Date.now() + (4 * hour)

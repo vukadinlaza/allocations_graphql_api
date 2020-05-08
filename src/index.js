@@ -14,6 +14,12 @@ const { ApolloServer, gql } = require('apollo-server-express');
 
 const { NODE_ENV } = process.env
 
+/** 
+
+  Boilerplate express server that attaches apollo
+
+ **/
+
 function corsWhitelist (whitelist) {
   const origin = (origin, cb) => {
     if (whitelist.includes(origin)) {
