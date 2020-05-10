@@ -99,6 +99,7 @@ const Mutations = {
       const res = await db.investments.insertOne({
         status: "invited",
         invited_at: Date.now(),
+        [`${investment.status}_at`]: Date.now(),
         ...investment,
         user_id: ObjectId(user_id),
         deal_id: ObjectId(deal_id),
