@@ -285,10 +285,16 @@ const Mutations = {
   createOrgAndDeal: async (_parent, { orgName, deal }, { db, user }) => {
     // no auth required for this (anyone can do it once signed in)
 
+    const slug = _.kebabCase(orgName)
+    // ensure no collision
+    if (await db.organizations.findOne({ slug })) {
+      throw new Error("name collision")
+    }
+
     const { ops: [org] } = await db.organizations.insertOne({
       name: orgName,
       created_at: Date.now(),
-      slug: _.kebabCase(orgName),
+      slug,
       approved: false
     })
 
