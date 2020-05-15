@@ -88,13 +88,13 @@
     "winston": "^3.2.1"
   },
   "engines": {
-    "node": "10.x",
+    "node": "13.x",
     "npm": "6.x",
     "yarn": "1.x"
   },
   "jest": {
-    "testPathIgnorePatterns" : [
-      "test/*" 
+    "testPathIgnorePatterns": [
+      "test/*"
     ]
   }
 }

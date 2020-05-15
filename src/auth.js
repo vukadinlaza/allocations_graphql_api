@@ -8,12 +8,12 @@ const client = jwksClient({
   cache: true,
   cacheMaxEntries: 1000,
   cacheMaxAge: ms('30d'),
-  jwksUri: `https://login.allocations.co/.well-known/jwks.json`
+  jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`
 })
 
 const options = {
-  domain: "login.allocations.co",
-  client_id: "R2iJsfjNPGNjIdPmRoE3IcKd9UvVrsp1"
+  domain: process.env.AUTH0_DOMAIN,
+  client_id: process.env.AUTH0_KEY,
 }
 
 function getKey(header, cb){
@@ -38,8 +38,8 @@ async function authenticate({ req, db }) {
   try {
     const token = (req.headers.authorization || "").slice(7)
     const data = await verify(token)
+    const user = await db.users.findOne({ email: data[`${process.env.AUTH0_NAMESPACE}/email`], })
 
-    const user = await db.users.findOne({ email: data["https://dashboard.allocations.co/email"] })
     if (user) {
       // attaches .orgs to org admins
       if (user.organizations_admin) {
@@ -50,7 +50,7 @@ async function authenticate({ req, db }) {
     }
 
     // else create user
-    const res = await db.users.insertOne({ email:  data["https://dashboard.allocations.co/email"] })
+    const res = await db.users.insertOne({ email: data[`${process.env.AUTH0_NAMESPACE}/email`], })
     return res.ops[0]
   } catch (e) {
     logger.error(e)

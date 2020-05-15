@@ -44,8 +44,6 @@ module.exports = {
   isAdmin, 
   isAdminOrSameUser, 
   isOrgAdmin,
-
-  // transitioning to more accurate phrasing 
-  ensureFundAdmin,
-  isFundAdmin 
+  ensureFundAdmin, // transitioning to more accurate phrasing
+  isFundAdmin, 
 }
