@@ -1,7 +1,9 @@
 
 module.exports = function template ({ sender, deal, link, org }) {
   return `  
-    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml"><head>
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+    <html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
       <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
       <!--[if !mso]><!-->
@@ -124,9 +126,9 @@ module.exports = function template ({ sender, deal, link, org }) {
       <center>
       <table><tr><td width="600">
     <![endif]-->
-                                      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px;" align="center">
-                                        <tbody><tr>
-                                          <td role="modules-container" style="padding:0px 0px 0px 0px; color:#000000; text-align:left;" bgcolor="#FFFFFF" width="100%" align="left"><table class="module preheader preheader-hide" role="module" data-type="preheader" border="0" cellpadding="0" cellspacing="0" width="100%" style="display: none !important; mso-hide: all; visibility: hidden; opacity: 0; color: transparent; height: 0; width: 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px;" align="center">
+    <tbody><tr>
+    <td role="modules-container" style="padding:0px 0px 0px 0px; color:#000000; text-align:left;" bgcolor="#FFFFFF" width="100%" align="left"><table class="module preheader preheader-hide" role="module" data-type="preheader" border="0" cellpadding="0" cellspacing="0" width="100%" style="display: none !important; mso-hide: all; visibility: hidden; opacity: 0; color: transparent; height: 0; width: 0;">
       <tbody><tr>
         <td role="module-content">
           <p></p>
@@ -136,7 +138,7 @@ module.exports = function template ({ sender, deal, link, org }) {
       <tbody>
         <tr>
           <td style="font-size:6px; line-height:10px; padding:0px 0px 0px 0px;" valign="top" align="center">
-            <img class="max-width" border="0" style="display:block; color:#000000; text-decoration:none; font-family:Helvetica, arial, sans-serif; font-size:16px; max-width:50% !important; width:50%; height:auto !important;" width="300" alt="" data-proportionally-constrained="true" data-responsive="true" src="http://cdn.mcauto-images-production.sendgrid.net/ee47f069b297ef65/1c60e931-f10e-4523-990b-575f5881e945/2700x900.png">
+            <img class="max-width" border="0" style="display:block; color:#000000; text-decoration:none; font-family:Helvetica, arial, sans-serif; font-size:16px; max-width:50% !important; width:50%; height:auto !important;" width="300" alt="" data-proportionally-constrained="true" data-responsive="true" src="https://allocations-public.s3.us-east-2.amazonaws.com/logo-new.png">
           </td>
         </tr>
       </tbody>
@@ -144,7 +146,7 @@ module.exports = function template ({ sender, deal, link, org }) {
       <tbody>
         <tr>
           <td style="padding:18px 0px 18px 0px; line-height:30px; text-align:inherit;" height="100%" valign="top" bgcolor="" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="font-family: helvetica, sans-serif; font-size: 20px">
-            ${org.name} has invited you to their deal
+            ${org.name} has invited you to their deal!
           </span></div><div></div></div></td>
         </tr>
       </tbody>
@@ -160,7 +162,7 @@ module.exports = function template ({ sender, deal, link, org }) {
                   <tr>
                   <td align="center" bgcolor="#3F69E1" class="inner-td" style="border-radius:6px; font-size:16px; text-align:center; background-color:inherit;">
                     <a href="${link}" style="border:0px solid #333333; border-color:#333333; border-radius:6px; border-width:0px; color:#ffffff; display:inline-block; font-size:14px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:12px 18px 12px 18px; text-align:center; text-decoration:none; border-style:solid; background-color:#3F69E1;" target="_blank">
-                      View Deal and Invest
+                      View Deal
                     </a>
                   </td>
                   </tr>
