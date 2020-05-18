@@ -8,7 +8,6 @@ const express = require('express')
 const { execute, subscribe } = require('graphql')
 const helmet = require('helmet')
 const { authedServer } = require('./graphql/server')
-const authenticate = require('./auth')
 const { connect } = require('./mongo')
 const { ApolloServer, gql } = require('apollo-server-express');
 
