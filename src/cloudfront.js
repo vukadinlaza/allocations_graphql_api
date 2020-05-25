@@ -1,7 +1,12 @@
 const S3 = require('aws-sdk/clients/s3')
 const cloudfrontSign = require('aws-cloudfront-sign')
 
-const { CLOUDFRONT_URL, CLOUDFRONT_ENCRYPTED_URL, CLOUDFRONT_PUBLIC_KEY, CLOUDFRONT_PRIVATE_KEY } = process.env
+const {
+  CLOUDFRONT_URL,
+  CLOUDFRONT_ENCRYPTED_URL,
+  CLOUDFRONT_PUBLIC_KEY,
+  CLOUDFRONT_PRIVATE_KEY,
+} = process.env
 
 const s3 = new S3({apiVersion: '2006-03-01'})
 
