@@ -7,6 +7,7 @@ const {
   CLOUDFRONT_ENCRYPTED_URL,
   CLOUDFRONT_PUBLIC_KEY,
   CLOUDFRONT_SECRET_NAME,
+
 } = process.env
 
 const secretManager = new AWS.SecretsManager({

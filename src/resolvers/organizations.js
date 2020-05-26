@@ -5,7 +5,6 @@ const PublicUploader = require('../uploaders/public-docs')
 const AdminMailer = require('../mailers/admin-mailer')
 const { AuthenticationError, gql } = require('apollo-server-express')
 const Hellosign = require('../hellosign')
-const gSheets = require('../google-sheets')
 
 /** 
 
@@ -328,10 +327,7 @@ const Organization = {
     isAdmin(ctx)
     return Hellosign.listTemplates()
   },
-  masterFiling: async (org) => {
-    const funds = await gSheets.throttledMasterFund()
-    return _.get(funds.find(f => f.name === org.legal_name), 'steps') || []
-  },
+  masterFiling: async org => [],
   // since approved was added on later, we're going to assume any previous one IS approved
   approved: (org) => {
     return org.approved !== false

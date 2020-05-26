@@ -1,15 +1,17 @@
 // import ENVs from .env (gitignored)
 require('dotenv').config();
 
+const { ApolloServer, gql } = require('apollo-server-express')
 const bodyParser = require('body-parser')
 const compression = require('compression')
 const cors = require('cors')
 const express = require('express')
 const { execute, subscribe } = require('graphql')
 const helmet = require('helmet')
+
 const { authedServer } = require('./graphql/server')
 const { connect } = require('./mongo')
-const { ApolloServer, gql } = require('apollo-server-express');
+const getSettings = require('./settings')
 
 const { NODE_ENV } = process.env
 
@@ -31,30 +33,26 @@ function corsWhitelist (whitelist) {
 }
 
 async function run () {
-  const app = express();
-  const port = process.env.PORT || 4000;
+  const app = express()
+  const port = process.env.PORT || 4000
+  const settings = await getSettings(NODE_ENV)
 
   // only prevent CORS if in production
-  if (NODE_ENV === "production") {
-    app.use("*", corsWhitelist(["https://dashboard.allocations.co", "https://dashboard.allocations.com"]))
-  }
-
-  if (NODE_ENV === "staging") {
-    app.use("*", corsWhitelist(["https://staging.allocations.co", "https://staging.allocations.com"]))
+  if (NODE_ENV === "production" || NODE_ENV === "staging") {
+    app.use("*", corsWhitelist(settings.cors))
   }
 
   // standard express middlewares
-  app.use(helmet());
-  app.use(compression());
-  app.use(bodyParser.urlencoded({extended: true}));
-  app.use(bodyParser.json());
+  app.use(helmet())
+  app.use(compression())
+  app.use(bodyParser.urlencoded({extended: true}))
+  app.use(bodyParser.json())
 
   // connect to MongoDB
   const db = await connect()
 
   // auth handling (only prod for now)
   console.log("⛰️ Environment: ", process.env.NODE_ENV)
-  const credential = process.env.NODE_ENV === "production"
 
   app.use((err, req, res, next) => {
     if (err.name === "UnauthorizedError") {
@@ -69,7 +67,7 @@ async function run () {
   
   // init auth graphql server
   const authedGraphqlServer = authedServer(db)
-  authedGraphqlServer.applyMiddleware({ app });
+  authedGraphqlServer.applyMiddleware({ app })
 
   app.listen({ port }, () =>
     console.log(`🚀 Server ready at http://localhost:4000${authedGraphqlServer.graphqlPath}`)
