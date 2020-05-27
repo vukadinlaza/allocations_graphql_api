@@ -88,7 +88,7 @@
     "winston": "^3.2.1"
   },
   "engines": {
-    "node": "13.x",
+    "node": "12.17.0",
     "npm": "6.x",
     "yarn": "1.x"
   },

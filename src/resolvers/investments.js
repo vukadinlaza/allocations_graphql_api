@@ -155,11 +155,13 @@ const Mutations = {
   /** deletes investment document, S3 & db path **/
   rmInvestmentDoc: async (_, {investment_id, file}, ctx) => {
     isAdmin(ctx)
+
     await Uploader.rmInvestmentDoc(investment_id, file)
     await ctx.db.investments.updateOne(
       { _id: ObjectId(investment_id) },
       { $pull: { documents: `investments/${investment_id}/${file}` } }
     )
+
     return true
   }
 }
