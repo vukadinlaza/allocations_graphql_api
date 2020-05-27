@@ -236,7 +236,7 @@ const Mutations = {
     const slug = _.kebabCase(deal.company_name)
 
     // ensure that deal name with org doesn't exist
-    const collision = await ctx.db.deals.findOne({ slug, organization: org._id })
+    const collision = await ctx.db.deals.findOne({ slug  })
     if (collision) {
       throw new Error("Deal with same name already exists")
     }
@@ -274,8 +274,8 @@ const Mutations = {
 
     try {
       // delete deal and all investments in deal
-      await ctx.db.deals.deleteOne({ _id: ObjectId(_id) })
       await ctx.investments.deleteMany({ deal_id: ObjectId(_id) })
+      await ctx.db.deals.deleteOne({ _id: ObjectId(_id) })
       return true
     } catch (e) {
       return false

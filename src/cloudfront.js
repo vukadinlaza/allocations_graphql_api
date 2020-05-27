@@ -29,7 +29,6 @@ function expiry () {
 
 async function getSignedUrl (path) {
   const privateKeyString = cachedPrivateKey || await getPrivKey()
-
   // currently there are 2 cloudfronts, 1 for encrypted one for legacy w/ diff paths
   const baseURL = path.slice(0, 12) === "investments/" ? CLOUDFRONT_ENCRYPTED_URL : CLOUDFRONT_URL
 
@@ -43,9 +42,9 @@ async function getPrivKey () {
   const res = await secretManager.getSecretValue({
     SecretId: CLOUDFRONT_SECRET_NAME,
   }).promise()
-  const key = res.SecretString
-  cachedPrivateKey = key
-  return key
+  const key = res.SecretString;
+  cachedPrivateKey = JSON.parse(key)['CLOUDFRONT_PRIVATE_KEY'].replace(/\\n/g, '\n');
+  return cachedPrivateKey
 }
 
 module.exports = { getSignedUrl, getPrivKey }
