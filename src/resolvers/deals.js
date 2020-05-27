@@ -274,8 +274,8 @@ const Mutations = {
 
     try {
       // delete deal and all investments in deal
-      await ctx.db.deals.deleteOne({ _id: ObjectId(_id) })
       await ctx.investments.deleteMany({ deal_id: ObjectId(_id) })
+      await ctx.db.deals.deleteOne({ _id: ObjectId(_id) })
       return true
     } catch (e) {
       return false
