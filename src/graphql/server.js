@@ -1,8 +1,8 @@
-const { ApolloServer} = require('apollo-server-express')
+const { ApolloServer } = require('apollo-server-express')
 const { verify, authenticate } = require('../auth')
 
 const logger = require('../utils/logger')
-const { typeDefs, resolvers } = require('../resolvers')
+const { typeDefs, resolvers } = require('../graphql/resolvers')
 
 function authedServer (db) {
   const publicEndpoints = ["PublicDeal"]

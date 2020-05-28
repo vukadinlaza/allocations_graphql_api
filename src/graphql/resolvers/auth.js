@@ -1,8 +1,8 @@
 const { ObjectId } = require("mongodb")
 const _ = require('lodash')
 const { gql } = require('apollo-server-express')
-const { isAdmin } = require('../graphql/permissions')
-const logger = require('../utils/logger')
+const { isAdmin } = require('../permissions')
+const logger = require('../../utils/logger')
 const { AuthenticationError } = require('apollo-server-express')
 
 const Schema = gql`

@@ -1,7 +1,7 @@
 // import ENVs from .env (gitignored)
 require('dotenv').config();
 
-const { ApolloServer, gql } = require('apollo-server-express')
+// const { ApolloServer, gql } = require('apollo-server-express')
 const bodyParser = require('body-parser')
 const compression = require('compression')
 const cors = require('cors')

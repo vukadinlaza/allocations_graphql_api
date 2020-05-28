@@ -1,4 +1,4 @@
-const { isAdmin } = require('../graphql/permissions')
+const { isAdmin } = require('../permissions')
 const { gql } = require('apollo-server-express')
 
 const Schema = gql`

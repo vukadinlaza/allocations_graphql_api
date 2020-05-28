@@ -1,6 +1,6 @@
 /** 
   
-  merges all the resolvers into one typeDef and resolver
+  merges all the resolvers into one typeDef and resolver names 'resolvers'
 
  **/
 

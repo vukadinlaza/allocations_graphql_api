@@ -1,9 +1,9 @@
 const { ObjectId } = require("mongodb")
-const { isAdmin, isAdminOrSameUser } = require('../graphql/permissions')
-const { gql, AuthenticationError } = require('apollo-server-express')
-
-const Cloudfront = require('../cloudfront')
-const Uploader = require('../uploaders/investor-docs')
+const { isAdmin, isAdminOrSameUser } = require('../permissions')
+const { AuthenticationError } = require('apollo-server-express')
+const Cloudfront = require('../../cloudfront')
+const Uploader = require('../../uploaders/investor-docs')
+const Investments = require('../schema/investments')
 
 /** 
 
@@ -11,54 +11,7 @@ const Uploader = require('../uploaders/investor-docs')
 
  **/
 
-const Schema = gql`
-  type Investment {
-    _id: String
-
-    invited_at: Int
-    pledged_at: Int
-    onboarded_at: Int
-    completed_at: Int
-
-    organization: String
-    amount: Int
-    deal: Deal
-    user: User
-    status: InvestmentStatus
-    documents: [Document]
-    investor: User
-  }
-
-  enum InvestmentStatus {
-    invited
-    pledged
-    onboarded
-    complete
-  }
-
-  extend type Query {
-    investment(_id: String): Investment
-    allInvestments: [Investment]
-  }
-
-  extend type Mutation {
-    createInvestment(investment: InvestmentInput!): Investment
-    updateInvestment(investment: InvestmentInput!): Investment
-    deleteInvestment(_id: String!): Boolean
-
-    addInvestmentDoc(investment_id: String!, doc: Upload!): String
-    rmInvestmentDoc(investment_id: String!, file: String!): Boolean
-  }
-
-  input InvestmentInput {
-    _id: String
-    amount: Int
-    deal_id: String
-    user_id: String
-    status: String
-    documents: String
-  }
-`
+const Schema = Investments
 
 const Investment = {
   deal: (investment, _, { db }) => {
