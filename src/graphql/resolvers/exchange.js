@@ -1,11 +1,11 @@
 const { ObjectId } = require("mongodb")
 const { sumBy } = require('lodash')
 const { gql } = require('apollo-server-express')
-const { isAdmin, isOrgAdmin, ensureFundAdmin } = require('../graphql/permissions')
-const Cloudfront = require('../cloudfront')
-const DealDocUploader = require('../uploaders/deal-docs')
-const DealMailer = require('../mailers/deal-mailer')
-const logger = require('../utils/logger')
+const { isAdmin, isOrgAdmin, ensureFundAdmin } = require('../permissions')
+const Cloudfront = require('../../cloudfront')
+const DealDocUploader = require('../../uploaders/deal-docs')
+const DealMailer = require('../../mailers/deal-mailer')
+const logger = require('../../utils/logger')
 const { AuthenticationError } = require('apollo-server-express')
 
 /** 

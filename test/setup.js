@@ -2,7 +2,7 @@ const { ApolloServer } = require('apollo-server-express')
 const { createTestClient } = require('apollo-server-integration-testing')
 const { connect, drop } = require('../src/mongo')
 const { authenticate } = require('./auth')
-const { typeDefs, resolvers } = require('../src/resolvers')
+const { typeDefs, resolvers } = require('../src/graphql/resolvers')
 
 const userFixtures = require('./fixtures/users')
 
