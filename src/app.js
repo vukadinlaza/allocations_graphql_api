@@ -39,7 +39,7 @@ async function run () {
 
   // only prevent CORS if in production
   if (NODE_ENV === "production" || NODE_ENV === "staging") {
-    app.use("*", corsWhitelist(settings.cors))
+    app.use("*", corsWhitelist(settings.default.cors))
   }
 
   // standard express middlewares
