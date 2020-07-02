@@ -74,7 +74,8 @@ const Mutations = {
 
     return ctx.db.investments.updateOne(
       { _id: ObjectId(_id) },
-      { $set: investment }
+      { $set: { amount: investment.amount } },
+      {"new": true}
     )
   },
   /** delete investment **/
