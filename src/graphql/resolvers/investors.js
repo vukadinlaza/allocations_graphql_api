@@ -27,10 +27,7 @@ const User = {
       const deal = await ctx.db.deals.findOne({ 
         slug: deal_slug,
         organization: fund._id,
-        $or: [
-          { invitedInvestors: ObjectId(user._id) }, 
-          { allInvited: true, organization: { $in: user.organizations || [] } }
-        ]
+        invitedInvestors: ObjectId(user._id)
       })
       if (deal) return deal
       throw new AuthenticationError("REDIRECT")
