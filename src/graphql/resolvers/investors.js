@@ -26,8 +26,8 @@ const User = {
       // otherwise make sure they are invited!
       const deal = await ctx.db.deals.findOne({ 
         slug: deal_slug,
-        organization: fund._id,
-        invitedInvestors: ObjectId(user._id)
+        organization: fund._id
+        // invitedInvestors: ObjectId(user._id)
       })
       if (deal) return deal
       throw new AuthenticationError("REDIRECT")
