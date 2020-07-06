@@ -19,19 +19,16 @@ const User = {
   invitedDeal: async (user, { deal_slug, fund_slug }, ctx) => {
     const fund = await ctx.db.organizations.findOne({ slug: fund_slug })
 
-    // // if fund admin or superadmin -> show
-    // if (isFundAdmin(fund_slug, ctx.user) || ctx.user.admin) {
-    //   return ctx.db.deals.findOne({ slug: deal_slug, organization: fund._id })
-    // } 
-    
-    
-    // else {
+    // if fund admin or superadmin -> show
+    if (isFundAdmin(fund_slug, ctx.user) || ctx.user.admin) {
+      return ctx.db.deals.findOne({ slug: deal_slug, organization: fund._id })
+    } else {
       // otherwise make sure they are invited!
       const deal = await ctx.db.deals.findOne({ 
         slug: deal_slug,
-        organization: fund._id
+        organization: fund._id,
+        invitedInvestors: ObjectId(user._id)
       })
-
       if (deal) return deal
       throw new AuthenticationError("REDIRECT")
     }
