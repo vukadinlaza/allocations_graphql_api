@@ -48,7 +48,7 @@ const Mutations = {
     const deal = await db.collection("deals").findOne({ _id: ObjectId(deal_id) })
 
     // superadmin OR all are invited OR is org admin
-    if (user.admin || deal.allInvited || user.orgs.find(o => o._id.toString() === deal.organization.toString())) {
+    // if (user.admin || deal.allInvited || user.orgs.find(o => o._id.toString() === deal.organization.toString())) {
       const res = await db.investments.insertOne({
         status: "invited",
         invited_at: Date.now(),
@@ -59,7 +59,7 @@ const Mutations = {
         organization: ObjectId(deal.organization)
       })
       return res.ops[0]
-    }
+    // }
     throw new AuthenticationError('permission denied');
   },
   /** updates investment and tracks the status change **/
