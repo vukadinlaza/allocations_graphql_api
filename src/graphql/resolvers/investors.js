@@ -20,9 +20,9 @@ const User = {
     const fund = await ctx.db.organizations.findOne({ slug: fund_slug })
 
     // if fund admin or superadmin -> show
-    if (isFundAdmin(fund_slug, ctx.user) || ctx.user.admin) {
-      return ctx.db.deals.findOne({ slug: deal_slug, organization: fund._id })
-    } else {
+    // if (isFundAdmin(fund_slug, ctx.user) || ctx.user.admin) {
+    //   return ctx.db.deals.findOne({ slug: deal_slug, organization: fund._id })
+    // } else {
       // otherwise make sure they are invited!
       const deal = await ctx.db.deals.findOne({ 
         slug: deal_slug,
@@ -31,7 +31,7 @@ const User = {
       })
       if (deal) return deal
       throw new AuthenticationError("REDIRECT")
-    }
+    // }
   },
   investments: (user, _, { db }) => {
     return db.investments.find({ user_id: user._id }).toArray()
