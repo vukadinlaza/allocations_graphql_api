@@ -85,8 +85,7 @@
     "pino": "^5.15.0",
     "rollbar": "^2.15.1",
     "subscriptions-transport-ws": "^0.9.16",
-    "winston": "^3.2.1",
-    "xml-js": "^1.6.11"
+    "winston": "^3.2.1"
   },
   "engines": {
     "node": "12.17.0",
