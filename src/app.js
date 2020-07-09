@@ -24,7 +24,7 @@ const { NODE_ENV } = process.env
 function corsWhitelist (whitelist) {
   const origin = (origin, cb) => {
     console.log('origin', origin, whitelist)
-    if (whitelist.includes(origin)) {
+    if (whitelist.includes(origin) || !origin) {
       cb(null, true)
     } else {
       cb(new Error('Not allowed by CORS'))
