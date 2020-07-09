@@ -5,7 +5,7 @@ module.exports = {
     'https://staging.allocations.co',
     'https://staging.allocations.com',
     'https://allocations-staging-api.herokuapp.com',
-    'https://*.docusign.com',
-    'https://*.docusign.net'
-  ],
+    /\.docusign\.com$/,
+    /\.docusign\.net$/
+  ]
 }
