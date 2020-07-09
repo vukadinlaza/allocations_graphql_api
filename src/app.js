@@ -64,6 +64,8 @@ async function run () {
       next(err);
     }
   }); 
+
+  app.use('/api/webhooks', require('./express/routes/webhooks'))
   
   // init auth graphql server
   const authedGraphqlServer = authedServer(db)
