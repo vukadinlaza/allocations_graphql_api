@@ -8,6 +8,7 @@ const cors = require('cors')
 const express = require('express')
 const { execute, subscribe } = require('graphql')
 const helmet = require('helmet')
+const xmlparser = require('express-xml-bodyparser');
 
 const { authedServer } = require('./graphql/server')
 const { connect } = require('./mongo')
@@ -23,7 +24,6 @@ const { NODE_ENV } = process.env
 
 function corsWhitelist (whitelist) {
   const origin = (origin, cb) => {
-    console.log('origin', origin, whitelist)
     if (whitelist.includes(origin) || !origin) {
       cb(null, true)
     } else {
@@ -48,6 +48,8 @@ async function run () {
   app.use(compression())
   app.use(bodyParser.urlencoded({extended: true}))
   app.use(bodyParser.json())
+  app.use(xmlparser());
+
 
   // connect to MongoDB
   const db = await connect()
