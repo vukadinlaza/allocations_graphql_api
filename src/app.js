@@ -23,6 +23,7 @@ const { NODE_ENV } = process.env
 
 function corsWhitelist (whitelist) {
   const origin = (origin, cb) => {
+    console.log('origin', origin, whitelist)
     if (whitelist.includes(origin)) {
       cb(null, true)
     } else {
@@ -38,7 +39,6 @@ async function run () {
   const settings = await getSettings(NODE_ENV)
 
   // only prevent CORS if in production
-    console.log(settings.default.cors)
   if (NODE_ENV === "production" || NODE_ENV === "staging") {
     app.use("*", corsWhitelist(settings.default.cors))
   }
