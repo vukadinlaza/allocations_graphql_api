@@ -17,7 +17,7 @@ type User {
   organizations: [String]
   organizations_admin: [Organization]
   terms_of_service: Boolean
-  documents: [Document]
+  documents: [Object]
   passport: Document
   accredidation_doc: Document
   investments: [Investment]
