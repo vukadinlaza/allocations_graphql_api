@@ -44,6 +44,7 @@ extend type Query {
   investor(email: String, _id: String): User
   allInvestors: [User]
   searchUsers(org: String!, q: String!, limit: Int): [User]
+  getLink(input: Object): Object
 }
 
 extend type Mutation {

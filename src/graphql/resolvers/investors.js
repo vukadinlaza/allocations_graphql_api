@@ -4,6 +4,7 @@ const { isAdmin, isOrgAdmin, isFundAdmin, isAdminOrSameUser, ensureFundAdmin } =
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
+const { makeEnvelopeDef, createEnvelope, makeRecipientViewRequest, createRecipientView } = require('../../utils/docusign')
 const Users = require('../schema/users')
 
 /**  
@@ -102,6 +103,27 @@ const Queries = {
       ...orgCheck,
       ...searchQ
     }).limit(limit || 10).toArray()
+  },
+  getLink: async(_, data, ctx) => {
+    // step 1 define envelope data
+    // const templateId = 'ac6e6809-c6a3-4d7f-bca2-46d3abb8014a'
+    // const envelopeDefinition = await makeEnvelopeDef({user: data.input, templateId})
+
+    // // step 2 create the envelope with docusign
+    // const {envelopeId} = await createEnvelope({ envelopeDefinition, accountId: '26630525-c754-47e0-a821-a9ca4134ac03'})
+
+    // step 3  define the view
+
+
+    const envelopeId = '180ac2fe-6460-438a-9951-bc332efb60b6'
+    const accountId = '26630525-c754-47e0-a821-a9ca4134ac03'
+    const viewRequest = await makeRecipientViewRequest({user: {...data.input, _id: ctx.user._id}, dsPingUrl: 'https://staging.allocations.com', dsReturnUrl: 'https://staging.allocations.com', envelopeId, accountId})
+
+    // step 4 create the view
+    const view = await createRecipientView({envelopeId, viewRequest, accountId})
+
+
+    return {redirectUrl: view.redirectUrl}
   }
 }
 
