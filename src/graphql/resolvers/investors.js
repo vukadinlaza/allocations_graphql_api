@@ -118,7 +118,7 @@ const Queries = {
     const {envelopeId} = await createEnvelope({ envelopeDefinition, accountId})
 
     // step 3  define the view
-    const viewRequest = await makeRecipientViewRequest({user: { ...ctx.user, ...data.input,  _id: ctx.user._id}, dsPingUrl: 'https://staging.allocations.com', dsReturnUrl: 'https://staging.allocations.com', envelopeId, accountId})
+    const viewRequest = await makeRecipientViewRequest({user: { ...ctx.user, ...data.input,  _id: ctx.user._id}, dsPingUrl: process.env.DS_APP_URL, dsReturnUrl: process.env.DS_APP_URL, envelopeId, accountId})
 
     // step 4 create the view
     const view = await createRecipientView({envelopeId, viewRequest, accountId})

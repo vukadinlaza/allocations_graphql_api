@@ -116,7 +116,7 @@ const makeRecipientViewRequest = async ({user, dsPingUrl, dsReturnUrl, envelopeI
     const env = await envelopesApi.listRecipients(accountId, envelopeId)
 
     // Will need to change or update this. 
-    viewRequest.returnUrl = dsReturnUrl + "?state=123";
+    viewRequest.returnUrl = dsReturnUrl + `/deals/${user.activeInvestment.org}/${user.activeInvestment.deal_slug}`;
     viewRequest.authenticationMethod = 'email';
 
     
