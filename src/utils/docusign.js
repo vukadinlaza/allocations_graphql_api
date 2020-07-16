@@ -1,7 +1,7 @@
 const docusign = require('docusign-esign')
 const apiClient = new docusign.ApiClient();
 
-const basePath = 'https://demo.docusign.net/restapi'
+const basePath = process.env.NODE_ENV === 'production' ? 'https://docusign.net/restapi' : 'https://demo.docusign.net/restapi'
 const DsJwtAuth = require('./docusign-auth')
 
 apiClient.setBasePath(basePath);
@@ -13,9 +13,10 @@ let envelopesApi = new docusign.EnvelopesApi(apiClient)
 
 const getAuthToken = async () => {
     const hasToken = await DsJwtAuth.prototype.checkToken()
-    const token = await DsJwtAuth.prototype.getToken()
-    console.log(token)
-    apiClient.addDefaultHeader('Authorization', 'Bearer ' + token.accessToken);
+    if(!hasToken) {
+        const token = await DsJwtAuth.prototype.getToken()
+        apiClient.addDefaultHeader('Authorization', 'Bearer ' + token.accessToken);
+    }
 }
 
 
@@ -25,7 +26,6 @@ const makeEnvelopeDef = ({user, templateId}) => {
     let env = new docusign.EnvelopeDefinition();
     env.emailSubject = 'Please sign this document';
     env.status = 'sent'
- 
     env.compositeTemplates =  [
         {
         serverTemplates: [
@@ -41,39 +41,48 @@ const makeEnvelopeDef = ({user, templateId}) => {
                 signers: [
                 {
                     email: user.email,
-                    name: user.first_name || user.signer_full_name,
-                    userName: user.first_name || user.signer_full_name,
+                    name: user.signer_full_name || `${user.firstName} ${user.lastName}`,
+                    userName: user.signer_full_name || `${user.firstName} ${user.lastName}`,
                     recipientId: '10001',
                     clientUserId: user.email,
                     roleName: 'Signer',
                     routingOrder: '1',
                     tabs: {
-                        signHereTabs: [{
-                            anchorString: 'React',
-                            anchorYOffset: '10',
-                            anchorUnits: 'pixels',
-                            anchorXOffset: '20'
-                        }],
-                        textTabs: [{
-                            tabLabel: 'Text-1685d421-1287-49cb-87ac-da3b868846fc',
+                        // Extract to util function => return different tabs based on doc type
+                        textTabs: [
+                        {
+                            tabLabel: 'Full-Name',
                             show: 'true',
-                            value: user.email,
+                            value: user.signer_full_name || `${user.firstName} ${user.lastName}`
                         },
                         {
-                            tabLabel: '\\*firstName',
+                            tabLabel: 'Entity-Name',
                             show: 'true',
-                            value: user.firstName || user.signer_full_name,
+                            value: user.investor_type === 'entity' ? user.entity_name : ''
                         },
                         {
-                            tabLabel: '\\*lastName',
+                            tabLabel: 'Street-Address',
                             show: 'true',
-                            value: user.lastName || user.signer_full_name,
-
+                            value: user.street_address
                         },
                         {
-                            tabLabel: '\\*country', 
+                            tabLabel: 'City-State-Zip-Province',
                             show: 'true',
-                            value: user.country || ''
+                            value: `${user.city}, ${user.state}, ${user.zip}`
+                        },
+                        {
+                            tabLabel: 'CountyOfCitizenship',
+                            show: 'true',
+                            value: user.country
+                        },
+                        {
+                            anchorString: '\\SSN/ITIN',
+                            show: 'true',
+                            value: user.ssnOrItin
+                        }, 
+                        {
+                            tabLabel: 'Text-e038e295-a054-47ca-9e27-df6f8d577101',
+                            value: 'YEA BUDDY'
                         }
                         ]
                     }
@@ -93,25 +102,16 @@ const createEnvelope = async ({envelopeDefinition, accountId}) => {
     let results = null;
 
     // Step 2. call Envelopes::create API method
-    // Exceptions will be caught by the calling function
     results = await envelopesApi.createEnvelope(accountId, {envelopeDefinition});
 
     let envelopeId = results.envelopeId;
     console.log(`Envelope was created. EnvelopeId ${envelopeId}`);
-
     return {envelopeId}
 
 }
 
 
 const makeRecipientViewRequest = async ({user, dsPingUrl, dsReturnUrl, envelopeId, accountId}) => {
-    // Data for this method
-    // args.dsReturnUrl 
-    // args.signerEmail 
-    // args.signerName 
-    // args.signerClientId
-    // args.dsPingUrl 
-
     let viewRequest = new docusign.RecipientViewRequest();
     const env = await envelopesApi.listRecipients(accountId, envelopeId)
 
@@ -124,12 +124,13 @@ const makeRecipientViewRequest = async ({user, dsPingUrl, dsReturnUrl, envelopeI
     // can be changed/spoofed very easily.
     viewRequest.returnUrl = dsReturnUrl + "?state=123";
     viewRequest.authenticationMethod = 'email';
+
+    
     // Recipient information must match embedded recipient info
     // we used to create the envelope.
-
     viewRequest.email = user.email;
-    viewRequest.name = user.first_name || user.signer_full_name,
-    viewRequest.userName =  user.first_name || user.signer_full_name,
+    viewRequest.name = user.signer_full_name || `${user.firstName} ${user.lastName}`,
+    viewRequest.userName =  user.signer_full_name || `${user.firstName} ${user.lastName}`,
     viewRequest.recipientId = '10001';
     viewRequest.clientUserId = user.email;
     viewRequest.userId = env.signers.find(r => r.email === user.email).userId
@@ -143,12 +144,9 @@ const makeRecipientViewRequest = async ({user, dsPingUrl, dsReturnUrl, envelopeI
 
 const createRecipientView = async ({viewRequest, accountId, envelopeId}) => {
     // Call the CreateRecipientView API
-    // Exceptions will be caught by the calling function
     let results 
-    console.log('VIEW', viewRequest)
     results = await envelopesApi.createRecipientView(accountId, envelopeId, {'recipientViewRequest': viewRequest});
 
-    console.log('THIS ONE', results)
     return ({envelopeId: envelopeId, redirectUrl: results.url})
 }
 

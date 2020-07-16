@@ -105,19 +105,20 @@ const Queries = {
     }).limit(limit || 10).toArray()
   },
   getLink: async(_, data, ctx) => {
-    // step 1 define envelope data
 
     await getAuthToken()
-    const templateId = '109bd6e0-deb0-40e4-9dfd-0388474f37cd'
+
+    // hardcoded template ID because we only have one template in our demo account => replace with logic to find correct template
+    const templateId = '460efb59-b4e9-452b-bc5f-1d8a53114acc'
 
     const accountId = process.env.DOCUSIGN_ACCOUNT_ID
-    const envelopeDefinition = await makeEnvelopeDef({user: data.input, templateId})
+    const envelopeDefinition = await makeEnvelopeDef({user: { ...ctx.user, ...data.input,  _id: ctx.user._id}, templateId})
 
     // step 2 create the envelope with docusign
     const {envelopeId} = await createEnvelope({ envelopeDefinition, accountId})
 
     // step 3  define the view
-    const viewRequest = await makeRecipientViewRequest({user: {...data.input, _id: ctx.user._id}, dsPingUrl: 'https://staging.allocations.com', dsReturnUrl: 'https://staging.allocations.com', envelopeId, accountId})
+    const viewRequest = await makeRecipientViewRequest({user: { ...ctx.user, ...data.input,  _id: ctx.user._id}, dsPingUrl: 'https://staging.allocations.com', dsReturnUrl: 'https://staging.allocations.com', envelopeId, accountId})
 
     // step 4 create the view
     const view = await createRecipientView({envelopeId, viewRequest, accountId})
