@@ -2,7 +2,7 @@ const settings =
 {
   "dsClientId": `${process.env.DOCUSIGN_ACCOUNT_ID}`,
   "dsClientSecret": `${process.env.DOCUSIGN_PRIVATE_KEY}`,
-  "appUrl": "http://localhost:4000",
+  "appUrl": "http://localhost:3000",
   "production": false,
   "debug": true,
   "sessionSecret": "12345",
@@ -24,7 +24,6 @@ const dsOauthServer = process.env.NODE_ENV === 'production'
 settings.dsClientId = process.env.DOCUSIGN_CLIENT_ID || settings.dsClientId;
 settings.appUrl = process.env.DS_APP_URL || settings.appUrl;
 settings.dsJWTClientId = process.env.DS_JWT_CLIENT_ID || jwt.dsJWTClientId;
-// settings.privateKeyLocation = process.env.DS_PRIVATE_KEY_PATH  || jwt.privateKeyLocation;
 settings.privateRSAKey = process.env.DOCUSIGN_CLIENT_PRIVATE_KEY.replace(/\\n/gm, '\n') || ''
 settings.impersonatedUserGuid =  process.env.DS_IMPERSONATED_USER_GUID || jwt.impersonatedUserGuid;
 

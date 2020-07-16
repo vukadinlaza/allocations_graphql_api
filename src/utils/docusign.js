@@ -115,13 +115,7 @@ const makeRecipientViewRequest = async ({user, dsPingUrl, dsReturnUrl, envelopeI
     let viewRequest = new docusign.RecipientViewRequest();
     const env = await envelopesApi.listRecipients(accountId, envelopeId)
 
-    // Set the url where you want the recipient to go once they are done signing
-    // should typically be a callback route somewhere in your app.
-    // The query parameter is included as an example of how
-    // to save/recover state information during the redirect to
-    // the DocuSign signing ceremony. It's usually better to use
-    // the session mechanism of your web framework. Query parameters
-    // can be changed/spoofed very easily.
+    // Will need to change or update this. 
     viewRequest.returnUrl = dsReturnUrl + "?state=123";
     viewRequest.authenticationMethod = 'email';
 
