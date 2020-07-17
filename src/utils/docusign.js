@@ -1,5 +1,6 @@
 const docusign = require('docusign-esign')
 const apiClient = new docusign.ApiClient();
+const {map} = require('lodash')
 
 const basePath = process.env.NODE_ENV === 'production' ? 'https://docusign.net/restapi' : 'https://demo.docusign.net/restapi'
 const DsJwtAuth = require('./docusign-auth')
@@ -70,20 +71,21 @@ const makeEnvelopeDef = ({user, templateId}) => {
                             show: 'true',
                             value: `${user.city}, ${user.state}, ${user.zip}`
                         },
-                        {
-                            tabLabel: 'CountyOfCitizenship',
-                            show: 'true',
-                            value: user.country
-                        },
-                        {
-                            anchorString: '\\SSN/ITIN',
-                            show: 'true',
-                            value: user.ssnOrItin
-                        }, 
-                        {
-                            tabLabel: 'Text-e038e295-a054-47ca-9e27-df6f8d577101',
-                            value: 'YEA BUDDY'
-                        }
+                        {tabLabel: 'Address-Country', value: user.country},
+                        {tabLabel: 'SSN-ITIN', value: user.ssn_itin},
+                        {tabLabel: 'Date-Of-Birth', value: user.dob},
+                        {tabLabel: 'Foreign-Tax-Number', value: user.foreign_tax_number},
+                        {tabLabel: 'Mailing-Street-Address', value: user.mail_street_address},
+                        {tabLabel: 'Mailing-City-State-Zip-Province', value: `${user.mail_city}, ${user.mail_state}, ${user.mail_zip}`},
+                        {tabLabel: 'Mailing-Country', value: user.mail_country},
+                        {tabLabel: 'Citizenship-Country', value: user.country},
+
+
+                        {tabLabel: 'Tax-Treaty-Special-Rates-Conditions-Paragraph', value: user.tax_treaty_rates_conditions},
+                        {tabLabel: 'Tax-Treaty-Special-Rates-Conditions-Percent', value: user.claim_percent_withholding},
+                        {tabLabel: 'Tax-Treaty-Special-Rates-Conditions-Income-Type', value: user.types_of_income},
+                        {tabLabel: 'Tax-Treaty-Special-Rates-Conditions-Extra-Info', value: user.additional_explanation},
+
                         ]
                     }
                 }
@@ -100,14 +102,11 @@ const makeEnvelopeDef = ({user, templateId}) => {
 
 const createEnvelope = async ({envelopeDefinition, accountId}) => {    
     let results = null;
-
     // Step 2. call Envelopes::create API method
     results = await envelopesApi.createEnvelope(accountId, {envelopeDefinition});
-
     let envelopeId = results.envelopeId;
     console.log(`Envelope was created. EnvelopeId ${envelopeId}`);
     return {envelopeId}
-
 }
 
 
@@ -144,10 +143,62 @@ const createRecipientView = async ({viewRequest, accountId, envelopeId}) => {
     return ({envelopeId: envelopeId, redirectUrl: results.url})
 }
 
+
+const getKYCTemplateId = ({input}) => {
+
+    console.log(input)
+    const isUsCitizen = input.country === 'United States'
+
+    const kycDocuments = [	
+    {	
+    isUsCitizen: true,	
+    formType: 'W-9 Entity',	
+    investor_type: 'entity',	
+    templateId: '460efb59-b4e9-452b-bc5f-1d8a53114acc'	
+    },	
+    {	
+    isUsCitizen: true, 	
+    formType: 'W-9 Individual',	
+    investor_type: 'individual',	
+    templateId: '460efb59-b4e9-452b-bc5f-1d8a53114acc'	
+    },	
+    {	
+    isUsCitizen: false, 	
+    investor_type: 'individual',	
+    formType: 'W-8BEN Individual',	
+    templateId: 'ae7f91d5-381c-4ca2-ae2e-4161bad232c7'	
+    },	 	
+    ]
+
+    return kycDocuments.find(doc => {	
+        return doc.isUsCitizen === isUsCitizen && doc.investor_type === input.investor_type	
+    })
+}
+
+const createSignerTabs = ({input}) => {
+  const x = [
+
+    {tabLabel: 'Street-Address', label: 'Street Address', slug: 'mail_street_address'},
+    {tabLabel: 'Mailing-City-State-Zip-Province', label: 'City', slug: 'mail_city'},
+    {tabLabel: 'Mailing-City-State-Zip-Province', label: 'State', slug: 'mail_state'},
+    {tabLabel: 'Mailing-City-State-Zip-Province', label: 'Zip', slug: 'mail_zip'},
+    {tabLabel: 'Mailing-Country', label: 'Country', slug: 'mail_country'}
+  ]
+
+  const tabs = x.map(item => {
+      return {
+          ...item,
+           value: input[item.slug]
+      }
+  })
+  return tabs
+}
+
 module.exports = {
     makeEnvelopeDef,
     createEnvelope,
     makeRecipientViewRequest,
     createRecipientView,
-    getAuthToken
+    getAuthToken,
+    getKYCTemplateId,
 }

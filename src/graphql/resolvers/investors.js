@@ -1,10 +1,23 @@
 const { ObjectId } = require("mongodb")
 const { gql } = require('apollo-server-express')
-const { isAdmin, isOrgAdmin, isFundAdmin, isAdminOrSameUser, ensureFundAdmin } = require('../permissions')
+const { 
+  isAdmin, 
+  isOrgAdmin,
+  isFundAdmin,
+  isAdminOrSameUser,
+  ensureFundAdmin 
+  } = require('../permissions')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
-const { makeEnvelopeDef, createEnvelope, makeRecipientViewRequest, createRecipientView, getAuthToken } = require('../../utils/docusign')
+const { 
+  makeEnvelopeDef,
+  createEnvelope,
+  makeRecipientViewRequest,
+  createRecipientView,
+  getAuthToken,
+  getKYCTemplateId 
+  } = require('../../utils/docusign')
 const Users = require('../schema/users')
 
 /**  
@@ -105,24 +118,19 @@ const Queries = {
     }).limit(limit || 10).toArray()
   },
   getLink: async(_, data, ctx) => {
-
     await getAuthToken()
 
-    // hardcoded template ID because we only have one template in our demo account => replace with logic to find correct template
-    const templateId = '460efb59-b4e9-452b-bc5f-1d8a53114acc'
+    const templateData = getKYCTemplateId({input: data.input})
 
     const accountId = process.env.DOCUSIGN_ACCOUNT_ID
-    const envelopeDefinition = await makeEnvelopeDef({user: { ...ctx.user, ...data.input,  _id: ctx.user._id}, templateId})
+    
+    const envelopeDefinition = await makeEnvelopeDef({user: { ...ctx.user, ...data.input,  _id: ctx.user._id}, templateId: templateData.templateId})
 
-    // step 2 create the envelope with docusign
     const {envelopeId} = await createEnvelope({ envelopeDefinition, accountId})
 
-    // step 3  define the view
     const viewRequest = await makeRecipientViewRequest({user: { ...ctx.user, ...data.input,  _id: ctx.user._id}, dsPingUrl: process.env.DS_APP_URL, dsReturnUrl: process.env.DS_APP_URL, envelopeId, accountId})
 
-    // step 4 create the view
     const view = await createRecipientView({envelopeId, viewRequest, accountId})
-
 
     return {redirectUrl: view.redirectUrl}
   }
