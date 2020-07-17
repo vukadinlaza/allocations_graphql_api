@@ -86,6 +86,9 @@ const makeEnvelopeDef = ({user, templateId}) => {
                         {tabLabel: 'Tax-Treaty-Special-Rates-Conditions-Income-Type', value: user.types_of_income},
                         {tabLabel: 'Tax-Treaty-Special-Rates-Conditions-Extra-Info', value: user.additional_explanation},
 
+
+                        {tabLabel: 'Exempt-Payee-Code', value: user.exempt_payee_code},
+                        {tabLabel: 'Exemption-FATCA-Code', value: user.fatca_code},
                         ]
                     }
                 }
