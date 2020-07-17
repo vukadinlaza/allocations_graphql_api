@@ -46,6 +46,10 @@ type DealParams {
   totalCarry: String
   totalManagementFee: String
   minimumInvestment: String
+  sign_deadline: String
+  wire_deadline: String
+  estimated_setup_costs: String
+  management_fees: String
 }
 
 input DealParamsInput {
@@ -54,7 +58,11 @@ input DealParamsInput {
   estimatedSetupCosts: String
   totalCarry: String
   totalManagementFee: String
-  minimumInvestment: String
+  minimumInvestment: String  
+  sign_deadline: String
+  wire_deadline: String
+  estimated_setup_costs: String
+  management_fees: String
 }
 
 type PubPledge {

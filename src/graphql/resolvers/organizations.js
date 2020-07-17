@@ -17,7 +17,7 @@ const Schema = Organizations
 const Queries = {
   organization: async (_, { slug }, { user, db }) => {
     const org = await db.organizations.findOne({ slug })
-    
+    console.log(org, "meow")
     // short circuit with fund if superadmin
     if (user.admin) return org
 
