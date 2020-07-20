@@ -116,7 +116,7 @@ const Queries = {
     return ctx.db.collection("users").find({
       ...orgCheck,
       ...searchQ
-    }).limit(limit || 10).toArray()
+    }).toArray()
   },
   getLink: async(_, data, ctx) => {
     await getAuthToken()
