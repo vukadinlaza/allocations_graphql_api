@@ -7,6 +7,7 @@ const {
   isAdminOrSameUser,
   ensureFundAdmin 
   } = require('../permissions')
+const { pick } = require('lodash')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
@@ -120,6 +121,8 @@ const Queries = {
   getLink: async(_, data, ctx) => {
     await getAuthToken()
 
+    const newUserData = pick(data.input, ['dob', 'street_address' , 'city', 'state', 'zip', 'mail_country', 'mail_city', 'mail_zip', 'mail_state', 'mail_street_address'])
+
     const templateData = getKYCTemplateId({input: data.input})
 
     const accountId = process.env.DOCUSIGN_ACCOUNT_ID
@@ -132,7 +135,12 @@ const Queries = {
 
     const view = await createRecipientView({envelopeId, viewRequest, accountId})
 
-    return {redirectUrl: view.redirectUrl}
+    await ctx.db.users.updateOne(
+      { _id: ObjectId(ctx.user._id) },
+      { $set: {...newUserData } }
+    )
+
+    return {redirectUrl: view.redirectUrl, formName: templateData.formType}
   }
 }
 

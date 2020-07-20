@@ -22,7 +22,17 @@ type User {
   accredidation_doc: Document
   investments: [Investment]
   invitedDeals: [Deal]
-  invitedDeal(deal_slug: String!, fund_slug: String!): Deal
+  invitedDeal(deal_slug: String!, fund_slug: String!): Deal,
+  dob: String
+  street_address: String
+  city: String
+  state: String
+  zip: String
+  mail_country: String
+  mail_city: String
+  mail_zip: String
+  mail_state: String
+  mail_street_address: String
 }
 
 input UserInput {
