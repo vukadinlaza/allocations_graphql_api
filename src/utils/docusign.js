@@ -149,7 +149,6 @@ const createRecipientView = async ({viewRequest, accountId, envelopeId}) => {
 
 const getKYCTemplateId = ({input}) => {
 
-    console.log(input)
     const isUsCitizen = input.country === 'United States'
 
     const kycDocuments = [	
@@ -170,6 +169,12 @@ const getKYCTemplateId = ({input}) => {
     investor_type: 'individual',	
     formType: 'W-8BEN Individual',	
     templateId: 'ae7f91d5-381c-4ca2-ae2e-4161bad232c7'	
+    },	 	
+    {	
+    isUsCitizen: false, 	
+    investor_type: 'entity',	
+    formType: 'W-8BEN Entity',	
+    templateId: 'e9d5ba42-368c-4015-8bf7-599efc1f19b6'	
     },	 	
     ]
 
