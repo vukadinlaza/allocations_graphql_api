@@ -22,7 +22,7 @@ type User {
   accredidation_doc: Document
   investments: [Investment]
   invitedDeals: [Deal]
-  invitedDeal(deal_slug: String!, fund_slug: String!): Deal,
+  invitedDeal(deal_slug: String!, fund_slug: String!): Deal
   dob: String
   street_address: String
   city: String
