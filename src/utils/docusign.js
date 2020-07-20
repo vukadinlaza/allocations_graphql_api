@@ -11,6 +11,7 @@ apiClient.setBasePath(basePath);
 docusign.Configuration.default.setDefaultApiClient(apiClient);
 
 let envelopesApi = new docusign.EnvelopesApi(apiClient)
+let templatesApi = new docusign.TemplatesApi(apiClient)
 
 const getAuthToken = async () => {
     const hasToken = await DsJwtAuth.prototype.checkToken()
@@ -147,34 +148,34 @@ const createRecipientView = async ({viewRequest, accountId, envelopeId}) => {
 }
 
 
-const getKYCTemplateId = ({input}) => {
-
+const getKYCTemplateId = async ({input, accountId}) => {
     const isUsCitizen = input.country === 'United States'
+    const templates = await templatesApi.listTemplates(accountId)
 
     const kycDocuments = [	
     {	
     isUsCitizen: true,	
     formType: 'W-9 Entity',	
     investor_type: 'entity',	
-    templateId: '460efb59-b4e9-452b-bc5f-1d8a53114acc'	
+    templateId: templates.envelopeTemplates.find(t => t.name.includes('W-9')).templateId	
     },	
     {	
     isUsCitizen: true, 	
     formType: 'W-9 Individual',	
     investor_type: 'individual',	
-    templateId: '460efb59-b4e9-452b-bc5f-1d8a53114acc'	
+    templateId: templates.envelopeTemplates.find(t => t.name.includes('W-9')).templateId	
     },	
     {	
     isUsCitizen: false, 	
     investor_type: 'individual',	
     formType: 'W-8BEN Individual',	
-    templateId: 'ae7f91d5-381c-4ca2-ae2e-4161bad232c7'	
+    templateId: templates.envelopeTemplates.find(t => t.name.includes('W-8BEN')).templateId	
     },	 	
     {	
     isUsCitizen: false, 	
     investor_type: 'entity',	
     formType: 'W-8BEN Entity',	
-    templateId: 'e9d5ba42-368c-4015-8bf7-599efc1f19b6'	
+    templateId: templates.envelopeTemplates.find(t => t.name.includes('W-8BEN-E')).templateId
     },	 	
     ]
 

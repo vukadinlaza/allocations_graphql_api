@@ -120,12 +120,12 @@ const Queries = {
   },
   getLink: async(_, data, ctx) => {
     await getAuthToken()
+    const accountId = process.env.DOCUSIGN_ACCOUNT_ID
 
     const newUserData = pick(data.input, ['dob', 'street_address' , 'city', 'state', 'zip', 'mail_country', 'mail_city', 'mail_zip', 'mail_state', 'mail_street_address'])
 
-    const templateData = getKYCTemplateId({input: data.input})
+    const templateData = await getKYCTemplateId({input: data.input, accountId})
 
-    const accountId = process.env.DOCUSIGN_ACCOUNT_ID
     
     const envelopeDefinition = await makeEnvelopeDef({user: { ...ctx.user, ...data.input,  _id: ctx.user._id}, templateId: templateData.templateId})
 
