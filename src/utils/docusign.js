@@ -149,9 +149,7 @@ const createRecipientView = async ({viewRequest, accountId, envelopeId}) => {
 
 const getKYCTemplateId = ({input}) => {
 
-    console.log(input)
     const isUsCitizen = input.country === 'United States'
-    console.log(isUsCitizen, input.investor_type)
 
     const kycDocuments = [	
     {	
