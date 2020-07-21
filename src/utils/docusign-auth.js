@@ -48,19 +48,13 @@ DsJwtAuth.prototype.checkToken = function _checkToken(bufferMin = tokenReplaceMi
  
 DsJwtAuth.prototype.getToken = async function _getToken() {
     const jwtLifeSec = 10 * 60,
-        scopes = "signature impersonation",
+        scopes = "signature",
         dsApi = new docusign.ApiClient();
-        console.log('fires from inside getToken 1')
     dsApi.setOAuthBasePath(dsConfig.dsOauthServer.replace('https://', ''));
-
-    console.log('fires from inside getToken 2')
-    console.log('vars', dsConfig.dsClientId, dsConfig.impersonatedUserGuid, scopes, rsaKey, jwtLifeSec)
 
     const results = await dsApi.requestJWTUserToken(dsConfig.dsClientId,
         dsConfig.impersonatedUserGuid, scopes, rsaKey,
         jwtLifeSec);
-
-        console.log('inside getToken 2 with results', results)
 
     const expiresAt = moment().add(results.body.expires_in, 's').subtract(tokenReplaceMin, 'm');
     this.accessToken = results.body.access_token;
