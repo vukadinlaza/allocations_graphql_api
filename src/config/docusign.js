@@ -17,9 +17,7 @@ const jwt =
   "dsJWTClientId": "${process.env.DOCUSIGN_CLIENT_ID}",
   "impersonatedUserGuid": `${process.env.DS_USER_GUID}`
 }
-const dsOauthServer = process.env.NODE_ENV === 'production'
-  ? 'https://account.docusign.com'
-  : 'https://account-d.docusign.com';
+const dsOauthServer = 'https://account-d.docusign.com';
 
 settings.dsClientId = process.env.DOCUSIGN_CLIENT_ID || settings.dsClientId;
 settings.appUrl = process.env.DS_APP_URL || settings.appUrl;
