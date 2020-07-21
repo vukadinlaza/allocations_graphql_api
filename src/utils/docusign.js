@@ -2,7 +2,7 @@ const docusign = require('docusign-esign')
 const apiClient = new docusign.ApiClient();
 const {map} = require('lodash')
 
-const basePath = 'https://demo.docusign.net/restapi'
+const basePath = process.env.NODE_ENV === 'production' ? 'https://na3.docusign.net/restapi' : 'https://demo.docusign.net/restapi'
 const DsJwtAuth = require('./docusign-auth')
 
 apiClient.setBasePath(basePath);
