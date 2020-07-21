@@ -157,25 +157,25 @@ const getKYCTemplateId = async ({input, accountId}) => {
     isUsCitizen: true,	
     formType: 'W-9 Entity',	
     investor_type: 'entity',	
-    templateId: templates.envelopeTemplates.find(t => t.name.includes('W-9')).templateId	
+    templateId: templates.envelopeTemplates.find(t => t.name.includes('W-9-Embedded')).templateId	
     },	
     {	
     isUsCitizen: true, 	
     formType: 'W-9 Individual',	
     investor_type: 'individual',	
-    templateId: templates.envelopeTemplates.find(t => t.name.includes('W-9')).templateId	
+    templateId: templates.envelopeTemplates.find(t => t.name.includes('W-9-Embedded')).templateId	
     },	
     {	
     isUsCitizen: false, 	
     investor_type: 'individual',	
     formType: 'W-8BEN Individual',	
-    templateId: templates.envelopeTemplates.find(t => t.name.includes('W-8BEN')).templateId	
+    templateId: templates.envelopeTemplates.find(t => t.name.includes('W-8BEN-Embedded')).templateId	
     },	 	
     {	
     isUsCitizen: false, 	
     investor_type: 'entity',	
     formType: 'W-8BEN Entity',	
-    templateId: templates.envelopeTemplates.find(t => t.name.includes('W-8BEN-E')).templateId
+    templateId: templates.envelopeTemplates.find(t => t.name.includes('W-8BEN-E-Embedded')).templateId
     },	 	
     ]
 
