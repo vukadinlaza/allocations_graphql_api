@@ -14,11 +14,16 @@ let envelopesApi = new docusign.EnvelopesApi(apiClient)
 let templatesApi = new docusign.TemplatesApi(apiClient)
 
 const getAuthToken = async () => {
+    console.log('fires 1')
     const hasToken = await DsJwtAuth.prototype.checkToken()
+    console.log('fires 2')
+    console.log('fires 3 with token', hasToken)
     if(!hasToken) {
         const token = await DsJwtAuth.prototype.getToken()
+        console.log('fires inside conditional', token)
         apiClient.addDefaultHeader('Authorization', 'Bearer ' + token.accessToken);
     }
+    console.log('after all')
 }
 
 
