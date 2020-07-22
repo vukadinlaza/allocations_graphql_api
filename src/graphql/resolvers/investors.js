@@ -127,7 +127,7 @@ const Queries = {
     const templateData = await getKYCTemplateId({input: data.input, accountId})
 
     
-    const envelopeDefinition = await makeEnvelopeDef({user: { ...ctx.user, ...data.input,  _id: ctx.user._id}, templateId: templateData.templateId})
+    const envelopeDefinition = await makeEnvelopeDef({user: { ...ctx.user, ...data.input,  _id: ctx.user._id}, templateId: templateData.templateId, formName: templateData.formType })
 
     const {envelopeId} = await createEnvelope({ envelopeDefinition, accountId})
 

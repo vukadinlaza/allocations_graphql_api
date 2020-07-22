@@ -14,21 +14,28 @@ let envelopesApi = new docusign.EnvelopesApi(apiClient)
 let templatesApi = new docusign.TemplatesApi(apiClient)
 
 const getAuthToken = async () => {
-    console.log('fires 1')
     const hasToken = await DsJwtAuth.prototype.checkToken()
-    console.log('fires 2')
-    console.log('fires 3 with token', hasToken)
     if(!hasToken) {
         const token = await DsJwtAuth.prototype.getToken()
-        console.log('fires inside conditional', token)
         apiClient.addDefaultHeader('Authorization', 'Bearer ' + token.accessToken);
     }
-    console.log('after all')
 }
 
+const makeEnvelopeDef = ({user, templateId, formName}) => {
 
 
-const makeEnvelopeDef = ({user, templateId}) => {
+    const formatSSN = () => {
+        const isW9 = formName.includes('W-9')
+        if(!isW9) {
+            return [{tabLabel: 'SSN-ITIN', value: user.ssn_itin}],
+        }
+        return user.ssn_itin.split('').map((letter, index) => {
+            return {
+                tabLabel: `SSN-${index + 1}`,
+                value: letter
+            }
+        })
+    }
 
     let env = new docusign.EnvelopeDefinition();
     env.emailSubject = 'Please sign this document';
@@ -78,7 +85,7 @@ const makeEnvelopeDef = ({user, templateId}) => {
                             value: `${user.city}, ${user.state}, ${user.zip}`
                         },
                         {tabLabel: 'Address-Country', value: user.country},
-                        {tabLabel: 'SSN-ITIN', value: user.ssn_itin},
+                        ...formatSSN(),
                         {tabLabel: 'Date-Of-Birth', value: user.dob},
                         {tabLabel: 'Foreign-Tax-Number', value: user.foreign_tax_number},
                         {tabLabel: 'Mailing-Street-Address', value: user.mail_street_address},
