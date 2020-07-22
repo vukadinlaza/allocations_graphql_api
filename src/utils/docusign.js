@@ -167,8 +167,6 @@ const getKYCTemplateId = async ({input, accountId}) => {
     const isUsCitizen = input.country === 'United States'
     const templates = await templatesApi.listTemplates(accountId)
 
-    console.log(templates, input)
-
     const kycDocuments = [	
     {	
     isUsCitizen: true,	
