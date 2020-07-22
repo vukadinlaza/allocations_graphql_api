@@ -26,6 +26,8 @@ const makeEnvelopeDef = ({user, templateId, formName}) => {
 
     const formatSSN = () => {
         const isW9 = formName.includes('W-9')
+
+        if(!user.ssn_itin) return [];
         if(!isW9) {
             return [{tabLabel: 'SSN-ITIN', value: user.ssn_itin}]
         }
