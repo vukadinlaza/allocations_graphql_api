@@ -124,7 +124,6 @@ const createEnvelope = async ({envelopeDefinition, accountId}) => {
     // Step 2. call Envelopes::create API method
     results = await envelopesApi.createEnvelope(accountId, {envelopeDefinition});
     let envelopeId = results.envelopeId;
-    console.log(`Envelope was created. EnvelopeId ${envelopeId}`);
     return {envelopeId}
 }
 
@@ -134,7 +133,7 @@ const makeRecipientViewRequest = async ({user, dsPingUrl, dsReturnUrl, envelopeI
     const env = await envelopesApi.listRecipients(accountId, envelopeId)
 
     // Will need to change or update this. 
-    viewRequest.returnUrl = dsReturnUrl + `/deals/${user.activeInvestment.org}/${user.activeInvestment.deal_slug}`;
+    viewRequest.returnUrl = dsReturnUrl + '/cb/thankyou';
     viewRequest.authenticationMethod = 'email';
 
     
