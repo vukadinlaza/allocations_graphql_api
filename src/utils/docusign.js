@@ -95,7 +95,7 @@ const makeEnvelopeDef = ({user, templateId, formName}) => {
                         {tabLabel: 'Mailing-City-State-Zip-Province', value: `${user.mail_city}, ${user.mail_state}, ${user.mail_zip}`},
                         {tabLabel: 'Mailing-Country', value: user.mail_country},
                         {tabLabel: 'Citizenship-Country', value: user.country},
-
+                        {tabLabel: 'Organization-Name', value: user.organization_name},
 
                         {tabLabel: 'Tax-Treaty-Special-Rates-Conditions-Paragraph', value: user.tax_treaty_rates_conditions},
                         {tabLabel: 'Tax-Treaty-Special-Rates-Conditions-Percent', value: user.claim_percent_withholding},
@@ -165,6 +165,14 @@ const createRecipientView = async ({viewRequest, accountId, envelopeId}) => {
 const getKYCTemplateId = async ({input, accountId}) => {
     const isUsCitizen = input.country === 'United States'
     const templates = await templatesApi.listTemplates(accountId)
+    
+    if(input.documentType === 'Provision Of Services') {
+        const envData = templates.envelopeTemplates.find(t => t.name.includes(input.documentType));
+        return {
+            templateId: envData.templateId,
+            formType: 'Provision Of Services'
+        }
+    }
 
     const kycDocuments = [	
     {	
