@@ -127,19 +127,23 @@ const Queries = {
     const templateData = await getKYCTemplateId({input: data.input, accountId})
 
     
-    const envelopeDefinition = await makeEnvelopeDef({user: { ...ctx.user, ...data.input,  _id: ctx.user._id}, templateId: templateData.templateId, formName: templateData.formType })
+    const envelopeDefinition = await makeEnvelopeDef({
+      user: { ...ctx.user, ...data.input,  _id: ctx.user._id},
+      templateId: templateData.templateId,
+      formName: templateData.formType
+    })
 
     const {envelopeId} = await createEnvelope({ envelopeDefinition, accountId})
 
     const viewRequest = await makeRecipientViewRequest({user: { ...ctx.user, ...data.input,  _id: ctx.user._id}, dsPingUrl: process.env.DS_APP_URL, dsReturnUrl: process.env.DS_APP_URL, envelopeId, accountId})
 
     const view = await createRecipientView({envelopeId, viewRequest, accountId})
-
-    await ctx.db.users.updateOne(
-      { _id: ObjectId(ctx.user._id) },
-      { $set: {...newUserData } }
-    )
-
+    if(templateData.formType !== 'Provision Of Services') {
+      await ctx.db.users.updateOne(
+        { _id: ObjectId(ctx.user._id) },
+        { $set: {...newUserData } }
+      )
+    }
     return {redirectUrl: view.redirectUrl, formName: templateData.formType}
   }
 }
