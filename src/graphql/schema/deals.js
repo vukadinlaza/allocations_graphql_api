@@ -42,31 +42,41 @@ type Deal {
 type DealParams {
   totalRoundSize: String
   allocation: String
-  estimatedSetupCosts: String
   totalCarry: String
   totalManagementFee: String
   minimumInvestment: String
   signDeadline: String
   wireDeadline: String
+  estimatedSetupCosts: String
+  estimatedSetupCostsDollar: String
+  estimatedTerm: String
   managementFees: String
+  managementFeesDollar: String
   portfolioTotalCarry: String
   portfolioEstimatedSetupCosts: String
+  portfolioEstimatedSetupCostsDollar: String
   portfolioManagementFees: String
+  portfolioManagementFeesDollar: String
 }
 
 input DealParamsInput {
   totalRoundSize: String
   allocation: String
-  estimatedSetupCosts: String
   totalCarry: String
   totalManagementFee: String
   minimumInvestment: String  
   signDeadline: String
   wireDeadline: String
+  estimatedSetupCosts: String
+  estimatedSetupCostsDollar: String
+  estimatedTerm: String
   managementFees: String
+  managementFeesDollar: String
   portfolioTotalCarry: String
   portfolioEstimatedSetupCosts: String
+  portfolioEstimatedSetupCostsDollar: String
   portfolioManagementFees: String
+  portfolioManagementFeesDollar: String
 }
 
 type PubPledge {
