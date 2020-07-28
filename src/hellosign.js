@@ -51,8 +51,8 @@ async function listRequests(user) {
 }
 
 async function listTemplates() {
-  const { templates } = await helloSign.template.list()
-  return templates.map(t => ({ _id: t.template_id, title: t.title }))
+  // const { templates } = await helloSign.template.list()
+  // return templates.map(t => ({ _id: t.template_id, title: t.title }))
 }
 
 module.exports = { createRequest, listRequests, listTemplates, getSignUrl }
