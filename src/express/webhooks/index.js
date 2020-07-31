@@ -32,7 +32,7 @@ module.exports = Router()
     const dealFeild = fieldData.find(f => f._attributes.name === 'Deal-ID')
     const dealId = get(dealFeild, 'value._text')
 
-    console.log(dealId)
+    console.log('deal id', dealId)
 
     const user = await db.users.findOne({email: signerEmail});
 
@@ -46,9 +46,11 @@ module.exports = Router()
     if(!investment) {
       return res.status(400).end();
     }
+
+    console.log('investment', investment._id)
     
     if(dealId) {
-      await db.users.findOneAndUpdate({_id: investment._id}, {status: 'signed'})
+      await db.users.findOneAndUpdate({_id: investment._id}, {$set: {status: 'signed'}})
     }
 
     await db.users.findOneAndUpdate({_id: user._id}, { $push: {documents: {signedAt, signerDocusignId, envelopeId, documentName, documentId}}});
