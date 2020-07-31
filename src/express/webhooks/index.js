@@ -21,7 +21,14 @@ module.exports = Router()
     const envelopeId = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.EnvelopeID._text')
     const documentName = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.DocumentStatuses.DocumentStatus.Name._text')
     const documentId = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.DocumentStatuses.DocumentStatus.ID._text')
-    
+
+    console.log('fields', get(signerDocusignData, 'RecipientStatus.FormData.xfdf.fields.field'))
+
+    const dealId = get(signerDocusignData, 'RecipientStatus.FormData.xfdf.fields.field', []).find(f => f.name._text === 'Deal-ID')
+
+    console.log('deal id', dealId)
+
+   
 
     const user = await db.users.findOneAndUpdate({email: signerEmail}, { $push: {documents: {signedAt, signerDocusignId, envelopeId, documentName, documentId}}});
 

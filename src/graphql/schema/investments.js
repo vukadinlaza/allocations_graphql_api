@@ -20,9 +20,11 @@ type Investment {
 
 enum InvestmentStatus {
   invited
-  pledged
   onboarded
   complete
+  signed
+  wired
+  pledged
 }
 
 extend type Query {
