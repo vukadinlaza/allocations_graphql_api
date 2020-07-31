@@ -42,7 +42,7 @@ module.exports = Router()
       return res.status(400).end();  
     }
 
-    const investment = db.investments.findOne{deal_id: ObjectId(dealId), user_id: user._id}
+    const investment = db.investments.findOne({deal_id: ObjectId(dealId), user_id: user._id})
     console.log('investment', investment._id)
 
     if(!investment) {
