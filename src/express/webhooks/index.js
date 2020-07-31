@@ -1,4 +1,5 @@
 const { Router } = require('express');
+const { ObjectId } = require('mongodb')
 const { get } = require('lodash')
 const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
@@ -23,20 +24,34 @@ module.exports = Router()
     const documentId = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.DocumentStatuses.DocumentStatus.ID._text')
 
 
-    let fieldData = get(signerDocusignData, 'RecipientStatus.FormData.xfdf.fields.field', [])
-    console.log(fieldData)
-    
+    let fieldData = get(signerDocusignData, 'RecipientStatus.FormData.xfdf.fields.field', [])    
     if(!Array.isArray(fieldData)) {
       fieldData = [fieldData]
     }
-    console.log(fieldData)
 
-    const dealId = fieldData.find(f => f.name._text === 'Deal-ID')
-    console.log('deal id', dealId)
+    const dealFeild = fieldData.find(f => f._attributes.name === 'Deal-ID')
+    const dealId = get(dealFeild, 'value._text')
 
-   
+    console.log(dealId)
 
-    const user = await db.users.findOneAndUpdate({email: signerEmail}, { $push: {documents: {signedAt, signerDocusignId, envelopeId, documentName, documentId}}});
+    const user = await db.users.findOne({email: signerEmail});
+
+
+    if(!user) {
+      return res.status(400).end();  
+    }
+
+    const investment = {deal_id: ObjectId(dealId), user_id: user._id}
+
+    if(!investment) {
+      return res.status(400).end();
+    }
+    
+    if(dealId) {
+      await db.users.findOneAndUpdate({_id: investment._id}, {status: 'signed'})
+    }
+
+    await db.users.findOneAndUpdate({_id: user._id}, { $push: {documents: {signedAt, signerDocusignId, envelopeId, documentName, documentId}}});
 
     return res.status(200).end();
 
