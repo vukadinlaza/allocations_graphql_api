@@ -1,24 +1,24 @@
 const { ObjectId } = require("mongodb")
 const { gql } = require('apollo-server-express')
-const { 
-  isAdmin, 
+const {
+  isAdmin,
   isOrgAdmin,
   isFundAdmin,
   isAdminOrSameUser,
-  ensureFundAdmin 
-  } = require('../permissions')
+  ensureFundAdmin
+} = require('../permissions')
 const { pick } = require('lodash')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
-const { 
+const {
   makeEnvelopeDef,
   createEnvelope,
   makeRecipientViewRequest,
   createRecipientView,
   getAuthToken,
-  getKYCTemplateId 
-  } = require('../../utils/docusign')
+  getKYCTemplateId
+} = require('../../utils/docusign')
 const Users = require('../schema/users')
 
 /**  
@@ -38,27 +38,27 @@ const User = {
     // if (isFundAdmin(fund_slug, ctx.user) || ctx.user.admin) {
     //   return ctx.db.deals.findOne({ slug: deal_slug, organization: fund._id })
     // } else {
-      // otherwise make sure they are invited!
-      const deal = await ctx.db.deals.findOne({ 
-        slug: deal_slug,
-        organization: fund._id
-        // invitedInvestors: ObjectId(user._id)
-      })
-      if (deal) return deal
-      throw new AuthenticationError("REDIRECT")
+    // otherwise make sure they are invited!
+    const deal = await ctx.db.deals.findOne({
+      slug: deal_slug,
+      organization: fund._id
+      // invitedInvestors: ObjectId(user._id)
+    })
+    if (deal) return deal
+    throw new AuthenticationError("REDIRECT")
     // }
   },
   investments: (user, _, { db }) => {
     return db.investments.find({ user_id: user._id }).toArray()
   },
   invitedDeals: (user, _, { db }) => {
-    return db.deals.find({ 
+    return db.deals.find({
       status: { $ne: 'closed' },
       $or: [
         { invitedInvestors: ObjectId(user._id) },
         // if allInvited and user is part of this org
         { allInvited: true, organization: { $in: user.organizations || [] } }
-      ] 
+      ]
     }).toArray()
   },
   passport: (user) => {
@@ -69,7 +69,7 @@ const User = {
   },
   name: (user) => {
     return user.investor_type === "entity"
-      ?  user.entity_name
+      ? user.entity_name
       : `${user.first_name} ${user.last_name}`
   },
   organizations_admin: (user, _, { db }) => {
@@ -90,25 +90,25 @@ const Queries = {
     // only admins can arbitrarily query
     if (args._id) isAdmin(ctx)
 
-    const query = args._id 
-      ? { _id: ObjectId(args._id) } 
+    const query = args._id
+      ? { _id: ObjectId(args._id) }
       : { email: ctx.user.email }
 
-    return ctx.db.collection("users").findOne(query)        
+    return ctx.db.collection("users").findOne(query)
   },
   allInvestors: (_, args, ctx) => {
     isAdmin(ctx)
     return db.collection("users").find({}).toArray()
   },
-  searchUsers: async (_, {org, q, limit}, ctx) => {
+  searchUsers: async (_, { org, q, limit }, ctx) => {
     const orgRecord = await ensureFundAdmin(org, ctx)
 
     const searchQ = {
       $or: [
-        {first_name: { $regex: new RegExp(q), $options: "i" }},
-        {last_name: { $regex: q, $options: "i" }},
-        {entity_name: { $regex: q, $options: "i" }},
-        {email: { $regex: q, $options: "i" }}
+        { first_name: { $regex: new RegExp(q), $options: "i" } },
+        { last_name: { $regex: q, $options: "i" } },
+        { entity_name: { $regex: q, $options: "i" } },
+        { email: { $regex: q, $options: "i" } }
       ]
     }
     const orgCheck = ctx.user.admin ? {} : { organizations: orgRecord._id }
@@ -118,33 +118,32 @@ const Queries = {
       ...searchQ
     }).toArray()
   },
-  getLink: async(_, data, ctx) => {
+  getLink: async (_, data, ctx) => {
     await getAuthToken()
     const accountId = process.env.DOCUSIGN_ACCOUNT_ID
+    const newUserData = pick(data.input, ['dob', 'street_address', 'city', 'state', 'zip', 'mail_country', 'mail_city', 'mail_zip', 'mail_state', 'mail_street_address'])
 
-    const newUserData = pick(data.input, ['dob', 'street_address' , 'city', 'state', 'zip', 'mail_country', 'mail_city', 'mail_zip', 'mail_state', 'mail_street_address'])
+    const templateData = await getKYCTemplateId({ input: data.input, accountId })
 
-    const templateData = await getKYCTemplateId({input: data.input, accountId})
 
-    
     const envelopeDefinition = await makeEnvelopeDef({
-      user: { ...ctx.user, ...data.input,  _id: ctx.user._id},
+      user: { ...ctx.user, ...data.input, _id: ctx.user._id },
       templateId: templateData.templateId,
       formName: templateData.formType
     })
 
-    const {envelopeId} = await createEnvelope({ envelopeDefinition, accountId})
+    const { envelopeId } = await createEnvelope({ envelopeDefinition, accountId })
 
-    const viewRequest = await makeRecipientViewRequest({user: { ...ctx.user, ...data.input,  _id: ctx.user._id}, dsPingUrl: process.env.DS_APP_URL, dsReturnUrl: process.env.DS_APP_URL, envelopeId, accountId})
+    const viewRequest = await makeRecipientViewRequest({ user: { ...ctx.user, ...data.input, _id: ctx.user._id }, dsPingUrl: process.env.DS_APP_URL, dsReturnUrl: process.env.DS_APP_URL, envelopeId, accountId })
 
-    const view = await createRecipientView({envelopeId, viewRequest, accountId})
-    if(templateData.formType !== 'Provision Of Services') {
+    const view = await createRecipientView({ envelopeId, viewRequest, accountId })
+    if (templateData.formType !== 'Provision Of Services') {
       await ctx.db.users.updateOne(
         { _id: ObjectId(ctx.user._id) },
-        { $set: {...newUserData } }
+        { $set: { ...newUserData, dob: newUserData.dob.slice(0, 4) } }
       )
     }
-    return {redirectUrl: view.redirectUrl, formName: templateData.formType}
+    return { redirectUrl: view.redirectUrl, formName: templateData.formType }
   }
 }
 
@@ -157,7 +156,7 @@ const Mutations = {
     return res.ops[0]
   },
   /** updates user and handles file uploads **/
-  updateUser: async (_, {input: {_id, passport, accredidation_doc, ...user}}, ctx) => {
+  updateUser: async (_, { input: { _id, passport, accredidation_doc, ...user } }, ctx) => {
     isAdminOrSameUser({ _id }, ctx)
 
     // upload passport if passed
@@ -185,7 +184,7 @@ const Mutations = {
     return ctx.db.users.updateOne(
       { _id: ObjectId(_id) },
       { $set: user }
-    )                
+    )
   },
   /** deletes investor -> TODO delete their investment as well **/
   deleteInvestor: async (_, { _id }, ctx) => {
@@ -200,9 +199,9 @@ const Mutations = {
   }
 }
 
-module.exports = { 
+module.exports = {
   Schema,
   Queries,
   Mutations,
-  subResolvers: { User } 
+  subResolvers: { User }
 }
