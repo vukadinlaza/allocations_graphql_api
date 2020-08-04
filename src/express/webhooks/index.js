@@ -32,20 +32,14 @@ module.exports = Router()
       const dealFeild = fieldData.find(f => f._attributes.name === 'Deal-ID')
       const dealId = get(dealFeild, 'value._text')
 
-      console.log('deal id', dealId)
-
-
       const user = await db.users.findOne({ email: signerEmail });
-
-      console.log('user id', user._id)
-
 
       if (!user) {
         return res.status(400).end();
       }
 
       if (dealId) {
-        await db.investments.update({ deal_id: ObjectId(dealId), user_id: ObjectId(user._id) }, { $set: { status: 'signed' } })
+        await db.investments.updateMany({ deal_id: ObjectId(dealId), user_id: ObjectId(user._id) }, { $set: { status: 'signed' } })
       }
 
       await db.users.findOneAndUpdate({ _id: ObjectId(user._id) }, { $push: { documents: { signedAt, signerDocusignId, envelopeId, documentName, documentId } } });
