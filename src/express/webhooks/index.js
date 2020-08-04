@@ -36,6 +36,7 @@ module.exports = Router()
 
 
       const user = await db.users.findOne({ email: signerEmail });
+
       console.log('user id', user._id)
 
 
@@ -47,7 +48,7 @@ module.exports = Router()
         await db.investments.update({ deal_id: ObjectId(dealId), user_id: ObjectId(user._id) }, { $set: { status: 'signed' } })
       }
 
-      await db.users.findOneAndUpdate({ _id: user._id }, { $push: { documents: { signedAt, signerDocusignId, envelopeId, documentName, documentId } } });
+      await db.users.findOneAndUpdate({ _id: ObjectId(user._id) }, { $push: { documents: { signedAt, signerDocusignId, envelopeId, documentName, documentId } } });
 
       return res.status(200).end();
 
