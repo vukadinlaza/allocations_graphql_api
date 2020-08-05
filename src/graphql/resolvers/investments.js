@@ -44,26 +44,26 @@ const Queries = {
 
 const Mutations = {
   /** inits investment with appropriate status **/
-  createInvestment: async (_, { investment: { user_id, deal_id, ...investment }}, { user, db }) => {
+  createInvestment: async (_, { investment: { user_id, deal_id, ...investment } }, { user, db }) => {
     const deal = await db.collection("deals").findOne({ _id: ObjectId(deal_id) })
 
     // superadmin OR all are invited OR is org admin
     // if (user.admin || deal.allInvited || user.orgs.find(o => o._id.toString() === deal.organization.toString())) {
-      const res = await db.investments.insertOne({
-        status: "invited",
-        invited_at: Date.now(),
-        [`${investment.status}_at`]: Date.now(),
-        ...investment,
-        user_id: ObjectId(user_id),
-        deal_id: ObjectId(deal_id),
-        organization: ObjectId(deal.organization)
-      })
-      return res.ops[0]
+    const res = await db.investments.insertOne({
+      status: "invited",
+      invited_at: Date.now(),
+      [`${investment.status}_at`]: Date.now(),
+      ...investment,
+      user_id: ObjectId(user_id),
+      deal_id: ObjectId(deal_id),
+      organization: ObjectId(deal.organization)
+    })
+    return res.ops[0]
     // }
     throw new AuthenticationError('permission denied');
   },
   /** updates investment and tracks the status change **/
-  updateInvestment: async (_, { org, investment: { _id, ...investment }}, ctx) => {
+  updateInvestment: async (_, { org, investment: { _id, ...investment } }, ctx) => {
     isAdmin(ctx)
 
     // we need to track status changes
@@ -71,11 +71,10 @@ const Mutations = {
     if (savedInvestment.status !== investment.status) {
       investment[`${investment.status}_at`] = Date.now()
     }
-
     return ctx.db.investments.updateOne(
       { _id: ObjectId(_id) },
       { $set: { amount: investment.amount } },
-      {"new": true}
+      { "new": true }
     )
   },
   /** delete investment **/
@@ -93,7 +92,7 @@ const Mutations = {
   // Document Handling
 
   /** uploads investment document, S3 & db path **/
-  addInvestmentDoc: async (_, {investment_id, doc}, ctx) => {
+  addInvestmentDoc: async (_, { investment_id, doc }, ctx) => {
     isAdmin(ctx)
 
     const file = await doc
@@ -107,7 +106,7 @@ const Mutations = {
     return Cloudfront.getSignedUrl(s3Path)
   },
   /** deletes investment document, S3 & db path **/
-  rmInvestmentDoc: async (_, {investment_id, file}, ctx) => {
+  rmInvestmentDoc: async (_, { investment_id, file }, ctx) => {
     isAdmin(ctx)
 
     await Uploader.rmInvestmentDoc(investment_id, file)
@@ -120,9 +119,9 @@ const Mutations = {
   }
 }
 
-module.exports = { 
+module.exports = {
   Schema,
-  Queries, 
-  Mutations, 
+  Queries,
+  Mutations,
   subResolvers: { Investment }
 }
