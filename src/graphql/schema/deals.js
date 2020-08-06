@@ -4,6 +4,7 @@ module.exports = gql(`
 type Deal {
   _id: String
   created_at: String
+  updated_at: String
   approved: Boolean
   organization: Organization
   company_name: String

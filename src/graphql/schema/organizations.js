@@ -8,6 +8,7 @@ module.exports = gql(`
     slug: String
     logo: String
     created_at: String
+    updated_at: String
 
     approved: Boolean
 

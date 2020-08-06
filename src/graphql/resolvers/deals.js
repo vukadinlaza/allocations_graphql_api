@@ -16,27 +16,27 @@ const { AuthenticationError } = require('apollo-server-express')
 
 const Schema = Deals
 
-function slugify (str) {
+function slugify(str) {
   return str.toLowerCase().replace(' ', '-')
 }
 
-function investorInitials (investor) {
+function investorInitials(investor) {
   return ((investor.first_name || "").slice(0, 1) + (investor.last_name || "").slice(0, 1)).toUpperCase()
 }
 
 const Deal = {
   // investment denotes the `ctx.user` investment in this deal (can only be one)
   investment: (deal, _, { db, user }) => {
-    return db.collection("investments").findOne({ 
+    return db.collection("investments").findOne({
       deal_id: ObjectId(deal._id),
-      user_id: ObjectId(user._id)  
+      user_id: ObjectId(user._id)
     })
   },
   investments: (deal, _, { db }) => {
     return db.investments.find({ deal_id: deal._id }).toArray()
   },
   invitedInvestors: async (deal, _, { db }) => {
-    return db.users.find({ _id: { $in: deal.invitedInvestors || [] }}).toArray()
+    return db.users.find({ _id: { $in: deal.invitedInvestors || [] } }).toArray()
   },
   wireInstructions: (deal, _, { db }) => {
     return deal.wireInstructions ? Cloudfront.getSignedUrl(deal.wireInstructions) : null
@@ -82,15 +82,15 @@ const Queries = {
     isAdmin(ctx)
     return ctx.db.deals.find({}).toArray()
   },
-  searchDeals: (_, {q, limit}, ctx) => {
+  searchDeals: (_, { q, limit }, ctx) => {
     isAdmin(ctx)
     return ctx.db.deals.find({
       company_name: { $regex: new RegExp(q), $options: "i" }
     }).limit(limit || 10).toArray()
   },
   /** Search query for any deals on an org **/
-  searchDealsByOrg: async (_, {q, org: orgSlug, limit}, ctx) => {
-    const org =  await ensureFundAdmin(orgSlug, ctx)
+  searchDealsByOrg: async (_, { q, org: orgSlug, limit }, ctx) => {
+    const org = await ensureFundAdmin(orgSlug, ctx)
     return ctx.db.deals.find({
       organization: org._id,
       company_name: { $regex: new RegExp(q), $options: "i" }
@@ -107,7 +107,7 @@ const Queries = {
   }
 }
 
-function uuid () {
+function uuid() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
 }
 
@@ -118,7 +118,7 @@ const Mutations = {
     const slug = _.kebabCase(deal.company_name)
 
     // ensure that deal name with org doesn't exist
-    const collision = await ctx.db.deals.findOne({ slug  })
+    const collision = await ctx.db.deals.findOne({ slug })
     if (collision) {
       throw new Error("Deal with same name already exists")
     }
@@ -135,17 +135,21 @@ const Mutations = {
     return res.ops[0]
   },
   /** special handling for wire instructions upload **/
-  updateDeal: async (_, {org, deal: { _id, wireDoc, ...deal}}, ctx) => {
+  updateDeal: async (_, { org, deal: { _id, wireDoc, ...deal } }, ctx) => {
     await ensureFundAdmin(org, ctx)
 
     if (wireDoc) {
       // upload wireDoc
-      deal.wireInstructions = await DealDocUploader.addDoc({ doc: wireDoc, title: "wire-instructions" , deal_id: _id })
+      deal.wireInstructions = await DealDocUploader.addDoc({ doc: wireDoc, title: "wire-instructions", deal_id: _id })
     }
 
     const res = await ctx.db.deals.findOneAndUpdate(
       { _id: ObjectId(_id) },
-      { $set: deal },
+      {
+        $set: {
+          ...deal, updated_at: Date.now(),
+        }
+      },
       { returnOriginal: false }
     )
     return res.value
@@ -182,11 +186,11 @@ const Mutations = {
 
     // add user to org admin
     await db.users.updateOne(
-      { _id: user._id }, 
+      { _id: user._id },
       { $push: { organizations_admin: org._id } }
     )
 
-    const res = await db.deals.insertOne({ 
+    const res = await db.deals.insertOne({
       ...deal,
       slug: _.kebabCase(deal.company_name),
       organization: org._id,
@@ -219,7 +223,7 @@ const Mutations = {
       await ctx.db.deals.updateOne(
         { _id: ObjectId(deal_id) },
         { $push: { emailInvites: invite } }
-      ) 
+      )
     }
 
     return invite
@@ -280,9 +284,9 @@ const Mutations = {
   }
 }
 
-module.exports = { 
-  Schema, 
+module.exports = {
+  Schema,
   Queries,
   Mutations,
-  subResolvers: { Deal } 
+  subResolvers: { Deal }
 }
