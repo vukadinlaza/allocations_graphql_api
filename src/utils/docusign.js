@@ -32,7 +32,7 @@ const makeEnvelopeDef = ({ user, templateId, formName }) => {
             return [{ tabLabel: 'SSN-ITIN', value: user.ssn_itin }]
         }
 
-        return user.ssn_itin.split('').map((letter, index) => {
+        return user.ssn_itin.replace(/[^0-9]/g, '').split('').slice(0, 9).map((letter, index) => {
             return {
                 tabLabel: `SSN-${index + 1}`,
                 value: letter
@@ -143,7 +143,7 @@ const makeRecipientViewRequest = async ({ user, dsPingUrl, dsReturnUrl, envelope
     const env = await envelopesApi.listRecipients(accountId, envelopeId)
 
     // Will need to change or update this. 
-    viewRequest.returnUrl = dsReturnUrl + '/cb/thankyou';
+    viewRequest.returnUrl = 'https://allocations.com/thank-you';
     viewRequest.authenticationMethod = 'email';
 
 
