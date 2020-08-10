@@ -39,7 +39,14 @@ module.exports = Router()
       }
 
       if (dealId) {
-        await db.investments.updateMany({ deal_id: ObjectId(dealId), user_id: ObjectId(user._id) }, { $set: { status: 'signed' } })
+        await db.investments.updateMany({
+          deal_id: ObjectId(dealId),
+          user_id: ObjectId(user._id),
+          status: {
+            $in: ['invited', 'onboarded', 'pledged']
+          }
+        },
+          { $set: { status: 'signed' } })
       }
 
       await db.users.findOneAndUpdate({ _id: ObjectId(user._id) }, { $push: { documents: { signedAt, signerDocusignId, envelopeId, documentName, documentId } } });

@@ -58,6 +58,13 @@ type DealParams {
   portfolioEstimatedSetupCostsDollar: String
   portfolioManagementFees: String
   portfolioManagementFeesDollar: String
+  fundTotalCarry: String
+  fundEstimatedSetupCosts: String
+  fundEstimatedSetupCostsDollar: String
+  fundManagementFees: String
+  fundManagementFeesDollar: String
+  fundGeneralPartner: String
+  fundEstimatedTerm: String
 }
 
 input DealParamsInput {
@@ -78,6 +85,13 @@ input DealParamsInput {
   portfolioEstimatedSetupCostsDollar: String
   portfolioManagementFees: String
   portfolioManagementFeesDollar: String
+  fundTotalCarry: String
+  fundEstimatedSetupCosts: String
+  fundEstimatedSetupCostsDollar: String
+  fundManagementFees: String
+  fundManagementFeesDollar: String
+  fundGeneralPartner: String
+  fundEstimatedTerm: String
 }
 
 type PubPledge {
