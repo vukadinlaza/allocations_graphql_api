@@ -120,7 +120,6 @@ const Mutations = {
   }
 }
 
-
 module.exports = {
   Schema,
   Queries,
