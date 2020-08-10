@@ -52,6 +52,7 @@ const Mutations = {
     const res = await db.investments.insertOne({
       status: "invited",
       invited_at: Date.now(),
+      created_at: Date.now(),
       [`${investment.status}_at`]: Date.now(),
       ...investment,
       user_id: ObjectId(user_id),
@@ -73,7 +74,7 @@ const Mutations = {
     }
     return ctx.db.investments.updateOne(
       { _id: ObjectId(_id) },
-      { $set: { amount: investment.amount } },
+      { $set: { amount: investment.amount, updated_at: Date.now() } },
       { "new": true }
     )
   },

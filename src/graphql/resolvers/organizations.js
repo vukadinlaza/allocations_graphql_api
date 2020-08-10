@@ -27,7 +27,7 @@ const Queries = {
   },
   /** members must have the org id on their .organizations_admin key **/
   organizationMembers: async (_, { slug }, { user, db }) => {
-    isAdmin({user, db})
+    isAdmin({ user, db })
     const org = await db.organizations.findOne({ slug })
 
     return db.users.find({ organizations_admin: org._id }).toArray()
@@ -52,17 +52,17 @@ const Mutations = {
 
     // add user to org admin
     await ctx.db.users.updateOne(
-      { _id: ctx.user._id }, 
+      { _id: ctx.user._id },
       { $push: { organizations_admin: org._id } }
     )
     return org
   },
   /** simple update **/
-  updateOrganization: async (_, { organization: { _id, ...organization }}, ctx) => {
-    isAdmin(ctx)    
+  updateOrganization: async (_, { organization: { _id, ...organization } }, ctx) => {
+    isAdmin(ctx)
     return ctx.db.organizations.updateOne(
       { _id: ObjectId(_id) },
-      { $set: organization }
+      { $set: { ...organization, updated_at: Date.now(), } }
     )
   },
   /** TODO -> deletes org and all associations **/
@@ -76,7 +76,7 @@ const Mutations = {
      * 3) any investments originating from the org
      * 4) any user permission references the the org
      **/
-     return true
+    return true
   },
   /** add member to org **/
   addOrganizationMembership: async (_, { slug, user_id }, ctx) => {
@@ -156,14 +156,14 @@ const Organization = {
   },
   deal: (org, { _id }, { db }) => {
     if (org.slug === "allocations") {
-      return db.deals.findOne({ _id: ObjectId(_id), organization: { $in: [org._id, null] }})
+      return db.deals.findOne({ _id: ObjectId(_id), organization: { $in: [org._id, null] } })
     } else {
       return db.deals.findOne({ _id: ObjectId(_id), organization: org._id })
     }
   },
   n_deals: (org, _, { db }) => {
     if (org.slug === "allocations") {
-      return db.deals.count({ organization: { $in: [org._id, null] }})
+      return db.deals.count({ organization: { $in: [org._id, null] } })
     } else {
       return db.deals.count({ organization: org._id })
     }
@@ -183,8 +183,8 @@ const Organization = {
     }
   },
   investments: async (org, _, { db }) => {
-    const dealQuery = org.slug === "allocations" 
-      ? { organization: { $in: [org._id, null] }} 
+    const dealQuery = org.slug === "allocations"
+      ? { organization: { $in: [org._id, null] } }
       : { organization: org._id }
 
     const deals = await db.collection("deals").find(dealQuery).toArray()
@@ -228,7 +228,7 @@ const ComplianceTask = {
   }
 }
 
-module.exports = { 
+module.exports = {
   Organization,
   Queries,
   Schema,

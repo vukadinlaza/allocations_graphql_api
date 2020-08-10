@@ -16,6 +16,8 @@ type Investment {
   status: InvestmentStatus
   documents: [Document]
   investor: User
+  created_at: String
+  updated_at: String
 }
 
 enum InvestmentStatus {
