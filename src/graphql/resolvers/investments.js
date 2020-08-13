@@ -66,7 +66,6 @@ const Mutations = {
   /** updates investment and tracks the status change **/
   updateInvestment: async (_, { org, investment: { _id, ...investment } }, ctx) => {
     isAdmin(ctx)
-
     // we need to track status changes
     const savedInvestment = await ctx.db.investments.findOne({ _id: ObjectId(_id) })
     if (savedInvestment.status !== investment.status) {
@@ -74,7 +73,7 @@ const Mutations = {
     }
     return ctx.db.investments.updateOne(
       { _id: ObjectId(_id) },
-      { $set: { amount: investment.amount, updated_at: Date.now() } },
+      { $set: { amount: investment.amount, updated_at: Date.now(), status: investment.status } },
       { "new": true }
     )
   },
