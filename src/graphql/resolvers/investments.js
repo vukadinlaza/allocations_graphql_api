@@ -71,10 +71,9 @@ const Mutations = {
     if (savedInvestment.status !== investment.status) {
       investment[`${investment.status}_at`] = Date.now()
     }
-    const status = investment.status !== null ? investment.status : savedInvestment.status
     return ctx.db.investments.updateOne(
       { _id: ObjectId(_id) },
-      { $set: { amount: investment.amount, updated_at: Date.now(), status: status } },
+      { $set: { amount: investment.amount, updated_at: Date.now(), status: investment.status } },
       { "new": true }
     )
   },
