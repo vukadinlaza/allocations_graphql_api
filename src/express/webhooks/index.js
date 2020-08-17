@@ -41,7 +41,9 @@ module.exports = Router()
       }
 
       if (dealId) {
-        user = await db.users.findOne({ email: userEmail });
+        if (userEmail) {
+          user = await db.users.findOne({ email: userEmail });
+        }
         await db.investments.updateMany({
           deal_id: ObjectId(dealId),
           user_id: ObjectId(user._id),
