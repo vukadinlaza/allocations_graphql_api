@@ -54,17 +54,12 @@ module.exports = Router()
           user_id: ObjectId(user._id),
         })
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
-        let buff = new Buffer(pdf, 'base64');
-        let text = buff.toString('ascii');
-
-        console.log('text', text)
-
         const s3Path = `investments/${investment._id}/${documentName}`
 
         const obj = {
           Bucket,
           Key,
-          Body: text,
+          Body: pdf,
           ContentType: "application/pdf",
           ContentDisposition: "inline"
         }
