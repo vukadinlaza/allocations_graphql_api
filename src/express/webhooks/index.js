@@ -57,7 +57,7 @@ module.exports = Router()
         let buff = new Buffer(pdf, 'base64');
         let text = buff.toString('ascii');
 
-        const s3Path = `investments/${investment_id}/${documentName}`
+        const s3Path = `investments/${investment._id}/${documentName}`
 
         const obj = {
           Bucket,
