@@ -3,6 +3,7 @@ const { ObjectId } = require('mongodb')
 const { get } = require('lodash')
 const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
+const { Uploader } = require('../../uploaders/investor-docs')
 
 module.exports = Router()
   .post('/docusign', async (req, res, next) => {
@@ -12,7 +13,7 @@ module.exports = Router()
 
       const docusignData = JSON.parse(convert.xml2json(rawBody, { compact: true, spaces: 4 }));
 
-      console.log('data', get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF'))
+      const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF')
 
       const signerDocusignData = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.RecipientStatuses', {})
       // Gets User data from Docusign body
@@ -46,6 +47,16 @@ module.exports = Router()
         if (userEmail) {
           user = await db.users.findOne({ email: userEmail });
         }
+
+        const s3Path = await Uploader.putInvestmentDoc(investment_id, pdf)
+
+        console.log(s3path)
+
+        await db.investments.updateOne(
+          { _id: ObjectId(investment_id) },
+          { $addToSet: { documents: s3Path } }
+        )
+
         await db.investments.updateMany({
           deal_id: ObjectId(dealId),
           user_id: ObjectId(user._id),
