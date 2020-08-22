@@ -53,12 +53,11 @@ module.exports = Router()
           deal_id: ObjectId(dealId),
           user_id: ObjectId(user._id),
         })
-        console.log(get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF')
-        )
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
-        console.log('PDF', pdf)
         let buff = new Buffer(pdf, 'base64');
         let text = buff.toString('ascii');
+
+        console.log('text', text)
 
         const s3Path = `investments/${investment._id}/${documentName}`
 
