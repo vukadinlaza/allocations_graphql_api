@@ -12,7 +12,7 @@ module.exports = Router()
 
       const docusignData = JSON.parse(convert.xml2json(rawBody, { compact: true, spaces: 4 }));
 
-      console.log('data', docusignData)
+      console.log('data', get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF'))
 
       const signerDocusignData = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.RecipientStatuses', {})
       // Gets User data from Docusign body
