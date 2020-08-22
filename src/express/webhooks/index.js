@@ -47,8 +47,12 @@ module.exports = Router()
         if (userEmail) {
           user = await db.users.findOne({ email: userEmail });
         }
+        const investment = await db.investments.findOne({
+          deal_id: ObjectId(dealId),
+          user_id: ObjectId(user._id),
+        })
 
-        const s3Path = await Uploader.putInvestmentDoc(investment_id, pdf)
+        const s3Path = await Uploader.putInvestmentDoc(investment_id._id, pdf)
 
         console.log(s3path)
         await db.investments.updateMany({
