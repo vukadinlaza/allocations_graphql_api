@@ -56,7 +56,7 @@ module.exports = Router()
         console.log('1')
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
         const s3Path = `investments/${investment._id}/${documentName}`
-        console.log('2', s3path)
+        console.log('2', s3Path)
 
         const obj = {
           Bucket,
@@ -66,7 +66,7 @@ module.exports = Router()
           ContentDisposition: "inline"
         }
 
-        console.log('3', s3path)
+        console.log('3', s3Path)
 
         await s3.upload(obj).promise()
 
