@@ -3,7 +3,7 @@ const { ObjectId } = require('mongodb')
 const { get } = require('lodash')
 const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
-const { Uploader } = require('../../uploaders/investor-docs')
+const Uploader = require('../../uploaders/investor-docs')
 
 module.exports = Router()
   .post('/docusign', async (req, res, next) => {
@@ -51,20 +51,17 @@ module.exports = Router()
         const s3Path = await Uploader.putInvestmentDoc(investment_id, pdf)
 
         console.log(s3path)
-
-        await db.investments.updateOne(
-          { _id: ObjectId(investment_id) },
-          { $addToSet: { documents: s3Path } }
-        )
-
         await db.investments.updateMany({
           deal_id: ObjectId(dealId),
           user_id: ObjectId(user._id),
           status: {
             $in: ['invited', 'onboarded', 'pledged']
-          }
+          },
         },
-          { $set: { status: 'signed' } })
+          {
+            $set: { status: 'signed' },
+            $addToSet: { documents: s3Path }
+          })
       }
 
       await db.users.findOneAndUpdate({ _id: ObjectId(user._id) }, { $push: { documents: { signedAt, signerDocusignId, envelopeId, documentName, documentId } } });
