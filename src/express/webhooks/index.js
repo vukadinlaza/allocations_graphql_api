@@ -52,7 +52,7 @@ module.exports = Router()
           user_id: ObjectId(user._id),
         })
 
-        const s3Path = await Uploader.putInvestmentDoc(investment_id._id, pdf)
+        const s3Path = await Uploader.putInvestmentDoc(investment._id, pdf)
 
         console.log(s3path)
         await db.investments.updateMany({
