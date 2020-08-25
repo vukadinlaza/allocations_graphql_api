@@ -3,12 +3,6 @@ const { ObjectId } = require('mongodb')
 const { get } = require('lodash')
 const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
-const S3 = require('aws-sdk/clients/s3')
-
-const Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
-const url = `https://${Bucket}.s3.us-east-2.amazonaws.com`
-
-const s3 = new S3({ apiVersion: '2006-03-01' })
 
 module.exports = Router()
   .post('/docusign', async (req, res, next) => {
@@ -17,6 +11,7 @@ module.exports = Router()
       const db = await connect();
 
       const docusignData = JSON.parse(convert.xml2json(rawBody, { compact: true, spaces: 4 }));
+
       const signerDocusignData = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.RecipientStatuses', {})
       // Gets User data from Docusign body
       const signerEmail = get(signerDocusignData, 'RecipientStatus.Email._text')
@@ -35,54 +30,23 @@ module.exports = Router()
       }
 
       const dealFeild = fieldData.find(f => f._attributes.name === 'Deal-ID')
-      const emailfield = fieldData.find(f => f._attributes.name === 'userEmail')
       const dealId = get(dealFeild, 'value._text')
-      const userEmail = get(emailfield, 'value._text')
 
-      let user = await db.users.findOne({ email: signerEmail });
+      const user = await db.users.findOne({ email: signerEmail });
 
       if (!user) {
         return res.status(400).end();
       }
 
       if (dealId) {
-        if (userEmail) {
-          user = await db.users.findOne({ email: userEmail });
-        }
-        const investment = await db.investments.findOne({
-          deal_id: ObjectId(dealId),
-          user_id: ObjectId(user._id),
-        })
-        console.log('1')
-        const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
-        const s3Path = `investments/${investment._id}/${documentName}`
-        console.log('2', s3Path)
-
-        const obj = {
-          Bucket,
-          Key,
-          Body: pdf,
-          ContentType: "application/pdf",
-          ContentDisposition: "inline"
-        }
-
-        console.log('3', s3Path)
-
-        await s3.upload(obj).promise()
-
-        console.log('4')
-
         await db.investments.updateMany({
           deal_id: ObjectId(dealId),
           user_id: ObjectId(user._id),
           status: {
             $in: ['invited', 'onboarded', 'pledged']
-          },
+          }
         },
-          {
-            $set: { status: 'signed' },
-            $addToSet: { documents: s3Path }
-          })
+          { $set: { status: 'signed' } })
       }
 
       await db.users.findOneAndUpdate({ _id: ObjectId(user._id) }, { $push: { documents: { signedAt, signerDocusignId, envelopeId, documentName, documentId } } });
