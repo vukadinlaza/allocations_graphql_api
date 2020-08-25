@@ -56,7 +56,7 @@ module.exports = Router()
         console.log('1')
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
         const s3Path = `investments/${investment._id}/${documentName}`
-        console.log('2', s3Path)
+        console.log('2', s3path)
 
         const obj = {
           Bucket,
@@ -65,12 +65,9 @@ module.exports = Router()
           ContentType: "application/pdf",
           ContentDisposition: "inline"
         }
-
-        console.log('3', s3Path)
-
         await s3.upload(obj).promise()
 
-        console.log('4')
+        console.log(s3path)
 
         await db.investments.updateMany({
           deal_id: ObjectId(dealId),
@@ -90,6 +87,7 @@ module.exports = Router()
       return res.status(200).end();
 
     } catch (err) {
+      console.log(error)
       next(err);
     }
   });
