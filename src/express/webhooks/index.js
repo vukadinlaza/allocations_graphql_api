@@ -3,12 +3,6 @@ const { ObjectId } = require('mongodb')
 const { get } = require('lodash')
 const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
-const S3 = require('aws-sdk/clients/s3')
-
-const Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
-const url = `https://${Bucket}.s3.us-east-2.amazonaws.com`
-
-const s3 = new S3({ apiVersion: '2006-03-01' })
 
 module.exports = Router()
   .post('/docusign', async (req, res, next) => {
@@ -17,6 +11,7 @@ module.exports = Router()
       const db = await connect();
 
       const docusignData = JSON.parse(convert.xml2json(rawBody, { compact: true, spaces: 4 }));
+
       const signerDocusignData = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.RecipientStatuses', {})
       // Gets User data from Docusign body
       const signerEmail = get(signerDocusignData, 'RecipientStatus.Email._text')
@@ -63,23 +58,19 @@ module.exports = Router()
           Key,
           Body: pdf,
           ContentType: "application/pdf",
-          ContentDisposition: "inline"
         }
-        await s3.upload(obj).promise()
+        const s3res = await s3.upload(obj)
 
-        console.log(s3path)
+        console.log(s3path, 9009)
 
         await db.investments.updateMany({
           deal_id: ObjectId(dealId),
           user_id: ObjectId(user._id),
           status: {
             $in: ['invited', 'onboarded', 'pledged']
-          },
+          }
         },
-          {
-            $set: { status: 'signed' },
-            $addToSet: { documents: s3Path }
-          })
+          { $set: { status: 'signed' } })
       }
 
       await db.users.findOneAndUpdate({ _id: ObjectId(user._id) }, { $push: { documents: { signedAt, signerDocusignId, envelopeId, documentName, documentId } } });
