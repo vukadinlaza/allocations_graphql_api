@@ -3,6 +3,15 @@ const { ObjectId } = require('mongodb')
 const { get } = require('lodash')
 const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
+const S3 = require('aws-sdk/clients/s3')
+// const s3 = new S3({
+//   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+//   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+// });
+const s3 = new S3({ apiVersion: '2006-03-01' })
+
+const Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
+
 
 module.exports = Router()
   .post('/docusign', async (req, res, next) => {
@@ -50,18 +59,19 @@ module.exports = Router()
         })
         console.log('1')
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
-        const s3Path = `investments/${investment._id}/${documentName}`
-        console.log('2', s3path)
+        const key = `investments/${investment._id}/${documentName}`
+        console.log('2', key)
 
         const obj = {
           Bucket,
-          Key,
+          Key: key,
           Body: pdf,
           ContentType: "application/pdf",
+          ContentDisposition: "inline"
         }
-        const s3res = await s3.upload(obj)
+        const s3Res = await s3.upload(obj)
 
-        console.log(s3path, 9009)
+        console.log(key, s3Res)
 
         await db.investments.updateMany({
           deal_id: ObjectId(dealId),
@@ -70,7 +80,12 @@ module.exports = Router()
             $in: ['invited', 'onboarded', 'pledged']
           }
         },
-          { $set: { status: 'signed' } })
+          {
+            $set: { status: 'signed' },
+            $addToSet: { documents: key }
+          }
+        );
+
       }
 
       await db.users.findOneAndUpdate({ _id: ObjectId(user._id) }, { $push: { documents: { signedAt, signerDocusignId, envelopeId, documentName, documentId } } });
