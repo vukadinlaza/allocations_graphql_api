@@ -30,7 +30,9 @@ module.exports = Router()
       }
 
       const dealFeild = fieldData.find(f => f._attributes.name === 'Deal-ID')
+      const emailfield = fieldData.find(f => f._attributes.name === 'userEmail')
       const dealId = get(dealFeild, 'value._text')
+      const userEmail = get(emailfield, 'value._text')
 
       let user = await db.users.findOne({ email: signerEmail });
 
