@@ -56,15 +56,13 @@ module.exports = Router()
         })
         console.log('1')
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
-        const b64toBlob = (base64, type = 'application/octet-stream') =>
-          fetch(`data:${type};base64,${base64}`).then(res => res.blob())
         const key = `investments/${investment._id}/${documentName}`
         console.log('2', key)
 
         const obj = {
           Bucket,
           Key: key,
-          Body: b64toBlob(pdf),
+          Body: pdf,
           ContentType: "application/pdf",
           ContentDisposition: "inline"
         }
