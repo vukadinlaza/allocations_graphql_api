@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb")
 const _ = require('lodash')
-const { isAdmin, isOrgAdmin, ensureFundAdmin } = require('../permissions')
+const { isAdmin, isOrgAdmin, ensureFundAdmin, isFundAdmin } = require('../permissions')
 const Cloudfront = require('../../cloudfront')
 const DealDocUploader = require('../../uploaders/deal-docs')
 const DealMailer = require('../../mailers/deal-mailer')
@@ -75,7 +75,6 @@ const Deal = {
 
 const Queries = {
   deal: (_, args, ctx) => {
-    isAdmin(ctx)
     return ctx.db.deals.findOne({ _id: ObjectId(args._id) })
   },
   allDeals: (_, args, ctx) => {
