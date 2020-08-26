@@ -39,6 +39,21 @@ const makeEnvelopeDef = ({ user, templateId, formName }) => {
             }
         })
     }
+    const formatEIN = () => {
+        const isW9 = formName.includes('W-9')
+
+        if (!user.ein) return [];
+        if (!isW9) {
+            return [{ tabLabel: 'EIN', value: user.ein }]
+        }
+
+        return user.ein.replace(/[^0-9]/g, '').split('').slice(0, 9).map((letter, index) => {
+            return {
+                tabLabel: `EIN-${index + 1}`,
+                value: letter
+            }
+        })
+    }
 
     const getMailingAddressTabs = () => {
         const mailingTabs = [
@@ -104,6 +119,7 @@ const makeEnvelopeDef = ({ user, templateId, formName }) => {
                                         },
                                         { tabLabel: 'Address-Country', value: user.country },
                                         ...formatSSN(),
+                                        ...formatEIN(),
                                         { tabLabel: 'Date-Of-Birth', value: user.dob },
                                         { tabLabel: 'Foreign-Tax-Number', value: user.foreign_tax_number },
                                         { tabLabel: 'Citizenship-Country', value: user.country },
