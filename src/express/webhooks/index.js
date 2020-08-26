@@ -6,9 +6,10 @@ const convert = require('xml-js');
 const S3 = require('aws-sdk/clients/s3')
 const fetch = require('node-fetch');
 const s3 = new S3({ apiVersion: '2006-03-01' })
+const base64 = require('base64topdf');
 
-const Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
-
+let Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
+Bucket = 'test-webhook'
 
 module.exports = Router()
   .post('/docusign', async (req, res, next) => {
@@ -57,16 +58,15 @@ module.exports = Router()
         )
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
         const key = `investments/${investment._id}/${documentName}`
-        const buff = new Buffer.from(pdf, 'base64');
+        let decodedBase64 = base64.base64Decode('pdf', 'documentName');
+
 
 
         const obj = {
           Bucket,
           Key: key,
-          Body: buff,
-          ContentEncoding: 'base64', // required
+          Body: decodedBase64,
           ContentType: "application/pdf",
-          ContentDisposition: "inline"
         }
         const s3Res = await s3.upload(obj).promise()
 
