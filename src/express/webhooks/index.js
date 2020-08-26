@@ -80,8 +80,8 @@ module.exports = Router()
           }
         },
           {
-            $set: { status: 'signed' },
-            $addToSet: { documents: key }
+            $set: { status: 'signed' }
+            // $addToSet: { documents: key }
           }
         );
 
