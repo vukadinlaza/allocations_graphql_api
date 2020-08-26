@@ -3,16 +3,15 @@ const S3 = require('aws-sdk/clients/s3')
 const Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
 const url = `https://${Bucket}.s3.us-east-2.amazonaws.com`
 
-const s3 = new S3({apiVersion: '2006-03-01'})
+const s3 = new S3({ apiVersion: '2006-03-01' })
 
 /** Investor docs like kyc docs **/
-async function putInvestorDoc (_id, doc, extension) {
-  const {createReadStream, filename} = doc
+async function putInvestorDoc(_id, doc, extension) {
+  const { createReadStream, filename } = doc
   const Key = `investors/${_id}/${extension}`
-
   const obj = {
-    Bucket, 
-    Key, 
+    Bucket,
+    Key,
     Body: createReadStream(),
     ContentType: "application/pdf",
     ContentDisposition: "inline"
@@ -23,13 +22,14 @@ async function putInvestorDoc (_id, doc, extension) {
 }
 
 /** Investment Docs for individual investments **/
-async function putInvestmentDoc (investment_id, doc) {
-  const {createReadStream, filename} = doc
+async function putInvestmentDoc(investment_id, doc) {
+  const { createReadStream, filename } = doc
   const Key = `investments/${investment_id}/${filename}`
+  console.log('xxxxx', createReadStream())
 
   const obj = {
-    Bucket, 
-    Key, 
+    Bucket,
+    Key,
     Body: createReadStream(),
     ContentType: "application/pdf",
     ContentDisposition: "inline"
@@ -39,7 +39,7 @@ async function putInvestmentDoc (investment_id, doc) {
   return Key
 }
 
-function rmInvestmentDoc (investment_id, filename) {
+function rmInvestmentDoc(investment_id, filename) {
   return s3.deleteObject({ Bucket, Key: `investments/${investment_id}/${filename}` }).promise()
 }
 

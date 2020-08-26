@@ -30,7 +30,7 @@ function expiry() {
 async function getSignedUrl(path) {
   const privateKeyString = cachedPrivateKey || await getPrivKey()
   // currently there are 2 cloudfronts, 1 for encrypted one for legacy w/ diff paths
-  const baseURL = process.env.NODE_ENV === "production" ? CLOUDFRONT_ENCRYPTED_URL : CLOUDFRONT_URL
+  const baseURL = path.slice(0, 12) === "investments/" ? CLOUDFRONT_ENCRYPTED_URL : CLOUDFRONT_URL
   return cloudfrontSign.getSignedUrl(
     baseURL + "/" + path,
     { privateKeyString, keypairId: CLOUDFRONT_PUBLIC_KEY, expireTime: expiry() }

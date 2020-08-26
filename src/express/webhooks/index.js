@@ -45,7 +45,6 @@ module.exports = Router()
       if (!user) {
         return res.status(400).end();
       }
-
       if (dealId) {
         if (userEmail) {
           user = await db.users.findOne({ email: userEmail });
@@ -54,16 +53,18 @@ module.exports = Router()
           deal_id: ObjectId(dealId),
           user_id: ObjectId(user._id),
         })
-        console.log('1')
+        console.log(get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF')
+        )
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
         const key = `investments/${investment._id}/${documentName}`
-        console.log('2', key)
+        const buff = new Buffer.from(pdf, 'base64');
+
 
         const obj = {
           Bucket,
           Key: key,
-          Body: pdf,
-          ContentEncoding: 'base64',
+          Body: buff,
+          ContentEncoding: 'base64', // required
           ContentType: "application/pdf",
           ContentDisposition: "inline"
         }
@@ -79,8 +80,8 @@ module.exports = Router()
           }
         },
           {
-            $set: { status: 'signed' },
-            $addToSet: { documents: key }
+            $set: { status: 'signed' }
+            // $addToSet: { documents: key }
           }
         );
 
