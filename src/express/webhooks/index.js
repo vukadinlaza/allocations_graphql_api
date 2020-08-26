@@ -64,6 +64,7 @@ module.exports = Router()
           Bucket,
           Key: key,
           Body: buff,
+          ContentEncoding: 'base64', // required
           ContentType: "application/pdf",
           ContentDisposition: "inline"
         }
