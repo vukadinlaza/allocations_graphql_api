@@ -63,10 +63,11 @@ module.exports = Router()
           Bucket,
           Key: key,
           Body: pdf,
+          ContentEncoding: 'base64',
           ContentType: "application/pdf",
           ContentDisposition: "inline"
         }
-        const s3Res = await s3.upload(obj)
+        const s3Res = await s3.upload(obj).promise()
 
         console.log(key, s3Res)
 
