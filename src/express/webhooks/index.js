@@ -4,11 +4,9 @@ const { get } = require('lodash')
 const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
 const S3 = require('aws-sdk/clients/s3')
-const fetch = require('node-fetch');
 const s3 = new S3({ apiVersion: '2006-03-01' })
 
-const Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
-
+let Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
 
 module.exports = Router()
   .post('/docusign', async (req, res, next) => {
@@ -53,24 +51,19 @@ module.exports = Router()
           deal_id: ObjectId(dealId),
           user_id: ObjectId(user._id),
         })
-        console.log(get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF')
-        )
-        const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
+        const base64String = get(docusignData, 'DocuSignEnvelopeInformation.Documentbs.DocumentPDF.PDFBytes._text')
         const key = `investments/${investment._id}/${documentName}`
-        const buff = new Buffer.from(pdf, 'base64');
-
+        const buf = Buffer.from(base64String, 'base64');
 
         const obj = {
           Bucket,
           Key: key,
-          Body: buff,
-          ContentEncoding: 'base64', // required
+          Body: buf,
+          ContentEncoding: 'base64',
           ContentType: "application/pdf",
-          ContentDisposition: "inline"
         }
         const s3Res = await s3.upload(obj).promise()
 
-        console.log(key, s3Res)
 
         await db.investments.updateMany({
           deal_id: ObjectId(dealId),
@@ -80,8 +73,8 @@ module.exports = Router()
           }
         },
           {
-            $set: { status: 'signed' }
-            // $addToSet: { documents: key }
+            $set: { status: 'signed' },
+            $addToSet: { documents: key }
           }
         );
 
