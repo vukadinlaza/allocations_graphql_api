@@ -90,7 +90,7 @@ module.exports = Router()
       return res.status(200).end();
 
     } catch (err) {
-      console.log(error)
+      console.log(err)
       next(err);
     }
   });
