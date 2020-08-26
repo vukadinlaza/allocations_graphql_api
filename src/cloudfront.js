@@ -23,22 +23,21 @@ const secretManager = new AWS.SecretsManager({
 const hour = 60 * 60 * 1000
 let cachedPrivateKey = null
 
-function expiry () {
+function expiry() {
   return Date.now() + (4 * hour)
 }
 
-async function getSignedUrl (path) {
+async function getSignedUrl(path) {
   const privateKeyString = cachedPrivateKey || await getPrivKey()
   // currently there are 2 cloudfronts, 1 for encrypted one for legacy w/ diff paths
-  const baseURL = path.slice(0, 12) === "investments/" ? CLOUDFRONT_ENCRYPTED_URL : CLOUDFRONT_URL
-
+  const baseURL = process.env.NODE_ENV === "production" ? CLOUDFRONT_ENCRYPTED_URL : CLOUDFRONT_URL
   return cloudfrontSign.getSignedUrl(
     baseURL + "/" + path,
     { privateKeyString, keypairId: CLOUDFRONT_PUBLIC_KEY, expireTime: expiry() }
   )
 }
 
-async function getPrivKey () {
+async function getPrivKey() {
   const res = await secretManager.getSecretValue({
     SecretId: CLOUDFRONT_SECRET_NAME,
   }).promise()
