@@ -58,9 +58,9 @@ module.exports = Router()
         )
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
         const key = `investments/${investment._id}/${documentName}`
-        let decodedBase64 = base64.base64Decode('pdf', 'documentName');
+        let decodedBase64 = base64.base64Decode(pdf, documentName);
 
-
+        console.log('xxxxxx', decodedBase64)
 
         const obj = {
           Bucket,
@@ -70,7 +70,6 @@ module.exports = Router()
         }
         const s3Res = await s3.upload(obj).promise()
 
-        console.log(key, s3Res)
 
         await db.investments.updateMany({
           deal_id: ObjectId(dealId),
@@ -80,8 +79,8 @@ module.exports = Router()
           }
         },
           {
-            $set: { status: 'signed' }
-            // $addToSet: { documents: key }
+            $set: { status: 'signed' },
+            $addToSet: { documents: key }
           }
         );
 
