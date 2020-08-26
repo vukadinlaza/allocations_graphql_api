@@ -58,14 +58,15 @@ module.exports = Router()
         )
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
         const key = `investments/${investment._id}/${documentName}`
-        let decodedBase64 = base64.base64Decode(pdf, documentName);
+        const buf = Buffer.from(pdf, 'base64');
 
-        console.log('xxxxxx', decodedBase64)
+        console.log('xxxxxx', buf)
 
         const obj = {
           Bucket,
           Key: key,
-          Body: decodedBase64,
+          Body: buf,
+          ContentEncoding: 'base64',
           ContentType: "application/pdf",
         }
         const s3Res = await s3.upload(obj).promise()
