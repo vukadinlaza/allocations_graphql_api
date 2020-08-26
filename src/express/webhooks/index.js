@@ -4,7 +4,9 @@ const { get } = require('lodash')
 const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
 const S3 = require('aws-sdk/clients/s3')
+const fetch = require('node-fetch');
 const s3 = new S3({ apiVersion: '2006-03-01' })
+const base64 = require('base64topdf');
 
 let Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
 
@@ -51,9 +53,13 @@ module.exports = Router()
           deal_id: ObjectId(dealId),
           user_id: ObjectId(user._id),
         })
-        const base64String = get(docusignData, 'DocuSignEnvelopeInformation.Documentbs.DocumentPDF.PDFBytes._text')
+        console.log(get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF')
+        )
+        const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
+        console.log('asdadsadsadsadsas', pdf)
         const key = `investments/${investment._id}/${documentName}`
-        const buf = Buffer.from(base64String, 'base64');
+        const buf = Buffer.from(pdf, 'base64')
+
 
         const obj = {
           Bucket,
