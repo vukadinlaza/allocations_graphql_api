@@ -9,7 +9,6 @@ const s3 = new S3({ apiVersion: '2006-03-01' })
 const base64 = require('base64topdf');
 
 let Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
-Bucket = 'test-webhook'
 
 module.exports = Router()
   .post('/docusign', async (req, res, next) => {
