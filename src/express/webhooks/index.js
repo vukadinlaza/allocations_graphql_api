@@ -54,7 +54,7 @@ module.exports = Router()
           user_id: ObjectId(user._id),
         })
 
-        if (!investment?._id) {
+        if (!investment && !investment._id) {
           const deal = await db.deals.findOne({ _id: ObjectId(dealId) })
 
           investment = await db.investments.insertOne({
