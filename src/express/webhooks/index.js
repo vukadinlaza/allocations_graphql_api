@@ -49,12 +49,25 @@ module.exports = Router()
         if (userEmail) {
           user = await db.users.findOne({ email: userEmail });
         }
-        const investment = await db.investments.findOne({
+        let investment = await db.investments.findOne({
           deal_id: ObjectId(dealId),
           user_id: ObjectId(user._id),
         })
-        console.log(get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF')
-        )
+
+        if (investment === null) {
+          const deal = await db.deals.findOne({ _id: ObjectId(dealId) })
+
+          investment = await db.investments.insertOne({
+            user_id: ObjectId(user._id),
+            deal_id: ObjectId(dealId),
+            status: 'invited',
+            created_at: Date.now(),
+            invitied_at: Date.now(),
+            oranization: deal.organization,
+            amount: 0
+          })
+          investment._id = investment.insertedId
+        }
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
         const key = `investments/${investment._id}/${documentName}`
         const buf = Buffer.from(pdf, 'base64')
