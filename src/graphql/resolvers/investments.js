@@ -33,11 +33,9 @@ const Investment = {
 
 const Queries = {
   investment: (_, args, ctx) => {
-    isAdmin(ctx)
     return ctx.db.investments.findOne({ _id: ObjectId(args._id) })
   },
   allInvestments: (_, __, ctx) => {
-    isAdmin(ctx)
     return db.investments.find({}).toArray()
   }
 }
@@ -65,7 +63,6 @@ const Mutations = {
   },
   /** updates investment and tracks the status change **/
   updateInvestment: async (_, { org, investment: { _id, ...investment } }, ctx) => {
-    isAdmin(ctx)
     // we need to track status changes
     const savedInvestment = await ctx.db.investments.findOne({ _id: ObjectId(_id) })
     if (savedInvestment.status !== investment.status) {
@@ -79,7 +76,6 @@ const Mutations = {
   },
   /** delete investment **/
   deleteInvestment: async (_, { _id }, ctx) => {
-    isAdmin(ctx)
 
     try {
       const res = await ctx.db.investments.deleteOne({ _id: ObjectId(_id) })
@@ -93,7 +89,6 @@ const Mutations = {
 
   /** uploads investment document, S3 & db path **/
   addInvestmentDoc: async (_, { investment_id, doc }, ctx) => {
-    isAdmin(ctx)
 
     const file = await doc
     const s3Path = await Uploader.putInvestmentDoc(investment_id, file)
@@ -107,7 +102,6 @@ const Mutations = {
   },
   /** deletes investment document, S3 & db path **/
   rmInvestmentDoc: async (_, { investment_id, file }, ctx) => {
-    isAdmin(ctx)
 
     await Uploader.rmInvestmentDoc(investment_id, file)
     await ctx.db.investments.updateOne(
