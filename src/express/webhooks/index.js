@@ -56,7 +56,6 @@ module.exports = Router()
         console.log(get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF')
         )
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
-        console.log('asdadsadsadsadsas', pdf)
         const key = `investments/${investment._id}/${documentName}`
         const buf = Buffer.from(pdf, 'base64')
 
