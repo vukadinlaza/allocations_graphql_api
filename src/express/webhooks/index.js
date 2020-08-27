@@ -54,7 +54,7 @@ module.exports = Router()
           user_id: ObjectId(user._id),
         })
 
-        if (investment !== null) {
+        if (investment === null) {
           const deal = await db.deals.findOne({ _id: ObjectId(dealId) })
 
           investment = await db.investments.insertOne({
@@ -66,6 +66,7 @@ module.exports = Router()
             oranization: deal.organization,
             amount: 0
           })
+          investment._id = investment.insertedId
         }
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
         const key = `investments/${investment._id}/${documentName}`
