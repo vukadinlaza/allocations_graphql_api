@@ -21,6 +21,7 @@ type User {
   passport: Document
   accredidation_doc: Document
   investments: [Investment]
+  dealInvestments(deal_id: String!): [Investment]
   invitedDeals: [Deal]
   invitedDeal(deal_slug: String!, fund_slug: String!): Deal
   dob: String
@@ -51,7 +52,7 @@ input UserInput {
 }
 
 extend type Query {
-  investor(email: String, _id: String): User
+  investor(email: String, _id: String, deal_id: String): User
   allInvestors: [User]
   searchUsers(org: String!, q: String!, limit: Int): [User]
   getLink(input: Object): Object

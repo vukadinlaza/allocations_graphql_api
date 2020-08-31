@@ -51,6 +51,10 @@ const User = {
   investments: (user, _, { db }) => {
     return db.investments.find({ user_id: user._id }).toArray()
   },
+  dealInvestments: (user, { deal_id }, { db }) => {
+    return db.investments.find({ user_id: user._id, deal_id: ObjectId(deal_id) }).toArray()
+  }
+  ,
   invitedDeals: (user, _, { db }) => {
     return db.deals.find({
       status: { $ne: 'closed' },
