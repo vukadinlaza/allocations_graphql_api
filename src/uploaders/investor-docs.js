@@ -13,7 +13,7 @@ async function putInvestorDoc(_id, doc, extension) {
     Bucket,
     Key,
     Body: createReadStream(),
-    ContentType: "application/pdf",
+    ContentType: doc.mimetype,
     ContentDisposition: "inline"
   }
   await s3.upload(obj).promise()
@@ -25,7 +25,6 @@ async function putInvestorDoc(_id, doc, extension) {
 async function putInvestmentDoc(investment_id, doc) {
   const { createReadStream, filename } = doc
   const Key = `investments/${investment_id}/${filename}`
-  console.log('xxxxx', createReadStream())
 
   const obj = {
     Bucket,
