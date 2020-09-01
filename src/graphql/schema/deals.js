@@ -53,16 +53,19 @@ type DealParams {
   estimatedTerm: String
   managementFees: String
   managementFeesDollar: String
+  managementFeeType: String
   portfolioTotalCarry: String
   portfolioEstimatedSetupCosts: String
   portfolioEstimatedSetupCostsDollar: String
   portfolioManagementFees: String
   portfolioManagementFeesDollar: String
+  portfolioManagementFeeType: String
   fundTotalCarry: String
   fundEstimatedSetupCosts: String
   fundEstimatedSetupCostsDollar: String
   fundManagementFees: String
   fundManagementFeesDollar: String
+  fundManagementFeeType: String
   fundGeneralPartner: String
   fundEstimatedTerm: String
 }
@@ -80,16 +83,19 @@ input DealParamsInput {
   estimatedTerm: String
   managementFees: String
   managementFeesDollar: String
+  managementFeeType: String
   portfolioTotalCarry: String
   portfolioEstimatedSetupCosts: String
   portfolioEstimatedSetupCostsDollar: String
   portfolioManagementFees: String
   portfolioManagementFeesDollar: String
+  portfolioManagementFeeType: String
   fundTotalCarry: String
   fundEstimatedSetupCosts: String
   fundEstimatedSetupCostsDollar: String
   fundManagementFees: String
   fundManagementFeesDollar: String
+  fundManagementFeeType: String
   fundGeneralPartner: String
   fundEstimatedTerm: String
 }
