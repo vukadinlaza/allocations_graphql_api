@@ -30,14 +30,12 @@ type Deal {
   memo: String
   pledges: [PubPledge]
   documents: [Document]
-
   appLink: String
   publicLink: String
-
   dealParams: DealParams
-
   last_valuation: String
   no_exchange: Boolean
+  raised: Int
 }
 
 type DealParams {
