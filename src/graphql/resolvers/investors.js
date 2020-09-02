@@ -91,9 +91,6 @@ const User = {
 const Queries = {
   /** admin or investor themselves can query **/
   investor: async (_, args, ctx) => {
-    // only admins can arbitrarily query
-    if (args._id) isAdmin(ctx)
-
     const query = args._id
       ? { _id: ObjectId(args._id) }
       : { email: ctx.user.email }
