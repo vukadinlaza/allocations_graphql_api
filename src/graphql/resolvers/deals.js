@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb")
-const { sumBy } = require('lodash')
+const { sumBy, isNumber } = require('lodash')
 const { isAdmin, isOrgAdmin, ensureFundAdmin, isFundAdmin } = require('../permissions')
 const Cloudfront = require('../../cloudfront')
 const DealDocUploader = require('../../uploaders/deal-docs')
@@ -73,10 +73,11 @@ const Deal = {
   },
   raised: async (deal, _, { db }) => {
     const investments = await db.investments.find({ deal_id: deal._id }).toArray()
-    console.log(investments)
-    return investments.reduce((acc, inv) => {
-      return acc + inv.amount || 0
+    const amount = investments.reduce((acc, inv) => {
+      const amount = isNumber(inv.amount) ? inv.amount : 0
+      return acc + amount
     }, 0)
+    return amount
   },
 }
 
