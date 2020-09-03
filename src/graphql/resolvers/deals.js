@@ -180,7 +180,7 @@ const Mutations = {
       name: orgName,
       created_at: Date.now(),
       slug,
-      approved: false
+      approved: true
     })
 
     // add user to org admin
