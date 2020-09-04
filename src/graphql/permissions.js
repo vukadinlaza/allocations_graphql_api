@@ -20,9 +20,9 @@ const ensureFundAdmin = async (slug, { user, db }) => {
 }
 
 /** fund admin guard **/
-const isOrgAdmin = (orgSlug, { user }) => {
-  const org = (user.orgs || []).find(o => o.slug === orgSlug)
-  if (org) return org
+const isOrgAdmin = (orgId, { user }) => {
+  const org = (user.orgs || []).find(o => o._id.toString() === orgId.toString())
+  if (org || user.admin) return org
 
   throw new AuthenticationError("permission denied")
 }
@@ -40,10 +40,10 @@ const isFundAdmin = (slug, user) => {
   return Boolean((user.orgs || []).find(o => o.slug === slug))
 }
 
-module.exports = { 
-  isAdmin, 
-  isAdminOrSameUser, 
+module.exports = {
+  isAdmin,
+  isAdminOrSameUser,
   isOrgAdmin,
   ensureFundAdmin, // transitioning to more accurate phrasing
-  isFundAdmin, 
+  isFundAdmin,
 }
