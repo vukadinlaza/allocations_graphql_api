@@ -107,7 +107,7 @@ const Queries = {
   publicDeal: async (_, { deal_slug, fund_slug, invite_code }, { db }) => {
     const fund = await db.organizations.findOne({ slug: fund_slug })
     const deal = await db.deals.findOne({ slug: deal_slug, organization: fund._id })
-    if (deal && deal.inviteKey === invite_code) {
+    if (deal) {
       return deal
     }
     throw new AuthenticationError("permission denied")
