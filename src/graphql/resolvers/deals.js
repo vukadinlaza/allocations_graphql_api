@@ -74,7 +74,7 @@ const Deal = {
   raised: async (deal, _, { db }) => {
     const investments = await db.investments.find({ deal_id: deal._id }).toArray()
     const amount = investments.reduce((acc, inv) => {
-      const amount = _.isNumber(inv.amount) ? inv.amount : 0
+      const amount = !isNaN(inv.amount) ? inv.amount : 0
       return acc + amount
     }, 0)
     return amount
