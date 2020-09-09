@@ -1,6 +1,6 @@
 const { ObjectId } = require('mongodb')
 const _ = require('lodash')
-const { isAdmin } = require('../permissions')
+const { isAdmin, isOrgAdmin } = require('../permissions')
 const PublicUploader = require('../../uploaders/public-docs')
 const AdminMailer = require('../../mailers/admin-mailer')
 const { AuthenticationError, gql } = require('apollo-server-express')
@@ -58,12 +58,15 @@ const Mutations = {
     return org
   },
   /** simple update **/
-  updateOrganization: async (_, { organization: { _id, ...organization } }, ctx) => {
-    isAdmin(ctx)
-    return ctx.db.organizations.updateOne(
+  updateOrganization: async (_, { organization: { _id, slug, ...organization } }, ctx) => {
+    isOrgAdmin(_id, { user: ctx.user })
+    const updatedOrg = await ctx.db.organizations.findOneAndUpdate(
       { _id: ObjectId(_id) },
-      { $set: { ...organization, updated_at: Date.now(), } }
+      { $set: { ...organization, slug, updated_at: Date.now(), } },
+      { returnOriginal: false },
+
     )
+    return updatedOrg.value
   },
   /** TODO -> deletes org and all associations **/
   deleteOrganization: async (_, { _id }, ctx) => {
