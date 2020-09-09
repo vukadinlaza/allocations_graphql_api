@@ -30,14 +30,12 @@ type Deal {
   memo: String
   pledges: [PubPledge]
   documents: [Document]
-
   appLink: String
   publicLink: String
-
   dealParams: DealParams
-
   last_valuation: String
   no_exchange: Boolean
+  raised: Int
 }
 
 type DealParams {
@@ -123,7 +121,7 @@ enum DealStatus {
 type Query {
   deal(_id: String): Deal
   allDeals: [Deal]
-  publicDeal(deal_slug: String!, fund_slug: String!, invite_code: String!): Deal
+  publicDeal(deal_slug: String!, fund_slug: String!, invite_code: String): Deal
   searchDeals(q: String!, limit: Int): [Deal]
   searchDealsByOrg(q: String!, org: String!, limit: Int): [Deal]
 }

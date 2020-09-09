@@ -70,7 +70,15 @@ const Deal = {
         return { amount: p.amount, timestamp: p.pledged_at, initials: investorInitials(investor) }
       })
     )
-  }
+  },
+  raised: async (deal, _, { db }) => {
+    const investments = await db.investments.find({ deal_id: deal._id }).toArray()
+    const amount = investments.reduce((acc, inv) => {
+      const amount = _.isNumber(inv.amount) ? inv.amount : 0
+      return acc + amount
+    }, 0)
+    return amount
+  },
 }
 
 const Queries = {
@@ -99,7 +107,7 @@ const Queries = {
   publicDeal: async (_, { deal_slug, fund_slug, invite_code }, { db }) => {
     const fund = await db.organizations.findOne({ slug: fund_slug })
     const deal = await db.deals.findOne({ slug: deal_slug, organization: fund._id })
-    if (deal && deal.inviteKey === invite_code) {
+    if (deal) {
       return deal
     }
     throw new AuthenticationError("permission denied")
@@ -180,7 +188,7 @@ const Mutations = {
       name: orgName,
       created_at: Date.now(),
       slug,
-      approved: false
+      approved: true
     })
 
     // add user to org admin
