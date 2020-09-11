@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const { ObjectId } = require('mongodb')
-const { get } = require('lodash')
+const { get, toLower } = require('lodash')
 const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
 const S3 = require('aws-sdk/clients/s3')
@@ -40,7 +40,7 @@ module.exports = Router()
       const dealId = get(dealFeild, 'value._text')
       const userEmail = get(emailfield, 'value._text')
 
-      let user = await db.users.findOne({ email: signerEmail });
+      let user = await db.users.findOne({ email: toLower(signerEmail) });
 
       if (!user) {
         if (userEmail) {
