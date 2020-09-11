@@ -43,7 +43,12 @@ module.exports = Router()
       let user = await db.users.findOne({ email: signerEmail });
 
       if (!user) {
-        return res.status(400).end();
+        if (userEmail) {
+          user = await db.users.findOne({ email: userEmail });
+        }
+        if (!user) {
+          return res.status(400).end();
+        }
       }
       if (dealId) {
         if (userEmail) {
