@@ -111,4 +111,20 @@ module.exports = Router()
       console.log(err)
       next(err);
     }
+  })
+  .post('/verifyinvestor', async (req, res, next) => {
+    try {
+      const { rawBody } = req;
+      console.log('req', req)
+      console.log('req.body', req)
+      const db = await connect();
+
+      // await db.users.findOneAndUpdate({ _id: ObjectId(user._id) }, { $push: { documents: {} } });
+
+      return res.status(200).end();
+
+    } catch (err) {
+      console.log(err)
+      next(err);
+    }
   });
