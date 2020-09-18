@@ -146,6 +146,13 @@ module.exports = Router()
           });
 
       }
+      if (userId && status === 'not_accredited') {
+        await db.users.findOneAndUpdate({ _id: ObjectId(userId) },
+          {
+            $set: { accredidation_status: false },
+          });
+      }
+
       return res.status(200).end();
 
     } catch (err) {

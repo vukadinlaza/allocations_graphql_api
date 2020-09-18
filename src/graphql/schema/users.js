@@ -20,6 +20,7 @@ type User {
   documents: [Object]
   passport: Document
   accredidation_doc: Document
+  accredidation_status: Boolean
   investments: [Investment]
   dealInvestments(deal_id: String!): [Investment]
   invitedDeals: [Deal]
