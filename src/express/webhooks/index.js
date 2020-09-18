@@ -134,7 +134,7 @@ module.exports = Router()
         const obj = {
           Bucket,
           Key: key,
-          Body: cerficate,
+          Body: cerficate.body,
           ContentType: "application/pdf"
         }
         const s3Res = await s3.upload(obj).promise()
