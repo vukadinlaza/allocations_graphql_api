@@ -127,13 +127,12 @@ module.exports = Router()
 
         // const Key = `investors/${_id}/${extension}`
         const key = `investor/${userId}/accredidation_doc`
-        // const buf = Buffer.from(pdf, 'base64')
-
+        const buf = new Buffer(cerficate, 'binary')
 
         const obj = {
           Bucket,
           Key: key,
-          Body: cerficate,
+          Body: buf,
           ContentType: "application/pdf"
         }
         const s3Res = await s3.upload(obj).promise()
