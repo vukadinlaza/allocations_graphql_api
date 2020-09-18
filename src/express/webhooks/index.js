@@ -5,6 +5,7 @@ const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
 const S3 = require('aws-sdk/clients/s3')
 const fetch = require('node-fetch');
+const moment = require('moment')
 const { putInvestorDoc } = require('../../uploaders/investor-docs')
 const s3 = new S3({ apiVersion: '2006-03-01' })
 
@@ -125,14 +126,8 @@ module.exports = Router()
           method: 'get',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
         })
-        const requestData = await fetch(`https://verifyinvestor-staging.herokuapp.com/api/v1/verification_requests/${requestId}`, {
-          method: 'get',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'applications/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
-        })
 
-        console.log(requestData.body)
-        const expirationDate = get(requestData, 'body.verified_expires_at')
-
+        const expirationDate = moment(Date.now()).add(90, 'days');
         const key = `investor/${userId}/accredidation_doc`
 
         const obj = {
@@ -145,7 +140,7 @@ module.exports = Router()
 
         await db.users.findOneAndUpdate({ _id: ObjectId(userId) },
           {
-            $push: { documents: { documentName: 'Verify Investor Cerficate', status, expirationDate, verifyInvestorId } },
+            $push: { documents: { documentName: 'Verify Investor Cerficate', status, expirationDate, verifyInvestorId, requestId } },
             $set: { accredidation_doc: key },
           });
 
