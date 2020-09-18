@@ -126,9 +126,18 @@ module.exports = Router()
         })
 
         // const Key = `investors/${_id}/${extension}`
+        const key = `investor/${userId}/accredidation_doc`
+        // const buf = Buffer.from(pdf, 'base64')
 
-        const s3Path = await putInvestorDoc(userId, cerficate, "accredidation_doc")
-        console.log(s3Path)
+
+        const obj = {
+          Bucket,
+          Key: key,
+          Body: cerficate,
+          ContentType: "application/pdf"
+        }
+        const s3Res = await s3.upload(obj).promise()
+        console.log(s3Res)
       }
       console.log('body', body)
       console.log('ID', userId)
