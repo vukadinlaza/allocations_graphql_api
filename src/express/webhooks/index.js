@@ -115,8 +115,6 @@ module.exports = Router()
   .post('/verifyinvestor', async (req, res, next) => {
     try {
       const db = await connect();
-      const body = get(req, 'body')
-      console.log(req.body)
       const userId = get(req, 'body.eapi_identifier')
       const status = get(req, 'body.status')
       const verifyInvestorId = get(req, 'body.investor_id')
@@ -131,6 +129,8 @@ module.exports = Router()
           method: 'get',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
         })
+
+        console.log(requestData)
         const expirationDate = get(requestData, 'body.verified_expires_at')
 
         const key = `investor/${userId}/accredidation_doc`
@@ -141,7 +141,7 @@ module.exports = Router()
           Body: cerficate.body,
           ContentType: "application/pdf"
         }
-        const s3Res = await s3.upload(obj).promise()
+        await s3.upload(obj).promise()
 
         await db.users.findOneAndUpdate({ _id: ObjectId(userId) },
           {
