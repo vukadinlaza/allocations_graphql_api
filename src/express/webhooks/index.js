@@ -130,7 +130,7 @@ module.exports = Router()
           headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
         })
 
-        console.log(requestData)
+        console.log(requestData.body)
         const expirationDate = get(requestData, 'body.verified_expires_at')
 
         const key = `investor/${userId}/accredidation_doc`
