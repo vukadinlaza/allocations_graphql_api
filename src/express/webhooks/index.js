@@ -6,7 +6,6 @@ const convert = require('xml-js');
 const S3 = require('aws-sdk/clients/s3')
 const fetch = require('node-fetch');
 const s3 = new S3({ apiVersion: '2006-03-01' })
-const base64 = require('base64topdf');
 
 let Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
 
@@ -115,10 +114,20 @@ module.exports = Router()
   .post('/verifyinvestor', async (req, res, next) => {
     try {
       const body = get(req, 'body')
-      const userId = get(req, 'body.identifier')
+      const userId = get(req, 'body.eapi_identifier')
 
       if (userId) {
 
+
+        const cerficate = await fetch('https://verifyinvestor-staging.herokuapp.com/api/v1/verification_requests/30268/certificate', {
+          method: 'get',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
+        })
+
+        // const Key = `investors/${_id}/${extension}`
+
+        const s3Path = await Uploader.putInvestorDoc(_id, cerficate, "accredidation_doc")
+        console.log(s3Path)
       }
       console.log('body', body)
       console.log('ID', userId)
