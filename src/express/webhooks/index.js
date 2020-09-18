@@ -126,7 +126,8 @@ module.exports = Router()
         })
 
 
-        console.log(cerficate)
+        console.log('res', cerficate)
+        console.log('BODY', cerficate.body)
         // const Key = `investors/${_id}/${extension}`
         const key = `investor/${userId}/accredidation_doc`
 
