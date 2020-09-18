@@ -119,14 +119,19 @@ module.exports = Router()
       console.log(req.body)
       const userId = get(req, 'body.eapi_identifier')
       const status = get(req, 'body.status')
-      const expirationDate = get(req, 'body.verified_expires_at')
-      const verifyInvestorId = get(req, 'body.id')
+      const verifyInvestorId = get(req, 'body.investor_id')
+      const requestId = get(req, 'body.verification_request_id')
 
       if (userId && status === 'accredited') {
-        const cerficate = await fetch('https://verifyinvestor-staging.herokuapp.com/api/v1/verification_requests/30268/certificate', {
+        const cerficate = await fetch(`https://verifyinvestor-staging.herokuapp.com/api/v1/verification_requests/${requestId}/certificate`, {
           method: 'get',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
         })
+        const requestData = await fetch(`https://verifyinvestor-staging.herokuapp.com/api/v1/verification_requests/${requestId}`, {
+          method: 'get',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
+        })
+        const expirationDate = get(requestData, 'body.verified_expires_at')
 
         const key = `investor/${userId}/accredidation_doc`
 
