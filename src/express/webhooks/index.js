@@ -114,21 +114,19 @@ module.exports = Router()
   })
   .post('/verifyinvestor', async (req, res, next) => {
     try {
+      const db = await connect();
       const body = get(req, 'body')
       const userId = get(req, 'body.eapi_identifier')
+      const status = get(req, 'body.status')
+      const expirationDate = get(req, 'body.verified_expires_at')
+      const verifyInvestorId = get(req, 'body.id')
 
-      if (userId) {
-
-
+      if (userId && status === 'accredited') {
         const cerficate = await fetch('https://verifyinvestor-staging.herokuapp.com/api/v1/verification_requests/30268/certificate', {
           method: 'get',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
         })
 
-
-        console.log('res', cerficate)
-        console.log('BODY', cerficate.body)
-        // const Key = `investors/${_id}/${extension}`
         const key = `investor/${userId}/accredidation_doc`
 
         const obj = {
@@ -138,16 +136,14 @@ module.exports = Router()
           ContentType: "application/pdf"
         }
         const s3Res = await s3.upload(obj).promise()
-        console.log(s3Res)
+
+        await db.users.findOneAndUpdate({ _id: ObjectId(userId) },
+          {
+            $push: { documents: { documentName: 'Verify Investor Cerficate', status, expirationDate, verifyInvestorId } },
+            $set: { accredidation_doc: key },
+          });
+
       }
-      console.log('body', body)
-      console.log('ID', userId)
-
-
-      // const db = await connect();
-
-      // await db.users.findOneAndUpdate({ _id: ObjectId(user._id) }, { $push: { documents: {} } });
-
       return res.status(200).end();
 
     } catch (err) {
