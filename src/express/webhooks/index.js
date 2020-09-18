@@ -127,7 +127,7 @@ module.exports = Router()
 
         // const Key = `investors/${_id}/${extension}`
 
-        const s3Path = await putInvestorDoc(_id, cerficate, "accredidation_doc")
+        const s3Path = await putInvestorDoc(userId, cerficate, "accredidation_doc")
         console.log(s3Path)
       }
       console.log('body', body)
