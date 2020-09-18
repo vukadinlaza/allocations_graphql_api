@@ -5,6 +5,7 @@ const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
 const S3 = require('aws-sdk/clients/s3')
 const fetch = require('node-fetch');
+const { putInvestorDoc } = require('../../uploaders/investor-docs')
 const s3 = new S3({ apiVersion: '2006-03-01' })
 
 let Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
@@ -126,7 +127,7 @@ module.exports = Router()
 
         // const Key = `investors/${_id}/${extension}`
 
-        const s3Path = await Uploader.putInvestorDoc(_id, cerficate, "accredidation_doc")
+        const s3Path = await putInvestorDoc(_id, cerficate, "accredidation_doc")
         console.log(s3Path)
       }
       console.log('body', body)
