@@ -141,7 +141,7 @@ module.exports = Router()
 
         await db.users.findOneAndUpdate({ _id: ObjectId(userId) },
           {
-            $push: { documents: { documentName: 'Verify Investor Cerficate', status, expirationDate, verifyInvestorId, requestId } },
+            $push: { documents: { documentName: 'Verify Investor Certificate', status, expirationDate, verifyInvestorId, requestId } },
             $set: { accredidation_doc: key },
           });
 
