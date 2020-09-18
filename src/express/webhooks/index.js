@@ -114,11 +114,17 @@ module.exports = Router()
   })
   .post('/verifyinvestor', async (req, res, next) => {
     try {
-      const { rawBody } = req;
+      const body = get(req, 'body')
+      const userId = get(req, 'body.identifier')
 
-      console.log('req.body', req.body)
+      if (userId) {
 
-      const db = await connect();
+      }
+      console.log('body', body)
+      console.log('ID', userId)
+
+
+      // const db = await connect();
 
       // await db.users.findOneAndUpdate({ _id: ObjectId(user._id) }, { $push: { documents: {} } });
 
