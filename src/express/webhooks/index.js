@@ -125,14 +125,15 @@ module.exports = Router()
           headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
         })
 
+
+        console.log(cerficate)
         // const Key = `investors/${_id}/${extension}`
         const key = `investor/${userId}/accredidation_doc`
-        const buf = new Buffer(cerficate, 'binary')
 
         const obj = {
           Bucket,
           Key: key,
-          Body: buf,
+          Body: cerficate,
           ContentType: "application/pdf"
         }
         const s3Res = await s3.upload(obj).promise()
