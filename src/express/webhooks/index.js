@@ -116,6 +116,7 @@ module.exports = Router()
     try {
       const db = await connect();
       const body = get(req, 'body')
+      console.log(req.body)
       const userId = get(req, 'body.eapi_identifier')
       const status = get(req, 'body.status')
       const expirationDate = get(req, 'body.verified_expires_at')
