@@ -122,7 +122,7 @@ module.exports = Router()
       const requestId = get(req, 'body.verification_request_id')
 
       if (userId && status === 'accredited') {
-        const cerficate = await fetch(`https://verifyinvestor-staging.herokuapp.com/api/v1/verification_requests/${requestId}/certificate`, {
+        const cerficate = await fetch(`${process.env.VERIFY_INVESTOR_URL}/${requestId}/certificate`, {
           method: 'get',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
         })
