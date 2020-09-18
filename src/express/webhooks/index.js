@@ -127,7 +127,7 @@ module.exports = Router()
         })
         const requestData = await fetch(`https://verifyinvestor-staging.herokuapp.com/api/v1/verification_requests/${requestId}`, {
           method: 'get',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
+          headers: { 'Content-Type': 'application/json', 'Accept': 'applications/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
         })
 
         console.log(requestData.body)
