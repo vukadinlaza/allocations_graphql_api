@@ -2,27 +2,27 @@ const mailer = require('./mailer')
 const logger = require('../utils/logger')
 
 async function sendConfirmation({ deal, to }) {
-    const html = confirmationTemplate({ deal })
+  const html = confirmationTemplate({ deal })
 
-    const msg = {
-        to,
-        from: "support@allocations.com",
-        subject: `You have completed signing the documents regarding ${deal.company_name}`,
-        text: `You have completed signing the documents regarding ${deal.company_name}`,
-        html
-    }
+  const msg = {
+    to,
+    from: "support@allocations.com",
+    subject: `Completed documents for ${deal.company_name}`,
+    text: `Completed documents for ${deal.company_name}`,
+    html
+  }
 
-    try {
-        const res = await mailer.send(msg)
-        return { status: "sent", sent_at: Date.now(), to }
-    } catch (e) {
-        logger.error(e)
-        return { status: "error" }
-    }
+  try {
+    const res = await mailer.send(msg)
+    return { status: "sent", sent_at: Date.now(), to }
+  } catch (e) {
+    logger.error(e)
+    return { status: "error" }
+  }
 }
 
 function confirmationTemplate({ deal }) {
-    return `
+  return `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml">
     <head>
