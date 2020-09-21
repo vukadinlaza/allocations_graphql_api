@@ -63,7 +63,6 @@ module.exports = Router()
 
         const deal = await db.deals.findOne({ _id: ObjectId(dealId) })
         if (investment === null) {
-
           investment = await db.investments.insertOne({
             user_id: ObjectId(user._id),
             deal_id: ObjectId(dealId),
