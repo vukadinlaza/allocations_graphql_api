@@ -101,7 +101,7 @@ module.exports = Router()
             $addToSet: { documents: key }
           }
         );
-
+        await sendConfirmation({ deal, to: user.email })
       }
 
       await db.users.findOneAndUpdate({ _id: ObjectId(user._id) }, { $push: { documents: { signedAt, signerDocusignId, envelopeId, documentName, documentId } } });
