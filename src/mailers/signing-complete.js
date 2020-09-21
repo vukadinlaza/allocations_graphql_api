@@ -6,7 +6,7 @@ async function sendConfirmation({ deal, to }) {
 
     const msg = {
         to,
-        from: "support@allocations.com",
+        from: "invites@allocations.com",
         subject: `You have completed signing the documents regarding ${deal.company_name}`,
         text: `You have completed signing the documents regarding ${deal.company_name}`,
         html
