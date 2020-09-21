@@ -208,4 +208,4 @@ function confirmationTemplate({ deal }) {
   `
 }
 
-module.exports = { senConfirmation }
+module.exports = { sendConfirmation }
