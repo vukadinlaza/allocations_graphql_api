@@ -7,6 +7,7 @@ const S3 = require('aws-sdk/clients/s3')
 const fetch = require('node-fetch');
 const moment = require('moment')
 const { putInvestorDoc } = require('../../uploaders/investor-docs')
+const { sendConfirmation } = require('../../mailers/signing-complete')
 const s3 = new S3({ apiVersion: '2006-03-01' })
 
 let Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
