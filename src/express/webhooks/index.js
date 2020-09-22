@@ -129,7 +129,7 @@ module.exports = Router()
 
         const expirationDate = moment(Date.now()).add(90, 'days').toDate();;
 
-        const key = `investor/${userId}/accredidation_doc`
+        const key = `investors/${userId}/accredidation_doc`
 
         const obj = {
           Bucket,
