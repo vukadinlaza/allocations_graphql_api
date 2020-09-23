@@ -5,8 +5,10 @@ const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
 const S3 = require('aws-sdk/clients/s3')
 const fetch = require('node-fetch');
+const moment = require('moment')
+const { putInvestorDoc } = require('../../uploaders/investor-docs')
+const { sendConfirmation } = require('../../mailers/signing-complete')
 const s3 = new S3({ apiVersion: '2006-03-01' })
-const base64 = require('base64topdf');
 
 let Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
 
@@ -59,9 +61,8 @@ module.exports = Router()
           user_id: ObjectId(user._id),
         })
 
+        const deal = await db.deals.findOne({ _id: ObjectId(dealId) })
         if (investment === null) {
-          const deal = await db.deals.findOne({ _id: ObjectId(dealId) })
-
           investment = await db.investments.insertOne({
             user_id: ObjectId(user._id),
             deal_id: ObjectId(dealId),
@@ -100,10 +101,57 @@ module.exports = Router()
             $addToSet: { documents: key }
           }
         );
-
+        await sendConfirmation({ deal, to: user.email })
       }
 
       await db.users.findOneAndUpdate({ _id: ObjectId(user._id) }, { $push: { documents: { signedAt, signerDocusignId, envelopeId, documentName, documentId } } });
+
+      return res.status(200).end();
+
+    } catch (err) {
+      console.log(err)
+      next(err);
+    }
+  })
+  .post('/verifyinvestor', async (req, res, next) => {
+    try {
+      const db = await connect();
+      const userId = get(req, 'body.eapi_identifier')
+      const status = get(req, 'body.status')
+      const verifyInvestorId = get(req, 'body.investor_id')
+      const requestId = get(req, 'body.verification_request_id')
+
+      if (userId && status === 'accredited') {
+        const cerficate = await fetch(`${process.env.VERIFY_INVESTOR_URL}/${requestId}/certificate`, {
+          method: 'get',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
+        })
+
+        const expirationDate = moment(Date.now()).add(90, 'days').toDate();;
+
+        const key = `investors/${userId}/accredidation_doc`
+
+        const obj = {
+          Bucket,
+          Key: key,
+          Body: cerficate.body,
+          ContentType: "application/pdf"
+        }
+        await s3.upload(obj).promise()
+
+        await db.users.findOneAndUpdate({ _id: ObjectId(userId) },
+          {
+            $push: { documents: { documentName: 'Verify Investor Certificate', status, expirationDate, verifyInvestorId, requestId } },
+            $set: { accredidation_doc: key, accredidation_status: true },
+          });
+
+      }
+      if (userId && status === 'not_accredited') {
+        await db.users.findOneAndUpdate({ _id: ObjectId(userId) },
+          {
+            $set: { accredidation_status: false },
+          });
+      }
 
       return res.status(200).end();
 
