@@ -39,6 +39,7 @@ type Deal {
 }
 
 type DealParams {
+  dealType: String
   totalRoundSize: String
   allocation: String
   totalCarry: String
