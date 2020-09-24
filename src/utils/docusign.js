@@ -1,5 +1,6 @@
 const docusign = require('docusign-esign')
 const apiClient = new docusign.ApiClient();
+const moment = require('moment')
 const { map, get } = require('lodash')
 
 const basePath = process.env.NODE_ENV === 'production' ? 'https://na3.docusign.net/restapi' : 'https://demo.docusign.net/restapi'
@@ -56,17 +57,14 @@ const makeEnvelopeDef = ({ user, templateId, formName }) => {
     }
 
     const getMailingAddressTabs = () => {
+        if (user.usePermAddressAsMailing) {
+            return [];
+        }
         const mailingTabs = [
             { tabLabel: 'Mailing-Street-Address', value: get(user, 'mail_street_address', '') },
             { tabLabel: 'Mailing-City-State-Zip-Province', value: `${get(user, 'mail_city', '')}, ${get(user, 'mail_state', '')}, ${get(user, 'mail_zip', '')}` },
             { tabLabel: 'Mailing-Country', value: get(user, 'mail_country', '') }
         ]
-
-        if (user.usePermAddressAsMailing) {
-            return [{ tabLabel: 'Mailing-Street-Address', value: get(user, 'street_address', '') },
-            { tabLabel: 'Mailing-City-State-Zip-Province', value: `${get(user, 'city', '')}, ${get(user, 'state', '')}, ${get(user, 'zip', '')}` },
-            { tabLabel: 'Mailing-Country', value: get(user, 'country', '') }]
-        }
         return mailingTabs
     }
 
@@ -120,7 +118,7 @@ const makeEnvelopeDef = ({ user, templateId, formName }) => {
                                         { tabLabel: 'Address-Country', value: user.country },
                                         ...formatSSN(),
                                         ...formatEIN(),
-                                        { tabLabel: 'Date-Of-Birth', value: user.dob },
+                                        { tabLabel: 'Date-Of-Birth', value: moment(user.dob).format('MM/DD/YYYY') },
                                         { tabLabel: 'Foreign-Tax-Number', value: user.foreign_tax_number },
                                         { tabLabel: 'Citizenship-Country', value: user.country },
                                         { tabLabel: 'Organization-Name', value: user.organization_name },
