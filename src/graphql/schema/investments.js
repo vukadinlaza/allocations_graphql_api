@@ -18,6 +18,7 @@ type Investment {
   investor: User
   created_at: String
   updated_at: String
+  metaData: Object
 }
 
 enum InvestmentStatus {
