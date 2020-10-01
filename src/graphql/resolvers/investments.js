@@ -28,6 +28,11 @@ const Investment = {
     } else {
       return []
     }
+  },
+  value: async (investment, _, { db }) => {
+    const deal = await db.collection('deals').findOne({ _id: investment.deal_id })
+    const value = investment.amount * parseInt(deal.dealParams.dealMultiple)
+    return value
   }
 }
 
