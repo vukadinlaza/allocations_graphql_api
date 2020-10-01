@@ -40,6 +40,7 @@ type Deal {
 
 type DealParams {
   dealType: String
+  dealMultiple: String
   totalRoundSize: String
   allocation: String
   totalCarry: String
@@ -70,6 +71,8 @@ type DealParams {
 }
 
 input DealParamsInput {
+  dealType: String
+  dealMultiple: String
   totalRoundSize: String
   allocation: String
   totalCarry: String
