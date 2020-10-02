@@ -52,6 +52,8 @@ const Deal = {
     return org.approved !== false
   },
   dealParams: (deal) => {
+    const m = parseInt(deal.dealParams.dealMultiple || '1')
+    deal.dealParams.dealMultiple = m
     return deal.dealParams || {}
   },
   appLink: async (deal, _, { db }) => {

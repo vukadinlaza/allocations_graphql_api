@@ -1,4 +1,5 @@
 const { ObjectId } = require("mongodb")
+const { isNumber } = require('lodash')
 const { isAdmin, isAdminOrSameUser } = require('../permissions')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
@@ -28,6 +29,12 @@ const Investment = {
     } else {
       return []
     }
+  },
+  value: async (investment, _, { db }) => {
+    const deal = await db.collection('deals').findOne({ _id: investment.deal_id })
+    const multiple = parseInt((deal.dealParams.dealMultiple || '1'))
+    const value = investment.amount * multiple
+    return value
   }
 }
 
