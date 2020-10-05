@@ -286,8 +286,7 @@ const Mutations = {
   },
   addDealDocs: async (_, { deal_id, docs }, ctx) => {
     isAdmin(ctx)
-    console.log('DOCS', docs)
-    const paths = docs.map(async doc => {
+    await docs.map(async doc => {
       const path = await DealDocUploader.addDoc({ deal_id, doc })
       console.log('PATH', path)
       return ctx.db.deals.updateOne(
@@ -295,7 +294,6 @@ const Mutations = {
         { $push: { documents: path } }
       )
     })
-    console.log('PATHSSSS', paths)
     return ctx.db.deals.findOne(
       { _id: ObjectId(deal_id) })
   },
