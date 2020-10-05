@@ -19,6 +19,7 @@ async function addDoc({ doc, title, deal_id }) {
     ContentDisposition: "inline"
   }
   await s3.upload(obj).promise()
+  console.log('KEYY', key)
   return Key
 }
 
