@@ -10,7 +10,7 @@ const path = process.env.NODE_ENV === "production" ? "deals" : "deals-test"
 async function addDoc({ doc, title, deal_id }) {
   const { createReadStream, filename } = await doc
   const Key = `${path}/${deal_id}/${title || filename}`
-  console.log('KEYY', key)
+  console.log('KEYY', Key)
 
   const obj = {
     Bucket,
