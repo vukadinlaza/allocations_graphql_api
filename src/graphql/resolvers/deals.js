@@ -290,6 +290,7 @@ const Mutations = {
       await console.log({ deal_id, doc })
       return await DealDocUploader.addDoc({ deal_id, doc })
     })
+    console.log(paths)
     return ctx.db.deals.updateOne(
       { _id: ObjectId(deal_id) },
       { $push: { documents: paths } }
