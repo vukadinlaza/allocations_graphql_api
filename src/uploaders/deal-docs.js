@@ -9,9 +9,7 @@ const path = process.env.NODE_ENV === "production" ? "deals" : "deals-test"
 
 async function addDoc({ doc, title, deal_id }) {
   const { createReadStream, filename } = await doc
-  const Key = `${path}/${deal_id}/${title || filename}`
-  console.log('KEYY', Key)
-
+  const Key = `${path}/${deal_id}/${title || filename}`.replaceAll(' ', '')
   const obj = {
     Bucket,
     Key,
