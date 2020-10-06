@@ -284,6 +284,22 @@ const Mutations = {
       { $push: { documents: path } }
     )
   },
+  addDealDocs: async (_, { deal_id, docs }, ctx) => {
+    isAdmin(ctx)
+
+    const keys = await docs.map(async doc => {
+      const path = await DealDocUploader.addDoc({ deal_id, doc })
+      console.log('PATH', path)
+      await ctx.db.deals.updateOne(
+        { _id: ObjectId(deal_id) },
+        { $push: { documents: path } }
+      )
+      return path
+    })
+    console.log(keys)
+    return ctx.db.deals.findOne(
+      { _id: ObjectId(deal_id) })
+  },
   /** delete deal doc, S3 & db **/
   rmDealDoc: async (_, params, ctx) => {
     isAdmin(ctx)
