@@ -43,7 +43,6 @@ module.exports = Router()
       const userEmail = get(emailfield, 'value._text')
 
       let user = await db.users.findOne({ email: signerEmail.toLowerCase() });
-
       if (!user) {
         if (userEmail) {
           user = await db.users.findOne({ email: userEmail });
@@ -86,19 +85,19 @@ module.exports = Router()
           ContentEncoding: 'base64',
           ContentType: "application/pdf",
         }
+
         const s3Res = await s3.upload(obj).promise()
 
+        investment = await db.investments.findOne({ _id: ObjectId(investment._id) })
 
+        const newStatus = (investment.status === 'wired' || investment.status === 'complete') ? investment.status : 'signed'
         await db.investments.updateMany({
           deal_id: ObjectId(dealId),
-          user_id: ObjectId(user._id),
-          status: {
-            $in: ['invited', 'onboarded', 'pledged']
-          }
+          user_id: ObjectId(user._id)
         },
           {
-            $set: { status: 'signed' },
-            $addToSet: { documents: key }
+            $set: { status: newStatus },
+            $push: { documents: key }
           }
         );
         await sendConfirmation({ deal, to: user.email })
