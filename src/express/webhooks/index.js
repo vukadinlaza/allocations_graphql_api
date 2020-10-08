@@ -101,7 +101,7 @@ module.exports = Router()
         },
           {
             $set: { status: 'signed' },
-            $addToSet: { documents: key }
+            $push: { documents: key }
           }
         );
         await sendConfirmation({ deal, to: user.email })
