@@ -43,7 +43,6 @@ module.exports = Router()
       const userEmail = get(emailfield, 'value._text')
 
       let user = await db.users.findOne({ email: signerEmail.toLowerCase() });
-      console.log('fires 1', user)
       if (!user) {
         if (userEmail) {
           user = await db.users.findOne({ email: userEmail });
@@ -86,8 +85,6 @@ module.exports = Router()
           ContentEncoding: 'base64',
           ContentType: "application/pdf",
         }
-        console.log('fires 2', investment)
-        console.log('fires 3', key)
 
         const s3Res = await s3.upload(obj).promise()
 
