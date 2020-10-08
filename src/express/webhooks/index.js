@@ -88,7 +88,7 @@ module.exports = Router()
 
         const s3Res = await s3.upload(obj).promise()
 
-        investment = db.investments.findOne({ _id: ObjectId(investment._id) })
+        investment = await db.investments.findOne({ _id: ObjectId(investment._id) })
         console.log(investment)
         console.log(investment.status)
         const newStatus = (investment.status === 'wired' || investment.status === 'complete') ? investment.status : 'signed'
