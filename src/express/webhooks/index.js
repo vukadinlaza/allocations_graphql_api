@@ -19,17 +19,16 @@ module.exports = Router()
       const db = await connect();
 
       const docusignData = JSON.parse(convert.xml2json(rawBody, { compact: true, spaces: 4 }));
-      const signerDocusignData = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.RecipientStatuses', {})
-      console.log(get(signerDocusignData, 'RecipientStatus[0].Type'))
-      console.log(get(signerDocusignData, 'RecipientStatus[0].RoutingOrder'))
-      // const recipientStatusArray = signerDocusignData.RecipientStatus
-      // if (Array.isArray(recipientStatusArray)) {
-      //   fieldData = [fieldData]
-      // }
+      let lpRecipientStatus = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.RecipientStatuses.RecipientStatus', {})
+      console.log('BEFORE', lpRecipientStatus)
+      if (Array.isArray(lpRecipientStatus)) {
+        lpRecipientStatus = get(lpRecipientStatus, '[0]')
+      }
+      console.log('AFTER', lpRecipientStatus)
       // Gets User data from Docusign body
-      const signerEmail = get(signerDocusignData, 'RecipientStatus.Email._text', '')
-      const signedAt = get(signerDocusignData, 'RecipientStatus.Signed._text')
-      const signerDocusignId = get(signerDocusignData, 'RecipientStatus.RecipientId._text')
+      const signerEmail = get(lpRecipientStatus, 'Email._text', '')
+      const signedAt = get(lpRecipientStatus, 'Signed._text')
+      const signerDocusignId = get(lpRecipientStatus, 'RecipientId._text')
 
       // Gets Document/Envelope data
       const envelopeId = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.EnvelopeID._text')
@@ -37,7 +36,7 @@ module.exports = Router()
       const documentId = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.DocumentStatuses.DocumentStatus.ID._text')
 
 
-      let fieldData = get(signerDocusignData, 'RecipientStatus.FormData.xfdf.fields.field', [])
+      let fieldData = get(lpRecipientStatus, 'FormData.xfdf.fields.field', [])
       if (!Array.isArray(fieldData)) {
         fieldData = [fieldData]
       }
