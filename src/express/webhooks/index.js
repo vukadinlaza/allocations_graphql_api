@@ -22,7 +22,7 @@ module.exports = Router()
       let lpRecipientStatus = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.RecipientStatuses.RecipientStatus', {})
       console.log('BEFORE', lpRecipientStatus)
       if (Array.isArray(lpRecipientStatus)) {
-        lpRecipientStatus = recipientStatusArray.find(s => s.Type._text === 'Signer') || {}
+        lpRecipientStatus = get(lpRecipientStatus, '[0]')
       }
       console.log('AFTER', lpRecipientStatus)
       // Gets User data from Docusign body
