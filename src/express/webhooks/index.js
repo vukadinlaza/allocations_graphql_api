@@ -22,7 +22,7 @@ module.exports = Router()
 
       const signerDocusignData = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.RecipientStatuses', {})
       // Gets User data from Docusign body
-      const signerEmail = get(signerDocusignData, 'RecipientStatus.Email._text')
+      const signerEmail = get(signerDocusignData, 'RecipientStatus.Email._text', '')
       const signedAt = get(signerDocusignData, 'RecipientStatus.Signed._text')
       const signerDocusignId = get(signerDocusignData, 'RecipientStatus.RecipientId._text')
 
