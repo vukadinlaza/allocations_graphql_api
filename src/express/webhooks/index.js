@@ -42,6 +42,9 @@ module.exports = Router()
       const dealId = get(dealFeild, 'value._text')
       const userEmail = get(emailfield, 'value._text')
 
+
+      console.log('EMAILS', signerEmail, userEmail)
+
       let user = await db.users.findOne({ email: signerEmail.toLowerCase() });
       if (!user) {
         if (userEmail) {
