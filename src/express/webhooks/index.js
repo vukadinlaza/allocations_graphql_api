@@ -19,13 +19,15 @@ module.exports = Router()
       const db = await connect();
 
       const docusignData = JSON.parse(convert.xml2json(rawBody, { compact: true, spaces: 4 }));
-      const signerDocusignData = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.RecipientStatuses', {})
+      let signerDocusignData = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.RecipientStatuses', {})
+
       console.log(get(signerDocusignData, 'RecipientStatus[0].Type'))
       console.log(get(signerDocusignData, 'RecipientStatus[0].RoutingOrder'))
-      // const recipientStatusArray = signerDocusignData.RecipientStatus
-      // if (Array.isArray(recipientStatusArray)) {
-      //   fieldData = [fieldData]
-      // }
+
+      const recipientStatusArray = signerDocusignData.RecipientStatus
+      if (Array.isArray(recipientStatusArray)) {
+        signerDocusignData = get(signerDocusignData, 'RecipientStatus[0]', {})
+      }
       // Gets User data from Docusign body
       const signerEmail = get(signerDocusignData, 'RecipientStatus.Email._text', '')
       const signedAt = get(signerDocusignData, 'RecipientStatus.Signed._text')
