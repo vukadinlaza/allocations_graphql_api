@@ -2,11 +2,8 @@ const { ObjectId } = require("mongodb")
 const { sumBy } = require('lodash')
 const { gql } = require('apollo-server-express')
 const { isAdmin, isOrgAdmin, ensureFundAdmin } = require('../permissions')
-const Cloudfront = require('../../cloudfront')
-const DealDocUploader = require('../../uploaders/deal-docs')
-const DealMailer = require('../../mailers/deal-mailer')
-const logger = require('../../utils/logger')
-const { AuthenticationError } = require('apollo-server-express')
+const fetch = require('node-fetch');
+const moment = require('moment')
 
 /** 
   
@@ -41,6 +38,7 @@ const Schema = gql`
     price: Float
     amount: Float
     side: TradeSide
+    investment_id: String
     settled_at: String
     matched_at: String
   }
@@ -54,7 +52,7 @@ const Schema = gql`
     _id: String
     user: User
     user_id: String
-    side: OrderSide
+    side: TradeSide
     order_type: OrderType
     status: OrderStatus
     price: Float
@@ -63,6 +61,7 @@ const Schema = gql`
     cancelled: Boolean
     cancelled_at: String
     deal_id: String
+    investment_id: String
   }
 
   enum OrderStatus {
@@ -86,9 +85,10 @@ const Schema = gql`
     _id: String
     user_id: String!
     deal_id: String!
-    side: OrderSide!
-    price: Float!
+    side: TradeSide!
+    price: Float
     amount: Float!
+    investment_id: String
   }
 
   type MatchRequest {
@@ -146,7 +146,7 @@ const ExchangeDeal = {
     return db.organizations.findOne({ _id: deal.organization })
   },
   shares: async (deal, _, { db, user }) => {
-    const investments = await db.investments.find({ 
+    const investments = await db.investments.find({
       user_id: ObjectId(user._id),
       deal_id: deal._id,
       status: "complete"
@@ -205,22 +205,39 @@ const MatchRequest = {
 
 const Mutations = {
   /** Add order w/ proper associations **/
-  createOrder: async (_, { order: { user_id, deal_id, ...order } }, ctx) => {
+  createOrder: async (_, { order: { deal_id, ...order } }, ctx) => {
     isAdmin(ctx)
     // TODO => check that user has sufficient inventory
 
     const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
 
-    const res = await ctx.db.orders.insertOne({
+    const body = {
       ...order,
-      user_id: ObjectId(user_id),
+      user_id: ObjectId(ctx.user._id),
       organization_id: deal.organization,
+      side: order.side,
       deal_id: deal._id,
       created_at: Date.now(),
       status: "open",
-      cancelled: false
+      amount: order.amount,
+      cancelled: false,
+      investment_id: order.investment_id
+    }
+    console.log('BODY', body)
+    const orderRes = await ctx.db.orders.insertOne({ ...body })
+
+    const webhookRes = await fetch('https://hooks.zapier.com/hooks/catch/7904699/ogkbkqd', {
+      method: 'post',
+      body: JSON.stringify({
+        ...body,
+        email: ctx.user.email,
+        deal: deal.company_name,
+        date: moment(body.created_at).format('MM/DD/YYYY'),
+        fullName: `${ctx.user.first_name || null} ${ctx.user.last_name || null} `
+      }),
+      headers: { 'Content-Type': 'application/json' },
     })
-    return res.ops[0]
+    return orderRes
   },
   /** cancels order, so that it can no longer be matched **/
   cancelOrder: (_, { order_id }, ctx) => {
@@ -247,7 +264,7 @@ const Mutations = {
     return res.ops[0]
   },
   /** creates and settles a trade -> TODO add balance transfer **/
-  createTrade: async (_, { org: orgSlug, trade: { seller_id, buyer_id, deal_id, ...trade  } }, ctx) => {
+  createTrade: async (_, { amount, requester, investment_id, type, deal_id }, ctx) => {
     const org = await ensureFundAdmin(orgSlug, ctx)
 
     return ctx.db.trades.insertOne({
@@ -275,8 +292,8 @@ const Queries = {
   }
 }
 
-module.exports = { 
-  Schema, 
+module.exports = {
+  Schema,
   Queries,
   Mutations,
   subResolvers: { ExchangeDeal, MatchRequest, Trade }
