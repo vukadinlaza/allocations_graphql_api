@@ -167,9 +167,16 @@ module.exports = Router()
     }
   })
   .post('/slack', async (req, res, next) => {
-    console.log(req.body)
-    console.log('FIRESSSS', req)
-    const { challenge } = req.body
+    try {
+      console.log(req.body)
+      console.log('FIRESSSS', req)
+      const { challenge } = req.body
 
-    return res.status(200).json({ challenge });
+      return res.status(200).json({ challenge });
+    }
+    catch (err) {
+      console.log('SOME ERROR')
+      console.log(err)
+      next(err);
+    }
   })
