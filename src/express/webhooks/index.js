@@ -165,4 +165,10 @@ module.exports = Router()
       console.log(err)
       next(err);
     }
-  });
+  })
+  .post('/slack', async (req, res, next) => {
+    console.log(req.body)
+    const { challenge } = req.body
+
+    return res.status(200).json({ challenge });
+  })
