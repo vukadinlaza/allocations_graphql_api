@@ -51,7 +51,6 @@ async function run() {
   app.use(bodyParser.urlencoded({ extended: true }))
   app.use(bodyParser.json())
   app.use(xmlparser());
-  app.use('/api/webhooks', require('./express/webhooks/index'))
 
   //slack API
   app.use('/api/webhooks/slack', slackEvents.expressMiddleware())
@@ -63,6 +62,7 @@ async function run() {
     console.log(`LINK POSTED`);
   });
 
+  app.use('/api/webhooks', require('./express/webhooks/index'))
   // connect to MongoDB
   const db = await connect()
 
