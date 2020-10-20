@@ -80,7 +80,7 @@ async function run() {
     }
   });
 
-  // app.use('/api/webhooks', require('./express/webhooks/index'))
+  app.use('/api/webhooks', require('./express/webhooks/index'))
 
 
   // init auth graphql server
