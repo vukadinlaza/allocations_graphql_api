@@ -166,17 +166,17 @@ module.exports = Router()
       next(err);
     }
   })
-  // .post('/slack/callback', async (req, res, next) => {
-  //   try {
-  //     console.log(req.body)
-  //     const { challenge } = req.body
-  //     console.log('FIRESSSS', challenge)
+  .post('/slack/callback', async (req, res, next) => {
+    try {
+      console.log(req.body)
+      const { challenge } = req.body
+      console.log('FIRESSSS', challenge)
 
-  //     return res.status(200).json({ challenge });
-  //   }
-  //   catch (err) {
-  //     console.log('SOME ERROR')
-  //     console.log(err)
-  //     next(err);
-  //   }
-  // })
+      return res.status(200).json({ challenge });
+    }
+    catch (err) {
+      console.log('SOME ERROR')
+      console.log(err)
+      next(err);
+    }
+  })
