@@ -51,10 +51,10 @@ async function run() {
   app.use(bodyParser.urlencoded({ extended: true }))
   app.use(bodyParser.json())
   app.use(xmlparser());
+  app.use('/api/webhooks', require('./express/webhooks/index'))
 
   //slack API
   app.use('/api/webhooks/slack/callback', slackEvents.expressMiddleware())
-  console.log()
   // Attach listeners to events by Slack Event "type". See: https://api.slack.com/events/message.im
   slackEvents.on('message', (event) => {
     console.log(`Received a message event: user ${event.user} in channel ${event.channel}`);
@@ -79,9 +79,6 @@ async function run() {
       next(err);
     }
   });
-
-  app.use('/api/webhooks', require('./express/webhooks/index'))
-
 
   // init auth graphql server
   const authedGraphqlServer = authedServer(db)
