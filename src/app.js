@@ -14,7 +14,7 @@ const { authedServer } = require('./graphql/server')
 const { connect } = require('./mongo')
 const { createEventAdapter } = require('@slack/events-api')
 const getSettings = require('./settings')
-const slackEvents = createEventAdapter(process.env.SLACK_VERIFICATION_TOKEN);
+const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET);
 const { NODE_ENV } = process.env
 
 
