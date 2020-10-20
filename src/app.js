@@ -54,7 +54,7 @@ async function run() {
   // app.use('/api/webhooks', require('./express/webhooks/index'))
 
   //slack API
-  app.use('/api/webhooks/slack/callback', slackEvents.expressMiddleware())
+  app.use('/api/webhooks/slack', slackEvents.expressMiddleware())
   // Attach listeners to events by Slack Event "type". See: https://api.slack.com/events/message.im
   slackEvents.on('message', (event) => {
     console.log(`Received a message event: user ${event.user} in channel ${event.channel}`);
