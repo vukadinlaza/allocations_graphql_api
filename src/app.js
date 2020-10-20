@@ -15,7 +15,8 @@ const { connect } = require('./mongo')
 const { createEventAdapter } = require('@slack/events-api')
 const getSettings = require('./settings')
 const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET, {
-  includeBody: true
+  includeBody: true,
+  includeHeaders: true
 });
 const { NODE_ENV } = process.env
 
