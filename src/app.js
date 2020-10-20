@@ -12,9 +12,11 @@ const xmlparser = require('express-xml-bodyparser');
 
 const { authedServer } = require('./graphql/server')
 const { connect } = require('./mongo')
+const { createEventAdapter } = require('@slack/events-api')
 const getSettings = require('./settings')
-
+const { slackEvents } = require('./slack')
 const { NODE_ENV } = process.env
+
 
 /** 
 
@@ -22,7 +24,7 @@ const { NODE_ENV } = process.env
 
  **/
 
-function corsWhitelist (whitelist) {
+function corsWhitelist(whitelist) {
   const origin = (origin, cb) => {
     if (whitelist.includes(origin) || !origin) {
       cb(null, true)
@@ -33,7 +35,7 @@ function corsWhitelist (whitelist) {
   return cors({ origin })
 }
 
-async function run () {
+async function run() {
   const app = express()
   const port = process.env.PORT || 4000
   const settings = await getSettings(NODE_ENV)
@@ -46,10 +48,13 @@ async function run () {
   // standard express middlewares
   app.use(helmet())
   app.use(compression())
-  app.use(bodyParser.urlencoded({extended: true}))
+  app.use(bodyParser.urlencoded({ extended: true }))
   app.use(bodyParser.json())
   app.use(xmlparser());
 
+
+  //slack API
+  app.use('/slack/events', slackEvents.expressMiddleware())
 
   // connect to MongoDB
   const db = await connect()
@@ -66,11 +71,11 @@ async function run () {
       console.log(err);
       next(err);
     }
-  }); 
+  });
 
   app.use('/api/webhooks', require('./express/webhooks/index'))
 
-  
+
   // init auth graphql server
   const authedGraphqlServer = authedServer(db)
   authedGraphqlServer.applyMiddleware({ app })

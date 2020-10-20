@@ -43,6 +43,9 @@
   },
   "dependencies": {
     "@sendgrid/mail": "^6.5.2",
+    "@slack/client": "^5.0.2",
+    "@slack/events-api": "^2.3.4",
+    "@slack/web-api": "^5.12.0",
     "@types/assert": "^1.4.3",
     "@types/auth0": "^2.9.23",
     "@types/check-types": "^7.3.1",
@@ -82,6 +85,7 @@
     "http": "0.0.0",
     "jsonwebtoken": "^8.5.1",
     "jwks-rsa": "^1.6.0",
+    "lodash": "^4.17.20",
     "moment": "^2.27.0",
     "mongo-getdb": "^4.1.0",
     "mongodb": "^3.3.2",
