@@ -51,7 +51,7 @@ async function run() {
   app.use(bodyParser.urlencoded({ extended: true }))
   app.use(bodyParser.json())
   app.use(xmlparser());
-  app.use('/api/webhooks', require('./express/webhooks/index'))
+  // app.use('/api/webhooks', require('./express/webhooks/index'))
 
   //slack API
   app.use('/api/webhooks/slack/callback', slackEvents.expressMiddleware())
