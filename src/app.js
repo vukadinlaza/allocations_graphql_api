@@ -59,6 +59,9 @@ async function run() {
   slackEvents.on('message', (event) => {
     console.log(`Received a message event: user ${event.user} in channel ${event.channel}`);
   });
+  slackEvents.on('link_shared', (event) => {
+    console.log(`LINK POSTED`);
+  });
 
   // connect to MongoDB
   const db = await connect()
