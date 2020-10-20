@@ -12,6 +12,7 @@ const resolversRaw = [
   'superadmin',
   'investments',
   'organizations',
+  'marketplace',
   'documents'
 ].map(name => require(`./${name}`))
 
