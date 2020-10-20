@@ -166,7 +166,7 @@ module.exports = Router()
       next(err);
     }
   })
-  .post('/slack/callback', async (req, res, next) => {
+  .post('/slack', async (req, res, next) => {
     try {
       console.log(req.body)
       const { challenge } = req.body

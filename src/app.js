@@ -56,7 +56,8 @@ async function run() {
   app.use(xmlparser());
 
   //slack API
-  app.use('/api/webhooks/slack/callback', slackEvents.expressMiddleware())
+  // app.use('/api/webhooks/slack/callback', slackEvents.expressMiddleware())
+
   // Attach listeners to events by Slack Event "type". See: https://api.slack.com/events/message.im
   slackEvents.on('link_shared', (event) => {
     console.log(`LINK POSTED`);
