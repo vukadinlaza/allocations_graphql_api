@@ -14,7 +14,7 @@ const { authedServer } = require('./graphql/server')
 const { connect } = require('./mongo')
 const { createEventAdapter } = require('@slack/events-api')
 const getSettings = require('./settings')
-const { slackEvents } = require('./slack')
+const slackEvents = createEventAdapter(process.env.SLACK_VERIFICATION_TOKEN);
 const { NODE_ENV } = process.env
 
 
@@ -52,9 +52,13 @@ async function run() {
   app.use(bodyParser.json())
   app.use(xmlparser());
 
-
   //slack API
   app.use('/slack/events', slackEvents.expressMiddleware())
+
+  // Attach listeners to events by Slack Event "type". See: https://api.slack.com/events/message.im
+  slackEvents.on('message', (event) => {
+    console.log(`Received a message event: user ${event.user} in channel ${event.channel} says ${event.text}`);
+  });
 
   // connect to MongoDB
   const db = await connect()
