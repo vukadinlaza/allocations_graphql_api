@@ -9,7 +9,7 @@ const express = require('express')
 const { execute, subscribe } = require('graphql')
 const helmet = require('helmet')
 const xmlparser = require('express-xml-bodyparser');
-
+const { WebClient } = require('@slack/client');
 const { authedServer } = require('./graphql/server')
 const { connect } = require('./mongo')
 const { createEventAdapter } = require('@slack/events-api')
@@ -18,6 +18,7 @@ const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET, {
   includeBody: true,
   includeHeaders: true
 });
+const slack = new WebClient(process.env.SLACK_CLIENT_TOKEN);
 const { NODE_ENV } = process.env
 
 
@@ -59,9 +60,22 @@ async function run() {
   //slack API
   app.use('/api/webhooks/slack', slackEvents.expressMiddleware())
 
-  // Attach listeners to events by Slack Event "type". See: https://api.slack.com/events/message.im
+
+
+  const messageAttachmentFromLink = () => {
+
+  }
+
   slackEvents.on('link_shared', (event) => {
+    console.log(event)
     console.log(`LINK POSTED`);
+    // Promise.all(event.links.map(messageAttachmentFromLink))
+    //   // Transform the array of attachments to an unfurls object keyed by URL
+    //   .then(attachments => keyBy(attachments, 'url'))
+    //   .then(unfurls => mapValues(unfurls, attachment => omit(attachment, 'url')))
+    //   // Invoke the Slack Web API to append the attachment
+    //   .then(unfurls => slack.chat.unfurl(event.message_ts, event.channel, unfurls))
+    //   .catch(console.error);
   });
 
   // connect to MongoDB
