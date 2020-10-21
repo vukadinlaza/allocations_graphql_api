@@ -55,15 +55,15 @@ async function run() {
   app.use(bodyParser.json())
   app.use(xmlparser());
 
+  app.use('/api/webhooks', require('./express/webhooks/index'))
   //slack API
-  app.use('/api/webhooks', slackEvents.expressMiddleware())
+  app.use('/api/webhooks/slack', slackEvents.expressMiddleware())
 
   // Attach listeners to events by Slack Event "type". See: https://api.slack.com/events/message.im
   slackEvents.on('link_shared', (event) => {
     console.log(`LINK POSTED`);
   });
 
-  app.use('/api/webhooks', require('./express/webhooks/index'))
   // connect to MongoDB
   const db = await connect()
 
