@@ -19,7 +19,7 @@ const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET, {
   includeBody: true,
   includeHeaders: true
 });
-const slack = new WebClient(process.env.SLACK_CLIENT_TOKEN);
+const slack = new WebClient({ token: process.env.SLACK_CLIENT_TOKEN });
 const { NODE_ENV } = process.env
 
 
