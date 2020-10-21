@@ -52,9 +52,14 @@ async function run() {
   // standard express middlewares
   app.use(helmet())
   app.use(compression())
-  // app.use(bodyParser.urlencoded({ extended: true }))
-  // app.use(bodyParser.json())
-  // app.use(xmlparser());
+  app.use(bodyParser.urlencoded({ extended: true }))
+  app.use(bodyParser.json())
+  app.use(xmlparser());
+  app.use(bodyParser.json({
+    verify: (req, res, buf) => {
+      req.rawBody = buf
+    }
+  }))
 
   //slack API
   app.use('/api/webhooks/slack', slackEvents.expressMiddleware())
