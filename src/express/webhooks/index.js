@@ -169,18 +169,9 @@ module.exports = Router()
   })
   .post('/slack', async (req, res, next) => {
     try {
-      console.log('FIRESSSS', req)
-      const { rawBody } = req;
-      const ts = req.headers['x-slack-request-timestamp'];
-      const signature = req.headers['x-slack-signature'];
+      res.sendStatus(200)
+      next()
 
-
-      return verifyRequestSignature({
-        signingSecret: proces.env.SLACK_SIGNING_SECRET,
-        requestSignature: signature,
-        requestTimestamp: ts,
-        body: rawBody,
-      });
     }
     catch (err) {
       console.log('SOME ERROR')
