@@ -171,7 +171,6 @@ module.exports = Router()
     try {
       res.sendStatus(200)
       next()
-
     }
     catch (err) {
       console.log('SOME ERROR')

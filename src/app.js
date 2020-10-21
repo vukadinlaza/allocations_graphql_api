@@ -64,7 +64,7 @@ async function run() {
 
 
   //slack API
-  app.use('/api/webhooks/slack', slackEvents.expressMiddleware())
+  app.use('/api/webhooks/slack', slackEvents.requestListener())
   app.use('/api/webhooks', require('./express/webhooks/index'))
 
 
