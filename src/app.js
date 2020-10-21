@@ -52,14 +52,16 @@ async function run() {
   // standard express middlewares
   app.use(helmet())
   app.use(compression())
-  app.use(bodyParser.urlencoded({ extended: true }))
-  app.use(bodyParser.json())
   app.use(xmlparser());
-  app.use(bodyParser.json({
-    verify: (req, res, buf) => {
-      req.rawBody = buf
+  const rawBodyBuffer = (req, res, buf, encoding) => {
+    if (buf && buf.length) {
+      req.rawBody = buf.toString(encoding || 'utf8');
     }
-  }))
+  };
+
+  app.use(bodyParser.urlencoded({ verify: rawBodyBuffer, extended: true }));
+  app.use(bodyParser.json({ verify: rawBodyBuffer }));
+
 
   //slack API
   app.use('/api/webhooks/slack', slackEvents.expressMiddleware())
