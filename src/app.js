@@ -76,11 +76,12 @@ async function run() {
     console.log('SLUG', slug)
     const deal = await db.deals.find({ slug });
     console.log('DEAL', deal)
-    const attachment = {
-      title: photo.title,
-      image_url: photo.imageUrl,
-      url: link.url,
-    };
+    // const attachment = {
+    //   title: photo.title,
+    //   image_url: photo.imageUrl,
+    //   url: link.url,
+    // }
+    return { title: 'TEST TITLE', };
   }
 
   slackEvents.on('link_shared', (event) => {
