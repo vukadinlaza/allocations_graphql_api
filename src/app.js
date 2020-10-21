@@ -13,7 +13,8 @@ const { WebClient } = require('@slack/client');
 const { authedServer } = require('./graphql/server')
 const { connect } = require('./mongo')
 const { createEventAdapter } = require('@slack/events-api')
-const getSettings = require('./settings')
+const getSettings = require('./settings');
+const { last } = require('lodash');
 const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET, {
   includeBody: true,
   includeHeaders: true
@@ -67,26 +68,33 @@ async function run() {
   //slack API
   app.use('/api/webhooks', require('./express/webhooks/index'))
 
+  // connect to MongoDB
+  const db = await connect()
 
-
-  const messageAttachmentFromLink = () => {
-
+  const messageAttachmentFromLink = async (link) => {
+    const slug = last(link.url.split('/'))
+    console.log('SLUG', slug)
+    const deal = await db.deals.find({ slug });
+    console.log('DEAL', deal)
+    const attachment = {
+      title: photo.title,
+      image_url: photo.imageUrl,
+      url: link.url,
+    };
   }
 
   slackEvents.on('link_shared', (event) => {
     console.log(event)
     console.log(`LINK POSTED`);
-    // Promise.all(event.links.map(messageAttachmentFromLink))
-    //   // Transform the array of attachments to an unfurls object keyed by URL
-    //   .then(attachments => keyBy(attachments, 'url'))
-    //   .then(unfurls => mapValues(unfurls, attachment => omit(attachment, 'url')))
-    //   // Invoke the Slack Web API to append the attachment
-    //   .then(unfurls => slack.chat.unfurl(event.message_ts, event.channel, unfurls))
-    //   .catch(console.error);
+    Promise.all(event.links.map(messageAttachmentFromLink))
+      // Transform the array of attachments to an unfurls object keyed by URL
+      .then(attachments => keyBy(attachments, 'url'))
+      .then(unfurls => mapValues(unfurls, attachment => omit(attachment, 'url')))
+      // Invoke the Slack Web API to append the attachment
+      .then(unfurls => slack.chat.unfurl(event.message_ts, event.channel, unfurls))
+      .catch(console.error);
   });
 
-  // connect to MongoDB
-  const db = await connect()
 
   // auth handling (only prod for now)
   console.log("⛰️ Environment: ", process.env.NODE_ENV)
