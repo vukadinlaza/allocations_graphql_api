@@ -52,9 +52,9 @@ async function run() {
   // standard express middlewares
   app.use(helmet())
   app.use(compression())
-  app.use(bodyParser.urlencoded({ extended: true }))
-  app.use(bodyParser.json())
-  app.use(xmlparser());
+  // app.use(bodyParser.urlencoded({ extended: true }))
+  // app.use(bodyParser.json())
+  // app.use(xmlparser());
 
   //slack API
   app.use('/api/webhooks/slack', slackEvents.expressMiddleware())
