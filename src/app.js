@@ -91,9 +91,9 @@ async function run() {
       // Transform the array of attachments to an unfurls object keyed by URL
       .then(attachments => keyBy(attachments, 'url'))
       .then(unfurls => mapValues(unfurls, attachment => omit(attachment, 'url')))
-      // Invoke the Slack Web API to append the attachment
-      .then(unfurls => slack.chat.unfurl(event.message_ts, event.channel, unfurls))
-      .catch(console.error);
+    // // Invoke the Slack Web API to append the attachment
+    // .then(unfurls => slack.chat.unfurl(event.message_ts, event.channel, unfurls))
+    // .catch(console.error);
   });
 
 
