@@ -71,29 +71,30 @@ async function run() {
   // connect to MongoDB
   const db = await connect()
 
-  const messageAttachmentFromLink = async (link) => {
+  const getLinkMetaData = async (link) => {
     const slug = last(link.url.split('/'))
     console.log('SLUG', slug)
     const deal = await db.deals.findOne({ slug });
     console.log('DEAL', deal)
-    // const attachment = {
-    //   title: photo.title,
-    //   image_url: photo.imageUrl,
-    //   url: link.url,
-    // }
-    return { title: 'TEST TITLE', };
+    return attachment = {
+      title: deal.company_name,
+      description: deal.company_description,
+      image_url: `https://allocations-public.s3.us-east-2.amazonaws.com/organizations/${slug}.png`,
+      url: link.url,
+    }
   }
+  console.log('SLACK', slack)
 
   slackEvents.on('link_shared', (event) => {
     console.log(event)
     console.log(`LINK POSTED`);
-    Promise.all(event.links.map(messageAttachmentFromLink))
+    Promise.all(event.links.map(getLinkMetaData))
       // Transform the array of attachments to an unfurls object keyed by URL
       .then(attachments => keyBy(attachments, 'url'))
       .then(unfurls => mapValues(unfurls, attachment => omit(attachment, 'url')))
-    // // Invoke the Slack Web API to append the attachment
-    // .then(unfurls => slack.chat.unfurl(event.message_ts, event.channel, unfurls))
-    // .catch(console.error);
+      // // Invoke the Slack Web API to append the attachment
+      .then(unfurls => slack.chat.unfurl(event.message_ts, event.channel, unfurls))
+      .catch(console.error);
   });
 
 
