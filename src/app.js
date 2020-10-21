@@ -74,7 +74,7 @@ async function run() {
   const messageAttachmentFromLink = async (link) => {
     const slug = last(link.url.split('/'))
     console.log('SLUG', slug)
-    const deal = await db.deals.find({ slug });
+    const deal = await db.deals.findOne({ slug });
     console.log('DEAL', deal)
     // const attachment = {
     //   title: photo.title,
