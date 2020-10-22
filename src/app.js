@@ -78,10 +78,11 @@ async function run() {
     const slug = last(link.url.split('/'))
     console.log('SLUG', slug)
     const deal = await db.deals.findOne({ slug });
+    const org = await db.deals.findOne({ _id: deal.organization });
     return attachment = {
       title: deal.company_name,
       description: deal.company_description,
-      image_url: `https://allocations-public.s3.us-east-2.amazonaws.com/organizations/${slug}.png`,
+      image_url: `https://allocations-public.s3.us-east-2.amazonaws.com/organizations/${org.slug}.png`,
       url: link.url,
     }
   }
