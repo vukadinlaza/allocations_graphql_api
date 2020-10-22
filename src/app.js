@@ -116,7 +116,7 @@ async function run() {
                     "type": "section",
                     "text": {
                       "type": "mrkdwn",
-                      "text": JSON.stringify(unfurls.description.substring(0, 120))
+                      "text": JSON.stringify(unfurls.description)
                     }
                   },
                   {
