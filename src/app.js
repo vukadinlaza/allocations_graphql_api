@@ -78,7 +78,6 @@ async function run() {
     const slug = last(link.url.split('/'))
     console.log('SLUG', slug)
     const deal = await db.deals.findOne({ slug });
-    console.log('DEAL', deal)
     return attachment = {
       title: deal.company_name,
       description: deal.company_description,
@@ -89,8 +88,6 @@ async function run() {
   console.log('SLACK', slack.chat.unfurl)
 
   slackEvents.on('link_shared', (event) => {
-    console.log(event)
-    console.log(`LINK POSTED`);
     Promise.all(event.links.map(getLinkMetaData))
       // Transform the array of attachments to an unfurls object keyed by URL
       .then(attachments => keyBy(attachments, 'url'))
@@ -127,7 +124,7 @@ async function run() {
                       "emoji": true
                     },
                     "image_url": JSON.stringify(unfurls.image_url),
-                    "alt_text": "marg"
+                    "alt_text": JSON.stringify(unfurls.title)
                   }
                 ]
               }
