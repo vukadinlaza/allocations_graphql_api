@@ -9,12 +9,19 @@ const express = require('express')
 const { execute, subscribe } = require('graphql')
 const helmet = require('helmet')
 const xmlparser = require('express-xml-bodyparser');
-
+const { WebClient } = require('@slack/client');
 const { authedServer } = require('./graphql/server')
 const { connect } = require('./mongo')
-const getSettings = require('./settings')
-
+const { createEventAdapter } = require('@slack/events-api')
+const getSettings = require('./settings');
+const { last, mapValues, omit, keyBy } = require('lodash');
+const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET, {
+  includeBody: true,
+  includeHeaders: true
+});
+const slack = new WebClient(process.env.SLACK_CLIENT_TOKEN);
 const { NODE_ENV } = process.env
+
 
 /** 
 
@@ -22,7 +29,7 @@ const { NODE_ENV } = process.env
 
  **/
 
-function corsWhitelist (whitelist) {
+function corsWhitelist(whitelist) {
   const origin = (origin, cb) => {
     if (whitelist.includes(origin) || !origin) {
       cb(null, true)
@@ -33,7 +40,7 @@ function corsWhitelist (whitelist) {
   return cors({ origin })
 }
 
-async function run () {
+async function run() {
   const app = express()
   const port = process.env.PORT || 4000
   const settings = await getSettings(NODE_ENV)
@@ -44,15 +51,52 @@ async function run () {
   }
 
   // standard express middlewares
+  app.use('/api/webhooks/slack', slackEvents.requestListener())
   app.use(helmet())
   app.use(compression())
-  app.use(bodyParser.urlencoded({extended: true}))
-  app.use(bodyParser.json())
   app.use(xmlparser());
+  const rawBodyBuffer = (req, res, buf, encoding) => {
+    if (buf && buf.length) {
+      req.rawBody = buf.toString(encoding || 'utf8');
+    }
+  };
 
+  app.use(bodyParser.urlencoded({ verify: rawBodyBuffer, extended: true }));
+  app.use(bodyParser.json({ verify: rawBodyBuffer }));
+
+
+  //slack API
+  app.use('/api/webhooks', require('./express/webhooks/index'))
 
   // connect to MongoDB
   const db = await connect()
+
+  const getLinkMetaData = async (link) => {
+    const slug = last(link.url.split('/'))
+    console.log('SLUG', slug)
+    const deal = await db.deals.findOne({ slug });
+    console.log('DEAL', deal)
+    return attachment = {
+      title: deal.company_name,
+      description: deal.company_description,
+      image_url: `https://allocations-public.s3.us-east-2.amazonaws.com/organizations/${slug}.png`,
+      url: link.url,
+    }
+  }
+  console.log('SLACK', slack)
+
+  slackEvents.on('link_shared', (event) => {
+    console.log(event)
+    console.log(`LINK POSTED`);
+    Promise.all(event.links.map(getLinkMetaData))
+      // Transform the array of attachments to an unfurls object keyed by URL
+      .then(attachments => keyBy(attachments, 'url'))
+      .then(unfurls => mapValues(unfurls, attachment => omit(attachment, 'url')))
+      // // Invoke the Slack Web API to append the attachment
+      .then(unfurls => slack.chat.unfurl(event.message_ts, event.channel, unfurls))
+      .catch(console.error);
+  });
+
 
   // auth handling (only prod for now)
   console.log("⛰️ Environment: ", process.env.NODE_ENV)
@@ -66,11 +110,8 @@ async function run () {
       console.log(err);
       next(err);
     }
-  }); 
+  });
 
-  app.use('/api/webhooks', require('./express/webhooks/index'))
-
-  
   // init auth graphql server
   const authedGraphqlServer = authedServer(db)
   authedGraphqlServer.applyMiddleware({ app })

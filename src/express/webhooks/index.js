@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const { ObjectId } = require('mongodb')
+const { verifyRequestSignature } = require('@slack/events-api');
 const { get } = require('lodash')
 const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
@@ -165,4 +166,15 @@ module.exports = Router()
       console.log(err)
       next(err);
     }
-  });
+  })
+  .post('/slack', async (req, res, next) => {
+    try {
+      res.sendStatus(200)
+      next()
+    }
+    catch (err) {
+      console.log('SOME ERROR')
+      console.log(err)
+      next(err);
+    }
+  })
