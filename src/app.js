@@ -102,7 +102,7 @@ async function run() {
             "channel": event.channel,
             "ts": event.message_ts,
             "unfurls": {
-              'https://staging.allocations.com/deals/helios-capital/helios-capital': {
+              "https://staging.allocations.com/deals/helios-capital/helios-capital": {
                 "blocks": [
                   {
                     "type": "header",
