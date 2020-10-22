@@ -91,30 +91,29 @@ async function run() {
     const linkData = await Promise.all(event.links.map(getLinkMetaData))
     await linkData.map((data) => {
       console.log(data)
-      return slack.chat.unfurl(
-        {
-          "channel": event.channel,
-          "ts": event.message_ts,
-          "unfurls": {
-            "https://staging.allocations.com/deals/helios-capital/helios-capital": {
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "Take a look at this carafe, just another cousin of glass"
-                  },
-                  "accessory": {
-                    "type": "image",
-                    "image_url": "https://gentle-buttons.com/img/carafe-filled-with-red-wine.png",
-                    "alt_text": "Stein's wine carafe"
-                  }
-                }
-              ]
+      const payload = {
+        "channel": event.channel,
+        "ts": event.message_ts,
+        unfurls: {}
+      }
+      payload.unfurls[data.url] = {
+        "blocks": [
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": JSON.stringify(data.description)
+            },
+            "accessory": {
+              "type": "image",
+              "image_url": "https://gentle-buttons.com/img/carafe-filled-with-red-wine.png",
+              "alt_text": "Stein's wine carafe"
             }
           }
-        }
-      )
+        ]
+      }
+      console.log(payload)
+      return slack.chat.unfurl(payload)
     })
   });
 
