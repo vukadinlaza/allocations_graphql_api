@@ -94,6 +94,7 @@ async function run() {
       const payload = {
         channel: event.channel,
         ts: event.message_ts,
+        unfurls: {}
       }
       payload.unfurls[data.url] = {
         blocks: [
