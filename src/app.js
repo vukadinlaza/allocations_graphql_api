@@ -79,7 +79,7 @@ async function run() {
     console.log('SLUG', slug)
     const deal = await db.deals.findOne({ slug });
     console.log(deal)
-    const org = await db.deals.findOne({ _id: deal.organization });
+    const org = await db.organizations.findOne({ _id: deal.organization });
     return attachment = {
       title: deal.company_name,
       description: deal.company_description,
