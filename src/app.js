@@ -92,39 +92,34 @@ async function run() {
     await linkData.map((data) => {
       console.log(data)
       const payload = {
-        "channel": event.channel,
-        "ts": event.message_ts,
-        unfurls: {}
+        channel: event.channel,
+        ts: event.message_ts,
       }
       payload.unfurls[data.url] = {
-        "blocks": [
+        blocks: [
           {
-            "type": "header",
-            "text": {
-              "type": "plain_text",
-              "text": data.title
+            type: 'header',
+            text: {
+              type: 'plain_text',
+              text: JSON.stringify(data.title)
             }
           },
           {
-            "type": "section",
-            "text": {
-              "type": "mrkdwn",
-              "text": data.description
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: JSON.stringify(data.description)
             }
           },
           {
-            "type": "image",
-            "title": {
-              "type": "plain_text",
-              "text": data.title
-            },
-            "image_url": data.image_url,
-            "alt_text": "marg"
+            type: 'image',
+            image_url: JSON.stringify(data.image_url),
+            alt_text: 'Company Logo'
           }
         ]
       }
-      console.log(payload)
-      return slack.chat.unfurl(JSON.stringify(payload))
+      console.log('PAYLOAD', payload)
+      return slack.chat.unfurl(payload)
     })
   });
 
