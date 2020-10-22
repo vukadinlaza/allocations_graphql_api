@@ -102,9 +102,16 @@ async function run() {
             type: 'header',
             text: {
               type: 'plain_text',
-              text: JSON.stringify(data.title)
+              text: data.title
             }
-          }
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: data.description
+            }
+          },
         ]
       }
       console.log('PAYLOAD', payload)
