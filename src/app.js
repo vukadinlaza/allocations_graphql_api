@@ -86,7 +86,7 @@ async function run() {
       url: link.url,
     }
   }
-  console.log('SLACK', slack)
+  console.log('SLACK', slack.chat.unfurl)
 
   slackEvents.on('link_shared', (event) => {
     console.log(event)
@@ -96,7 +96,33 @@ async function run() {
       .then(attachments => keyBy(attachments, 'url'))
       .then(unfurls => mapValues(unfurls, attachment => omit(attachment, 'url')))
       // // Invoke the Slack Web API to append the attachment
-      .then(unfurls => slack.chat.unfurl(event.message_ts, event.channel, unfurls))
+      .then(unfurls => {
+        console.log(unfurls)
+        return slack.chat.unfurl(
+          {
+            "channel": event.channel,
+            "ts": event.message_ts,
+            "unfurls": {
+              "https://gentle-buttons.com/carafe": {
+                "blocks": [
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "Take a look at this carafe, just another cousin of glass"
+                    },
+                    "accessory": {
+                      "type": "image",
+                      "image_url": "https://gentle-buttons.com/img/carafe-filled-with-red-wine.png",
+                      "alt_text": "Stein's wine carafe"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        )
+      })
       .catch(console.error);
   });
 
