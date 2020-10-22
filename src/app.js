@@ -98,7 +98,7 @@ async function run() {
       .then(unfurls => {
         console.log(unfurls)
         return slack.chat.unfurl(
-          JSON.stringify({
+          {
             "channel": event.channel,
             "ts": event.message_ts,
             "unfurls": {
@@ -112,14 +112,14 @@ async function run() {
                     },
                     "accessory": {
                       "type": "image",
-                      "image_url": `${unfurls.image_url}`,
+                      "image_url": JSON.stringify(`${unfurls.image_url}`),
                       "alt_text": "Stein's wine carafe"
                     }
                   }
                 ]
               }
             }
-          })
+          }
         )
       })
       .catch(console.error);
