@@ -104,18 +104,6 @@ async function run() {
               type: 'plain_text',
               text: JSON.stringify(data.title)
             }
-          },
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: JSON.stringify(data.description)
-            }
-          },
-          {
-            type: 'image',
-            image_url: JSON.stringify(data.image_url),
-            alt_text: 'Company Logo'
           }
         ]
       }
