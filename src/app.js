@@ -108,21 +108,26 @@ async function run() {
                     "type": "header",
                     "text": {
                       "type": "plain_text",
-                      "text": JSON.stringify(`${unfurls.title}`)
-                    },
+                      "text": JSON.stringify(unfurl.title),
+                      "emoji": true
+                    }
                   },
                   {
                     "type": "section",
                     "text": {
-                      "type": "plain_text",
-                      "text": JSON.stringify(`${unfurls.description}`)
+                      "type": "mrkdwn",
+                      "text": JSON.stringify(unfurl.company_description)
                     }
                   },
                   {
                     "type": "image",
-                    "block_id": "logo",
-                    "image_url": JSON.stringify(`${unfurls.image_url}`),
-                    "alt_text": "Logo"
+                    "title": {
+                      "type": "plain_text",
+                      "text": JSON.stringify(unfurl.title),
+                      "emoji": true
+                    },
+                    "image_url": JSON.stringify(unfurl.image_url),
+                    "alt_text": "marg"
                   }
                 ]
               }
