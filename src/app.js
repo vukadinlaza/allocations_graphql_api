@@ -99,21 +99,32 @@ async function run() {
       payload.unfurls[data.url] = {
         "blocks": [
           {
+            "type": "header",
+            "text": {
+              "type": "plain_text",
+              "text": data.title
+            }
+          },
+          {
             "type": "section",
             "text": {
               "type": "mrkdwn",
-              "text": JSON.stringify(data.description)
-            },
-            "accessory": {
-              "type": "image",
-              "image_url": "https://gentle-buttons.com/img/carafe-filled-with-red-wine.png",
-              "alt_text": "Stein's wine carafe"
+              "text": data.description
             }
+          },
+          {
+            "type": "image",
+            "title": {
+              "type": "plain_text",
+              "text": data.title
+            },
+            "image_url": data.image_url,
+            "alt_text": "marg"
           }
         ]
       }
       console.log(payload)
-      return slack.chat.unfurl(payload)
+      return slack.chat.unfurl(JSON.stringify(payload))
     })
   });
 
