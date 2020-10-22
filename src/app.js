@@ -108,7 +108,7 @@ async function run() {
                     "type": "header",
                     "text": {
                       "type": "plain_text",
-                      "text": JSON.stringify(unfurl.title),
+                      "text": JSON.stringify(unfurls.title),
                       "emoji": true
                     }
                   },
@@ -116,17 +116,17 @@ async function run() {
                     "type": "section",
                     "text": {
                       "type": "mrkdwn",
-                      "text": JSON.stringify(unfurl.company_description)
+                      "text": JSON.stringify(unfurls.company_description)
                     }
                   },
                   {
                     "type": "image",
                     "title": {
                       "type": "plain_text",
-                      "text": JSON.stringify(unfurl.title),
+                      "text": JSON.stringify(unfurls.title),
                       "emoji": true
                     },
-                    "image_url": JSON.stringify(unfurl.image_url),
+                    "image_url": JSON.stringify(unfurls.image_url),
                     "alt_text": "marg"
                   }
                 ]
