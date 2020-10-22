@@ -120,13 +120,9 @@ async function run() {
                   },
                   {
                     "type": "image",
-                    "title": {
-                      "type": "plain_text",
-                      "text": "Please enjoy this photo of a kitten"
-                    },
-                    "block_id": "image4",
+                    "block_id": "logo",
                     "image_url": JSON.stringify(`${unfurls.image_url}`),
-                    "alt_text": "An incredibly cute kitten."
+                    "alt_text": "Logo"
                   }
                 ]
               }
