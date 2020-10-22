@@ -85,15 +85,11 @@ async function run() {
       url: link.url,
     }
   }
-  console.log('SLACK', slack.chat.unfurl)
 
   slackEvents.on('link_shared', (event) => {
     Promise.all(event.links.map(getLinkMetaData))
-      // Transform the array of attachments to an unfurls object keyed by URL
-      .then(attachments => keyBy(attachments, 'url'))
-      // // Invoke the Slack Web API to append the attachment
       .then(unfurls => {
-        console.log(unfurls)
+        console.log('UNFURL', unfurls)
         return slack.chat.unfurl(
           {
             "channel": event.channel,
