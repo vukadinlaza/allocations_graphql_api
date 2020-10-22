@@ -91,7 +91,7 @@ async function run() {
     //   .then(unfurls => {
     //     console.log('UNFURL', unfurls)
     //   })
-    const linkData = await event.links.map(getLinkMetaData)
+    const linkData = await Promise.all(event.links.map(getLinkMetaData))
     console.log('Link DATA', linkData)
   });
 
