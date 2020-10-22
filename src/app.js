@@ -9,7 +9,7 @@ const express = require('express')
 const { execute, subscribe } = require('graphql')
 const helmet = require('helmet')
 const xmlparser = require('express-xml-bodyparser');
-const { WebClient } = require('@slack/client');
+const { WebClient, LogLevel } = require('@slack/web-api');
 const { authedServer } = require('./graphql/server')
 const { connect } = require('./mongo')
 const { createEventAdapter } = require('@slack/events-api')
@@ -19,7 +19,10 @@ const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET, {
   includeBody: true,
   includeHeaders: true
 });
-const slack = new WebClient(process.env.SLACK_CLIENT_TOKEN);
+const slack = new WebClient(process.env.SLACK_CLIENT_TOKEN, {
+  logLevel: LogLevel.DEBUG,
+
+});
 const { NODE_ENV } = process.env
 
 
