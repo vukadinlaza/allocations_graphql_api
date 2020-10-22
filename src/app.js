@@ -90,6 +90,7 @@ async function run() {
 
     const linkData = await Promise.all(event.links.map(getLinkMetaData))
     await linkData.map((data) => {
+      console.log(data)
       return slack.chat.unfurl(
         {
           "channel": event.channel,
@@ -98,29 +99,16 @@ async function run() {
             "https://staging.allocations.com/deals/helios-capital/helios-capital": {
               "blocks": [
                 {
-                  "type": "header",
-                  "text": {
-                    "type": "plain_text",
-                    "text": JSON.stringify(data.title),
-                    "emoji": true
-                  }
-                },
-                {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": JSON.stringify(data.description)
-                  }
-                },
-                {
-                  "type": "image",
-                  "title": {
-                    "type": "plain_text",
-                    "text": JSON.stringify(data.title),
-                    "emoji": true
+                    "text": "Take a look at this carafe, just another cousin of glass"
                   },
-                  "image_url": JSON.stringify(data.image_url),
-                  "alt_text": JSON.stringify(data.title)
+                  "accessory": {
+                    "type": "image",
+                    "image_url": "https://gentle-buttons.com/img/carafe-filled-with-red-wine.png",
+                    "alt_text": "Stein's wine carafe"
+                  }
                 }
               ]
             }
