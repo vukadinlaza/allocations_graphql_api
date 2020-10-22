@@ -86,49 +86,13 @@ async function run() {
     }
   }
 
-  slackEvents.on('link_shared', (event) => {
-    Promise.all(event.links.map(getLinkMetaData))
-      .then(unfurls => {
-        console.log('UNFURL', unfurls)
-        return slack.chat.unfurl(
-          {
-            "channel": event.channel,
-            "ts": event.message_ts,
-            "unfurls": {
-              "https://staging.allocations.com/deals/helios-capital/helios-capital": {
-                "blocks": [
-                  {
-                    "type": "header",
-                    "text": {
-                      "type": "plain_text",
-                      "text": JSON.stringify(unfurls.title),
-                      "emoji": true
-                    }
-                  },
-                  {
-                    "type": "section",
-                    "text": {
-                      "type": "mrkdwn",
-                      "text": JSON.stringify(unfurls.description)
-                    }
-                  },
-                  {
-                    "type": "image",
-                    "title": {
-                      "type": "plain_text",
-                      "text": JSON.stringify(unfurls.title),
-                      "emoji": true
-                    },
-                    "image_url": JSON.stringify(unfurls.image_url),
-                    "alt_text": JSON.stringify(unfurls.title)
-                  }
-                ]
-              }
-            }
-          }
-        )
-      })
-      .catch(console.error);
+  slackEvents.on('link_shared', async (event) => {
+    // Promise.all(event.links.map(getLinkMetaData))
+    //   .then(unfurls => {
+    //     console.log('UNFURL', unfurls)
+    //   })
+    const linkData = await event.links.map(getLinkMetaData)
+    console.log('Link DATA', linkData)
   });
 
 
