@@ -112,6 +112,11 @@ async function run() {
               text: data.description
             }
           },
+          {
+            type: 'image',
+            image_url: data.image_url,
+            alt_text: 'Logo'
+          }
         ]
       }
       console.log('PAYLOAD', payload)
