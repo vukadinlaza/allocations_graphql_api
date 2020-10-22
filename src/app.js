@@ -90,7 +90,7 @@ async function run() {
 
     const linkData = await Promise.all(event.links.map(getLinkMetaData))
     await linkData.map((data) => {
-      console.log(data)
+      if (!data.title) return;
       const payload = {
         channel: event.channel,
         ts: event.message_ts,
