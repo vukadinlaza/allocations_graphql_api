@@ -78,6 +78,7 @@ async function run() {
     const slug = last(link.url.split('/'))
     console.log('SLUG', slug)
     const deal = await db.deals.findOne({ slug });
+    console.log(deal)
     const org = await db.deals.findOne({ _id: deal.organization });
     return attachment = {
       title: deal.company_name,
