@@ -112,7 +112,7 @@ async function run() {
                     },
                     "accessory": {
                       "type": "image",
-                      "image_url": unfurl.image_url,
+                      "image_url": unfurls.image_url,
                       "alt_text": "Stein's wine carafe"
                     }
                   }
