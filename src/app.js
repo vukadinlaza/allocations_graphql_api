@@ -94,7 +94,6 @@ async function run() {
     Promise.all(event.links.map(getLinkMetaData))
       // Transform the array of attachments to an unfurls object keyed by URL
       .then(attachments => keyBy(attachments, 'url'))
-      .then(unfurls => mapValues(unfurls, attachment => omit(attachment, 'url')))
       // // Invoke the Slack Web API to append the attachment
       .then(unfurls => {
         console.log(unfurls)
@@ -103,7 +102,7 @@ async function run() {
             "channel": event.channel,
             "ts": event.message_ts,
             "unfurls": {
-              "https://gentle-buttons.com/carafe": {
+              'https://staging.allocations.com/deals/helios-capital/helios-capital': {
                 "blocks": [
                   {
                     "type": "section",
@@ -113,7 +112,7 @@ async function run() {
                     },
                     "accessory": {
                       "type": "image",
-                      "image_url": "https://gentle-buttons.com/img/carafe-filled-with-red-wine.png",
+                      "image_url": unfurl.image_url,
                       "alt_text": "Stein's wine carafe"
                     }
                   }
