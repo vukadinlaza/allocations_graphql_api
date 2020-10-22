@@ -105,16 +105,28 @@ async function run() {
               'https://staging.allocations.com/deals/helios-capital/helios-capital': {
                 "blocks": [
                   {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": JSON.stringify(`${unfurls.title}`)
+                    },
+                  },
+                  {
                     "type": "section",
                     "text": {
-                      "type": "mrkdwn",
-                      "text": "Take a look at this carafe, just another cousin of glass"
-                    },
-                    "accessory": {
-                      "type": "image",
-                      "image_url": JSON.stringify(`${unfurls.image_url}`),
-                      "alt_text": "Stein's wine carafe"
+                      "type": "plain_text",
+                      "text": JSON.stringify(`${unfurls.description}`)
                     }
+                  },
+                  {
+                    "type": "image",
+                    "title": {
+                      "type": "plain_text",
+                      "text": "Please enjoy this photo of a kitten"
+                    },
+                    "block_id": "image4",
+                    "image_url": JSON.stringify(`${unfurls.image_url}`),
+                    "alt_text": "An incredibly cute kitten."
                   }
                 ]
               }
