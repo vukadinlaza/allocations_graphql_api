@@ -76,6 +76,7 @@ async function run() {
 
   const getLinkMetaData = async (link) => {
     const slug = last(link.url.split('/'))
+    console.log({ slug })
     const deal = await db.deals.findOne({ slug });
     const org = await db.organizations.findOne({ _id: deal.organization });
     return attachment = {
@@ -90,6 +91,7 @@ async function run() {
 
     const linkData = await Promise.all(event.links.map(getLinkMetaData))
     await linkData.map((data) => {
+      console.log({ data })
       if (!data.title) return;
       const payload = {
         channel: event.channel,
