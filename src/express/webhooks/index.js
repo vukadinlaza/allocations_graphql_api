@@ -169,9 +169,10 @@ module.exports = Router()
   })
   .post('/slack', async (req, res, next) => {
     try {
-      // if (res && res.body && res.body.challenge) {
-      //   res.sendStatus(200).json({ challenge: res.body.challenge })
-      // }
+      console.log('HELP HOOKS FIRES')
+      if (res && res.body && res.body.challenge) {
+        return res.sendStatus(200).json({ challenge: res.body.challenge })
+      }
       res.sendStatus(200)
       next()
     }
