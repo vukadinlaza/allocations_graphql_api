@@ -9,7 +9,7 @@ const express = require('express')
 const { execute, subscribe } = require('graphql')
 const helmet = require('helmet')
 const xmlparser = require('express-xml-bodyparser');
-const { WebClient } = require('@slack/client');
+const { WebClient, LogLevel } = require('@slack/web-api');
 const { authedServer } = require('./graphql/server')
 const { connect } = require('./mongo')
 const { createEventAdapter } = require('@slack/events-api')
@@ -19,7 +19,10 @@ const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET, {
   includeBody: true,
   includeHeaders: true
 });
-const slack = new WebClient(process.env.SLACK_CLIENT_TOKEN);
+const slack = new WebClient(process.env.SLACK_CLIENT_TOKEN, {
+  logLevel: LogLevel.DEBUG,
+
+});
 const { NODE_ENV } = process.env
 
 
@@ -73,28 +76,51 @@ async function run() {
 
   const getLinkMetaData = async (link) => {
     const slug = last(link.url.split('/'))
-    console.log('SLUG', slug)
     const deal = await db.deals.findOne({ slug });
-    console.log('DEAL', deal)
+    const org = await db.organizations.findOne({ _id: deal.organization });
     return attachment = {
       title: deal.company_name,
       description: deal.company_description,
-      image_url: `https://allocations-public.s3.us-east-2.amazonaws.com/organizations/${slug}.png`,
+      image_url: `https://allocations-public.s3.us-east-2.amazonaws.com/organizations/${org.slug}.png`,
       url: link.url,
     }
   }
-  console.log('SLACK', slack)
 
-  slackEvents.on('link_shared', (event) => {
-    console.log(event)
-    console.log(`LINK POSTED`);
-    Promise.all(event.links.map(getLinkMetaData))
-      // Transform the array of attachments to an unfurls object keyed by URL
-      .then(attachments => keyBy(attachments, 'url'))
-      .then(unfurls => mapValues(unfurls, attachment => omit(attachment, 'url')))
-      // // Invoke the Slack Web API to append the attachment
-      .then(unfurls => slack.chat.unfurl(event.message_ts, event.channel, unfurls))
-      .catch(console.error);
+  slackEvents.on('link_shared', async (event) => {
+
+    const linkData = await Promise.all(event.links.map(getLinkMetaData))
+    await linkData.map((data) => {
+      if (!data.title) return;
+      const payload = {
+        channel: event.channel,
+        ts: event.message_ts,
+        unfurls: {}
+      }
+      payload.unfurls[data.url] = {
+        blocks: [
+          {
+            type: 'header',
+            text: {
+              type: 'plain_text',
+              text: data.title
+            }
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: data.description
+            }
+          },
+          {
+            type: 'image',
+            image_url: data.image_url,
+            alt_text: 'Logo'
+          }
+        ]
+      }
+      return slack.chat.unfurl(payload)
+    })
   });
 
 
