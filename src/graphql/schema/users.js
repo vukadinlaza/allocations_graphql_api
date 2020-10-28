@@ -34,7 +34,8 @@ type User {
   mail_city: String
   mail_zip: String
   mail_state: String
-  mail_street_address: String
+  mail_street_address: String,
+  showInvestAndMrkPlc: Boolean
 }
 
 input UserInput {
@@ -50,6 +51,7 @@ input UserInput {
   passport: Upload
   accredidation_doc: Upload
   terms_of_service: Boolean
+  showInvestAndMrkPlc: Boolean
 }
 
 extend type Query {
