@@ -66,5 +66,6 @@ extend type Mutation {
   deleteInvestor(_id: String!): Boolean
   updateUser(input: UserInput): User
   updateInvestor(investment: InvestmentInput): User
+  postZap(data: Object): User
 }
 `)
