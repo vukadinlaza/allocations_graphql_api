@@ -20,6 +20,8 @@ const {
   getKYCTemplateId
 } = require('../../utils/docusign')
 const Users = require('../schema/users')
+const fetch = require('node-fetch');
+const moment = require('moment')
 
 /**  
 
@@ -197,6 +199,18 @@ const Mutations = {
     } catch (e) {
       return false
     }
+  },
+  postZap: async (_, body, ctx) => {
+    const webhookRes = await fetch('https://hooks.zapier.com/hooks/catch/7904699/oqfry9n', {
+      method: 'post',
+      body: JSON.stringify({
+        ...body.data,
+        email: ctx.user.email,
+        date: moment(body.created_at).format('MM/DD/YYYY'),
+        name: `${ctx.user.first_name || null} ${ctx.user.last_name || null} `
+      }),
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }
 
