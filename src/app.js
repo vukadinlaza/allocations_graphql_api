@@ -79,6 +79,25 @@ async function run() {
     console.log({ slug })
     const deal = await db.deals.findOne({ slug });
     const org = await db.organizations.findOne({ _id: deal.organization });
+    const params = {
+      Bucket: 'allocations-public',
+      Key: `organizations/${org.slug}.png`
+    };
+    // Using async/await (untested)
+    try {
+
+      const headCode = await s3.headObject(params).promise();
+      console.log('Head Code', headCode)
+      const signedUrl = await s3.getSignedUrl('getObject', params);
+      console.log('Signed URL', signedUrl)
+      // Do something with signedUrl
+    } catch (headErr) {
+      if (headErr.code === 'NotFound') {
+      }
+    }
+
+
+
     return attachment = {
       title: deal.company_name,
       description: deal.company_description,
@@ -89,40 +108,45 @@ async function run() {
 
   slackEvents.on('link_shared', async (event) => {
 
-    const linkData = await Promise.all(event.links.map(getLinkMetaData))
-    await linkData.map((data) => {
-      console.log({ data })
-      if (!data.title) return;
-      const payload = {
-        channel: event.channel,
-        ts: event.message_ts,
-        unfurls: {}
-      }
-      payload.unfurls[data.url] = {
-        blocks: [
-          {
-            type: 'header',
-            text: {
-              type: 'plain_text',
-              text: data.title
+    try {
+      const linkData = await Promise.all(event.links.map(getLinkMetaData))
+      await linkData.map((data) => {
+        console.log({ data })
+        if (!data.title) return;
+        const payload = {
+          channel: event.channel,
+          ts: event.message_ts,
+          unfurls: {}
+        }
+        payload.unfurls[data.url] = {
+          blocks: [
+            {
+              type: 'header',
+              text: {
+                type: 'plain_text',
+                text: data.title
+              }
+            },
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: data.description
+              }
+            },
+            {
+              type: 'image',
+              image_url: data.image_url,
+              alt_text: 'Logo'
             }
-          },
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: data.description
-            }
-          },
-          {
-            type: 'image',
-            image_url: data.image_url,
-            alt_text: 'Logo'
-          }
-        ]
-      }
-      return slack.chat.unfurl(payload)
-    })
+          ]
+        }
+        return slack.chat.unfurl(payload)
+      })
+    }
+    catch (e) {
+      console.log(e)
+    }
   });
 
 
