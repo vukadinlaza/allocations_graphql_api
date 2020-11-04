@@ -37,6 +37,7 @@ type User {
   mail_street_address: String
   showInvestAndMrkPlc: Boolean
   showCredit: Boolean
+  source: String
 }
 
 input UserInput {

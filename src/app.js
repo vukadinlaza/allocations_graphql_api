@@ -70,6 +70,7 @@ async function run() {
 
   //slack API
   app.use('/api/webhooks', require('./express/webhooks/index'))
+  app.use('/api/users', require('./express/api/user'))
 
   // connect to MongoDB
   const db = await connect()
