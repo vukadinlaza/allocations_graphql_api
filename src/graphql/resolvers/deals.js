@@ -200,12 +200,12 @@ const Mutations = {
       { _id: user._id },
       { $push: { organizations_admin: org._id } }
     )
-
+    console.log(deal)
     const res = await db.deals.insertOne({
       ...deal,
-      slug: _.kebabCase(deal.company_name),
+      slug: _.kebabCase(deal.company_name || deal.airtableId),
       organization: org._id,
-      status: "onboarding",
+      status: deal.status ? deal.status : "onboarding",
       dealParams: {},
       created_at: Date.now(),
       inviteKey: uuid()
