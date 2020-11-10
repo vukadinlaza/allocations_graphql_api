@@ -50,7 +50,7 @@ module.exports = Router()
       console.log('DOC NAME', documentName)
       if (documentName.includes('Allocations Services Agreement')) {
         const atIdField = fieldData.find(f => f._attributes.name === 'build-airtable-id')
-        get(atIdField, 'value._text');
+        const airTableId = get(atIdField, 'value._text');
         const payload = {
           records: [
             {
