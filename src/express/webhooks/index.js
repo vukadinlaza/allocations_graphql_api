@@ -48,8 +48,10 @@ module.exports = Router()
       const userEmail = get(emailfield, 'value._text')
 
 
-      console.log('EMAILS', signerEmail, userEmail)
-
+      if (documentName === ' BUILD - Services Agreement') {
+        console.log('FIRES')
+        return;
+      }
       let user = await db.users.findOne({ email: signerEmail.toLowerCase() });
       if (!user) {
         if (userEmail) {
