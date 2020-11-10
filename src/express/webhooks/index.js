@@ -48,8 +48,27 @@ module.exports = Router()
       const userEmail = get(emailfield, 'value._text')
 
       console.log('DOC NAME', documentName)
-      if (documentName === 'BUILD - Services Agreement') {
-        console.log('FIRES')
+      if (documentName.includes('Allocations Services Agreement')) {
+        const airTableId = fieldData.find(f => f._attributes.name === 'build-airtable-id')
+        console.log(airTableId)
+        const payload = {
+          records: [
+            {
+              id: airTableId,
+              fields: { ['Signed Provision of Service']: true, ['Review']: true },
+            },
+          ],
+        };
+        const BASE = 'appdPrRjapx8iYnIn';
+        const TABEL_NAME = 'Deals';
+        await fetch(`https://api.airtable.com/v0/${BASE}/${TABEL_NAME}`, {
+          method: 'patch', // make sure it is a "PATCH request"
+          body: JSON.stringify(payload),
+          headers: {
+            Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`, // API key
+            'Content-Type': 'application/json', // we will recive a json object
+          },
+        });
         return;
       }
       let user = await db.users.findOne({ email: signerEmail.toLowerCase() });
