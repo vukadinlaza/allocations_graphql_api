@@ -61,7 +61,7 @@ module.exports = Router()
         };
         const BASE = 'appdPrRjapx8iYnIn';
         const TABEL_NAME = 'Deals';
-        await fetch(`https://api.airtable.com/v0/${BASE}/${TABEL_NAME}`, {
+        const atres = await fetch(`https://api.airtable.com/v0/${BASE}/${TABEL_NAME}`, {
           method: 'patch', // make sure it is a "PATCH request"
           body: JSON.stringify(payload),
           headers: {
@@ -69,6 +69,7 @@ module.exports = Router()
             'Content-Type': 'application/json', // we will recive a json object
           },
         });
+        console.log("RES", atres)
         return;
       }
       let user = await db.users.findOne({ email: signerEmail.toLowerCase() });
