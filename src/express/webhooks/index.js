@@ -70,7 +70,7 @@ module.exports = Router()
           },
         });
         console.log("RES", atres)
-        return;
+        return res.status(200).end();
       }
       let user = await db.users.findOne({ email: signerEmail.toLowerCase() });
       if (!user) {
