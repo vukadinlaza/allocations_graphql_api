@@ -36,6 +36,7 @@ type Deal {
   last_valuation: String
   no_exchange: Boolean
   raised: Int
+  airtableId: String
 }
 
 type DealParams {
@@ -120,6 +121,7 @@ enum DealStatus {
   onboarding
   closing
   closed
+  draft
 }
 
 type Query {
@@ -164,5 +166,6 @@ input DealInput {
   dealParams: DealParamsInput
   last_valuation: String
   no_exchange: Boolean
+  airtableId: String
 }
 `)

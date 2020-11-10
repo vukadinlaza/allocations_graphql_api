@@ -87,6 +87,14 @@ const User = {
     return db.organizations.find({
       _id: { $in: (user.organizations_admin || []).map(ObjectId) }
     }).toArray()
+  },
+  deals: async (user, _, { db }) => {
+    const deals = await Promise.all(user.organizations_admin.map(org => {
+      return db.deals.find({ organization: ObjectId(org) }).toArray() || []
+    }))
+
+    console.log(deals.reduce((acc, org) => [...acc, ...org], []))
+    return deals.reduce((acc, org) => [...acc, ...org], [])
   }
 }
 
