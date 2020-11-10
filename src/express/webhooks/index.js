@@ -47,7 +47,7 @@ module.exports = Router()
       const dealId = get(dealFeild, 'value._text')
       const userEmail = get(emailfield, 'value._text')
 
-
+      console.log('DOC NAME', documentName)
       if (documentName === 'BUILD - Services Agreement') {
         console.log('FIRES')
         return;
