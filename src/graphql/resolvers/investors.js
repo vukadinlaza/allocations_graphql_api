@@ -209,7 +209,9 @@ const Mutations = {
     }
   },
   postZap: async (_, body, ctx) => {
-    const webhookRes = await fetch('https://hooks.zapier.com/hooks/catch/7904699/oqfry9n', {
+    console.log(body)
+    const url = body.data.zapUrl ? body.data.zapUrl : 'https://hooks.zapier.com/hooks/catch/7904699/oqfry9n'
+    const webhookRes = await fetch(url, {
       method: 'post',
       body: JSON.stringify({
         ...body.data,
