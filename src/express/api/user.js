@@ -5,7 +5,7 @@ const { connect } = require('../../mongo/index')
 const apiKeys = [{ key: '5fa2d72131ed7b7bc4666fe5', source: 'TVC' }]
 module.exports = Router()
 	.post('/:API_KEY', async (req, res, next) => {
-
+		console.log(req.params)
 		try {
 			const key = apiKeys.find(k => k.key === req.params.API_KEY)
 			if (!key) {
@@ -40,7 +40,8 @@ module.exports = Router()
 	})
 	.patch('/:API_KEY', async (req, res, next) => {
 		try {
-			if (!apiKeys.includes(req.params.API_KEY)) {
+			const key = apiKeys.find(k => k.key === req.params.API_KEY)
+			if (!key) {
 				return res.status(400).send({
 					status: 400,
 					error: 'Invalid API key'
