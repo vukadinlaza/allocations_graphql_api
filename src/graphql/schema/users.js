@@ -37,7 +37,8 @@ type User {
   mail_street_address: String
   showInvestAndMrkPlc: Boolean
   showCredit: Boolean
-  source: String,
+  showBuild: Boolean
+  source: String
   deals: [Deal]
 }
 
@@ -56,6 +57,7 @@ input UserInput {
   terms_of_service: Boolean
   showInvestAndMrkPlc: Boolean
   showCredit: Boolean
+  showBuild: Boolean
 }
 
 extend type Query {
