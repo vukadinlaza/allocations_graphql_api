@@ -149,7 +149,11 @@ const deals = [
 				deal: deal.split('___')[1]
 			}
 		})
-		const users = map(oldMain, obj => {
+		function uuid() {
+			return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+		}
+
+		const users = map(oldMain, (obj, i) => {
 			return {
 				last_name: obj['FIELD3'],
 				first_name: obj['FIELD2'],
@@ -182,7 +186,8 @@ const deals = [
 				}
 			})
 			return investments
-		})
+		});
+
 		const flatInv = flatten(investments).filter(inv => inv.email && inv.amount).map(inv => ({ ...inv, amount: toNumber(inv.amount.replace(/,/g, '')) })).filter(inv => isNumber(inv.amount) && !isNaN(inv.amount) && inv.amount > 0)
 		const groupedInvs = groupBy(flatInv, 'dealName')
 		const createdInvs = await Promise.all(map(groupedInvs, async investments => {

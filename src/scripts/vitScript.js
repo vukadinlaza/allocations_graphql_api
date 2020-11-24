@@ -176,13 +176,13 @@ const { xx } = require('./deals');
 	try {
 		console.log('\n=== Script started ===\n');
 		const db = await connect()
-		const orgToDeal = await db.organizations.findOne({ name: 'Vitalize' })
-		await db.organizations.deleteMany({
-			name: 'Vitalize'
-		})
-		await db.users.deleteMany({ source: 'vitalize' })
-		await db.deals.deleteMany({ organization: orgToDeal._id })
-		await db.investments.deleteMany({ organization: orgToDeal._id })
+		// const orgToDeal = await db.organizations.findOne({ name: 'Vitalize' })
+		// await db.organizations.deleteMany({
+		// 	name: 'Vitalize'
+		// })
+		// await db.users.deleteMany({ source: 'vitalize' })
+		// await db.deals.deleteMany({ organization: orgToDeal._id })
+		// await db.investments.deleteMany({ organization: orgToDeal._id })
 
 
 
@@ -221,21 +221,24 @@ const { xx } = require('./deals');
 				memo: deal.memo,
 				status: 'closed',
 				dealParams: {
-					wireDeadline: new Date('01/01/2020')
+					wireDeadline: '01/01/2020'
 				}
 			})
 			const createdDeal = res.ops[0]
 			return createdDeal
 		}))
 		console.log('created DEALs', createdDeals.filter(d => d !== null).length)
-		const users = map(data, obj => {
+		function uuid() {
+			return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+		}
+		const users = map(data, (obj, i) => {
 			return {
 				last_name: obj['FIELD2'],
 				first_name: obj['FIELD3'],
 				fullName: obj['FIELD4'],
-				investingAs: obj['FIELD6'],
+				investingAs: obj['FIELD6'] === '' ? obj['FIELD7'] === '' ? ['FIELD3'] : obj['FIELD7'] : obj['FIELD6'],
 				investor_type: '',
-				email: obj['FIELD7'],
+				email: obj['FIELD7'] || `${uuid()}support@allocations.com`,
 				street: obj['FIELD8'] + ', ' + obj['FIELD9'],
 				state: obj['FIELD10'],
 				zip: obj['FIELD11'],

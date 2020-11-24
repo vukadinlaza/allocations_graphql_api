@@ -5,9 +5,14 @@ const descriptions = [
 		"Truncated": "orthotic device for upper-extremity neuromuscular weakness"
 	},
 	{
-		"Company": "AgenDX",
+		"Company": "AgenDx (NanDio)",
 		"One-Liner": "AgenDx offers a cost-effective molecular diagnostics platform that is positioned to transform where and how cancer is detected and treated.",
 		"Truncated": "molecular diagnostics platform"
+	},
+	{
+		"Company": "Akouba Credit",
+		"One-Liner": "AkoubaCredit is a digital solution for community banks to reduce cost and increase efficiency when issuing small business loans.",
+		"Truncated": "banking and loan processing platform "
 	},
 	{
 		"Company": "Alembic",
@@ -20,17 +25,22 @@ const descriptions = [
 		"Truncated": "human resources platform for anonymous reporting"
 	},
 	{
+		"Company": "Appcast",
+		"One-Liner": "A technology platform that allows employers/companies to promote their jobs across various career and consumer sites on a cost-per-applicant basis.  ",
+		"Truncated": "HR/Hiring platform "
+	},
+	{
 		"Company": "Ash & Erie",
 		"One-Liner": "Ash & Erie is an apparel company that designs, manufactures, and sells everyday clothes for shorter guys",
 		"Truncated": "everyday clothes for shorter guys"
 	},
 	{
-		"Company": "Avive (fka Revive)",
+		"Company": "Avive (Revive)",
 		"One-Liner": "Avive is developing a next-generation Automated External Defibrillator (AED) built with you in mind.",
 		"Truncated": "automated external defibrillator"
 	},
 	{
-		"Company": "Ayoba-Yo",
+		"Company": "Ayoba",
 		"One-Liner": "Ayoba-Yo produces premium beef snacks that have greater health benefits than traditional jerky and beef snacks",
 		"Truncated": "premium beef snacks"
 	},
@@ -40,7 +50,12 @@ const descriptions = [
 		"Truncated": "pre-natal app"
 	},
 	{
-		"Company": "BTT",
+		"Company": "BasePaws",
+		"One-Liner": "Direct to consumer DNA testing kit for cats",
+		"Truncated": "DNA testing for cats"
+	},
+	{
+		"Company": "Blue Triangle Technologies",
 		"One-Liner": "BTT is a SaaS platform that identifies lost revenue opportunities in clients' websites by correlating revenue with page speed.",
 		"Truncated": "digital experience analytics"
 	},
@@ -60,14 +75,19 @@ const descriptions = [
 		"Truncated": "antiperspirant for sweaty hands and feet"
 	},
 	{
-		"Company": "Catalyst Orthoscience",
+		"Company": "Catalyst ",
 		"One-Liner": "Catalyst Orthoscience has developed a more effective total shoulder replacement system.",
 		"Truncated": "total shoulder replacement system"
 	},
 	{
-		"Company": "Chime",
+		"Company": "Chime (1debit)",
 		"One-Liner": "Chime is a secure, mobile-first bank that helps its users save automatically and features real time cash-back rewards.",
 		"Truncated": "mobile-first bank"
+	},
+	{
+		"Company": "ClearFlame",
+		"One-Liner": "ClearFlame adapts Diesel engines to use low-carbon fuels, achieving an unparalleled combination of strong performance, low emissions, and reduced fuel costs.",
+		"Truncated": "adapting Diesel engines to use low-cost alternative fuels"
 	},
 	{
 		"Company": "Conservation Labs",
@@ -75,7 +95,7 @@ const descriptions = [
 		"Truncated": "water use monitor"
 	},
 	{
-		"Company": "Coolfire Solutions",
+		"Company": "Coolfire",
 		"One-Liner": "Coolfire Solutions develops mobile software for government and large-scale enterprises looking for situational solutions in the field.",
 		"Truncated": "workstream collaboration software"
 	},
@@ -85,7 +105,7 @@ const descriptions = [
 		"Truncated": "live online instruction"
 	},
 	{
-		"Company": "EMU",
+		"Company": "Lucata (Emu)",
 		"One-Liner": "Emu is a supercomputer company that has established an innovative way to store and perform applications on large amounts of data.",
 		"Truncated": "a supercomputer company"
 	},
@@ -95,14 +115,19 @@ const descriptions = [
 		"Truncated": "augmented reality platform"
 	},
 	{
+		"Company": "Eyelation",
+		"One-Liner": "Eyelation uses its innovative kiosk technology and benefit management to meet the needs of corporate safety programs saving time and money.",
+		"Truncated": "corporate safety platform"
+	},
+	{
 		"Company": "Fanbank",
-		"One-Liner": "",
-		"Truncated": ""
+		"One-Liner": "Fanbank transforms the existing point-of-sale terminal used by a local business, the credit and debit cards in their customers’ wallets, and the mobile devices in their pockets to make promotional offers.",
+		"Truncated": "marketing platform "
 	},
 	{
 		"Company": "Fulcrum",
-		"One-Liner": "",
-		"Truncated": ""
+		"One-Liner": "Manufacturing cloud optimized for digital interfaces, not paper, built to usher in a future where production is fast, innovative, and connected. ",
+		"Truncated": "Subscription manufacturing cloud "
 	},
 	{
 		"Company": "Gatsby",
@@ -125,7 +150,7 @@ const descriptions = [
 		"Truncated": "Catholic prayer and meditation app"
 	},
 	{
-		"Company": "Infinite Composites Technologies",
+		"Company": "ICT ",
 		"One-Liner": "ICT designs, develops, and manufactures advanced gas storage systems for aerospace, industrial gas, and transportation applications",
 		"Truncated": "composite pressure vessel technology"
 	},
@@ -138,6 +163,16 @@ const descriptions = [
 		"Company": "Kidizen",
 		"One-Liner": "Kidizen is a parent-to-parent community for buying, sharing, and selling kidstyle",
 		"Truncated": "parent-to-parent platform for selling kids clothes"
+	},
+	{
+		"Company": "LHM",
+		"One-Liner": "A proprietary, top-quality whiskey inspired by Hatfield and McCoy family recipes.",
+		"Truncated": "whiskey producer"
+	},
+	{
+		"Company": "Malomo",
+		"One-Liner": "Enables direct-to-consumer retailers to turn their shipment tracking experience into a marketing channel.",
+		"Truncated": "retail marketing software "
 	},
 	{
 		"Company": "MarginEdge",
@@ -153,6 +188,11 @@ const descriptions = [
 		"Company": "myCOI",
 		"One-Liner": "myCOI is software that automates certificates of insurance collection, validation, and tracking.",
 		"Truncated": "certificate of insurance software"
+	},
+	{
+		"Company": "Neoantigenics",
+		"One-Liner": "Neoantigenics is developing an antibody-drug-conjugate therapy to an oocyte-specific protein that has been discovered to be on the surface of many cancers. ",
+		"Truncated": "Biotechnology therapy development "
 	},
 	{
 		"Company": "Nurture Life",
@@ -176,8 +216,13 @@ const descriptions = [
 	},
 	{
 		"Company": "Psyonic",
-		"One-Liner": "",
-		"Truncated": ""
+		"One-Liner": "Psyonic makes advanced bionic limbs that are accessible to all people with amputations.",
+		"Truncated": "bionic limb development "
+	},
+	{
+		"Company": "Rentlytics",
+		"One-Liner": "Analytics and Intelligence for Commercial Real Estate Investments",
+		"Truncated": "Web service for real estate "
 	},
 	{
 		"Company": "Retrium",
@@ -185,14 +230,29 @@ const descriptions = [
 		"Truncated": "enterprise retrospectives for teams"
 	},
 	{
-		"Company": "Rivet Radio",
+		"Company": "Rivet Smart Audio",
 		"One-Liner": "Rivet Smart Audio delivers customized, multi-platform audio news and feature stories worldwide",
 		"Truncated": "multi-platform audio news"
+	},
+	{
+		"Company": "Rivs",
+		"One-Liner": "A SAAS Interviewing Technology including video interviewing and interview scheduling.",
+		"Truncated": "HR software "
+	},
+	{
+		"Company": "Row One",
+		"One-Liner": "Casual, fashionable shoes branded with university, professional and corporate logos",
+		"Truncated": "retail footwear "
 	},
 	{
 		"Company": "ShotTracker",
 		"One-Liner": "ShotTracker provides basketball players, coaches, teams, and fans with automatically collected basketball metrics and statistics.",
 		"Truncated": "real-time basketball stats and analytics"
+	},
+	{
+		"Company": "Sightbox",
+		"One-Liner": "Sightbox is an all-inclusive annual eye exam and contact lens delivery service paid for monthly.",
+		"Truncated": "eyecare subscription service "
 	},
 	{
 		"Company": "SimplifyASC",
@@ -205,8 +265,18 @@ const descriptions = [
 		"Truncated": ""
 	},
 	{
-		"Company": "soona",
-		"One-Liner": "",
+		"Company": "Soona",
+		"One-Liner": "Soona provides brands professional photo and video delivered in 24 hours for less than the price of stock.",
+		"Truncated": "brand marketing photo and video "
+	},
+	{
+		"Company": "Superstar Games",
+		"One-Liner": "Superstar Games brings sports and virtuality reality experiences to the masses.",
+		"Truncated": "VR platform "
+	},
+	{
+		"Company": "TechStars ",
+		"One-Liner": "Techstars Chicago is at the center of the Midwest startup community, one of the fastest growing ecosystems in the U.S.",
 		"Truncated": ""
 	},
 	{
@@ -221,8 +291,8 @@ const descriptions = [
 	},
 	{
 		"Company": "Thousand Fell",
-		"One-Liner": "",
-		"Truncated": ""
+		"One-Liner": "Designer of recyclable and biodegradable sneakers intended to reduce the amount of synthetic waste dumped in landfills",
+		"Truncated": "recyclable sneakers for consumer "
 	},
 	{
 		"Company": "TradingView",
@@ -250,14 +320,24 @@ const descriptions = [
 		"Truncated": ""
 	},
 	{
-		"Company": "Wolf and Shepherd",
-		"One-Liner": "",
-		"Truncated": ""
+		"Company": "Wise Apple (EatPakd)",
+		"One-Liner": "We are modernizing school lunch with fresh, custom lunches delivered right to families' homes. ",
+		"Truncated": "school lunch delivery service "
+	},
+	{
+		"Company": "Wolf & Shepherd",
+		"One-Liner": "We take running shoe technology and conceal it in classy dress shoes.",
+		"Truncated": "Retail footwear "
 	},
 	{
 		"Company": "Zero Grocery",
-		"One-Liner": "",
-		"Truncated": ""
+		"One-Liner": "Direct-to-consumer plastic-free grocery delivery.",
+		"Truncated": "Consumer grocery delivery "
+	},
+	{
+		"Company": "ZipFit",
+		"One-Liner": "ZipFit's vision is to be a place where you shop and everything you buy fits. Today, ZipFit is the match.com of butts and jeans. ",
+		"Truncated": "online retail "
 	}
 ]
 module.exports = { descriptions }
