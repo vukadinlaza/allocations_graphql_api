@@ -40,6 +40,7 @@ type User {
   showBuild: Boolean
   source: String
   deals: [Deal]
+  investingAs: String
 }
 
 input UserInput {
