@@ -16,8 +16,8 @@ const options = {
   client_id: process.env.AUTH0_KEY,
 }
 
-function getKey(header, cb){
-  client.getSigningKey(header.kid, function(err, key) {
+function getKey(header, cb) {
+  client.getSigningKey(header.kid, function (err, key) {
     var signingKey = key.publicKey || key.rsaPublicKey;
     cb(null, signingKey);
   })
@@ -27,7 +27,7 @@ async function verify(token) {
   return new Promise((resolve, reject) => {
     jwt.verify(token, getKey, options, (err, decoded) => {
       if (err) {
-        return reject(AuthenticationError)
+        return reject(AuthenticationError('verify err statement'))
       }
       return resolve(decoded)
     })
@@ -54,7 +54,7 @@ async function authenticate({ req, db }) {
     return res.ops[0]
   } catch (e) {
     logger.error(e)
-    throw new AuthenticationError()
+    throw new AuthenticationError('authenicate function catch statement')
   }
 }
 

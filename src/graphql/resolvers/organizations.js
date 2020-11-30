@@ -24,7 +24,7 @@ const Queries = {
     if (org && user && (user.organizations_admin || []).map(id => id.toString()).includes(org._id.toString())) {
       return org
     }
-    throw new AuthenticationError()
+    throw new AuthenticationError('org query throw')
   },
   /** members must have the org id on their .organizations_admin key **/
   organizationMembers: async (_, { slug }, { user, db }) => {
