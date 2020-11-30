@@ -37,6 +37,7 @@ async function verify(token) {
 
 async function authenticate({ req, db }) {
   try {
+    console.log('TOKEN', req.headers.authorization)
     const token = (req.headers.authorization || "").slice(7)
     const data = await verify(token)
     const user = await db.users.findOne({ email: data[`${process.env.AUTH0_NAMESPACE}/email`], })
