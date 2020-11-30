@@ -54,6 +54,7 @@ async function authenticate({ req, db }) {
     return res.ops[0]
   } catch (e) {
     logger.error(e)
+    console.log(e)
     throw new AuthenticationError('authenicate function catch statement')
   }
 }
