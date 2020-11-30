@@ -27,7 +27,8 @@ async function verify(token) {
   return new Promise((resolve, reject) => {
     jwt.verify(token, getKey, options, (err, decoded) => {
       if (err) {
-        return reject(AuthenticationError('verify err statement'))
+        console.log('verify ERROR', err)
+        return reject(new AuthenticationError('verify err statement'))
       }
       return resolve(decoded)
     })
@@ -54,7 +55,7 @@ async function authenticate({ req, db }) {
     return res.ops[0]
   } catch (e) {
     logger.error(e)
-    console.log(e)
+    console.log('authenicate ERROR', e)
     throw new AuthenticationError('authenicate function catch statement')
   }
 }
