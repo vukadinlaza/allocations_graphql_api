@@ -166,15 +166,17 @@ const Mutations = {
     return res.value
   },
   /** delete Deal and all associated investment records **/
-  deleteDeal: async (_, { _id }, ctx) => {
+  deleteDeal: async (_, body, ctx) => {
+    const { _id } = body
     isAdmin(ctx)
 
     try {
       // delete deal and all investments in deal
-      await ctx.investments.deleteMany({ deal_id: ObjectId(_id) })
-      await ctx.db.deals.deleteOne({ _id: ObjectId(_id) })
+      const s = await ctx.db.investments.deleteMany({ deal_id: ObjectId(_id) })
+      const x = await ctx.db.deals.deleteOne({ _id: ObjectId(_id) })
       return true
     } catch (e) {
+      console.log(e)
       return false
     }
   },
