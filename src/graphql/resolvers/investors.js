@@ -89,7 +89,7 @@ const User = {
     }).toArray()
   },
   deals: async (user, _, { db }) => {
-    const deals = await Promise.all(user.organizations_admin.map(org => {
+    const deals = await Promise.all((user.organizations_admin || []).map(org => {
       return db.deals.find({ organization: ObjectId(org) }).toArray() || []
     }))
 
