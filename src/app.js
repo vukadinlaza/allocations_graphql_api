@@ -48,11 +48,11 @@ async function run() {
   const port = process.env.PORT || 4000
   const settings = await getSettings(NODE_ENV)
 
-  // // only prevent CORS if in production
-  // if (NODE_ENV === "production" || NODE_ENV === "staging") {
-  //   app.use("*", corsWhitelist(settings.default.cors))
-  // }
-  app.use(cors())
+  // only prevent CORS if in production
+  if (NODE_ENV === "production" || NODE_ENV === "staging") {
+    app.use("*", corsWhitelist(settings.default.cors))
+  }
+
   // standard express middlewares
   app.use('/api/webhooks/slack', slackEvents.requestListener())
   app.use(helmet())
