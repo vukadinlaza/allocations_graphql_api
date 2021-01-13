@@ -15,7 +15,7 @@ module.exports = gql(`
     admins: [User]
     investors: [User]
     investor(_id: String): User
-    deals(order_by: String, order_dir: String): [Deal]
+    deals(order_by: String, order_dir: String, offset: Int, limit: Int, status: String): [Deal]
     deal(_id: String): Deal
     n_deals: Int
     investments: [Investment]
@@ -95,7 +95,7 @@ module.exports = gql(`
   }
 
   extend type Query {
-    organization(slug: String!): Organization
+    organization(slug: String!, offset: Int, limit: Int): Organization
     organizationMembers(slug: String!): [User]
   }
 

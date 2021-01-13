@@ -15,7 +15,8 @@ const Organizations = require('../schema/organizations')
 const Schema = Organizations
 
 const Queries = {
-  organization: async (_, { slug }, { user, db }) => {
+  organization: async (_, { slug, limit, offset }, { user, db }) => {
+    console.log('X', limit, offset)
     const org = await db.organizations.findOne({ slug })
     // short circuit with fund if superadmin
     if (user.admin) return org
@@ -151,11 +152,23 @@ const Mutations = {
 }
 
 const Organization = {
-  deals: (org, { order_by = "created_at", order_dir = -1 }, { db }) => {
+  deals: (org, { order_by = "created_at", order_dir = -1, limit, offset, status }, { db }) => {
+    console.log('LIMIT', limit, offset, status)
+    const activeStatus = status === 'active' ? ['onboarding', 'closing'] : ['onboarding',
+      'closing',
+      'closed',
+      'draft']
+    const query = {
+      organization: org._id,
+      status: { "$in": activeStatus }
+
+    }
     // default sort order is descending by created_at
     return db.deals
-      .find({ organization: org._id })
+      .find(query)
       .sort({ [order_by]: order_dir })
+      .skip(offset || 0)
+      .limit(limit || 50)
       .toArray()
   },
   deal: (org, { _id }, { db }) => {
