@@ -18,6 +18,7 @@ const getAuthToken = async () => {
     const hasToken = await DsJwtAuth.prototype.checkToken()
     if (!hasToken) {
         const token = await DsJwtAuth.prototype.getToken()
+        console.log('Bearer Token', token.accessToken)
         apiClient.addDefaultHeader('Authorization', 'Bearer ' + token.accessToken);
     }
 }
