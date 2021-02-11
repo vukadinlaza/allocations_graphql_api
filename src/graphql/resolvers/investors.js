@@ -22,6 +22,7 @@ const {
 const Users = require('../schema/users')
 const fetch = require('node-fetch');
 const moment = require('moment')
+const { object } = require("check-types")
 
 /**  
 
@@ -95,6 +96,17 @@ const User = {
 
     console.log(deals.reduce((acc, org) => [...acc, ...org], []))
     return deals.reduce((acc, org) => [...acc, ...org], [])
+  },
+
+  accountInvestments: async (user, _, { db }) => {
+    const account = await db.accounts.findOne({ $or: [{ rootAdmin: ObjectId(user._id) }, { users: ObjectId(user._id) }] })
+    const investments = await db.investments.find({
+      user_id: {
+        $in: account.users
+      }
+    }).toArray()
+    console.log(investments)
+    return investments
   }
 }
 
