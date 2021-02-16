@@ -19,6 +19,19 @@ type Entity {
 	accredidation_status: Boolean
 	accountId: Account
 }
+
+input EntityInput {
+	_id: String
+	investor_type: String
+	country: String
+	first_name: String
+	last_name: String
+	entity_name: String
+	signer_full_name: String
+	accredited_investor_status: String
+	email: String
+  }
+
 extend type Query {
   getEntity: Entity
   getEntities(accountId: String): [Entity]
@@ -26,5 +39,7 @@ extend type Query {
 
 extend type Mutation {
 	createEntity(payload: Object): Object
+	deleteEntity(accountId: String, entityId: String): Boolean
+	updateEntity(payload: EntityInput): Entity
 }
 `)

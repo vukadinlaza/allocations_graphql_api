@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb")
-const { isNumber, pick, create } = require('lodash')
+const { isNumber, pick, create, omit } = require('lodash')
 const { isAdmin, isAdminOrSameUser } = require('../permissions')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
@@ -24,7 +24,6 @@ const Queries = {
 	getEntity: async (_, { _id }, { user, db }) => {
 	},
 	getEntities: async (_, { accountId }, { user, db }) => {
-		console.log(accountId)
 		const entities = await db.entities.find({ accountId: ObjectId(accountId) }).toArray()
 		return entities
 	},
@@ -32,13 +31,26 @@ const Queries = {
 
 const Mutations = {
 	createEntity: async (_, { payload }, { user, db }) => {
+		console.log('FIRES', payload)
 		const options = ['investor_type', 'country', 'state', 'first_name', 'last_name', 'entity_name', 'signer_full_name', 'accredited_investor_status', 'email', 'accountId']
 		const data = pick(payload, options)
-		console.log(payload)
 
 		const createdEntity = await db.entities.insertOne({ ...data, accountId: ObjectId(payload.accountId) })
 		return createdEntity.ops[0]
 	},
+	deleteEntity: async (_, { entityId, accountId }, { user, db }) => {
+		const res = await db.entities.deleteOne({ _id: ObjectId(entityId), accountId: ObjectId(accountId) })
+		return res.deletedCount === 1
+
+	},
+	updateEntity: async (_, { payload }, { user, db }) => {
+		return await db.entities.updateOne(
+			{ _id: ObjectId(payload._id) },
+			{ $set: { ...omit(payload, '_id') } },
+			{ "new": true }
+		)
+	},
+
 
 }
 

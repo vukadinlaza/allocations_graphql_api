@@ -25,7 +25,6 @@ const Queries = {
 	accountUsers: async (_, { _id }, { user, db }) => {
 		// update here to OR query
 		const account = await db.accounts.findOne({ $or: [{ rootAdmin: ObjectId(user._id) }, { users: ObjectId(user._id) }] })
-		console.log(account, 'ACCOUNT')
 		const users = await db.users.find({
 			_id: {
 				$in: (account.users || []).map(u => ObjectId(u))
@@ -36,7 +35,6 @@ const Queries = {
 	rootAdmin: async (_, { _id }, { user, db }) => {
 		// update here to OR query
 		const account = await db.accounts.findOne({ $or: [{ rootAdmin: ObjectId(user._id) }, { users: ObjectId(user._id) }] })
-		console.log(account, 'ACCOUNT')
 		return account.rootAdmin
 	},
 	accountId: async (_, { _id }, { user, db }) => {
@@ -51,7 +49,6 @@ const Mutations = {
 		const account = await db.accounts.findOne({ rootAdmin: user._id })
 		let accountId = null
 		if (!account) {
-			console.log('NO ACCOUNT', account)
 			const res = await db.accounts.insertOne({
 				rootAdmin: user._id,
 			})
@@ -67,7 +64,6 @@ const Mutations = {
 		// throw new AuthenticationError('permission denied');
 	},
 	confirmInvitation: async (_, { accountId }, { user, db }) => {
-		console.log('Account ID', accountId)
 		let confirmed = false
 		const account = await db.accounts.findOne({
 			$or: [{
