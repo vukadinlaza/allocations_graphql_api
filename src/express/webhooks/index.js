@@ -218,7 +218,7 @@ module.exports = Router()
         return res.sendStatus(200)
       }
       const dealIds = deals.map(d => d._id).filter(d => d)
-      const investment = await db.investments.findAndUpdate({
+      const investment = await db.investments.updateMany({
         user_id: user._id, deal_id: {
           $in: dealIds
         }
