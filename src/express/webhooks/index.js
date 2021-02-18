@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const { ObjectId } = require('mongodb')
 const { verifyRequestSignature } = require('@slack/events-api');
-const { get } = require('lodash')
+const { get, every } = require('lodash')
 const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
 const S3 = require('aws-sdk/clients/s3')
@@ -207,14 +207,14 @@ module.exports = Router()
   .post('/bankwire-notifications', async (req, res, next) => {
     try {
       console.log('FIRES');
-      console.log(req)
       const { body } = req
       console.log('Body', body)
 
       const db = await connect();
       const deals = await db.deals.find({ company_name: body.dealName }).toArray()
       const user = await db.users.findOne({ email: body.email })
-      if (!user._id || !deal._id) {
+      if (!user._id || !every(deals, '_id')
+      ) {
         return res.sendStatus(200)
       }
       const dealIds = deals.map(d => d._id).filter(d => d)
