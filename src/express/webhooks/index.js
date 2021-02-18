@@ -204,3 +204,25 @@ module.exports = Router()
       next(err);
     }
   })
+  .post('/bankwire-notifications', async (req, res, next) => {
+    try {
+      console.log('FIRES');
+      console.log(req)
+      const { body } = req
+      console.log('Body', body)
+
+      const db = await connect();
+      const deal = await db.deals.findOne({ company_name: body.dealName })
+      const user = await db.users.findOne({ email: body.email })
+      console.log('TEST TEST', user, deal)
+      const investment = await db.deals.update({ user_id: user._id, deal_id: deal._id }, { status: 'signed' })
+      console.log('INV', investment)
+      res.sendStatus(200)
+      next()
+    }
+    catch (err) {
+      console.log('SOME ERROR')
+      console.log(err)
+      next(err);
+    }
+  })
