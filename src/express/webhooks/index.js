@@ -206,9 +206,7 @@ module.exports = Router()
   })
   .post('/bankwire-notifications', async (req, res, next) => {
     try {
-      console.log('FIRES');
       const { body } = req
-      console.log('Body', body)
 
       const db = await connect();
       const deals = await db.deals.find({ company_name: body.dealName }).toArray()
@@ -222,7 +220,7 @@ module.exports = Router()
         user_id: user._id, deal_id: {
           $in: dealIds
         }
-      }, { $set: { status: 'signed' } })
+      }, { $set: { status: 'wired' } })
       res.sendStatus(200)
       next()
     }
