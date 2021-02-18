@@ -25,6 +25,9 @@ const Queries = {
 	accountUsers: async (_, { _id }, { user, db }) => {
 		// update here to OR query
 		const account = await db.accounts.findOne({ $or: [{ rootAdmin: ObjectId(user._id) }, { users: ObjectId(user._id) }] })
+		if (!account) {
+			return []
+		}
 		const users = await db.users.find({
 			_id: {
 				$in: (account.users || []).map(u => ObjectId(u))
@@ -35,11 +38,17 @@ const Queries = {
 	rootAdmin: async (_, { _id }, { user, db }) => {
 		// update here to OR query
 		const account = await db.accounts.findOne({ $or: [{ rootAdmin: ObjectId(user._id) }, { users: ObjectId(user._id) }] })
+		if (!account) {
+			return null
+		}
 		return account.rootAdmin
 	},
 	accountId: async (_, { _id }, { user, db }) => {
 		// update here to OR query
 		const account = await db.accounts.findOne({ $or: [{ rootAdmin: ObjectId(user._id) }, { users: ObjectId(user._id) }] })
+		if (!account) {
+			return null
+		}
 		return account._id
 	},
 }

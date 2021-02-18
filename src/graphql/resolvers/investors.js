@@ -100,12 +100,16 @@ const User = {
 
   accountInvestments: async (user, _, { db }) => {
     const account = await db.accounts.findOne({ $or: [{ rootAdmin: ObjectId(user._id) }, { users: ObjectId(user._id) }] })
+    if (!account) {
+      return await db.investments.find({
+        user_id: user._id
+      }).toArray()
+    }
     const investments = await db.investments.find({
       user_id: {
         $in: account.users
       }
     }).toArray()
-    console.log(investments)
     return investments
   }
 }
