@@ -212,14 +212,17 @@ module.exports = Router()
       console.log('Body', body)
 
       const db = await connect();
-      const deal = await db.deals.findOne({ company_name: body.dealName })
+      const deals = await db.deals.find({ company_name: body.dealName }).toArray()
       const user = await db.users.findOne({ email: body.email })
-
       if (!user._id || !deal._id) {
         return res.sendStatus(200)
       }
-      const investment = await db.investments.findOneAndUpdate({ user_id: user._id, deal_id: deal._id }, { status: 'signed' })
-      console.log('INV', investment)
+      const dealIds = deals.map(d => d._id).filter(d => d)
+      const investment = await db.investments.findAndUpdate({
+        user_id: user._id, deal_id: {
+          $in: dealIds
+        }
+      }, { $set: { status: 'signed' } })
       res.sendStatus(200)
       next()
     }
