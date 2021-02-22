@@ -18,6 +18,8 @@ type Entity {
 	accredidation_doc: Document
 	accredidation_status: Boolean
 	accountId: Account
+	user: User
+	isPrimaryEntity: Boolean
 }
 
 input EntityInput {

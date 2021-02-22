@@ -22,7 +22,6 @@ const {
 const Users = require('../schema/users')
 const fetch = require('node-fetch');
 const moment = require('moment')
-const { object } = require("check-types")
 
 /**  
 
@@ -105,13 +104,15 @@ const User = {
         user_id: user._id
       }).toArray()
     }
-    const investments = await db.investments.find({
-      user_id: {
-        $in: account.users
-      }
-    }).toArray()
+    console.log(account.users)
+    const investments = await db.investments.find({ $or: [{ user_id: { $in: [...(account.users || []).map(u => ObjectId(u))] } }, { user_id: ObjectId(account.rootAdmin) }] }).toArray()
     return investments
+  },
+  account: async (user, _, { db }) => {
+    const account = await db.accounts.findOne({ _id: ObjectId(user.account) })
+    return account
   }
+
 }
 
 const Queries = {

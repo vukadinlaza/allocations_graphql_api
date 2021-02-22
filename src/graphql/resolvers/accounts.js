@@ -24,13 +24,13 @@ const Account = {
 const Queries = {
 	accountUsers: async (_, { _id }, { user, db }) => {
 		// update here to OR query
-		const account = await db.accounts.findOne({ $or: [{ rootAdmin: ObjectId(user._id) }, { users: ObjectId(user._id) }] })
+		const account = await db.accounts.findOne({ _id: ObjectId(user.account) })
 		if (!account) {
 			return []
 		}
 		const users = await db.users.find({
 			_id: {
-				$in: (account.users || []).map(u => ObjectId(u))
+				$in: ([...(account.users || []), account.rootAdmin] || []).map(u => ObjectId(u))
 			}
 		}).toArray()
 		return users
@@ -55,51 +55,40 @@ const Queries = {
 
 const Mutations = {
 	sendAccountInvite: async (_, { payload }, { user, db }) => {
-		const account = await db.accounts.findOne({ rootAdmin: user._id })
-		let accountId = null
-		if (!account) {
-			const res = await db.accounts.insertOne({
-				rootAdmin: user._id,
-			})
-			const acct = res.ops[0]
-			accountId = acct._id
-		}
-		if (account._id) {
-			accountId = account._id
-		}
-		const invite = await AccountMailer.sendInvite({ sender: { ...user, accountId }, to: payload.newUserEmail })
+		console.log('SENT', user.account)
+		const invite = await AccountMailer.sendInvite({ sender: { ...user, accountId: user.account }, to: payload.newUserEmail })
 
 		return invite
 		// throw new AuthenticationError('permission denied');
 	},
 	confirmInvitation: async (_, { accountId }, { user, db }) => {
 		let confirmed = false
-		const account = await db.accounts.findOne({
-			$or: [{
-				rootAdmin: user._id,
-				users: {
-					$in: [user._id]
-				}
-			}]
-		})
-		if (account) {
+		console.log('RECEIEVED', accountId)
+
+		const account = await db.accounts.findOne({ _id: ObjectId(accountId) })
+		if (account._id) {
 			confirmed = true
-		}
-		if (!account) {
+			// Update User to new Account ID
+			const updatedUser = await db.users.updateOne({ _id: ObjectId(user._id) }, {
+				$set: { account: ObjectId(account._id) }
+			})
+			// Update All Entities to new Account ID
+			const updatedEntities = await db.entities.updateMany({ user: ObjectId(user._id) }, {
+				$set: {
+					accountId: ObjectId(account._id)
+				}
+			})
+			// Update the Account to include the user
 			const updatedAcct = await db.accounts.updateOne(
 				{ _id: ObjectId(accountId) },
 				{ $push: { users: user._id } }
 			)
-			confirmed = true
-
 		}
 
 		return confirmed
 	},
 	removeAcctUser: async (_, { accountId, userId }, ctx) => {
-		console.log(accountId, userId)
 		isAdmin(ctx)
-
 		try {
 			const res = await ctx.db.accounts.update(
 				{ _id: ObjectId(accountId) },
@@ -109,7 +98,6 @@ const Mutations = {
 					}
 				}
 			);
-			console.log(res)
 			return true
 		} catch (e) {
 			console.log(e)

@@ -24,7 +24,8 @@ const Queries = {
 	getEntity: async (_, { _id }, { user, db }) => {
 	},
 	getEntities: async (_, { accountId }, { user, db }) => {
-		const entities = await db.entities.find({ accountId: ObjectId(accountId) }).toArray()
+		const account = await db.accounts.findOne({ _id: ObjectId(user.account) })
+		const entities = await db.entities.find({ $or: [{ user: { $in: [...(account.users || []).map(u => ObjectId(u))] } }, { user: ObjectId(account.rootAdmin) }] }).toArray()
 		return entities
 	},
 }
@@ -35,7 +36,7 @@ const Mutations = {
 		const options = ['investor_type', 'country', 'state', 'first_name', 'last_name', 'entity_name', 'signer_full_name', 'accredited_investor_status', 'email', 'accountId']
 		const data = pick(payload, options)
 
-		const createdEntity = await db.entities.insertOne({ ...data, accountId: ObjectId(payload.accountId) })
+		const createdEntity = await db.entities.insertOne({ ...data, accountId: ObjectId(payload.accountId), user: ObjectId(user._id) })
 		return createdEntity.ops[0]
 	},
 	deleteEntity: async (_, { entityId, accountId }, { user, db }) => {
