@@ -2,27 +2,27 @@ const mailer = require('./mailer')
 const logger = require('../utils/logger')
 
 async function sendInvite({ sender, to }) {
-	const html = memberAccountInviteTemplate({ sender })
+  const html = memberAccountInviteTemplate({ sender })
 
-	const msg = {
-		to,
-		from: "invites@allocations.com",
-		subject: `You have been added as an member to ${sender.email}'s account on Allocations`,
-		text: `You have been added as an member to ${sender.email}'s account on Allocations`,
-		html
-	}
+  const msg = {
+    to,
+    from: "invites@allocations.com",
+    subject: `You have been added as an member to ${sender.email}'s account on Allocations`,
+    text: `You have been added as an member to ${sender.email}'s account on Allocations`,
+    html
+  }
 
-	try {
-		const res = await mailer.send(msg)
-		return { status: "sent", sent_at: Date.now(), to }
-	} catch (e) {
-		logger.error(e)
-		return { status: "error" }
-	}
+  try {
+    const res = await mailer.send(msg)
+    return { status: "sent", sent_at: Date.now(), to }
+  } catch (e) {
+    logger.error(e)
+    return { status: "error" }
+  }
 }
 
 function memberAccountInviteTemplate({ sender }) {
-	return `
+  return `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml">
     <head>
@@ -157,7 +157,7 @@ function memberAccountInviteTemplate({ sender }) {
     <tbody>
       <tr>
         <td style="font-size:6px; line-height:10px; padding:0px 0px 0px 0px;" valign="top" align="center">
-          <img class="max-width" border="0" style="display:block; color:#000000; text-decoration:none; font-family:Helvetica, arial, sans-serif; font-size:16px; max-width:40% !important; width:40%; height:auto !important;" width="240" alt="" data-proportionally-constrained="true" data-responsive="true" src="http://cdn.mcauto-images-production.sendgrid.net/ee47f069b297ef65/1c60e931-f10e-4523-990b-575f5881e945/2700x900.png">
+          <img class="max-width" border="0" style="display:block; color:#000000; text-decoration:none; font-family:Helvetica, arial, sans-serif; font-size:16px; max-width:40% !important; width:40%; height:auto !important;" width="240" alt="" data-proportionally-constrained="true" data-responsive="true" src="https://allocations-public.s3.us-east-2.amazonaws.com/logo-new.png">
         </td>
       </tr>
     </tbody>
