@@ -191,7 +191,6 @@ const Mutations = {
     if (passport && !passport.link) {
       const file = await passport
       const s3Path = await Uploader.putInvestorDoc(_id, file, "passport")
-
       return ctx.db.users.updateOne(
         { _id: ObjectId(_id) },
         { $set: { ...user, passport: s3Path } }
@@ -208,7 +207,11 @@ const Mutations = {
         { $set: { ...user, accredidation_doc: s3Path } }
       )
     }
-
+    const options = ['investor_type', 'country', 'state', 'first_name', 'last_name', 'entity_name', 'signer_full_name', 'accredited_investor_status', 'email', 'accountId']
+    const data = pick({ ...user }, options)
+    console.log(data)
+    const updatedEntity = await ctx.db.entities.updateOne({ user: ObjectId(_id), isPrimaryEntity: true }, { $set: data })
+    console.log(updatedEntity)
     return ctx.db.users.updateOne(
       { _id: ObjectId(_id) },
       { $set: user }
