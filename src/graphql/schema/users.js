@@ -41,6 +41,8 @@ type User {
   source: String
   deals: [Deal]
   investingAs: String
+  accountInvestments: [Investment]
+  account: Account
 }
 
 input UserInput {

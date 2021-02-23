@@ -8,7 +8,6 @@ type Investment {
   pledged_at: Int
   onboarded_at: Int
   completed_at: Int
-
   organization: String
   amount: Int
   deal: Deal

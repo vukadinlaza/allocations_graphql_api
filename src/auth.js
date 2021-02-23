@@ -2,6 +2,7 @@ const ms = require('ms')
 const jwt = require('jsonwebtoken')
 const jwksClient = require('jwks-rsa')
 const { AuthenticationError } = require('apollo-server-express')
+const { createUserAccountAndEntity } = require('./utils/createUser')
 const logger = require('pino')({ prettyPrint: process.env.NODE_ENV !== "production" })
 
 const client = jwksClient({
@@ -51,6 +52,7 @@ async function authenticate({ req, db }) {
 
     // else create user
     const res = await db.users.insertOne({ email: data[`${process.env.AUTH0_NAMESPACE}/email`], })
+    const acctAndEntity = await createUserAccountAndEntity({ db, u: res.ops[0] })
     return res.ops[0]
   } catch (e) {
     logger.error(e)

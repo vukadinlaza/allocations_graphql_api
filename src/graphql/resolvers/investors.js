@@ -95,7 +95,24 @@ const User = {
 
     console.log(deals.reduce((acc, org) => [...acc, ...org], []))
     return deals.reduce((acc, org) => [...acc, ...org], [])
+  },
+
+  accountInvestments: async (user, _, { db }) => {
+    const account = await db.accounts.findOne({ $or: [{ rootAdmin: ObjectId(user._id) }, { users: ObjectId(user._id) }] })
+    if (!account) {
+      return await db.investments.find({
+        user_id: user._id
+      }).toArray()
+    }
+    console.log(account.users)
+    const investments = await db.investments.find({ $or: [{ user_id: { $in: [...(account.users || []).map(u => ObjectId(u))] } }, { user_id: ObjectId(account.rootAdmin) }] }).toArray()
+    return investments
+  },
+  account: async (user, _, { db }) => {
+    const account = await db.accounts.findOne({ _id: ObjectId(user.account) })
+    return account
   }
+
 }
 
 const Queries = {
@@ -174,7 +191,6 @@ const Mutations = {
     if (passport && !passport.link) {
       const file = await passport
       const s3Path = await Uploader.putInvestorDoc(_id, file, "passport")
-
       return ctx.db.users.updateOne(
         { _id: ObjectId(_id) },
         { $set: { ...user, passport: s3Path } }
@@ -191,7 +207,11 @@ const Mutations = {
         { $set: { ...user, accredidation_doc: s3Path } }
       )
     }
-
+    const options = ['investor_type', 'country', 'state', 'first_name', 'last_name', 'entity_name', 'signer_full_name', 'accredited_investor_status', 'email', 'accountId']
+    const data = pick({ ...user }, options)
+    console.log(data)
+    const updatedEntity = await ctx.db.entities.updateOne({ user: ObjectId(_id), isPrimaryEntity: true }, { $set: data })
+    console.log(updatedEntity)
     return ctx.db.users.updateOne(
       { _id: ObjectId(_id) },
       { $set: user }
