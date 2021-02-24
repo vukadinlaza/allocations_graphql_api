@@ -9,9 +9,7 @@ module.exports = gql(`
     logo: String
     created_at: String
     updated_at: String
-
     approved: Boolean
-
     admins: [User]
     investors: [User]
     investor(_id: String): User
@@ -23,17 +21,15 @@ module.exports = gql(`
     adminInvites: [EmailInvite]
     complianceTasks: [ComplianceTask]
     signingRequests: [SigningRequest]
-
     masterFiling: [Filing]
-
     completedProvisionOfServices: Boolean
     provisionOfServicesURL: String
     documentTemplates: [DocumentTemplate]
-    
     exchangeDeals: [ExchangeDeal]
     matchRequests: [MatchRequest]
     trades: [Trade]
     orders: [Order]
+    orgInvestors: [User]
   }
 
   type Filing {
