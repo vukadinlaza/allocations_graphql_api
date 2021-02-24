@@ -6,6 +6,7 @@ const AdminMailer = require('../../mailers/admin-mailer')
 const { AuthenticationError, gql } = require('apollo-server-express')
 const Hellosign = require('../../hellosign')
 const Organizations = require('../schema/organizations')
+const { groupBy, map } = require('lodash')
 /** 
 
   all organization handling (sometimes called funds)
@@ -236,7 +237,33 @@ const Organization = {
   // since approved was added on later, we're going to assume any previous one IS approved
   approved: (org) => {
     return org.approved !== false
-  }
+  },
+  orgInvestors: async (org, _, { db }) => {
+    console.log(org)
+    const investments = await db.investments.find({ organization: ObjectId(org._id) }).toArray()
+    const investmentsByUser = groupBy(investments, 'user_id')
+    const x = await Promise.all(map(investmentsByUser, u => {
+      return u
+    }).map(user => {
+      const id = user[0]
+      const total = user.reduce((acc, u) => {
+        return acc += u.amount
+      }, 0)
+      if (!id) return;
+      return {
+        id: id.user_id,
+        amount: total,
+        numInvestments: user.length || 0
+      }
+    }).map(async (u) => {
+      const user = await db.users.findOne({ _id: ObjectId(u.id) })
+      if (user !== null) {
+        return { ...user, ...u }
+      }
+    }))
+    console.log(x)
+    return x
+  },
 }
 
 const ComplianceTask = {
