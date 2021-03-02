@@ -89,6 +89,8 @@ const Mutations = {
 	},
 	removeAcctUser: async (_, { accountId, userId }, ctx) => {
 		isAdmin(ctx)
+		const originalAccount = await ctx.db.accounts.findOne({ rootAdmin: ObjectId(userId) })
+		console.log('ACCOUNT', originalAccount)
 		try {
 			const res = await ctx.db.accounts.update(
 				{ _id: ObjectId(accountId) },
@@ -98,6 +100,19 @@ const Mutations = {
 					}
 				}
 			);
+
+
+			// reset user info back to base account 
+			await ctx.db.users.updateOne({ _id: ObjectId(userId) }, {
+				$set: { account: ObjectId(originalAccount._id) }
+			})
+
+			// Update All Entities to new Account ID
+			await ctx.db.entities.updateMany({ user: ObjectId(userId) }, {
+				$set: {
+					accountId: ObjectId(originalAccount._id)
+				}
+			})
 			return true
 		} catch (e) {
 			console.log(e)
