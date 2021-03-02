@@ -13,7 +13,9 @@ const resolversRaw = [
   'investments',
   'organizations',
   'marketplace',
-  'documents'
+  'documents',
+  'accounts',
+  'entities'
 ].map(name => require(`./${name}`))
 
 const splatReduce = (key) => resolversRaw.reduce((acc, r) => ({ ...acc, ...r[key] }), {})
