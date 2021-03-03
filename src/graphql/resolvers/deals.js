@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb")
 const _ = require('lodash')
+const fetch = require('node-fetch');
 const { isAdmin, isOrgAdmin, ensureFundAdmin, isFundAdmin } = require('../permissions')
 const Cloudfront = require('../../cloudfront')
 const DealDocUploader = require('../../uploaders/deal-docs')
@@ -133,6 +134,18 @@ const Mutations = {
     if (collision) {
       throw new Error("Deal with same name already exists")
     }
+
+    if (process.env.NODE_ENV === 'production') {
+      await fetch('https://hooks.zapier.com/hooks/catch/7904699/onwul0r/', {
+        method: 'post',
+        body: JSON.stringify({
+          organization: org.name,
+          dealName: deal.company_name
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
 
     const res = await ctx.db.deals.insertOne({
       ...deal,
