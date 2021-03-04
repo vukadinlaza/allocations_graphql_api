@@ -207,6 +207,7 @@ module.exports = Router()
   .post('/bankwire-notifications', async (req, res, next) => {
     try {
       const { body } = req
+      console.log(body)
 
       const db = await connect();
       const deals = await db.deals.find({ company_name: body.dealName }).toArray()
