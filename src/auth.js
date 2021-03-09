@@ -1,6 +1,7 @@
 const ms = require('ms')
 const jwt = require('jsonwebtoken')
 const jwksClient = require('jwks-rsa')
+const fetch = require('node-fetch');
 const { AuthenticationError } = require('apollo-server-express')
 const { createUserAccountAndEntity } = require('./utils/createUser')
 const logger = require('pino')({ prettyPrint: process.env.NODE_ENV !== "production" })
@@ -53,11 +54,27 @@ async function authenticate({ req, db }) {
     // else create user
     const res = await db.users.insertOne({ email: data[`${process.env.AUTH0_NAMESPACE}/email`], })
     const acctAndEntity = await createUserAccountAndEntity({ db, u: res.ops[0] })
+    await updateAirtableUsers({ user: res.ops[0] })
     return res.ops[0]
   } catch (e) {
     logger.error(e)
     console.log('authenicate ERROR', e)
     throw new AuthenticationError('authenicate function catch statement')
+  }
+}
+
+const updateAirtableUsers = async ({ user }) => {
+  if (process.env.NODE_ENV === 'production') {
+    await fetch('https://hooks.zapier.com/hooks/catch/7904699/onvqrx8/', {
+      method: 'post',
+      body: JSON.stringify({
+        email: user.email,
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        _id: user._id || ''
+      }),
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }
 
