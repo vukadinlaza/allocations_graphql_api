@@ -26,7 +26,7 @@ const slack = new WebClient(process.env.SLACK_CLIENT_TOKEN, {
 const { NODE_ENV } = process.env
 
 
-/** 
+/**
 
   Boilerplate express server that attaches apollo
 
@@ -71,13 +71,14 @@ async function run() {
   //slack API
   app.use('/api/webhooks', require('./express/webhooks/index'))
   app.use('/api/users', require('./express/api/user'))
+  app.use('/api/deal', require('./express/api/deal'))
+
 
   // connect to MongoDB
   const db = await connect()
 
   const getLinkMetaData = async (link) => {
     const slug = last(link.url.split('/'))
-    console.log({ slug })
     const deal = await db.deals.findOne({ slug });
     const org = await db.organizations.findOne({ _id: deal.organization });
     const params = {
