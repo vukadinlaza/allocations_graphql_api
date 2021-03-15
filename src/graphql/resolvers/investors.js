@@ -23,7 +23,7 @@ const Users = require('../schema/users')
 const fetch = require('node-fetch');
 const moment = require('moment')
 
-/**  
+/**
 
   handles all investor flow
 
@@ -209,13 +209,13 @@ const Mutations = {
     }
     const options = ['investor_type', 'country', 'state', 'first_name', 'last_name', 'entity_name', 'signer_full_name', 'accredited_investor_status', 'email', 'accountId']
     const data = pick({ ...user }, options)
-    console.log(data)
     const updatedEntity = await ctx.db.entities.updateOne({ user: ObjectId(_id), isPrimaryEntity: true }, { $set: data })
-    console.log(updatedEntity)
-    return ctx.db.users.updateOne(
+    const update = await ctx.db.users.updateOne(
       { _id: ObjectId(_id) },
       { $set: user }
     )
+
+    return await ctx.db.users.findOne({ _id: ObjectId(_id) })
   },
   /** deletes investor -> TODO delete their investment as well **/
   deleteInvestor: async (_, { _id }, ctx) => {
