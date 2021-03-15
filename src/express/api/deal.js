@@ -8,8 +8,6 @@ module.exports = Router()
 	.post('/', async (req, res, next) => {
 		try {
 			const { dealSlug, organizationSlug, API_KEY } = req.body;
-			console.log('req', dealSlug, organizationSlug, API_KEY)
-
 
 			const key = apiKeys.find(k => k.key === API_KEY)
 			if (!key) {
