@@ -57,9 +57,9 @@ async function authenticate({ req, db }) {
     await updateAirtableUsers({ user: res.ops[0] })
     return res.ops[0]
   } catch (e) {
-    logger.error(e)
+    // logger.error(e)
     console.log('authenicate ERROR', e)
-    throw new AuthenticationError('authenicate function catch statement')
+    // throw new AuthenticationError('authenicate function catch statement')
   }
 }
 

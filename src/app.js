@@ -26,7 +26,7 @@ const slack = new WebClient(process.env.SLACK_CLIENT_TOKEN, {
 const { NODE_ENV } = process.env
 
 
-/** 
+/**
 
   Boilerplate express server that attaches apollo
 
@@ -71,84 +71,11 @@ async function run() {
   //slack API
   app.use('/api/webhooks', require('./express/webhooks/index'))
   app.use('/api/users', require('./express/api/user'))
+  app.use('/api/deal', require('./express/api/deal'))
+
 
   // connect to MongoDB
   const db = await connect()
-
-  const getLinkMetaData = async (link) => {
-    const slug = last(link.url.split('/'))
-    console.log({ slug })
-    const deal = await db.deals.findOne({ slug });
-    const org = await db.organizations.findOne({ _id: deal.organization });
-    const params = {
-      Bucket: 'allocations-public',
-      Key: `organizations/${org.slug}.png`
-    };
-    // Using async/await (untested)
-    try {
-
-      const headCode = await s3.headObject(params).promise();
-      console.log('Head Code', headCode)
-      const signedUrl = await s3.getSignedUrl('getObject', params);
-      console.log('Signed URL', signedUrl)
-      // Do something with signedUrl
-    } catch (headErr) {
-      if (headErr.code === 'NotFound') {
-      }
-    }
-
-
-
-    return attachment = {
-      title: deal.company_name,
-      description: deal.company_description,
-      image_url: `https://allocations-public.s3.us-east-2.amazonaws.com/organizations/${org.slug}.png`,
-      url: link.url,
-    }
-  }
-
-  slackEvents.on('link_shared', async (event) => {
-
-    try {
-      const linkData = await Promise.all(event.links.map(getLinkMetaData))
-      await linkData.map((data) => {
-        console.log({ data })
-        if (!data.title) return;
-        const payload = {
-          channel: event.channel,
-          ts: event.message_ts,
-          unfurls: {}
-        }
-        payload.unfurls[data.url] = {
-          blocks: [
-            {
-              type: 'header',
-              text: {
-                type: 'plain_text',
-                text: data.title
-              }
-            },
-            {
-              type: 'section',
-              text: {
-                type: 'mrkdwn',
-                text: data.description
-              }
-            },
-            {
-              type: 'image',
-              image_url: data.image_url,
-              alt_text: 'Logo'
-            }
-          ]
-        }
-        return slack.chat.unfurl(payload)
-      })
-    }
-    catch (e) {
-      console.log(e)
-    }
-  });
 
 
   // auth handling (only prod for now)
