@@ -25,7 +25,7 @@ module.exports = Router()
 
 				return res.status(200).send(deal)
 			}
-
+			return res.status(200)
 		} catch (e) {
 			throw new Error(e)
 		}
