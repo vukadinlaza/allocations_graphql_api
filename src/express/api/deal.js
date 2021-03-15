@@ -20,9 +20,11 @@ module.exports = Router()
 			const db = await connect();
 
 			const organization = await db.organizations.findOne({ slug: organizationSlug })
-			const deal = await db.deals.findOne({ slug: dealSlug, organization: organization._id })
+			if(organization && organization._id) {
+				const deal = await db.deals.findOne({ slug: dealSlug, organization: organization._id })
 
-			return res.status(200).send(deal)
+				return res.status(200).send(deal)
+			}
 
 		} catch (e) {
 			throw new Error(e)
