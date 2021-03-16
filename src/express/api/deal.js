@@ -20,9 +20,11 @@ module.exports = Router()
 			const db = await connect();
 
 			const organization = await db.organizations.findOne({ slug: organizationSlug })
+			console.log('org', organization)
 			if(organization && organization._id) {
 
 				const deal = await db.deals.findOne({ slug: dealSlug, organization: organization._id })
+				console.log('deal found', deal)
 
 				return res.send(deal)
 			} else {
