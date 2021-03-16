@@ -8,6 +8,7 @@ module.exports = Router()
 	.post('/', async (req, res, next) => {
 		try {
 			const { dealSlug, organizationSlug = 'allocations', API_KEY } = req.body;
+			console.log('in route', dealSlug, organizationSlug)
 
 			const key = apiKeys.find(k => k.key === API_KEY)
 			if (!key) {
