@@ -7,11 +7,11 @@ const apiKeys = [{ key: '12345' }]
 module.exports = Router()
 	.post('/', async (req, res, next) => {
 		try {
-			const { dealSlug, organizationSlug, API_KEY } = req.body;
+			const { dealSlug, organizationSlug = 'allocations', API_KEY } = req.body;
 
 			const key = apiKeys.find(k => k.key === API_KEY)
 			if (!key) {
-				return res.status(400).send({
+				return res.send({
 					status: 400,
 					error: 'Invalid API key'
 				})
@@ -21,11 +21,13 @@ module.exports = Router()
 
 			const organization = await db.organizations.findOne({ slug: organizationSlug })
 			if(organization && organization._id) {
+
 				const deal = await db.deals.findOne({ slug: dealSlug, organization: organization._id })
 
-				return res.status(200).send(deal)
+				return res.send(deal)
+			} else {
+				return res.sendStatus(200)
 			}
-			return res.status(200)
 		} catch (e) {
 			throw new Error(e)
 		}
