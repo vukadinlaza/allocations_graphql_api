@@ -7,7 +7,7 @@ const apiKeys = [{ key: '12345' }]
 module.exports = Router()
 	.post('/', async (req, res, next) => {
 		try {
-			const { dealSlug, organizationSlug, API_KEY } = req.body;
+			const { dealSlug, organizationSlug = 'allocations', API_KEY } = req.body;
 
 			const key = apiKeys.find(k => k.key === API_KEY)
 			if (!key) {
