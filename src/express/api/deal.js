@@ -20,6 +20,7 @@ module.exports = Router()
 
 			const db = await connect();
 			const organization = await db.organizations.findOne({ slug: organizationSlug })
+			console.log('organization found', organization)
 
 			if(organization !== null && organization._id) {
 				console.log('in if sending deal')
@@ -32,6 +33,7 @@ module.exports = Router()
 				return res.sendStatus(200)
 			}
 		} catch (e) {
+			console.log('in catch, error!!!', e)
 			throw new Error(e)
 		}
 	})
