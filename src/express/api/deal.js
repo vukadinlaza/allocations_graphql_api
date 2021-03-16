@@ -8,7 +8,6 @@ module.exports = Router()
 	.post('/', async (req, res, next) => {
 		try {
 			const { dealSlug, organizationSlug = 'allocations', API_KEY } = req.body;
-			console.log('in route', dealSlug, organizationSlug)
 
 			const key = apiKeys.find(k => k.key === API_KEY)
 			if (!key) {
@@ -20,20 +19,19 @@ module.exports = Router()
 
 			const db = await connect();
 			const organization = await db.organizations.findOne({ slug: organizationSlug })
-			console.log('organization found', organization)
 
 			if(organization !== null && organization._id) {
-				console.log('in if sending deal')
+
 				const deal = await db.deals.findOne({ slug: dealSlug, organization: organization._id })
-				console.log('deal', deal)
 
 				return res.send(deal)
+
 			} else {
-				console.log('in else??? sending 200')
+
 				return res.sendStatus(200)
 			}
 		} catch (e) {
-			console.log('in catch, error!!!', e)
+
 			throw new Error(e)
 		}
 	})
