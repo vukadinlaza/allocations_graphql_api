@@ -147,7 +147,8 @@ const Queries = {
     }).toArray()
   },
   getLink: async (_, data, ctx) => {
-    await getAuthToken()
+    const token = await getAuthToken()
+    console.log('TOKEN FROM GETLINK', token)
     const accountId = process.env.DOCUSIGN_ACCOUNT_ID
     const newUserData = pick(data.input, ['dob', 'street_address', 'city', 'state', 'zip', 'mail_country', 'mail_city', 'mail_zip', 'mail_state', 'mail_street_address'])
 
