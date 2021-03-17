@@ -39,7 +39,7 @@ extend type Mutation {
   updateInvestment(investment: InvestmentInput!): Investment!
   deleteInvestment(_id: String!): Boolean
 
-  addInvestmentDoc(investment_id: String!, doc: Upload!): String
+  addInvestmentDoc(investment_id: String!, doc: Upload!, isK1: Boolean): String
   rmInvestmentDoc(investment_id: String!, file: String!): Boolean
 }
 

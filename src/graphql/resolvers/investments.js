@@ -95,10 +95,10 @@ const Mutations = {
   // Document Handling
 
   /** uploads investment document, S3 & db path **/
-  addInvestmentDoc: async (_, { investment_id, doc }, ctx) => {
+  addInvestmentDoc: async (_, { investment_id, doc, isK1 }, ctx) => {
 
     const file = await doc
-    const s3Path = await Uploader.putInvestmentDoc(investment_id, file)
+    const s3Path = await Uploader.putInvestmentDoc(investment_id, file, isK1)
 
     await ctx.db.investments.updateOne(
       { _id: ObjectId(investment_id) },
