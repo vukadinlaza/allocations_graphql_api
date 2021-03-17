@@ -16,10 +16,12 @@ let templatesApi = new docusign.TemplatesApi(apiClient)
 
 const getAuthToken = async () => {
     const hasToken = await DsJwtAuth.prototype.checkToken()
+    console.log('HAS TOKEN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', hasToken)
     if (!hasToken) {
         const token = await DsJwtAuth.prototype.getToken()
         console.log('Bearer Token', token.accessToken)
         apiClient.addDefaultHeader('Authorization', 'Bearer ' + token.accessToken);
+        return token.accessToken
     }
 }
 
