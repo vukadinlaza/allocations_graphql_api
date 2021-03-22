@@ -40,7 +40,8 @@ async function authenticate({ req, db }) {
   try {
     const token = (req.headers.authorization || "").slice(7)
     const data = await verify(token)
-    const user = await db.users.findOne({ email: data[`${process.env.AUTH0_NAMESPACE}/email`], })
+    const email = data[`${process.env.AUTH0_NAMESPACE}/email`].toLowerCase();
+    const user = await db.users.findOne({ email: email })
 
     if (user) {
       // attaches .orgs to org admins
@@ -52,7 +53,7 @@ async function authenticate({ req, db }) {
     }
 
     // else create user
-    const res = await db.users.insertOne({ email: data[`${process.env.AUTH0_NAMESPACE}/email`], })
+    const res = await db.users.insertOne({ email: email })
     const acctAndEntity = await createUserAccountAndEntity({ db, u: res.ops[0] })
     await updateAirtableUsers({ user: res.ops[0] })
     return res.ops[0]
