@@ -211,7 +211,7 @@ module.exports = Router()
 
       const db = await connect();
       const deals = await db.deals.find({ company_name: body.dealName }).toArray()
-      const user = await db.users.findOne({ email: body.email })
+      const user = await db.users.findOne({ email: body.email.toLowerCase() })
       if (!user._id || !every(deals, '_id')
       ) {
         return res.sendStatus(200)
