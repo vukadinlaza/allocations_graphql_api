@@ -40,6 +40,8 @@ type Deal {
 }
 
 type DealParams {
+  coinvestors: [String]
+  risks: [String]
   dealType: String
   dealMultiple: String
   totalRoundSize: String
@@ -69,9 +71,12 @@ type DealParams {
   fundManagementFeeType: String
   fundGeneralPartner: String
   fundEstimatedTerm: String
+  dealLogo: String
 }
 
 input DealParamsInput {
+  coinvestors: [String]
+  risks: [String]
   dealType: String
   dealMultiple: String
   totalRoundSize: String
@@ -101,6 +106,7 @@ input DealParamsInput {
   fundManagementFeeType: String
   fundGeneralPartner: String
   fundEstimatedTerm: String
+  dealLogo: String
 }
 
 type PubPledge {
