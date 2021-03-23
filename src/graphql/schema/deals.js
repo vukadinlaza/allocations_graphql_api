@@ -46,14 +46,13 @@ type DealParams {
   termsAndConditions: [String]
   valuation: String
   runRate: String
-  minInvestment: String
-  maxInvestment: String
   dealType: String
   dealMultiple: String
   totalRoundSize: String
   allocation: String
   totalCarry: String
   totalManagementFee: String
+  maximumInvestment: String
   minimumInvestment: String
   signDeadline: String
   wireDeadline: String
