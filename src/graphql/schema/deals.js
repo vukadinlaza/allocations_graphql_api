@@ -42,6 +42,12 @@ type Deal {
 type DealParams {
   coinvestors: [String]
   risks: [String]
+  keyHighlights: [String]
+  termsAndConditions: [String]
+  valuation: String
+  runRate: String
+  minInvestment: String
+  maxInvestment: String
   dealType: String
   dealMultiple: String
   totalRoundSize: String
@@ -83,7 +89,7 @@ input DealParamsInput {
   allocation: String
   totalCarry: String
   totalManagementFee: String
-  minimumInvestment: String  
+  minimumInvestment: String
   signDeadline: String
   wireDeadline: String
   estimatedSetupCosts: String
