@@ -3,7 +3,7 @@ require('dotenv').config();
 const moment = require('moment')
 
 const DocSpring = require('docspring');
-const { capitalize } = require('lodash');
+const { capitalize, toNumber } = require('lodash');
 const { ObjectId } = require('mongodb');
 
 var config = new DocSpring.Configuration()
@@ -16,10 +16,10 @@ const getTemplate = ({ db, payload }) => {
 	return docspring.getTemplate(template_id, function (error, template) {
 		if (error) throw error
 		console.log('FROM CALLBACK', template)
-		const key = `${payload.investmentId}/${template.name}.pdf`
+		const key = `investments/${payload.investmentId}/${template.name}.pdf`
 		// Update Investment with Key and Status
 		return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
-			$set: { status: 'signed' },
+			$set: { status: 'signed', amount: toNumber(payload.investmentAmount) },
 			$addToSet: { documents: key }
 		})
 	})
