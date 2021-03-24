@@ -123,15 +123,9 @@ const Mutations = {
   confirmInvestment: async (_, { payload }, { user, db }) => {
     console.log('PAYLOAD', payload)
     // Create Signed PDF
-    const submission = await generateDocSpringPDF({ input: payload, user })
-    const template = await getTemplate()
-    console.log('TEMPLATE', template)
-    const key = 'some fake key'
-    // Update Investment with Key and Status
-    await db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
-      $set: { status: 'signed' },
-      $addToSet: { documents: key }
-    })
+    generateDocSpringPDF({ input: payload, user })
+
+    const t = getTemplate({ db, payload })
 
     return db.investments.findOne({ _id: ObjectId(payload.investmentId) })
   },

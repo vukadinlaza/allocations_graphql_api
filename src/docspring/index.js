@@ -4,6 +4,7 @@ const moment = require('moment')
 
 const DocSpring = require('docspring');
 const { capitalize } = require('lodash');
+const { ObjectId } = require('mongodb');
 
 var config = new DocSpring.Configuration()
 config.apiTokenId = process.env.DOC_SPRING_API_ID
@@ -11,15 +12,21 @@ config.apiTokenSecret = process.env.DOC_SPRING_API_SECRET
 docspring = new DocSpring.Client(config)
 var template_id = 'tpl_3nKjygaFgz44KyCANJ'
 
-const getTemplate = () => {
-	docspring.getTemplate(template_id, function (error, template) {
+const getTemplate = ({ db, payload }) => {
+	return docspring.getTemplate(template_id, function (error, template) {
 		if (error) throw error
-		console.log(template)
+		console.log('FROM CALLBACK', template)
+		const key = `${payload.investmentId}/${template.name}.pdf`
+		// Update Investment with Key and Status
+		return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
+			$set: { status: 'signed' },
+			$addToSet: { documents: key }
+		})
 	})
 }
 
 
-const generateDocSpringPDF = async ({ user, input }) => {
+const generateDocSpringPDF = ({ user, input }) => {
 	const data = {
 		subscriptiondocsOne: capitalize(input.investor_type),
 		subscriptiondocsTwo: input.legalName,
@@ -49,7 +56,7 @@ const generateDocSpringPDF = async ({ user, input }) => {
 		},
 		wait: true,
 	}
-	const submission = await docspring.generatePDF(template_id, submission_data, function (
+	const res = docspring.generatePDF(template_id, submission_data, function (
 		error,
 		response
 	) {
@@ -58,10 +65,10 @@ const generateDocSpringPDF = async ({ user, input }) => {
 			throw error
 		}
 		var submission = response.submission
-		console.log('Download your PDF at:', submission)
+		console.log('Download your PDF at:', submission.download_url)
 		return submission
 	})
-	return submission
+	return Promise.resolve(res)
 }
 
 
