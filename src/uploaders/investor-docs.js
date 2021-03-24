@@ -24,7 +24,7 @@ async function putInvestorDoc(_id, doc, extension) {
 /** Investment Docs for individual investments **/
 async function putInvestmentDoc(investment_id, doc, isK1) {
   const { createReadStream, filename } = doc
-  const Key = isK1 ? `investments/${investment_id}/2020-K-1-${filename}` : `investments/${investment_id}/${filename}`
+  const Key = `investments/${investment_id}/${filename}`
 
   const obj = {
     Bucket,
