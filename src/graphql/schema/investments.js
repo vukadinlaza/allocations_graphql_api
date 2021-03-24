@@ -37,6 +37,7 @@ extend type Query {
 extend type Mutation {
   createInvestment(investment: InvestmentInput!): Investment!
   updateInvestment(investment: InvestmentInput!): Investment!
+  confirmInvestment(payload: Object): Investment!
   deleteInvestment(_id: String!): Boolean
 
   addInvestmentDoc(investment_id: String!, doc: Upload!, isK1: Boolean): String
