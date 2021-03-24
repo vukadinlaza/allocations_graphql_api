@@ -5,7 +5,7 @@ const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
 const Investments = require('../schema/investments')
-const { generateDocSpringPDF, updateInvestmentWithPDF } = require("../../docspring")
+const { generateDocSpringPDF, updateInvestmentWithPDF, getTemplate } = require("../../docspring")
 
 /** 
 
@@ -124,12 +124,11 @@ const Mutations = {
     console.log('PAYLOAD', payload)
     // Create Signed PDF
     const submission = await generateDocSpringPDF({ input: payload, user })
-
-    // Upload Document to S3
-    // const s3Path = await Uploader.putInvestmentDoc(payload.investmentId, file, false)
+    const template = await getTemplate()
+    console.log('TEMPLATE', template)
     const key = 'some fake key'
     // Update Investment with Key and Status
-    await db.investments.updateOne({ _id: payload.investmentId }, {
+    await db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
       $set: { status: 'signed' },
       $addToSet: { documents: key }
     })

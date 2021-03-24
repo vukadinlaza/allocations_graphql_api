@@ -9,27 +9,30 @@ var config = new DocSpring.Configuration()
 config.apiTokenId = process.env.DOC_SPRING_API_ID
 config.apiTokenSecret = process.env.DOC_SPRING_API_SECRET
 docspring = new DocSpring.Client(config)
+var template_id = 'tpl_3nKjygaFgz44KyCANJ'
 
-
+const getTemplate = () => {
+	docspring.getTemplate(template_id, function (error, template) {
+		if (error) throw error
+		console.log(template)
+	})
+}
 
 
 const generateDocSpringPDF = async ({ user, input }) => {
-	let link = null
-	var template_id = 'tpl_3nKjygaFgz44KyCANJ'
-
-
 	const data = {
 		subscriptiondocsOne: capitalize(input.investor_type),
-		subscriptiondocsTwo: capitalize(input.legalName),
+		subscriptiondocsTwo: input.legalName,
+		// Format with currency stuff
 		investmentAmount: input.investmentAmount,
-		subscriptiondocsThree: input.country + ', ' + (input.state || ''),
-		subscriptiondocsFour: input.country,
+		subscriptiondocsThree: input.investor_type === 'individual' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
+		subscriptiondocsFour: input.investor_type === 'entity' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
 		subscriptiondocsFive: input.investor_type === 'individual' ? input.accredited_investor_status : '',
-		subscriptiondocsSix: input.investor_type !== 'individual' ? input.accredited_investor_status : '',
+		subscriptiondocsSix: input.investor_type === 'individual' ? '' : input.accredited_investor_status,
 		email: user.email,
-		fullName: input.fullName,
-		signature: input.fullName,
-		memberName: input.fullName,
+		fullName: input.investor_type === 'individual' ? input.legalName : input.fullName,
+		signature: input.investor_type === 'individual' ? input.legalName : input.fullName,
+		memberName: input.legalName,
 		date: moment(new Date()).format('MM/DD/YYYY')
 	}
 	var submission_data = {
@@ -37,7 +40,7 @@ const generateDocSpringPDF = async ({ user, input }) => {
 		data: data,
 		metadata: {
 			user_id: user._id,
-			investment: input.investmentId,
+			investmentId: input.investmentId,
 		},
 		field_overrides: {
 			// title: {
@@ -55,7 +58,7 @@ const generateDocSpringPDF = async ({ user, input }) => {
 			throw error
 		}
 		var submission = response.submission
-		console.log('Download your PDF at:', submission.download_url)
+		console.log('Download your PDF at:', submission)
 		return submission
 	})
 	return submission
@@ -69,4 +72,4 @@ const updateInvestmentWithPDF = async ({ data, db, key = 'no key yet' }) => {
 	})
 }
 
-module.exports = { generateDocSpringPDF, updateInvestmentWithPDF }
+module.exports = { generateDocSpringPDF, updateInvestmentWithPDF, getTemplate }
