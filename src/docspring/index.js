@@ -1,7 +1,9 @@
 // Find your API tokens here: https://app.docspring.com/api_tokens
 require('dotenv').config();
+const moment = require('moment')
 
-const DocSpring = require('docspring')
+const DocSpring = require('docspring');
+const { capitalize } = require('lodash');
 
 var config = new DocSpring.Configuration()
 config.apiTokenId = process.env.DOC_SPRING_API_ID
@@ -17,18 +19,18 @@ const generateDocSpringPDF = async ({ user, input }) => {
 
 
 	const data = {
-		subscriptiondocsOne: '',
-		subscriptiondocsTwo: '',
-		investmentAmount: '',
-		subscriptiondocsThree: '',
-		subscriptiondocsFour: '',
-		subscriptiondocsFive: '',
-		subscriptiondocsSix: '',
-		email: '',
-		fullName: '',
-		signature: '',
-		memberName: '',
-		date: ''
+		subscriptiondocsOne: capitalize(input.investor_type),
+		subscriptiondocsTwo: capitalize(input.legalName),
+		investmentAmount: input.investmentAmount,
+		subscriptiondocsThree: input.country + ', ' + (input.state || ''),
+		subscriptiondocsFour: input.country,
+		subscriptiondocsFive: input.investor_type === 'individual' ? input.accredited_investor_status : '',
+		subscriptiondocsSix: input.investor_type !== 'individual' ? input.accredited_investor_status : '',
+		email: user.email,
+		fullName: input.fullName,
+		signature: input.fullName,
+		memberName: input.fullName,
+		date: moment(new Date()).format('MM/DD/YYYY')
 	}
 	var submission_data = {
 		editable: false,
@@ -60,10 +62,10 @@ const generateDocSpringPDF = async ({ user, input }) => {
 }
 
 
-const updateInvestmentWithPDF = async ({ data, db, key }) => {
+const updateInvestmentWithPDF = async ({ data, db, key = 'no key yet' }) => {
 	await db.updateOne({ _id: data.investmentId }, {
 		$set: { status: 'signed' },
-		$push: { documents: key }
+		$addToSet: { documents: key }
 	})
 }
 
