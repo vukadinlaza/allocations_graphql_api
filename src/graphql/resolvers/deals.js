@@ -167,6 +167,10 @@ const Mutations = {
       deal.wireInstructions = await DealDocUploader.addDoc({ doc: wireDoc, title: "wire-instructions", deal_id: _id })
     }
 
+    if (deal.status === 'closed') {
+      await db.investments.updateMany({ deal_id: ObjectId(id), status: 'wired' }, { $set: { status: 'complete' } })
+    }
+
     const res = await ctx.db.deals.findOneAndUpdate(
       { _id: ObjectId(_id) },
       {
