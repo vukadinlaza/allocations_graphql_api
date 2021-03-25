@@ -168,7 +168,8 @@ const Mutations = {
     }
 
     if (deal.status === 'closed') {
-      await db.investments.updateMany({ deal_id: ObjectId(id), status: 'wired' }, { $set: { status: 'complete' } })
+      console.log('FIRES')
+      await ctx.db.investments.updateMany({ deal_id: ObjectId(_id), status: 'wired' }, { $set: { status: 'complete' } })
     }
 
     const res = await ctx.db.deals.findOneAndUpdate(
