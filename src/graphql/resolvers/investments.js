@@ -121,11 +121,7 @@ const Mutations = {
   },
 
   confirmInvestment: async (_, { payload }, { user, db }) => {
-    console.log('PAYLOAD', payload)
-    // Create Signed PDF
-    generateDocSpringPDF({ input: payload, user })
-
-    const t = getTemplate({ db, payload })
+    const t = getTemplate({ db, payload, user })
 
     return db.investments.findOne({ _id: ObjectId(payload.investmentId) })
   },

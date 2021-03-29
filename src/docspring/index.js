@@ -12,21 +12,23 @@ config.apiTokenSecret = process.env.DOC_SPRING_API_SECRET
 docspring = new DocSpring.Client(config)
 var template_id = 'tpl_3nKjygaFgz44KyCANJ'
 
-const getTemplate = ({ db, payload }) => {
+const getTemplate = ({ db, payload, user }) => {
 	return docspring.getTemplate(template_id, function (error, template) {
 		if (error) throw error
 		console.log('FROM CALLBACK', template)
-		const key = `investments/${payload.investmentId}/${template.name}.pdf`
-		// Update Investment with Key and Status
-		return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
-			$set: { status: 'signed', amount: toNumber(payload.investmentAmount) },
-			$addToSet: { documents: key }
+		const key = `investments/${payload.investmentId}/${template.name.replace(/\s+/g, "_")}.pdf`
+		return generateDocSpringPDF({ user, input: payload, key }).then(() => {
+			return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
+				$set: { status: 'signed', amount: toNumber(payload.investmentAmount) },
+				$addToSet: { documents: key }
+			})
 		})
+
 	})
 }
 
 
-const generateDocSpringPDF = ({ user, input }) => {
+const generateDocSpringPDF = ({ user, input, key }) => {
 	const data = {
 		subscriptiondocsOne: capitalize(input.investor_type),
 		subscriptiondocsTwo: input.legalName,
@@ -48,6 +50,7 @@ const generateDocSpringPDF = ({ user, input }) => {
 		metadata: {
 			user_id: user._id,
 			investmentId: input.investmentId,
+			key
 		},
 		field_overrides: {
 			// title: {
