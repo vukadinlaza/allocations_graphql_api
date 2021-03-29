@@ -20,6 +20,16 @@ const getTemplate = ({ db, payload, user }) => {
 			return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
 				$set: { status: 'signed', amount: toNumber(payload.investmentAmount) },
 				$addToSet: { documents: key }
+			}).then(() => {
+				const signingpacket = {
+					userEmail: user.email,
+					userId: user._id,
+					authMethod: 'in-session',
+					signedAt: new Date(),
+					clientIp: payload.clientIp,
+					investmentId: ObjectId(payload.investmentId)
+				}
+				return db.signingpackets.insertOne({ ...signingpacket })
 			})
 		})
 
@@ -74,11 +84,4 @@ const generateDocSpringPDF = ({ user, input, templateName }) => {
 }
 
 
-const updateInvestmentWithPDF = async ({ data, db, key = 'no key yet' }) => {
-	await db.updateOne({ _id: data.investmentId }, {
-		$set: { status: 'signed' },
-		$addToSet: { documents: key }
-	})
-}
-
-module.exports = { generateDocSpringPDF, updateInvestmentWithPDF, getTemplate }
+module.exports = { generateDocSpringPDF, getTemplate }
