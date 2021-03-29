@@ -15,9 +15,8 @@ var template_id = 'tpl_3nKjygaFgz44KyCANJ'
 const getTemplate = ({ db, payload, user }) => {
 	return docspring.getTemplate(template_id, function (error, template) {
 		if (error) throw error
-		console.log('FROM CALLBACK', template)
 		const key = `investments/${payload.investmentId}/${template.name.replace(/\s+/g, "_")}.pdf`
-		return generateDocSpringPDF({ user, input: payload, key }).then(() => {
+		return generateDocSpringPDF({ user, input: payload, key, templateName: template.name.replace(/\s+/g, "_") }).then(() => {
 			return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
 				$set: { status: 'signed', amount: toNumber(payload.investmentAmount) },
 				$addToSet: { documents: key }
@@ -28,7 +27,7 @@ const getTemplate = ({ db, payload, user }) => {
 }
 
 
-const generateDocSpringPDF = ({ user, input, key }) => {
+const generateDocSpringPDF = ({ user, input, templateName }) => {
 	const data = {
 		subscriptiondocsOne: capitalize(input.investor_type),
 		subscriptiondocsTwo: input.legalName,
@@ -50,7 +49,7 @@ const generateDocSpringPDF = ({ user, input, key }) => {
 		metadata: {
 			user_id: user._id,
 			investmentId: input.investmentId,
-			key
+			templateName: templateName
 		},
 		field_overrides: {
 			// title: {
