@@ -121,7 +121,7 @@ const Mutations = {
   },
 
   confirmInvestment: async (_, { payload }, { user, db }) => {
-    getTemplate({ db, payload, user })
+    getTemplate({ db, payload, user, templateId: payload.docSpringTemplateId })
     return db.investments.findOne({ _id: ObjectId(payload.investmentId) })
   },
 }

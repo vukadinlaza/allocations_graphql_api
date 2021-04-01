@@ -10,13 +10,13 @@ var config = new DocSpring.Configuration()
 config.apiTokenId = process.env.DOC_SPRING_API_ID
 config.apiTokenSecret = process.env.DOC_SPRING_API_SECRET
 docspring = new DocSpring.Client(config)
-var template_id = 'tpl_3nKjygaFgz44KyCANJ'
 
-const getTemplate = ({ db, payload, user }) => {
-	return docspring.getTemplate(template_id, function (error, template) {
+const getTemplate = ({ db, payload, user, templateId }) => {
+	console.log('TEMPLATE ID', templateId)
+	return docspring.getTemplate(templateId, function (error, template) {
 		if (error) throw error
 		const key = `investments/${payload.investmentId}/${template.name.replace(/\s+/g, "_")}.pdf`
-		return generateDocSpringPDF({ user, input: payload, key, templateName: template.name.replace(/\s+/g, "_") }).then(() => {
+		return generateDocSpringPDF({ user, input: payload, key, templateId, templateName: template.name.replace(/\s+/g, "_") }).then(() => {
 			return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
 				$set: { status: 'signed', amount: toNumber(payload.investmentAmount) },
 				$addToSet: { documents: key }
@@ -37,7 +37,8 @@ const getTemplate = ({ db, payload, user }) => {
 }
 
 
-const generateDocSpringPDF = ({ user, input, templateName }) => {
+const generateDocSpringPDF = ({ user, input, templateName, templateId }) => {
+	console.log('INPUT', input)
 	const data = {
 		subscriptiondocsOne: capitalize(input.investor_type),
 		subscriptiondocsTwo: input.legalName,
@@ -68,7 +69,7 @@ const generateDocSpringPDF = ({ user, input, templateName }) => {
 		},
 		wait: true,
 	}
-	const res = docspring.generatePDF(template_id, submission_data, function (
+	const res = docspring.generatePDF(templateId, submission_data, function (
 		error,
 		response
 	) {
