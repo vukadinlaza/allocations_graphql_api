@@ -37,6 +37,8 @@ type Deal {
   no_exchange: Boolean
   raised: Int
   airtableId: String
+  docSpringTemplateId: String
+  spvAgreementKey: String
 }
 
 type DealParams {
@@ -76,7 +78,6 @@ type DealParams {
   fundManagementFeeType: String
   fundGeneralPartner: String
   fundEstimatedTerm: String
-  dealLogo: String
 }
 
 input DealParamsInput {
@@ -178,5 +179,7 @@ input DealInput {
   last_valuation: String
   no_exchange: Boolean
   airtableId: String
+  docSpringTemplateId: String
+  spvAgreementKey: String
 }
 `)
