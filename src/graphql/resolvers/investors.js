@@ -185,7 +185,8 @@ const Mutations = {
     return res.ops[0]
   },
   /** updates user and handles file uploads **/
-  updateUser: async (_, { input: { _id, passport, accredidation_doc, ...user } }, ctx) => {
+  updateUser: async (_, { input: { _id, passport, accredidation_doc, kycDoc, ...user } }, ctx) => {
+    console.log('user', user)
     isAdminOrSameUser({ _id }, ctx)
 
     // upload passport if passed
@@ -195,6 +196,13 @@ const Mutations = {
       return ctx.db.users.updateOne(
         { _id: ObjectId(_id) },
         { $set: { ...user, passport: s3Path } }
+      )
+    }
+
+    if (kycDoc) {
+      return ctx.db.users.updateOne(
+        { _id: ObjectId(_id) },
+        { $addToSet: { documents: kycDoc } }
       )
     }
 

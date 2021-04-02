@@ -61,6 +61,7 @@ input UserInput {
   showInvestAndMrkPlc: Boolean
   showCredit: Boolean
   showBuild: Boolean
+  kycDoc: Object
 }
 
 extend type Query {
