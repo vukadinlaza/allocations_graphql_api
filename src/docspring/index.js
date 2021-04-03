@@ -12,13 +12,13 @@ config.apiTokenSecret = process.env.DOC_SPRING_API_SECRET
 docspring = new DocSpring.Client(config)
 
 const getTemplate = ({ db, payload, user, templateId }) => {
-	console.log('TEMPLATE ID', templateId)
+	console.log('PAYLOAD', payload, parseFloat(payload.investmentAmount.replace(/,/g, '')))
 	return docspring.getTemplate(templateId, function (error, template) {
 		if (error) throw error
 		const key = `investments/${payload.investmentId}/${template.name.replace(/\s+/g, "_")}.pdf`
 		return generateDocSpringPDF({ user, input: payload, key, templateId, templateName: template.name.replace(/\s+/g, "_") }).then(() => {
 			return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
-				$set: { status: 'signed', amount: parseFloat(yournumber.replace(/,/g, '')) },
+				$set: { status: 'signed', amount: parseFloat(payload.investmentAmount.replace(/,/g, '')) },
 				$addToSet: { documents: key }
 			}).then(() => {
 				const signingpacket = {
