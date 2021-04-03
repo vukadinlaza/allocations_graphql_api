@@ -18,7 +18,7 @@ const getTemplate = ({ db, payload, user, templateId }) => {
 		const key = `investments/${payload.investmentId}/${template.name.replace(/\s+/g, "_")}.pdf`
 		return generateDocSpringPDF({ user, input: payload, key, templateId, templateName: template.name.replace(/\s+/g, "_") }).then(() => {
 			return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
-				$set: { status: 'signed', amount: toNumber(payload.investmentAmount) },
+				$set: { status: 'signed', amount: parseFloat(yournumber.replace(/,/g, '')) },
 				$addToSet: { documents: key }
 			}).then(() => {
 				const signingpacket = {
