@@ -42,7 +42,8 @@ type User {
   deals: [Deal]
   investingAs: String
   accountInvestments: [Investment]
-  account: Account
+  account: Account,
+  termsOfServiceCF: Boolean
 }
 
 input UserInput {
@@ -62,6 +63,7 @@ input UserInput {
   showCredit: Boolean
   showBuild: Boolean
   kycDoc: Object
+  termsOfServiceCF: Boolean
 }
 
 extend type Query {
