@@ -39,7 +39,7 @@ const getTemplate = ({ db, payload, user, templateId }) => {
 
 const generateDocSpringPDF = ({ user, input, templateName, templateId }) => {
 	console.log('INPUT', input)
-	const data = {
+	let data = {
 		subscriptiondocsOne: capitalize(input.investor_type),
 		subscriptiondocsTwo: input.legalName,
 		// Format with currency stuff
@@ -53,6 +53,12 @@ const generateDocSpringPDF = ({ user, input, templateName, templateId }) => {
 		signature: input.investor_type === 'individual' ? input.legalName : input.fullName,
 		memberName: input.legalName,
 		date: moment(new Date()).format('MM/DD/YYYY')
+	}
+
+	if (templateId === 'tpl_ctrRDXgQdKz5YGg9QK') {
+		data = {
+			signature: input.investor_type === 'individual' ? input.legalName : input.fullName,
+		}
 	}
 	var submission_data = {
 		editable: false,
