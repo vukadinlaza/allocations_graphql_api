@@ -7,7 +7,7 @@ const {
   isAdminOrSameUser,
   ensureFundAdmin
 } = require('../permissions')
-const { pick } = require('lodash')
+const { pick, isEmpty } = require('lodash')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
@@ -218,7 +218,9 @@ const Mutations = {
     }
     const options = ['investor_type', 'country', 'state', 'first_name', 'last_name', 'entity_name', 'signer_full_name', 'accredited_investor_status', 'email', 'accountId']
     const data = pick({ ...user }, options)
-    const updatedEntity = await ctx.db.entities.updateOne({ user: ObjectId(_id), isPrimaryEntity: true }, { $set: data })
+    if (!isEmpty(data)) {
+      const updatedEntity = await ctx.db.entities.updateOne({ user: ObjectId(_id), isPrimaryEntity: true }, { $set: data })
+    }
     const update = await ctx.db.users.updateOne(
       { _id: ObjectId(_id) },
       { $set: user }
