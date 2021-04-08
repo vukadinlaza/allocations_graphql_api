@@ -103,6 +103,11 @@ module.exports = Router()
           })
           investment._id = investment.insertedId
         }
+        const numDocs = (investment.documents || []).filter(d => {
+          return d.includes(documentName)
+        })
+        console.log('------------ NUM OF DOCS THAT MATCH ----------------------------------')
+        console.log('NUM:', numDocs.length)
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
         const key = `investments/${investment._id}/${documentName}`
         const buf = Buffer.from(pdf, 'base64')
