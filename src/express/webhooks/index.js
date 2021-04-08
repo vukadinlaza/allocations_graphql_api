@@ -108,8 +108,9 @@ module.exports = Router()
         })
         console.log('------------ NUM OF DOCS THAT MATCH ----------------------------------')
         console.log('NUM:', numDocs.length)
+        const tag = numDocs.length > 0 ? (numDocs + 1) : ''
         const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
-        const key = `investments/${investment._id}/${documentName}`
+        const key = `investments/${investment._id}/${tag}+${documentName}`
         const buf = Buffer.from(pdf, 'base64')
 
 
