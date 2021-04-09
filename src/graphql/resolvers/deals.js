@@ -307,6 +307,18 @@ const Mutations = {
       { _id: ObjectId(params.deal_id) }
     )
   },
+  addDealLogo: async (_, params, ctx) => {
+    isAdmin(ctx)
+    console.log('LOGO PARAMs', params)
+    const path = await DealDocUploader.uploadImage(params)
+    await ctx.db.deals.updateOne(
+      { _id: ObjectId(params.deal_id) },
+      { $set: { dealCoverImageKey: path } }
+    )
+    return ctx.db.deals.findOne(
+      { _id: ObjectId(params.deal_id) }
+    )
+  },
   addDealDocs: async (_, { deal_id, docs }, ctx) => {
     isAdmin(ctx)
 

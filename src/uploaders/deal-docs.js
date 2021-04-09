@@ -27,4 +27,19 @@ async function rmDoc({ title, deal_id }) {
   return Key
 }
 
-module.exports = { addDoc, rmDoc }
+
+async function uploadImage({ logo, title, deal_id }) {
+  // Read content from the file
+  const { createReadStream, filename } = await logo
+  const Key = `deals/${deal_id}/${title || filename.replace(' ', '')}`
+  const obj = {
+    bucket: 'allocations-public',
+    Key,
+    Body: createReadStream(),
+    ContentDisposition: "inline"
+  }
+  await s3.upload(obj).promise()
+  return Key
+};
+
+module.exports = { addDoc, rmDoc, uploadImage }

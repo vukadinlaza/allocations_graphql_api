@@ -39,6 +39,7 @@ type Deal {
   airtableId: String
   docSpringTemplateId: String
   spvAgreementKey: String
+  dealCoverImageKey: String
 }
 
 type DealParams {
@@ -153,6 +154,7 @@ type Mutation {
   inviteInvestor(org: String!, user_id: String!, deal_id: String!): Deal
   uninviteInvestor(org: String!, user_id: String!, deal_id: String!): Deal
   addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
+  addDealLogo(deal_id: String!, title: String!, logo: Upload!): Deal
   rmDealDoc(deal_id: String!, title: String!): Deal
   addDealDocs(deal_id: String!, docs: Upload): Deal
 
