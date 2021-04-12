@@ -33,7 +33,7 @@ async function uploadImage({ logo, title, deal_id }) {
   const { createReadStream, filename } = await logo
   const Key = `deals/${deal_id}/${title || filename.replace(' ', '')}`
   const obj = {
-    bucket: 'allocations-public',
+    Bucket: 'allocations-public',
     Key,
     Body: createReadStream(),
     ContentDisposition: "inline"
