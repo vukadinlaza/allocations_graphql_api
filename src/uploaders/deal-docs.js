@@ -31,7 +31,7 @@ async function rmDoc({ title, deal_id }) {
 async function uploadImage({ logo, title, deal_id }) {
   // Read content from the file
   const { createReadStream, filename } = await logo
-  const Key = `deals/${deal_id}/${title || filename.replace(' ', '')}`
+  const Key = `${process.env.NODE_ENV === "production" ? "production" : "staging"}/deals/${deal_id}/${title || filename.replace(' ', '')}`
   const obj = {
     Bucket: 'allocations-public',
     Key,
