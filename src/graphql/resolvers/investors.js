@@ -74,9 +74,12 @@ const User = {
     return user.accredidation_doc ? { link: Cloudfront.getSignedUrl(user.accredidation_doc), path: user.accredidation_doc } : null
   },
   name: (user) => {
-    return user.investor_type === "entity"
-      ? user.entity_name
-      : `${user.first_name} ${user.last_name}`
+    const nameOrEmail = (!user.first_name && !user.last_name) ? user.email : `${user.first_name} ${user.last_name}`
+    const entityOrEmail = (user.investor_type === "entity" && user.entity_name) ? user.entity_name : user.email
+
+    return (user.investor_type === "entity" && user.entity_name)
+      ? entityOrEmail
+      : nameOrEmail
   },
   organizations_admin: (user, _, { db }) => {
     if (user.admin) {
