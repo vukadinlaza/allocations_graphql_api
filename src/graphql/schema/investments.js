@@ -18,6 +18,17 @@ type Investment {
   created_at: String
   updated_at: String
   metaData: Object
+  submissionData: SubmissionData
+}
+
+type SubmissionData {
+  country: String
+  state: String
+  investor_type: String
+  legalName: String
+  accredited_investor_type: String
+  fullName: String
+  title: String
 }
 
 enum InvestmentStatus {

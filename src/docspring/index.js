@@ -27,7 +27,11 @@ const getTemplate = ({ db, payload, user, templateId }) => {
 					authMethod: 'in-session',
 					signedAt: new Date(),
 					clientIp: payload.clientIp,
-					investmentId: ObjectId(payload.investmentId)
+					investmentId: ObjectId(payload.investmentId),
+					submissionData: {
+						...payload, userEmail: user.email,
+						userId: user._id,
+					}
 				}
 				return db.signingpackets.insertOne({ ...signingpacket })
 			})

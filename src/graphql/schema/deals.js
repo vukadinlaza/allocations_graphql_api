@@ -139,7 +139,7 @@ enum DealStatus {
 }
 
 type Query {
-  deal(_id: String): Deal
+  deal(_id: String, deal_slug: String, fund_slug: String): Deal
   allDeals: [Deal]
   publicDeal(deal_slug: String!, fund_slug: String!, invite_code: String): Deal
   searchDeals(q: String!, limit: Int): [Deal]
