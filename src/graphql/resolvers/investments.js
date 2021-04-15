@@ -121,9 +121,28 @@ const Mutations = {
   },
 
   confirmInvestment: async (_, { payload }, { user, db }) => {
-    getTemplate({ db, payload, user, templateId: payload.docSpringTemplateId })
-    return db.investments.findOne({ _id: ObjectId(payload.investmentId) })
-  },
+
+    console.log('PAYLOAD', payload)
+    const deal = await db.deals.findOne({ _id: ObjectId(payload.dealId) })
+    let investment = null
+    if (!payload.investmentId) {
+      const invsRes = await db.investments.insertOne({
+        status: "invited",
+        invited_at: Date.now(),
+        created_at: Date.now(),
+        amount: parseFloat(payload.investmentAmount.replace(/,/g, '')),
+        user_id: ObjectId(user._id),
+        deal_id: ObjectId(payload.dealId),
+        organization: ObjectId(deal.organization),
+        submissionData: payload
+      })
+      investment = invsRes.ops[0]
+    } else {
+      investment = await db.investments.findOne({ _id: ObjectId(payload.investmentId) })
+    }
+    getTemplate({ db, payload: { ...payload, investmentId: investment._id }, user, templateId: payload.docSpringTemplateId })
+    return db.investments.findOne({ _id: ObjectId(investment._id) })
+  }
 }
 
 module.exports = {
