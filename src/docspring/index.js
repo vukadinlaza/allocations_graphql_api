@@ -42,7 +42,6 @@ const getTemplate = ({ db, payload, user, templateId }) => {
 
 
 const generateDocSpringPDF = ({ user, input, templateName, templateId }) => {
-	console.log('INPUT', input)
 	let data = {
 		subscriptiondocsOne: capitalize(input.investor_type),
 		subscriptiondocsTwo: input.legalName,
@@ -94,5 +93,36 @@ const generateDocSpringPDF = ({ user, input, templateName, templateId }) => {
 	return Promise.resolve(res)
 }
 
+const createTaxDocument = ({ payload }) => {
+	let data = {
+		...payload
+	}
+	var submission_data = {
+		editable: false,
+		data: data,
+		metadata: {
+			user_id: user._id,
+			templateName: payload.templateName
+		},
+		field_overrides: {
+		},
+		test: process.env.NODE_ENV === 'production' ? false : true,
+		wait: true,
+	}
+	const res = docspring.generatePDF(payload.templateId, submission_data, function (
+		error,
+		response
+	) {
+		if (error) {
+			console.log(response, error)
+			throw error
+		}
+		var submission = response.submission
+		console.log('Download your PDF at:', submission.download_url)
+		return submission
+	})
+	return Promise.resolve(res)
+}
 
-module.exports = { generateDocSpringPDF, getTemplate }
+
+module.exports = { generateDocSpringPDF, getTemplate, createTaxDocument }

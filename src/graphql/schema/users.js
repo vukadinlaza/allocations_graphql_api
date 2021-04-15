@@ -79,5 +79,6 @@ extend type Mutation {
   updateUser(input: UserInput): User
   updateInvestor(investment: InvestmentInput): User
   postZap(data: Object): User
+  submitTaxDocument(payload: Object): User
 }
 `)
