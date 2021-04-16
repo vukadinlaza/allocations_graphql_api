@@ -19,6 +19,7 @@ const {
   getAuthToken,
   getKYCTemplateId
 } = require('../../utils/docusign')
+const { createTaxDocument } = require('../../docspring/index')
 const Users = require('../schema/users')
 const fetch = require('node-fetch');
 const moment = require('moment')
@@ -256,7 +257,9 @@ const Mutations = {
       headers: { 'Content-Type': 'application/json' },
     })
   },
-  submitTaxDocument: async (_, { payload }, ctx) => {
+  submitTaxDocument: async (_, { payload }, { db, user }) => {
+    const x = await createTaxDocument({ payload, user, db })
+    return db.users.findOne({ _id: ObjectId(user._id) })
   }
 }
 

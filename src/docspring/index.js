@@ -3,7 +3,7 @@ require('dotenv').config();
 const moment = require('moment')
 
 const DocSpring = require('docspring');
-const { capitalize, toNumber } = require('lodash');
+const { capitalize, toNumber, omit } = require('lodash');
 const { ObjectId } = require('mongodb');
 
 var config = new DocSpring.Configuration()
@@ -16,7 +16,7 @@ const getTemplate = ({ db, payload, user, templateId }) => {
 	return docspring.getTemplate(templateId, function (error, template) {
 		if (error) throw error
 		const key = `investments/${payload.investmentId}/${template.name.replace(/\s+/g, "_")}.pdf`
-		return generateDocSpringPDF({ user, input: payload, key, templateId, templateName: template.name.replace(/\s+/g, "_") }).then(() => {
+		return generateDocSpringPDF({ db, user, input: payload, key, templateId, templateName: template.name.replace(/\s+/g, "_") }).then(() => {
 			return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
 				$set: { status: 'signed', amount: parseFloat(payload.investmentAmount.replace(/,/g, '')) },
 				$addToSet: { documents: key }
@@ -41,7 +41,7 @@ const getTemplate = ({ db, payload, user, templateId }) => {
 }
 
 
-const generateDocSpringPDF = ({ user, input, templateName, templateId }) => {
+const generateDocSpringPDF = ({ db, user, input, templateName, templateId }) => {
 	let data = {
 		subscriptiondocsOne: capitalize(input.investor_type),
 		subscriptiondocsTwo: input.legalName,
@@ -76,7 +76,6 @@ const generateDocSpringPDF = ({ user, input, templateName, templateId }) => {
 			// 	required: false,
 			// },
 		},
-		wait: true,
 	}
 	const res = docspring.generatePDF(templateId, submission_data, function (
 		error,
@@ -87,42 +86,52 @@ const generateDocSpringPDF = ({ user, input, templateName, templateId }) => {
 			throw error
 		}
 		var submission = response.submission
-		console.log('Download your PDF at:', submission.download_url)
+
+		db.investments.updateOne({ _id: ObjectId(input.investmentId) }, {
+			$set: { 'submissionData.submissionId': submission.id },
+		})
 		return submission
 	})
 	return Promise.resolve(res)
 }
 
-const createTaxDocument = ({ payload }) => {
-	let data = {
-		...payload
-	}
+const createTaxDocument = ({ payload, user, db }) => {
+	const data = omit({ ...payload, signature: payload.name_as_shown_on_your_income_tax_return_name_is_required_on_this_line_do_not_leave_this_line_blank }, ['kycTemplateId', 'kycTemplateName']);
+	console.log('DATA')
 	var submission_data = {
 		editable: false,
 		data: data,
 		metadata: {
 			user_id: user._id,
-			templateName: payload.templateName
+			templateName: payload.kycTemplateName
 		},
 		field_overrides: {
 		},
 		test: process.env.NODE_ENV === 'production' ? false : true,
 		wait: true,
 	}
-	const res = docspring.generatePDF(payload.templateId, submission_data, function (
-		error,
-		response
-	) {
-		if (error) {
-			console.log(response, error)
-			throw error
-		}
-		var submission = response.submission
-		console.log('Download your PDF at:', submission.download_url)
-		return submission
+	const res = new Promise((resolve, reject) => {
+		docspring.generatePDF(payload.kycTemplateId, submission_data, function (
+			error,
+			response
+		) {
+			if (error) {
+				// console.log(error.error)
+				throw error
+			}
+			var submission = response.submission
+			console.log('submission', submission)
+			const docObj = { documentName: payload.kycTemplateName, submissionId: submission.id }
+			db.users.updateOne({ _id: ObjectId(user._id) }, {
+				$push: { documents: docObj },
+			})
+			return resolve(submission)
+		})
 	})
 	return Promise.resolve(res)
 }
+
+
 
 
 module.exports = { generateDocSpringPDF, getTemplate, createTaxDocument }

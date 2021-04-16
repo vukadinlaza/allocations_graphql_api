@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb")
-const { isNumber } = require('lodash')
+const { isNumber, forEach } = require('lodash')
 const { isAdmin, isAdminOrSameUser } = require('../permissions')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
@@ -138,7 +138,10 @@ const Mutations = {
       })
       investment = invsRes.ops[0]
     } else {
+
       investment = await db.investments.findOne({ _id: ObjectId(payload.investmentId) })
+      const x = { ...investment.submissionData, ...payload }
+      await db.investments.updateOne({ _id: ObjectId(investment._id) }, { $set: { submissionData: x } })
     }
     getTemplate({ db, payload: { ...payload, investmentId: investment._id }, user, templateId: payload.docSpringTemplateId })
     return db.investments.findOne({ _id: ObjectId(investment._id) })
