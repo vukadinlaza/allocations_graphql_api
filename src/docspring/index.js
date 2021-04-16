@@ -122,7 +122,7 @@ const createTaxDocument = ({ payload, user, db }) => {
 			}
 			var submission = response.submission
 			console.log('submission', submission)
-			const docObj = { documentName: payload.kycTemplateName, submissionId: submission.id }
+			const docObj = { documentName: payload.kycTemplateName, submissionId: submission.id, docspringPermDownloadLink: submission.permanent_download_url }
 			db.users.updateOne({ _id: ObjectId(user._id) }, {
 				$push: { documents: docObj },
 			})
