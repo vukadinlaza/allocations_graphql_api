@@ -26,7 +26,7 @@ type SubmissionData {
   state: String
   investor_type: String
   legalName: String
-  accredited_investor_type: String
+  accredited_investor_status: String
   fullName: String
   title: String
 }
