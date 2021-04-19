@@ -190,5 +190,6 @@ input DealInput {
   docSpringTemplateId: String
   spvAgreementKey: String
   comments: [Object]
+  isPostingComment: Boolean
 }
 `)
