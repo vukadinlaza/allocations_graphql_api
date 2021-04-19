@@ -132,7 +132,50 @@ const createTaxDocument = ({ payload, user, db }) => {
 	return Promise.resolve(res)
 }
 
+const getInvestmentPreview = ({ input, user }) => {
+	let data = {
+		subscriptiondocsOne: capitalize(input.investor_type),
+		subscriptiondocsTwo: input.legalName,
+		// Format with currency stuff
+		investmentAmount: input.investmentAmount,
+		subscriptiondocsThree: input.investor_type === 'individual' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
+		subscriptiondocsFour: input.investor_type === 'entity' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
+		subscriptiondocsFive: input.investor_type === 'individual' ? input.accredited_investor_status : '',
+		subscriptiondocsSix: input.investor_type === 'individual' ? '' : input.accredited_investor_status,
+		email: user.email,
+		fullName: input.investor_type === 'individual' ? input.legalName : input.fullName,
+		signature: input.investor_type === 'individual' ? input.legalName : input.fullName,
+		memberName: input.legalName,
+		date: moment(new Date()).format('MM/DD/YYYY')
+	};
+	var submission_data = {
+		editable: false,
+		data: data,
+		metadata: {
+			preview: true
+		},
+		field_overrides: {
+		},
+		test: process.env.NODE_ENV === 'production' ? false : true,
+		wait: true,
+	}
+	const res = new Promise((resolve, reject) => {
+		docspring.generatePDF(input.docSpringTemplateId, submission_data, function (
+			error,
+			response
+		) {
+			if (error) {
+				console.log(error)
+				// throw error
+			}
+			var submission = response.submission
+			return resolve(submission)
+		})
+	})
+	return Promise.resolve(res)
+}
 
 
 
-module.exports = { generateDocSpringPDF, getTemplate, createTaxDocument }
+
+module.exports = { generateDocSpringPDF, getTemplate, createTaxDocument, getInvestmentPreview }

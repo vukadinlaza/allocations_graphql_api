@@ -5,7 +5,7 @@ const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
 const Investments = require('../schema/investments')
-const { generateDocSpringPDF, updateInvestmentWithPDF, getTemplate } = require("../../docspring")
+const { generateDocSpringPDF, updateInvestmentWithPDF, getTemplate, getInvestmentPreview } = require("../../docspring")
 
 /** 
 
@@ -145,6 +145,11 @@ const Mutations = {
     }
     getTemplate({ db, payload: { ...payload, investmentId: investment._id }, user, templateId: payload.docSpringTemplateId })
     return db.investments.findOne({ _id: ObjectId(investment._id) })
+  },
+  getInvestmentPreview: async (_, { payload }, { user, db }) => {
+
+    const res = await getInvestmentPreview({ input: payload, templateId: payload.docSpringTemplateId, user })
+    return { ...user, previewLink: res.download_url }
   }
 }
 
