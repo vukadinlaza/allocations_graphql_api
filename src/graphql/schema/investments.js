@@ -19,6 +19,7 @@ type Investment {
   updated_at: String
   metaData: Object
   submissionData: SubmissionData
+  previewLink: String
 }
 
 type SubmissionData {
@@ -48,6 +49,7 @@ extend type Query {
 extend type Mutation {
   createInvestment(investment: InvestmentInput!): Investment!
   updateInvestment(investment: InvestmentInput!): Investment!
+  getInvestmentPreview(payload: Object): Investment!
   confirmInvestment(payload: Object): Investment!
   deleteInvestment(_id: String!): Boolean
 
