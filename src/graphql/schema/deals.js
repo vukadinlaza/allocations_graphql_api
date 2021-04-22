@@ -40,7 +40,6 @@ type Deal {
   docSpringTemplateId: String
   spvAgreementKey: String
   dealCoverImageKey: String
-  comments: [Comment]
 }
 
 type DealParams {
@@ -161,10 +160,6 @@ type Mutation {
 
 }
 
-type Comment {
-  name: String
-  comment: String
-}
 
 input DealInput {
   _id: String
@@ -189,7 +184,6 @@ input DealInput {
   airtableId: String
   docSpringTemplateId: String
   spvAgreementKey: String
-  comments: [Object]
   isPostingComment: Boolean
 }
 `)
