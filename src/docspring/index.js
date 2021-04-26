@@ -97,7 +97,7 @@ const generateDocSpringPDF = ({ db, user, input, templateName, templateId }) => 
 
 const createTaxDocument = ({ payload, user, db }) => {
 	const sig = payload.kycTemplateName === 'W-9' ? payload.name_as_shown_on_your_income_tax_return_name_is_required_on_this_line_do_not_leave_this_line_blank : payload.signature
-	const data = omit({ ...payload, signature: sig }, ['kycTemplateId', 'kycTemplateName', 'tax_classification']);
+	const data = omit({ ...payload, signature: sig }, ['kycTemplateId', 'kycTemplateName', 'tax_classification', 'isDemo']);
 	console.log('DATA')
 	var submission_data = {
 		editable: false,

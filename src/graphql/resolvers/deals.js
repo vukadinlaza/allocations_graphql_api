@@ -89,12 +89,9 @@ const Deal = {
 
 const Queries = {
   deal: async (_, args, ctx) => {
-    console.log('ARGS', args)
     const org = await ctx.db.organizations.findOne({ slug: args.fund_slug })
-    console.log('ORG', org)
     if (org !== null && args.deal_slug) {
-      console.log('FIRES INSIDE IF STATEMENT', org)
-      return ctx.db.deals.findOne({ slug: args.deal_slug, organization: ObjectId(org._id) })
+      return await ctx.db.deals.findOne({ slug: args.deal_slug, organization: ObjectId(org._id) })
     } else if (args._id) {
       return ctx.db.deals.findOne({ _id: ObjectId(args._id) })
     }
@@ -241,7 +238,6 @@ const Mutations = {
       { _id: user._id },
       { $push: { organizations_admin: org._id } }
     )
-    console.log(deal)
     const res = await db.deals.insertOne({
       ...deal,
       slug: _.kebabCase(deal.company_name || deal.airtableId),
@@ -330,7 +326,6 @@ const Mutations = {
   },
   addDealLogo: async (_, params, ctx) => {
     isAdmin(ctx)
-    console.log('LOGO PARAMs', params)
     const path = await DealDocUploader.uploadImage(params)
     await ctx.db.deals.updateOne(
       { _id: ObjectId(params.deal_id) },
@@ -351,7 +346,6 @@ const Mutations = {
       )
       return path
     })
-    console.log(keys)
     return ctx.db.deals.findOne(
       { _id: ObjectId(deal_id) })
   },

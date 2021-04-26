@@ -124,6 +124,10 @@ const Mutations = {
 
     console.log('PAYLOAD', payload)
     const deal = await db.deals.findOne({ _id: ObjectId(payload.dealId) })
+
+    if (deal !== null && deal.isDemo === true) {
+      return { _id: 'mockDemoInvestmentID' }
+    }
     let investment = null
     if (!payload.investmentId) {
       const invsRes = await db.investments.insertOne({

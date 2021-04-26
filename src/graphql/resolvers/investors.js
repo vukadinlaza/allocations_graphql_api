@@ -258,20 +258,11 @@ const Mutations = {
     })
   },
   submitTaxDocument: async (_, { payload }, { db, user }) => {
-    // console.log('payload', payload)
-    // const e = toPairs(payload).map(i => {
-    //   return [i[0].split('/'), i[1]]
-    // })
-    // const z = Object.entries(payload)
-
-    // const keys = flattenDeep(e.map(i => {
-    //   return i[0].length > 1 ? i[0][0] : i[0]
-    // }))
-
-    // const x = ' '
-    // console.log(z)
-    // console.log(keys)
     console.log('payload', payload)
+
+    if (payload.isDemo) {
+      return db.users.findOne({ _id: ObjectId(user._id) })
+    }
     const x = await createTaxDocument({ payload, user, db })
     return db.users.findOne({ _id: ObjectId(user._id) })
   }
