@@ -40,6 +40,7 @@ type Deal {
   docSpringTemplateId: String
   spvAgreementKey: String
   dealCoverImageKey: String
+  isDemo: Boolean
 }
 
 type DealParams {
