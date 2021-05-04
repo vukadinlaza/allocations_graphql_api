@@ -41,6 +41,7 @@ type Deal {
   spvAgreementKey: String
   dealCoverImageKey: String
   isDemo: Boolean
+  viewedUsers: [User]
 }
 
 type DealParams {
@@ -158,7 +159,7 @@ type Mutation {
   addDealLogo(deal_id: String!, title: String!, logo: Upload!): Deal
   rmDealDoc(deal_id: String!, title: String!): Deal
   addDealDocs(deal_id: String!, docs: Upload): Deal
-
+  addUserAsViewed(deal_id: String!, user_id: String!): Deal 
 }
 
 

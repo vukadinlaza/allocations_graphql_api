@@ -85,6 +85,12 @@ const Deal = {
     }, 0)
     return amount
   },
+  viewedUsers: async (deal, _, { db }) => {
+    return await Promise.all((deal.usersViewed || []).map(user => {
+      return db.users.findOne({ _id: user })
+    }))
+  },
+
 }
 
 const Queries = {
@@ -357,7 +363,20 @@ const Mutations = {
       { _id: ObjectId(params.deal_id) },
       { $pull: { documents: path } }
     )
-  }
+  },
+  addUserAsViewed: async (_, { user_id, deal_id }, ctx) => {
+    console.log('USER DEAL', user_id, deal_id)
+    const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
+    console.log(deal.usersViewed)
+    if ((deal.usersViewed || []).map(i => String(i)).find(id => id === user_id)) {
+      return deal
+    }
+    return ctx.db.deals.updateOne(
+      { _id: ObjectId(deal_id) },
+      { $push: { usersViewed: ObjectId(user_id) } }
+    )
+  },
+
 }
 
 module.exports = {
