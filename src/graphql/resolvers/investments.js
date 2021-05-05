@@ -122,7 +122,6 @@ const Mutations = {
 
   confirmInvestment: async (_, { payload }, { user, db }) => {
 
-    console.log('PAYLOAD', payload)
     const deal = await db.deals.findOne({ _id: ObjectId(payload.dealId) })
 
     if (deal !== null && deal.isDemo === true) {
@@ -148,10 +147,13 @@ const Mutations = {
       await db.investments.updateOne({ _id: ObjectId(investment._id) }, { $set: { submissionData: x } })
     }
     getTemplate({ db, payload: { ...payload, investmentId: investment._id }, user, templateId: payload.docSpringTemplateId })
+    await db.deals.updateOne({ _id: ObjectId(deal._id) }, {
+      $pull: { usersViewed: ObjectId(user._id) }
+    })
+
     return db.investments.findOne({ _id: ObjectId(investment._id) })
   },
   getInvestmentPreview: async (_, { payload }, { user, db }) => {
-
     const res = await getInvestmentPreview({ input: payload, templateId: payload.docSpringTemplateId, user })
     return { ...user, previewLink: res.download_url }
   }
