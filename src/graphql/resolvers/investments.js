@@ -146,7 +146,7 @@ const Mutations = {
       const x = { ...investment.submissionData, ...payload }
       await db.investments.updateOne({ _id: ObjectId(investment._id) }, { $set: { submissionData: x } })
     }
-    getTemplate({ db, payload: { ...payload, investmentId: investment._id }, user, templateId: payload.docSpringTemplateId })
+    getTemplate({ db, payload: { ...payload, investmentId: investment._id }, user, templateId: payload.docSpringTemplateId, investmentDocs: investment.documents, investmentStatus: investment.status })
     await db.deals.updateOne({ _id: ObjectId(deal._id) }, {
       $pull: { usersViewed: ObjectId(user._id) }
     })

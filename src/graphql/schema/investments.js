@@ -30,6 +30,7 @@ type SubmissionData {
   accredited_investor_status: String
   fullName: String
   title: String
+  investmentId: String
 }
 
 enum InvestmentStatus {
