@@ -11,15 +11,26 @@ config.apiTokenId = process.env.DOC_SPRING_API_ID
 config.apiTokenSecret = process.env.DOC_SPRING_API_SECRET
 docspring = new DocSpring.Client(config)
 
-const getTemplate = ({ db, payload, user, templateId }) => {
-	console.log('PAYLOAD', payload, parseFloat(payload.investmentAmount.replace(/,/g, '')))
+const getTemplate = ({ db, payload, user, templateId, investmentDocs, investmentStatus }) => {
 	return docspring.getTemplate(templateId, function (error, template) {
+		console.log('PAYLOADD', payload)
 		if (error) throw error
-		const key = `investments/${payload.investmentId}/${template.name.replace(/\s+/g, "_")}.pdf`
-		return generateDocSpringPDF({ db, user, input: payload, key, templateId, templateName: template.name.replace(/\s+/g, "_") }).then(() => {
+		const timeStamp = Date.now()
+		const key = `investments/${payload.investmentId}/${timeStamp}-${template.name.replace(/\s+/g, "_")}.pdf`
+		const oldDocs = investmentDocs.filter(doc => {
+			return !doc.includes(template.name.replace(/\s+/g, "_"))
+		})
+		const newDocsArray = [...oldDocs, key]
+		return generateDocSpringPDF({ db, user, input: payload, key, templateId, timeStamp, templateName: template.name.replace(/\s+/g, "_") }).then(() => {
+
+			console.log('AMOUNTT', payload.investmentAmount, parseFloat(payload.investmentAmount.replace(/,/g, '')))
 			return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
-				$set: { status: 'signed', amount: parseFloat(payload.investmentAmount.replace(/,/g, '')) },
-				$addToSet: { documents: key }
+				$set:
+				{
+					status: investmentStatus || 'signed',
+					amount: parseFloat(payload.investmentAmount.replace(/,/g, '')),
+					documents: newDocsArray
+				}
 			}).then(() => {
 				const signingpacket = {
 					userEmail: user.email,
@@ -41,7 +52,7 @@ const getTemplate = ({ db, payload, user, templateId }) => {
 }
 
 
-const generateDocSpringPDF = ({ db, user, input, templateName, templateId }) => {
+const generateDocSpringPDF = ({ db, user, input, templateName, timeStamp, templateId }) => {
 	let data = {
 		subscriptiondocsOne: capitalize(input.investor_type),
 		subscriptiondocsTwo: input.legalName,
@@ -69,7 +80,8 @@ const generateDocSpringPDF = ({ db, user, input, templateName, templateId }) => 
 		metadata: {
 			user_id: user._id,
 			investmentId: input.investmentId,
-			templateName: templateName
+			templateName: templateName,
+			timeStamp: timeStamp
 		},
 		field_overrides: {
 			// title: {
