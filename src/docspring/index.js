@@ -17,7 +17,7 @@ const getTemplate = ({ db, payload, user, templateId, investmentDocs, investment
 		if (error) throw error
 		const timeStamp = Date.now()
 		const key = `investments/${payload.investmentId}/${timeStamp}-${template.name.replace(/\s+/g, "_")}.pdf`
-		const oldDocs = investmentDocs.filter(doc => {
+		const oldDocs = (investmentDocs || []).filter(doc => {
 			return !doc.includes(template.name.replace(/\s+/g, "_"))
 		})
 		const newDocsArray = [...oldDocs, key]
