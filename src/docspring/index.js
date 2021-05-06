@@ -27,7 +27,7 @@ const getTemplate = ({ db, payload, user, templateId, investmentDocs, investment
 			return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
 				$set:
 				{
-					status: investmentStatus || 'signed',
+					status: investmentStatus === 'invited' ? 'signed' : investmentStatus,
 					amount: parseFloat(payload.investmentAmount.replace(/,/g, '')),
 					documents: newDocsArray
 				}
