@@ -31,6 +31,7 @@ type SubmissionData {
   fullName: String
   title: String
   investmentId: String
+  submissionId: String
 }
 
 enum InvestmentStatus {
