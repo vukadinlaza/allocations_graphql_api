@@ -54,13 +54,13 @@ const getTemplate = ({ db, payload, user, templateId, investmentDocs, investment
 
 const generateDocSpringPDF = ({ db, user, input, templateName, timeStamp, templateId }) => {
 	let data = {
-		'Individual/Entity': capitalize(input.investor_type),
+		'InvestorType': capitalize(input.investor_type),
 		'MemberName': input.legalName,
 		'SubAmount': input.investmentAmount,
 		'USStateIndividual': input.investor_type === 'individual' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
 		'USStateEntity': input.investor_type === 'entity' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
-		'Accred Indiv': input.investor_type === 'individual' ? input.accredited_investor_status : '',
-		'Accred Entity': input.investor_type === 'individual' ? '' : input.accredited_investor_status,
+		'AccredIndiv': input.investor_type === 'individual' ? input.accredited_investor_status : '',
+		'AccredEntity': input.investor_type === 'individual' ? '' : input.accredited_investor_status,
 		'Email': user.email,
 		'FullName': input.investor_type === 'individual' ? input.legalName : input.fullName,
 		'Signature': input.investor_type === 'individual' ? input.legalName : input.fullName,
