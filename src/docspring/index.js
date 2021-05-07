@@ -54,24 +54,41 @@ const getTemplate = ({ db, payload, user, templateId, investmentDocs, investment
 
 const generateDocSpringPDF = ({ db, user, input, templateName, timeStamp, templateId }) => {
 	let data = {
-		subscriptiondocsOne: capitalize(input.investor_type),
-		subscriptiondocsTwo: input.legalName,
-		// Format with currency stuff
-		investmentAmount: input.investmentAmount,
-		subscriptiondocsThree: input.investor_type === 'individual' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
-		subscriptiondocsFour: input.investor_type === 'entity' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
-		subscriptiondocsFive: input.investor_type === 'individual' ? input.accredited_investor_status : '',
-		subscriptiondocsSix: input.investor_type === 'individual' ? '' : input.accredited_investor_status,
-		email: user.email,
-		fullName: input.investor_type === 'individual' ? input.legalName : input.fullName,
-		signature: input.investor_type === 'individual' ? input.legalName : input.fullName,
-		memberName: input.legalName,
-		date: moment(new Date()).format('MM/DD/YYYY')
+		'Individual/Entity': capitalize(input.investor_type),
+		'MemberName': input.legalName,
+		'SubAmount': input.investmentAmount,
+		'USStateIndividual': input.investor_type === 'individual' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
+		'USStateEntity': input.investor_type === 'entity' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
+		'Accred Indiv': input.investor_type === 'individual' ? input.accredited_investor_status : '',
+		'Accred Entity': input.investor_type === 'individual' ? '' : input.accredited_investor_status,
+		'Email': user.email,
+		'FullName': input.investor_type === 'individual' ? input.legalName : input.fullName,
+		'Signature': input.investor_type === 'individual' ? input.legalName : input.fullName,
+		'MemberName': input.legalName,
+		'Date Signed': moment(new Date()).format('MM/DD/YYYY')
 	}
 
 	if (templateId === 'tpl_ctrRDXgQdKz5YGg9QK') {
 		data = {
 			signature: input.investor_type === 'individual' ? input.legalName : input.fullName,
+		}
+	}
+
+
+	if (['tpl_RrmjKbpFRr7qhKY3dD', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_Z6jkb55rjqThssk3jG', 'tpl_ARmHkgKjECPmDT6ad9', 'tpl_3nKjygaFgz44KyCANJ', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_RrmjKbpFRr7qhKY3dD'].includes(templateId)) {
+		data = {
+			subscriptiondocsOne: capitalize(input.investor_type),
+			subscriptiondocsTwo: input.legalName,
+			investmentAmount: input.investmentAmount,
+			subscriptiondocsThree: input.investor_type === 'individual' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
+			subscriptiondocsFour: input.investor_type === 'entity' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
+			subscriptiondocsFive: input.investor_type === 'individual' ? input.accredited_investor_status : '',
+			subscriptiondocsSix: input.investor_type === 'individual' ? '' : input.accredited_investor_status,
+			email: user.email,
+			fullName: input.investor_type === 'individual' ? input.legalName : input.fullName,
+			signature: input.investor_type === 'individual' ? input.legalName : input.fullName,
+			memberName: input.legalName,
+			date: moment(new Date()).format('MM/DD/YYYY')
 		}
 	}
 	var submission_data = {
