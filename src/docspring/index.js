@@ -177,7 +177,7 @@ const getInvestmentPreview = ({ input, user }) => {
 		'Date Signed': moment(new Date()).format('MM/DD/YYYY')
 	}
 
-	if (templateId === 'tpl_ctrRDXgQdKz5YGg9QK') {
+	if (input.docSpringTemplateId === 'tpl_ctrRDXgQdKz5YGg9QK') {
 		data = {
 			signature: input.investor_type === 'individual' ? input.legalName : input.fullName,
 		}
