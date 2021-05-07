@@ -184,7 +184,7 @@ const getInvestmentPreview = ({ input, user }) => {
 	}
 
 
-	if (['tpl_RrmjKbpFRr7qhKY3dD', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_Z6jkb55rjqThssk3jG', 'tpl_ARmHkgKjECPmDT6ad9', 'tpl_3nKjygaFgz44KyCANJ', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_RrmjKbpFRr7qhKY3dD'].includes(templateId)) {
+	if (['tpl_RrmjKbpFRr7qhKY3dD', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_Z6jkb55rjqThssk3jG', 'tpl_ARmHkgKjECPmDT6ad9', 'tpl_3nKjygaFgz44KyCANJ', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_RrmjKbpFRr7qhKY3dD'].includes(input.docSpringTemplateId)) {
 		data = {
 			subscriptiondocsOne: capitalize(input.investor_type),
 			subscriptiondocsTwo: input.legalName,
