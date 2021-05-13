@@ -115,8 +115,13 @@ const User = {
   account: async (user, _, { db }) => {
     const account = await db.accounts.findOne({ _id: ObjectId(user.account) })
     return account
+  },
+  investorPersonalInfo: async (_, args, ctx) => {
+    const { db, user } = ctx;
+    let userInvesments = await db.investments.find({ user_id: user._id }).toArray();
+    let lastInvestment = userInvesments.pop();
+    return lastInvestment;
   }
-
 }
 
 const Queries = {

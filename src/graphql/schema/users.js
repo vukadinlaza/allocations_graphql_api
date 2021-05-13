@@ -44,7 +44,8 @@ type User {
   accountInvestments: [Investment]
   account: Account,
   termsOfServiceCF: Boolean
-  profileImageKey: String
+  profileImageKey: String,
+  investorPersonalInfo: Investment
 }
 
 input UserInput {
