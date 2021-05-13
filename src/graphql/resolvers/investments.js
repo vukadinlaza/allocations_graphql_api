@@ -1,13 +1,13 @@
 const { ObjectId } = require("mongodb")
-const { isNumber, forEach } = require('lodash')
-const { isAdmin, isAdminOrSameUser } = require('../permissions')
+// const { isNumber, forEach } = require('lodash')
+// const { isAdmin, isAdminOrSameUser } = require('../permissions')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
 const Investments = require('../schema/investments')
-const { generateDocSpringPDF, updateInvestmentWithPDF, getTemplate, getInvestmentPreview } = require("../../docspring")
+const { getTemplate, getInvestmentPreview } = require("../../docspring")
 
-/** 
+/**
 
   handles all the investment flow
 
