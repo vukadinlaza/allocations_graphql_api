@@ -9,6 +9,7 @@ const { ObjectId } = require('mongodb');
 var config = new DocSpring.Configuration()
 config.apiTokenId = process.env.DOC_SPRING_API_ID
 config.apiTokenSecret = process.env.DOC_SPRING_API_SECRET
+
 let docspring = new DocSpring.Client(config)
 
 
@@ -147,7 +148,7 @@ const createTaxDocument = ({ payload, user, db }) => {
 	const sig = kycTemplateName === 'W-9' ? payload.name_as_shown_on_your_income_tax_return_name_is_required_on_this_line_do_not_leave_this_line_blank : payload.signature;
 	const keysToOmit = ['kycTemplateId', 'kycTemplateName', 'tax_classification', 'isDemo']
 	const data = omit({ ...payload, signature: sig }, keysToOmit);
-
+  
 	var submission_data = {
 		editable: false,
 		data: data,

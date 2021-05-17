@@ -150,7 +150,7 @@ const Mutations = {
     await db.deals.updateOne({ _id: ObjectId(deal._id) }, {
       $pull: { usersViewed: ObjectId(user._id) }
     })
-
+    await signForInvestment(investment)
     return db.investments.findOne({ _id: ObjectId(investment._id) })
   },
   getInvestmentPreview: async (_, { payload }, { user, db }) => {
