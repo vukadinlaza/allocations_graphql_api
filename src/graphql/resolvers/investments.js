@@ -1,5 +1,4 @@
 const { ObjectId } = require("mongodb")
-const moment = require('moment');
 const { isNumber, forEach } = require('lodash')
 const { isAdmin, isAdminOrSameUser } = require('../permissions')
 const { AuthenticationError } = require('apollo-server-express')
@@ -8,7 +7,7 @@ const Uploader = require('../../uploaders/investor-docs')
 const Investments = require('../schema/investments')
 const { generateDocSpringPDF, updateInvestmentWithPDF, getTemplate, getInvestmentPreview } = require("../../docspring")
 
-/**
+/** 
 
   handles all the investment flow
 
@@ -124,17 +123,10 @@ const Mutations = {
   confirmInvestment: async (_, { payload }, { user, db }) => {
 
     const deal = await db.deals.findOne({ _id: ObjectId(payload.dealId) })
-    const signDeadline = deal?.dealParams?.signDeadline;
 
     if (deal !== null && deal.isDemo === true) {
       return { _id: 'mockDemoInvestmentID' }
     }
-
-    if(signDeadline){
-      const isClosed = moment(signDeadline).add(2, 'days').isBefore(new Date());
-      if(isClosed) throw new Error("The deal selected is closed.");
-    }
-
     let investment = null
     if (!payload.investmentId) {
       const invsRes = await db.investments.insertOne({
