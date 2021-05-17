@@ -128,9 +128,7 @@ const Mutations = {
 
     if (deal !== null && deal.isDemo === true) {
       return { _id: 'mockDemoInvestmentID' }
-    }
-
-    if(signDeadline){
+    }else if(signDeadline){
       const isClosed = moment(signDeadline).add(2, 'days').isBefore(new Date());
       if(isClosed) throw new Error("The deal selected is closed.");
     }
