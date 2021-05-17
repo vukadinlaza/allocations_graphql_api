@@ -23,6 +23,7 @@ const { createTaxDocument } = require('../../docspring/index')
 const Users = require('../schema/users')
 const fetch = require('node-fetch');
 const moment = require('moment')
+const { wFormSigned } = require('../../zaps/signedDocs')
 
 /**
 
@@ -97,7 +98,6 @@ const User = {
       return db.deals.find({ organization: ObjectId(org) }).toArray() || []
     }))
 
-    console.log(deals.reduce((acc, org) => [...acc, ...org], []))
     return deals.reduce((acc, org) => [...acc, ...org], [])
   },
 
@@ -108,15 +108,19 @@ const User = {
         user_id: user._id
       }).toArray()
     }
-    console.log(account.users)
     const investments = await db.investments.find({ $or: [{ user_id: { $in: [...(account.users || []).map(u => ObjectId(u))] } }, { user_id: ObjectId(account.rootAdmin) }] }).toArray()
     return investments
   },
   account: async (user, _, { db }) => {
     const account = await db.accounts.findOne({ _id: ObjectId(user.account) })
     return account
+  },
+  investorPersonalInfo: async (_, args, ctx) => {
+    const { db, user } = ctx;
+    let userInvesments = await db.investments.find({ user_id: user._id }).toArray();
+    let lastInvestment = userInvesments.pop();
+    return lastInvestment;
   }
-
 }
 
 const Queries = {
@@ -244,7 +248,6 @@ const Mutations = {
     }
   },
   postZap: async (_, body, ctx) => {
-    console.log(body)
     const url = body.data.zapUrl ? body.data.zapUrl : 'https://hooks.zapier.com/hooks/catch/7904699/oqfry9n'
     const webhookRes = await fetch(url, {
       method: 'post',
@@ -258,12 +261,13 @@ const Mutations = {
     })
   },
   submitTaxDocument: async (_, { payload }, { db, user }) => {
-    console.log('payload', payload)
-
     if (payload.isDemo) {
       return db.users.findOne({ _id: ObjectId(user._id) })
     }
-    const x = await createTaxDocument({ payload, user, db })
+    const { status } = await createTaxDocument({ payload, user, db })
+    if(status === 'success') {
+      await wFormSigned(payload)
+    }
     return db.users.findOne({ _id: ObjectId(user._id) })
   }
 }

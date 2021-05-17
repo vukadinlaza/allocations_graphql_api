@@ -3,94 +3,126 @@ require('dotenv').config();
 const moment = require('moment')
 
 const DocSpring = require('docspring');
-const { capitalize, toNumber, omit } = require('lodash');
+const { capitalize, omit } = require('lodash');
 const { ObjectId } = require('mongodb');
 
 var config = new DocSpring.Configuration()
 config.apiTokenId = process.env.DOC_SPRING_API_ID
 config.apiTokenSecret = process.env.DOC_SPRING_API_SECRET
-docspring = new DocSpring.Client(config)
 
-const getTemplate = ({ db, payload, user, templateId, investmentDocs, investmentStatus }) => {
-	return docspring.getTemplate(templateId, function (error, template) {
-		console.log('PAYLOADD', payload)
-		if (error) throw error
-		const timeStamp = Date.now()
-		const key = `investments/${payload.investmentId}/${timeStamp}-${template.name.replace(/\s+/g, "_")}.pdf`
-		const oldDocs = (investmentDocs || []).filter(doc => {
-			return !doc.includes(template.name.replace(/\s+/g, "_"))
-		})
-		const newDocsArray = [...oldDocs, key]
-		return generateDocSpringPDF({ db, user, input: payload, key, templateId, timeStamp, templateName: template.name.replace(/\s+/g, "_") }).then(() => {
+let docspring = new DocSpring.Client(config)
 
-			console.log('AMOUNTT', payload.investmentAmount, parseFloat(payload.investmentAmount.replace(/,/g, '')))
-			return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
-				$set:
-				{
-					status: investmentStatus === 'invited' ? 'signed' : investmentStatus,
-					amount: parseFloat(payload.investmentAmount.replace(/,/g, '')),
-					documents: newDocsArray
-				}
-			}).then(() => {
-				const signingpacket = {
-					userEmail: user.email,
-					userId: user._id,
-					authMethod: 'in-session',
-					signedAt: new Date(),
-					clientIp: payload.clientIp,
-					investmentId: ObjectId(payload.investmentId),
-					submissionData: {
-						...payload, userEmail: user.email,
-						userId: user._id,
-					}
-				}
-				return db.signingpackets.insertOne({ ...signingpacket })
-			})
-		})
 
-	})
+const getTemplateData = (input, user, templateId) => {
+
+	const SIGNATURE_ONLY_TEMPLATE = 'tpl_ctrRDXgQdKz5YGg9QK';
+	const oldTemplates = ['tpl_RrmjKbpFRr7qhKY3dD', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_Z6jkb55rjqThssk3jG', 'tpl_ARmHkgKjECPmDT6ad9', 'tpl_3nKjygaFgz44KyCANJ', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_RrmjKbpFRr7qhKY3dD']
+	const { investor_type, legalName, investmentAmount, country, state, accredited_investor_status, fullName } = input;
+	const isTypeIndividual = (investor_type === 'individual');
+	const isTypeEntity = (investor_type === 'entity');
+	const countryWithState = country + (country === 'United States' ? `, ${state}` : '');
+	const nameToUse = isTypeIndividual ? legalName : fullName;
+
+	if (templateId === SIGNATURE_ONLY_TEMPLATE) {
+		return {
+			signature: nameToUse,
+		}
+	}else if (oldTemplates.includes(templateId)) {
+		return {
+			subscriptiondocsOne: capitalize(investor_type),
+			subscriptiondocsTwo: legalName,
+			investmentAmount: investmentAmount,
+			subscriptiondocsThree: isTypeIndividual ? countryWithState : '',
+			subscriptiondocsFour: isTypeEntity ? countryWithState : '',
+			subscriptiondocsFive: isTypeIndividual ? accredited_investor_status : '',
+			subscriptiondocsSix: isTypeIndividual ? '' : accredited_investor_status,
+			email: user.email,
+			fullName: nameToUse,
+			signature: nameToUse,
+			memberName: legalName,
+			date: moment(new Date()).format('MM/DD/YYYY')
+		}
+	}else{
+		return {
+			'InvestorType': capitalize(investor_type),
+			'MemberName': legalName,
+			'SubAmount': investmentAmount,
+			'USStateIndividual': isTypeIndividual ? countryWithState : '',
+			'USStateEntity': isTypeEntity ? countryWithState  : '',
+			'AccredIndiv': isTypeIndividual ? accredited_investor_status : '',
+			'AccredEntity': isTypeIndividual ? '' : accredited_investor_status,
+			'Email': user.email,
+			'FullName': nameToUse,
+			'Signature': nameToUse,
+			'Date Signed': moment(new Date()).format('MM/DD/YYYY')
+		}
+	}
 }
 
 
-const generateDocSpringPDF = ({ db, user, input, templateName, timeStamp, templateId }) => {
-	let data = {
-		'InvestorType': capitalize(input.investor_type),
-		'MemberName': input.legalName,
-		'SubAmount': input.investmentAmount,
-		'USStateIndividual': input.investor_type === 'individual' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
-		'USStateEntity': input.investor_type === 'entity' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
-		'AccredIndiv': input.investor_type === 'individual' ? input.accredited_investor_status : '',
-		'AccredEntity': input.investor_type === 'individual' ? '' : input.accredited_investor_status,
-		'Email': user.email,
-		'FullName': input.investor_type === 'individual' ? input.legalName : input.fullName,
-		'Signature': input.investor_type === 'individual' ? input.legalName : input.fullName,
-		'MemberName': input.legalName,
-		'Date Signed': moment(new Date()).format('MM/DD/YYYY')
+const updateInvestment = async (db, investmentStatus, payload, newDocsArray) => {
+	const updatedInvestmentData = {
+		status: investmentStatus === 'invited' ? 'signed' : investmentStatus,
+		amount: parseFloat(payload.investmentAmount.replace(/,/g, '')),
+		documents: newDocsArray
 	}
+	await db.investments.updateOne({ _id: ObjectId(payload.investmentId)}, { $set: updatedInvestmentData })
+}
 
-	if (templateId === 'tpl_ctrRDXgQdKz5YGg9QK') {
-		data = {
-			signature: input.investor_type === 'individual' ? input.legalName : input.fullName,
+
+const addPacket = async (db, user, payload) => {
+	const signingpacket = {
+		userEmail: user.email,
+		userId: user._id,
+		authMethod: 'in-session',
+		signedAt: new Date(),
+		clientIp: payload.clientIp,
+		investmentId: ObjectId(payload.investmentId),
+		submissionData: {
+			...payload,
+			userEmail: user.email,
+			userId: user._id,
 		}
 	}
+	await db.signingpackets.insertOne({ ...signingpacket })
+}
 
 
-	if (['tpl_RrmjKbpFRr7qhKY3dD', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_Z6jkb55rjqThssk3jG', 'tpl_ARmHkgKjECPmDT6ad9', 'tpl_3nKjygaFgz44KyCANJ', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_RrmjKbpFRr7qhKY3dD'].includes(templateId)) {
-		data = {
-			subscriptiondocsOne: capitalize(input.investor_type),
-			subscriptiondocsTwo: input.legalName,
-			investmentAmount: input.investmentAmount,
-			subscriptiondocsThree: input.investor_type === 'individual' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
-			subscriptiondocsFour: input.investor_type === 'entity' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
-			subscriptiondocsFive: input.investor_type === 'individual' ? input.accredited_investor_status : '',
-			subscriptiondocsSix: input.investor_type === 'individual' ? '' : input.accredited_investor_status,
-			email: user.email,
-			fullName: input.investor_type === 'individual' ? input.legalName : input.fullName,
-			signature: input.investor_type === 'individual' ? input.legalName : input.fullName,
-			memberName: input.legalName,
-			date: moment(new Date()).format('MM/DD/YYYY')
-		}
+const updateSubmissionData = async (error, response, db, investmentId) => {
+	if (error) {
+		console.log(response, error)
+		throw error
 	}
+
+	let { submission } = response;
+	await db.investments.updateOne({ _id: ObjectId(investmentId) }, {
+		$set: { 'submissionData.submissionId': submission.id },
+	})
+	return submission
+}
+
+
+const updateUserDocuments = async (error, response, db, templateName, userId) => {
+	if (error) {
+		console.log(error)
+		// throw error
+	}
+	let { submission } = response;
+	const docObj = {
+		documentName: templateName,
+		submissionId: submission.id,
+		docspringPermDownloadLink: submission.permanent_download_url
+	}
+	await db.users.updateOne({ _id: ObjectId(userId) }, {
+		$push: { documents: docObj },
+	})
+	return submission
+}
+
+
+const generateDocSpringPDF = (db, user, input, templateName, timeStamp, templateId) => {
+
+	let data = getTemplateData(input, user, templateId);
 	var submission_data = {
 		editable: false,
 		data: data,
@@ -106,100 +138,39 @@ const generateDocSpringPDF = ({ db, user, input, templateName, timeStamp, templa
 			// },
 		},
 	}
-	const res = docspring.generatePDF(templateId, submission_data, function (
-		error,
-		response
-	) {
-		if (error) {
-			console.log(response, error)
-			throw error
-		}
-		var submission = response.submission
-
-		db.investments.updateOne({ _id: ObjectId(input.investmentId) }, {
-			$set: { 'submissionData.submissionId': submission.id },
-		})
-		return submission
-	})
-	return Promise.resolve(res)
+	docspring.generatePDF(templateId, submission_data, (error, response) => updateSubmissionData(error, response, db, input.investmentId))
 }
 
+
 const createTaxDocument = ({ payload, user, db }) => {
-	const sig = payload.kycTemplateName === 'W-9' ? payload.name_as_shown_on_your_income_tax_return_name_is_required_on_this_line_do_not_leave_this_line_blank : payload.signature
-	const data = omit({ ...payload, signature: sig }, ['kycTemplateId', 'kycTemplateName', 'tax_classification', 'isDemo']);
-	console.log('DATA')
+
+	const { kycTemplateName, kycTemplateId } = payload;
+	const sig = kycTemplateName === 'W-9' ? payload.name_as_shown_on_your_income_tax_return_name_is_required_on_this_line_do_not_leave_this_line_blank : payload.signature;
+	const keysToOmit = ['kycTemplateId', 'kycTemplateName', 'tax_classification', 'isDemo']
+	const data = omit({ ...payload, signature: sig }, keysToOmit);
+  
 	var submission_data = {
 		editable: false,
 		data: data,
 		metadata: {
 			user_id: user._id,
-			templateName: payload.kycTemplateName
+			templateName: kycTemplateName
 		},
 		field_overrides: {
 		},
 		test: process.env.NODE_ENV === 'production' ? false : true,
 		wait: true,
 	}
-	const res = new Promise((resolve, reject) => {
-		docspring.generatePDF(payload.kycTemplateId, submission_data, function (
-			error,
-			response
-		) {
-			if (error) {
-				console.log(error)
-				// throw error
-			}
-			var submission = response.submission
-			console.log('submission', submission)
-			const docObj = { documentName: payload.kycTemplateName, submissionId: submission.id, docspringPermDownloadLink: submission.permanent_download_url }
-			db.users.updateOne({ _id: ObjectId(user._id) }, {
-				$push: { documents: docObj },
-			})
-			return resolve(submission)
-		})
-	})
-	return Promise.resolve(res)
+
+	docspring.generatePDF(kycTemplateId, submission_data, (error, response) => updateUserDocuments(error, response, db, kycTemplateName, user._id))
 }
 
+
 const getInvestmentPreview = ({ input, user }) => {
-	let data = {
-		'InvestorType': capitalize(input.investor_type),
-		'MemberName': input.legalName,
-		'SubAmount': input.investmentAmount,
-		'USStateIndividual': input.investor_type === 'individual' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
-		'USStateEntity': input.investor_type === 'entity' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
-		'AccredIndiv': input.investor_type === 'individual' ? input.accredited_investor_status : '',
-		'AccredEntity': input.investor_type === 'individual' ? '' : input.accredited_investor_status,
-		'Email': user.email,
-		'FullName': input.investor_type === 'individual' ? input.legalName : input.fullName,
-		'Signature': input.investor_type === 'individual' ? input.legalName : input.fullName,
-		'MemberName': input.legalName,
-		'Date Signed': moment(new Date()).format('MM/DD/YYYY')
-	}
 
-	if (input.docSpringTemplateId === 'tpl_ctrRDXgQdKz5YGg9QK') {
-		data = {
-			signature: input.investor_type === 'individual' ? input.legalName : input.fullName,
-		}
-	}
+	const { docSpringTemplateId } = input;
+	let data = getTemplateData(input, user, docSpringTemplateId);
 
-
-	if (['tpl_RrmjKbpFRr7qhKY3dD', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_Z6jkb55rjqThssk3jG', 'tpl_ARmHkgKjECPmDT6ad9', 'tpl_3nKjygaFgz44KyCANJ', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_RrmjKbpFRr7qhKY3dD'].includes(input.docSpringTemplateId)) {
-		data = {
-			subscriptiondocsOne: capitalize(input.investor_type),
-			subscriptiondocsTwo: input.legalName,
-			investmentAmount: input.investmentAmount,
-			subscriptiondocsThree: input.investor_type === 'individual' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
-			subscriptiondocsFour: input.investor_type === 'entity' ? input.country + (input.country === 'United States' ? `, ${input.state}` : '') : '',
-			subscriptiondocsFive: input.investor_type === 'individual' ? input.accredited_investor_status : '',
-			subscriptiondocsSix: input.investor_type === 'individual' ? '' : input.accredited_investor_status,
-			email: user.email,
-			fullName: input.investor_type === 'individual' ? input.legalName : input.fullName,
-			signature: input.investor_type === 'individual' ? input.legalName : input.fullName,
-			memberName: input.legalName,
-			date: moment(new Date()).format('MM/DD/YYYY')
-		}
-	}
 	var submission_data = {
 		editable: false,
 		data: data,
@@ -211,23 +182,41 @@ const getInvestmentPreview = ({ input, user }) => {
 		test: process.env.NODE_ENV === 'production' ? false : true,
 		wait: true,
 	}
-	const res = new Promise((resolve, reject) => {
-		docspring.generatePDF(input.docSpringTemplateId, submission_data, function (
-			error,
-			response
-		) {
-			if (error) {
-				console.log(error)
-				// throw error
-			}
-			var submission = response.submission
-			return resolve(submission)
+
+	return new Promise((resolve, reject) => {
+		docspring.generatePDF(docSpringTemplateId, submission_data, (error, response) => {
+			if (error) reject(error);
+			return resolve(response.submission)
 		})
 	})
-	return Promise.resolve(res)
 }
 
 
+const getTemplate = ({ db, payload, user, templateId, investmentDocs = [], investmentStatus }) => {
+	// let template = await axios.get(`https://api.docspring.com/api/v1/templates/${templateId}`)
+	return docspring.getTemplate(templateId, (error, template) => {
+		if(error){
+			console.error(error);
+			throw error
+		}else{
+			const timeStamp = Date.now();
+			const adjTemplateName = template.name.replace(/\s+/g, "_");
+			const key = `investments/${payload.investmentId}/${timeStamp}-${adjTemplateName}.pdf`;
+
+			const oldDocs = investmentDocs.filter(doc => !doc.includes(adjTemplateName))
+			const newDocsArray = [...oldDocs, key];
+
+			generateDocSpringPDF(db, user, payload, adjTemplateName, timeStamp, templateId);
+
+			updateInvestment(db, investmentStatus, payload, newDocsArray);
+
+			addPacket(db, user, payload)
+
+			return template;
+
+		}
+	});
+}
 
 
 module.exports = { generateDocSpringPDF, getTemplate, createTaxDocument, getInvestmentPreview }
