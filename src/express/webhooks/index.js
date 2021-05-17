@@ -180,8 +180,8 @@ module.exports = Router()
             $push: { documents: { documentName: 'Verify Investor Certificate', status, expirationDate, verifyInvestorId, requestId } },
             $set: { accredidation_doc: key, accredidation_status: true },
           });
-
       }
+
       if (userId && status === 'not_accredited') {
         await db.users.findOneAndUpdate({ _id: ObjectId(userId) },
           {

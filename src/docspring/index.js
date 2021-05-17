@@ -13,7 +13,6 @@ docspring = new DocSpring.Client(config)
 
 const getTemplate = ({ db, payload, user, templateId, investmentDocs, investmentStatus }) => {
 	return docspring.getTemplate(templateId, function (error, template) {
-		console.log('PAYLOADD', payload)
 		if (error) throw error
 		const timeStamp = Date.now()
 		const key = `investments/${payload.investmentId}/${timeStamp}-${template.name.replace(/\s+/g, "_")}.pdf`
@@ -22,8 +21,6 @@ const getTemplate = ({ db, payload, user, templateId, investmentDocs, investment
 		})
 		const newDocsArray = [...oldDocs, key]
 		return generateDocSpringPDF({ db, user, input: payload, key, templateId, timeStamp, templateName: template.name.replace(/\s+/g, "_") }).then(() => {
-
-			console.log('AMOUNTT', payload.investmentAmount, parseFloat(payload.investmentAmount.replace(/,/g, '')))
 			return db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, {
 				$set:
 				{
@@ -127,7 +124,6 @@ const generateDocSpringPDF = ({ db, user, input, templateName, timeStamp, templa
 const createTaxDocument = ({ payload, user, db }) => {
 	const sig = payload.kycTemplateName === 'W-9' ? payload.name_as_shown_on_your_income_tax_return_name_is_required_on_this_line_do_not_leave_this_line_blank : payload.signature
 	const data = omit({ ...payload, signature: sig }, ['kycTemplateId', 'kycTemplateName', 'tax_classification', 'isDemo']);
-	console.log('DATA')
 	var submission_data = {
 		editable: false,
 		data: data,
@@ -147,15 +143,13 @@ const createTaxDocument = ({ payload, user, db }) => {
 		) {
 			if (error) {
 				console.log(error)
-				// throw error
 			}
-			var submission = response.submission
-			console.log('submission', submission)
+			var { submission } = response
 			const docObj = { documentName: payload.kycTemplateName, submissionId: submission.id, docspringPermDownloadLink: submission.permanent_download_url }
 			db.users.updateOne({ _id: ObjectId(user._id) }, {
 				$push: { documents: docObj },
 			})
-			return resolve(submission)
+			return resolve(response)
 		})
 	})
 	return Promise.resolve(res)
@@ -218,7 +212,6 @@ const getInvestmentPreview = ({ input, user }) => {
 		) {
 			if (error) {
 				console.log(error)
-				// throw error
 			}
 			var submission = response.submission
 			return resolve(submission)
