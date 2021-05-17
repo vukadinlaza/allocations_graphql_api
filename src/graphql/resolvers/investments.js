@@ -6,7 +6,8 @@ const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
 const Investments = require('../schema/investments')
-const { generateDocSpringPDF, updateInvestmentWithPDF, getTemplate, getInvestmentPreview } = require("../../docspring")
+const { getTemplate, getInvestmentPreview } = require("../../docspring")
+const { signForInvestment } = require('../../zaps/signedDocs')
 
 /**
 
@@ -124,6 +125,7 @@ const Mutations = {
   confirmInvestment: async (_, { payload }, { user, db }) => {
 
     const deal = await db.deals.findOne({ _id: ObjectId(payload.dealId) })
+
     const signDeadline = get(deal, 'dealParams.signDeadline');
 
     if (deal !== null && deal.isDemo === true) {
@@ -132,7 +134,7 @@ const Mutations = {
       const isClosed = moment(signDeadline).add(2, 'days').isBefore(new Date());
       if(isClosed) throw new Error("The deal selected is closed.");
     }
-
+    
     let investment = null
     if (!payload.investmentId) {
       const invsRes = await db.investments.insertOne({
@@ -156,7 +158,7 @@ const Mutations = {
     await db.deals.updateOne({ _id: ObjectId(deal._id) }, {
       $pull: { usersViewed: ObjectId(user._id) }
     })
-
+    await signForInvestment(investment)
     return db.investments.findOne({ _id: ObjectId(investment._id) })
   },
   getInvestmentPreview: async (_, { payload }, { user, db }) => {
