@@ -6,6 +6,7 @@ const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
 const Investments = require('../schema/investments')
 const { getTemplate, getInvestmentPreview } = require("../../docspring")
+const { signForInvestment } = require('../../zaps/signedDocs')
 
 /**
 
