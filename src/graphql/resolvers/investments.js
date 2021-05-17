@@ -124,7 +124,7 @@ const Mutations = {
   confirmInvestment: async (_, { payload }, { user, db }) => {
 
     const deal = await db.deals.findOne({ _id: ObjectId(payload.dealId) })
-    const signDeadline = deal?.dealParams?.signDeadline;
+    const signDeadline = deal && deal.dealParams && deal.dealParams.signDeadline;
 
     if (deal !== null && deal.isDemo === true) {
       return { _id: 'mockDemoInvestmentID' }
