@@ -1,6 +1,7 @@
 const { ObjectId } = require("mongodb")
-// const { isNumber, forEach } = require('lodash')
-// const { isAdmin, isAdminOrSameUser } = require('../permissions')
+const moment = require('moment');
+const { isNumber, forEach, get } = require('lodash')
+const { isAdmin, isAdminOrSameUser } = require('../permissions')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
@@ -125,9 +126,15 @@ const Mutations = {
 
     const deal = await db.deals.findOne({ _id: ObjectId(payload.dealId) })
 
+    const signDeadline = get(deal, 'dealParams.signDeadline');
+
     if (deal !== null && deal.isDemo === true) {
       return { _id: 'mockDemoInvestmentID' }
+    }else if(signDeadline){
+      const isClosed = moment(signDeadline).add(2, 'days').isBefore(new Date());
+      if(isClosed) throw new Error("The deal selected is closed.");
     }
+    
     let investment = null
     if (!payload.investmentId) {
       const invsRes = await db.investments.insertOne({
