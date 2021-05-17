@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb")
 const moment = require('moment');
-const { isNumber, forEach } = require('lodash')
+const { isNumber, forEach, get } = require('lodash')
 const { isAdmin, isAdminOrSameUser } = require('../permissions')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
@@ -124,7 +124,7 @@ const Mutations = {
   confirmInvestment: async (_, { payload }, { user, db }) => {
 
     const deal = await db.deals.findOne({ _id: ObjectId(payload.dealId) })
-    const signDeadline = deal && deal.dealParams && deal.dealParams.signDeadline;
+    const signDeadline = get(deal, 'dealParams.signDeadline');
 
     if (deal !== null && deal.isDemo === true) {
       return { _id: 'mockDemoInvestmentID' }
