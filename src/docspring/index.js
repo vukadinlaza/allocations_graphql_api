@@ -5,6 +5,7 @@ const moment = require('moment')
 const DocSpring = require('docspring');
 const { capitalize, omit } = require('lodash');
 const { ObjectId } = require('mongodb');
+const { sendSPVDoc } = require('../mailers/spv-doc-mailer');
 
 var config = new DocSpring.Configuration()
 config.apiTokenId = process.env.DOC_SPRING_API_ID
@@ -116,11 +117,14 @@ const updateUserDocuments = async (error, response, db, templateName, userId) =>
 	await db.users.updateOne({ _id: ObjectId(userId) }, {
 		$push: { documents: docObj },
 	})
-	return submission
+
+  return new Promise(res, rej => {
+		return res(submission)
+	})
 }
 
 
-const generateDocSpringPDF = (db, user, input, templateName, timeStamp, templateId) => {
+const generateDocSpringPDF = (db, deal, user, input, templateName, timeStamp, templateId) => {
 
 	let data = getTemplateData(input, user, templateId);
 	var submission_data = {
@@ -138,11 +142,25 @@ const generateDocSpringPDF = (db, user, input, templateName, timeStamp, template
 			// },
 		},
 	}
-	docspring.generatePDF(templateId, submission_data, (error, response) => updateSubmissionData(error, response, db, input.investmentId))
+
+  
+	docspring.generatePDF(templateId, submission_data, (error, response) => {
+
+
+    const emailData = {
+      pdfDownloadUrl: response.submission.download_url,
+      email: user.email,
+      deal
+    }
+
+    sendSPVDoc(emailData)
+
+    return updateSubmissionData(error, response, db, input.investmentId)
+  })
 }
 
 
-const createTaxDocument = ({ payload, user, db }) => {
+const createTaxDocument = async ({ payload, user, db }) => {
 
 	const { kycTemplateName, kycTemplateId } = payload;
 	const sig = kycTemplateName === 'W-9' ? payload.name_as_shown_on_your_income_tax_return_name_is_required_on_this_line_do_not_leave_this_line_blank : payload.signature;
@@ -162,7 +180,10 @@ const createTaxDocument = ({ payload, user, db }) => {
 		wait: true,
 	}
 
-	docspring.generatePDF(kycTemplateId, submission_data, (error, response) => updateUserDocuments(error, response, db, kycTemplateName, user._id))
+
+  return await Promise.resolve(docspring.generatePDF(kycTemplateId, submission_data, (error, response) => updateUserDocuments(error, response, db, kycTemplateName, user._id).then((r) => {
+		return r
+	})))
 }
 
 
@@ -192,7 +213,7 @@ const getInvestmentPreview = ({ input, user }) => {
 }
 
 
-const getTemplate = ({ db, payload, user, templateId, investmentDocs = [], investmentStatus }) => {
+const getTemplate = ({ db, deal, payload, user, templateId, investmentDocs = [], investmentStatus }) => {
 	// let template = await axios.get(`https://api.docspring.com/api/v1/templates/${templateId}`)
 	return docspring.getTemplate(templateId, (error, template) => {
 		if(error){
@@ -206,7 +227,7 @@ const getTemplate = ({ db, payload, user, templateId, investmentDocs = [], inves
 			const oldDocs = investmentDocs.filter(doc => !doc.includes(adjTemplateName))
 			const newDocsArray = [...oldDocs, key];
 
-			generateDocSpringPDF(db, user, payload, adjTemplateName, timeStamp, templateId);
+			generateDocSpringPDF(db, deal, user, payload, adjTemplateName, timeStamp, templateId);
 
 			updateInvestment(db, investmentStatus, payload, newDocsArray);
 
