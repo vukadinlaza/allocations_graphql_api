@@ -1,6 +1,6 @@
 const mailer = require('./mailer')
 const logger = require('../utils/logger')
-const dealInviteTemplate = require('./deal-invite-template')
+const dealInviteTemplate = require('./templates/deal-invite-template')
 const { subResolvers: { User } } = require('../graphql/resolvers/investors')
 
 async function sendInvite ({ deal, sender, to, org }) {
