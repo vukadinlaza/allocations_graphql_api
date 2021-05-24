@@ -376,6 +376,16 @@ const Mutations = {
       { $push: { usersViewed: ObjectId(user_id) } }
     )
   },
+  deleteUserAsViewed: async (_, { user_id, deal_id }, ctx) => {
+    const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
+    return ctx.db.deals.updateOne(
+      { _id: ObjectId(deal_id) },
+      {
+        $pull: { usersViewed: ObjectId(user_id) }
+      }
+    )
+  },
+
 
 }
 
