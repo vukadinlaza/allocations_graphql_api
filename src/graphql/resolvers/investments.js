@@ -7,7 +7,7 @@ const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
 const Investments = require('../schema/investments')
 const { getTemplate, getInvestmentPreview } = require("../../docspring")
-const { signForInvestment } = require('../../zaps/signedDocs')
+const { signedSPV } = require('../../zaps/signedDocs')
 
 /**
 
@@ -158,7 +158,7 @@ const Mutations = {
     await db.deals.updateOne({ _id: ObjectId(deal._id) }, {
       $pull: { usersViewed: ObjectId(user._id) }
     })
-    await signForInvestment(investment)
+    await signedSPV(investment)
     return db.investments.findOne({ _id: ObjectId(investment._id) })
   },
   getInvestmentPreview: async (_, { payload }, { user, db }) => {

@@ -6,6 +6,7 @@ const DocSpring = require('docspring');
 const { capitalize, omit } = require('lodash');
 const { ObjectId } = require('mongodb');
 const { sendSPVDoc } = require('../mailers/spv-doc-mailer');
+const { wFormSigned } = require('../zaps/signedDocs')
 
 var config = new DocSpring.Configuration()
 config.apiTokenId = process.env.DOC_SPRING_API_ID
@@ -103,7 +104,7 @@ const updateSubmissionData = async (error, response, db, investmentId) => {
 }
 
 
-const updateUserDocuments = async (error, response, db, templateName, userId) => {
+const updateUserDocuments = async (error, response, db, templateName, userId, payload) => {
 	if (error) {
 		console.log(error)
 		// throw error
@@ -118,7 +119,11 @@ const updateUserDocuments = async (error, response, db, templateName, userId) =>
 		$push: { documents: docObj },
 	})
 
-  return new Promise(res, rej => {
+	if(response.status === 'success') {
+		wFormSigned(payload);
+	}
+
+  return new Promise((res, rej) => {
 		return res(submission)
 	})
 }
@@ -181,7 +186,7 @@ const createTaxDocument = async ({ payload, user, db }) => {
 	}
 
 
-  return await Promise.resolve(docspring.generatePDF(kycTemplateId, submission_data, (error, response) => updateUserDocuments(error, response, db, kycTemplateName, user._id).then((r) => {
+  return await Promise.resolve(docspring.generatePDF(kycTemplateId, submission_data, (error, response) => updateUserDocuments(error, response, db, kycTemplateName, user._id, payload).then((r) => {
 		return r
 	})))
 }
