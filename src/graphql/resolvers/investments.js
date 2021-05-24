@@ -127,11 +127,12 @@ const Mutations = {
     const deal = await db.deals.findOne({ _id: ObjectId(payload.dealId) })
 
     const signDeadline = get(deal, 'dealParams.signDeadline');
+    const status = get(deal, 'status');
 
     if (deal !== null && deal.isDemo === true) {
       return { _id: 'mockDemoInvestmentID' }
     }else if(signDeadline){
-      const isClosed = moment(signDeadline).add(2, 'days').isBefore(new Date());
+      const isClosed = status === 'closed';
       if(isClosed) throw new Error("The deal selected is closed.");
     }
     
