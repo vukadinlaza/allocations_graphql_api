@@ -1,6 +1,7 @@
 const { ObjectId } = require("mongodb")
-// const { isNumber, forEach } = require('lodash')
-// const { isAdmin, isAdminOrSameUser } = require('../permissions')
+const moment = require('moment');
+const { isNumber, forEach, get } = require('lodash')
+const { isAdmin, isAdminOrSameUser } = require('../permissions')
 const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
@@ -9,6 +10,7 @@ const { getTemplate, getInvestmentPreview } = require("../../docspring")
 const { signForInvestment } = require('../../zaps/signedDocs')
 const CommitmentMailer = require('../../mailers/commitment-mailer')
 const CommitmentCancelledMailer = require('../../mailers/commitment-cancelled-mailer')
+const { signedSPV } = require('../../zaps/signedDocs')
 
 /**
 
@@ -126,8 +128,14 @@ const Mutations = {
   confirmInvestment: async (_, { payload }, { user, db }) => {
     const deal = await db.deals.findOne({ _id: ObjectId(payload.dealId) })
 
+    const signDeadline = get(deal, 'dealParams.signDeadline');
+    const status = get(deal, 'status');
+
     if (deal !== null && deal.isDemo === true) {
       return { _id: 'mockDemoInvestmentID' }
+    }else if(signDeadline){
+      const isClosed = status === 'closed';
+      if(isClosed) throw new Error("The deal selected is closed.");
     }
 
     let investment = null
@@ -151,6 +159,7 @@ const Mutations = {
 
     getTemplate({
       db,
+      deal,
       payload: { ...payload, investmentId: investment._id },
       user,
       templateId: payload.docSpringTemplateId,
@@ -163,6 +172,8 @@ const Mutations = {
     })
     await signForInvestment(investment)
     await CommitmentMailer.sendNotice(deal, user, payload.investmentAmount)
+
+    await signedSPV(investment)    
 
     return db.investments.findOne({ _id: ObjectId(investment._id) })
   },

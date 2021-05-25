@@ -23,7 +23,6 @@ const { createTaxDocument } = require('../../docspring/index')
 const Users = require('../schema/users')
 const fetch = require('node-fetch');
 const moment = require('moment')
-const { wFormSigned } = require('../../zaps/signedDocs')
 
 /**
 
@@ -264,10 +263,9 @@ const Mutations = {
     if (payload.isDemo) {
       return db.users.findOne({ _id: ObjectId(user._id) })
     }
-    const { status } = await createTaxDocument({ payload, user, db })
-    if(status === 'success') {
-      await wFormSigned(payload)
-    }
+
+    await createTaxDocument({ payload, user, db })
+ 
     return db.users.findOne({ _id: ObjectId(user._id) })
   }
 }

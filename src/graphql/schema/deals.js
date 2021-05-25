@@ -160,6 +160,7 @@ type Mutation {
   rmDealDoc(deal_id: String!, title: String!): Deal
   addDealDocs(deal_id: String!, docs: Upload): Deal
   addUserAsViewed(deal_id: String!, user_id: String!): Deal 
+  deleteUserAsViewed(deal_id: String!, user_id: String!): Deal 
 }
 
 
