@@ -46,6 +46,7 @@ type User {
   termsOfServiceCF: Boolean
   profileImageKey: String,
   investorPersonalInfo: Investment
+  investorLimits: Object
 }
 
 input UserInput {
@@ -65,7 +66,8 @@ input UserInput {
   showCredit: Boolean
   showBuild: Boolean
   kycDoc: Object
-  termsOfServiceCF: Boolean
+  termsOfServiceCF: Boolean,
+  investorLimits: Object
 }
 
 extend type Query {
