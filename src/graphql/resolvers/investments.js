@@ -7,6 +7,9 @@ const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
 const Investments = require('../schema/investments')
 const { getTemplate, getInvestmentPreview } = require("../../docspring")
+const { signForInvestment } = require('../../zaps/signedDocs')
+const CommitmentMailer = require('../../mailers/commitment-mailer')
+const CommitmentCancelledMailer = require('../../mailers/commitment-cancelled-mailer')
 const { signedSPV } = require('../../zaps/signedDocs')
 
 /**
@@ -123,7 +126,6 @@ const Mutations = {
   },
 
   confirmInvestment: async (_, { payload }, { user, db }) => {
-
     const deal = await db.deals.findOne({ _id: ObjectId(payload.dealId) })
 
     const signDeadline = get(deal, 'dealParams.signDeadline');
@@ -135,7 +137,7 @@ const Mutations = {
       const isClosed = status === 'closed';
       if(isClosed) throw new Error("The deal selected is closed.");
     }
-    
+
     let investment = null
     if (!payload.investmentId) {
       const invsRes = await db.investments.insertOne({
@@ -150,21 +152,47 @@ const Mutations = {
       })
       investment = invsRes.ops[0]
     } else {
-
       investment = await db.investments.findOne({ _id: ObjectId(payload.investmentId) })
       const x = { ...investment.submissionData, ...payload }
       await db.investments.updateOne({ _id: ObjectId(investment._id) }, { $set: { submissionData: x } })
     }
-    getTemplate({ db, deal, payload: { ...payload, investmentId: investment._id }, user, templateId: payload.docSpringTemplateId, investmentDocs: investment.documents, investmentStatus: investment.status })
+
+    getTemplate({
+      db,
+      deal,
+      payload: { ...payload, investmentId: investment._id },
+      user,
+      templateId: payload.docSpringTemplateId,
+      investmentDocs: investment.documents,
+      investmentStatus: investment.status
+    })
+
     await db.deals.updateOne({ _id: ObjectId(deal._id) }, {
       $pull: { usersViewed: ObjectId(user._id) }
     })
-    await signedSPV(investment)
+    await signForInvestment(investment)
+    await CommitmentMailer.sendNotice(deal, user, payload.investmentAmount)
+
+    await signedSPV(investment)    
+
     return db.investments.findOne({ _id: ObjectId(investment._id) })
   },
   getInvestmentPreview: async (_, { payload }, { user, db }) => {
     const res = await getInvestmentPreview({ input: payload, templateId: payload.docSpringTemplateId, user })
     return { ...user, previewLink: res.download_url }
+  },
+
+  cancelCommitment: async (_, { _id, reason }, { user, db }) => {
+    try {
+      const investment = await db.investments.findOne({ _id: ObjectId(_id) })
+      if(!investment) return false
+      const deal = await db.deals.findOne({ _id: ObjectId(investment.deal_id) })
+      let res = await db.investments.deleteOne({ _id: ObjectId(_id) })
+      await CommitmentCancelledMailer.sendNotice(deal, user, investment, reason)
+      return res.deletedCount === 1
+    } catch (e) {
+      return false
+    }
   }
 }
 

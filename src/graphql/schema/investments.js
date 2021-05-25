@@ -54,6 +54,7 @@ extend type Mutation {
   getInvestmentPreview(payload: Object): Investment!
   confirmInvestment(payload: Object): Investment!
   deleteInvestment(_id: String!): Boolean
+  cancelCommitment(_id: String!, reason: String!): Boolean
 
   addInvestmentDoc(investment_id: String!, doc: Upload!, isK1: Boolean): String
   rmInvestmentDoc(investment_id: String!, file: String!): Boolean

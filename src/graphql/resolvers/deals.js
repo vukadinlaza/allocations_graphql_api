@@ -9,8 +9,8 @@ const Deals = require('../schema/deals')
 const logger = require('../../utils/logger')
 const { AuthenticationError } = require('apollo-server-express')
 
-/** 
-  
+/**
+
   Handles all deal logic
 
  **/
