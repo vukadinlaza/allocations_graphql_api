@@ -29,7 +29,7 @@ const getTemplateData = (input, user, templateId) => {
 		return {
 			signature: nameToUse,
 		}
-	}else if (oldTemplates.includes(templateId)) {
+	} else if (oldTemplates.includes(templateId)) {
 		return {
 			subscriptiondocsOne: capitalize(investor_type),
 			subscriptiondocsTwo: legalName,
@@ -44,13 +44,13 @@ const getTemplateData = (input, user, templateId) => {
 			memberName: legalName,
 			date: moment(new Date()).format('MM/DD/YYYY')
 		}
-	}else{
+	} else {
 		return {
 			'InvestorType': capitalize(investor_type),
 			'MemberName': legalName,
 			'SubAmount': investmentAmount,
 			'USStateIndividual': isTypeIndividual ? countryWithState : '',
-			'USStateEntity': isTypeEntity ? countryWithState  : '',
+			'USStateEntity': isTypeEntity ? countryWithState : '',
 			'AccredIndiv': isTypeIndividual ? accredited_investor_status : '',
 			'AccredEntity': isTypeIndividual ? '' : accredited_investor_status,
 			'Email': user.email,
@@ -68,7 +68,7 @@ const updateInvestment = async (db, investmentStatus, payload, newDocsArray) => 
 		amount: parseFloat(payload.investmentAmount.replace(/,/g, '')),
 		documents: newDocsArray
 	}
-	await db.investments.updateOne({ _id: ObjectId(payload.investmentId)}, { $set: updatedInvestmentData })
+	await db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, { $set: updatedInvestmentData })
 }
 
 
@@ -119,11 +119,11 @@ const updateUserDocuments = async (error, response, db, templateName, userId, pa
 		$push: { documents: docObj },
 	})
 
-	if(response.status === 'success') {
+	if (response.status === 'success') {
 		wFormSigned(payload);
 	}
 
-  return new Promise((res, rej) => {
+	return new Promise((res, rej) => {
 		return res(submission)
 	})
 }
@@ -148,20 +148,20 @@ const generateDocSpringPDF = (db, deal, user, input, templateName, timeStamp, te
 		},
 	}
 
-  
+
 	docspring.generatePDF(templateId, submission_data, (error, response) => {
 
 
-    const emailData = {
-      pdfDownloadUrl: response.submission.download_url,
-      email: user.email,
-      deal
-    }
+		const emailData = {
+			pdfDownloadUrl: response.submission.download_url,
+			email: user.email,
+			deal
+		}
 
-    sendSPVDoc(emailData)
+		sendSPVDoc(emailData)
 
-    return updateSubmissionData(error, response, db, input.investmentId)
-  })
+		return updateSubmissionData(error, response, db, input.investmentId)
+	})
 }
 
 
@@ -171,7 +171,7 @@ const createTaxDocument = async ({ payload, user, db }) => {
 	const sig = kycTemplateName === 'W-9' ? payload.name_as_shown_on_your_income_tax_return_name_is_required_on_this_line_do_not_leave_this_line_blank : payload.signature;
 	const keysToOmit = ['kycTemplateId', 'kycTemplateName', 'tax_classification', 'isDemo']
 	const data = omit({ ...payload, signature: sig }, keysToOmit);
-  
+
 	var submission_data = {
 		editable: false,
 		data: data,
@@ -186,7 +186,7 @@ const createTaxDocument = async ({ payload, user, db }) => {
 	}
 
 
-  return await Promise.resolve(docspring.generatePDF(kycTemplateId, submission_data, (error, response) => updateUserDocuments(error, response, db, kycTemplateName, user._id, payload).then((r) => {
+	return await Promise.resolve(docspring.generatePDF(kycTemplateId, submission_data, (error, response) => updateUserDocuments(error, response, db, kycTemplateName, user._id, payload).then((r) => {
 		return r
 	})))
 }
@@ -221,10 +221,10 @@ const getInvestmentPreview = ({ input, user }) => {
 const getTemplate = ({ db, deal, payload, user, templateId, investmentDocs = [], investmentStatus }) => {
 	// let template = await axios.get(`https://api.docspring.com/api/v1/templates/${templateId}`)
 	return docspring.getTemplate(templateId, (error, template) => {
-		if(error){
+		if (error) {
 			console.error(error);
 			throw error
-		}else{
+		} else {
 			const timeStamp = Date.now();
 			const adjTemplateName = template.name.replace(/\s+/g, "_");
 			const key = `investments/${payload.investmentId}/${timeStamp}-${adjTemplateName}.pdf`;
@@ -243,6 +243,9 @@ const getTemplate = ({ db, deal, payload, user, templateId, investmentDocs = [],
 		}
 	});
 }
+
+
+
 
 
 module.exports = { generateDocSpringPDF, getTemplate, createTaxDocument, getInvestmentPreview }
