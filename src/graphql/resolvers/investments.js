@@ -133,9 +133,9 @@ const Mutations = {
 
     if (deal !== null && deal.isDemo === true) {
       return { _id: 'mockDemoInvestmentID' }
-    }else if(signDeadline){
+    } else if (signDeadline) {
       const isClosed = status === 'closed';
-      if(isClosed) throw new Error("The deal selected is closed.");
+      if (isClosed) throw new Error("The deal selected is closed.");
     }
 
     let investment = null
@@ -170,10 +170,9 @@ const Mutations = {
     await db.deals.updateOne({ _id: ObjectId(deal._id) }, {
       $pull: { usersViewed: ObjectId(user._id) }
     })
-    await signForInvestment(investment)
     await CommitmentMailer.sendNotice(deal, user, payload.investmentAmount)
 
-    await signedSPV(investment)    
+    await signedSPV(investment)
 
     return db.investments.findOne({ _id: ObjectId(investment._id) })
   },
@@ -185,7 +184,7 @@ const Mutations = {
   cancelCommitment: async (_, { _id, reason }, { user, db }) => {
     try {
       const investment = await db.investments.findOne({ _id: ObjectId(_id) })
-      if(!investment) return false
+      if (!investment) return false
       const deal = await db.deals.findOne({ _id: ObjectId(investment.deal_id) })
       let res = await db.investments.deleteOne({ _id: ObjectId(_id) })
       await CommitmentCancelledMailer.sendNotice(deal, user, investment, reason)
