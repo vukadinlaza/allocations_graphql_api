@@ -1,5 +1,5 @@
-/** 
-  
+/**
+
   merges all the resolvers into one typeDef and resolver names 'resolvers'
 
  **/
@@ -17,7 +17,8 @@ const resolversRaw = [
   'accounts',
   'entities',
   'signingpackets',
-  'comments'
+  'comments',
+  'applications'
 ].map(name => require(`./${name}`))
 
 const splatReduce = (key) => resolversRaw.reduce((acc, r) => ({ ...acc, ...r[key] }), {})
@@ -32,4 +33,3 @@ module.exports = {
   typeDefs: resolversRaw.map(r => r.Schema),
   resolvers
 }
-

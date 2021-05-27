@@ -117,7 +117,7 @@ const User = {
   investorPersonalInfo: async (_, args, ctx) => {
     const { db, user } = ctx;
     let userInvesments = await db.investments.find({ user_id: user._id }).toArray();
-    let lastInvestment = userInvesments.pop();
+    let lastInvestment = userInvesments.filter(investment => investment.submissionData).pop();
     return lastInvestment;
   }
 }
@@ -265,7 +265,7 @@ const Mutations = {
     }
 
     await createTaxDocument({ payload, user, db })
- 
+
     return db.users.findOne({ _id: ObjectId(user._id) })
   }
 }
