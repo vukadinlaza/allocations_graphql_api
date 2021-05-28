@@ -1,10 +1,8 @@
 const { ObjectId } = require("mongodb")
-const { sumBy } = require('lodash')
-const { gql } = require('apollo-server-express')
-const { isAdmin, isOrgAdmin, ensureFundAdmin } = require('../permissions')
 const fetch = require('node-fetch');
 const moment = require('moment')
 const Applications = require('../schema/applications')
+const Uploader = require('../../uploaders/application-docs')
 
 /**
 
@@ -22,11 +20,24 @@ const Applications = require('../schema/applications')
  }
 
 const Mutations = {
-  /** Add order w/ proper associations **/
-  createApplication: async (_, { application }, ctx) => {
-    console.log(application);
-    const newApplication = await ctx.db.applications.insertOne(application)
-    console.log({newApplication});
+  /** Create deal application **/
+  createApplication: async (_, { application }, { user, db }) => {
+    const { pitchDocument } = application;
+
+    if (pitchDocument) {
+      const file = await pitchDocument;
+      const s3Path = await Uploader.uploadPitchDoc(user._id, file, "pitch-document")
+      application.pitchDocument = s3Path;
+    }
+
+    const newApplication = await db.applications.insertOne(application)
+    const userApplications = user.dealApplications || [];
+    userApplications.push(newApplication.insertedId)
+
+    db.users.updateOne(
+      { _id: ObjectId(user._id) },
+      { $set: { ...user, dealApplications: userApplications } }
+    )
     return newApplication
   }
 }

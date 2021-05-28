@@ -4,33 +4,37 @@ module.exports = gql(`
   type Application {
     _id: String
     closeDate: String
-    disqualifyEvent: String
+    disqualifyEvent: Boolean
+    fundingVehicle: Boolean
+    priorRaise: Boolean
+    research: Boolean
+    withinUS: Boolean
+    exchangeAct: Boolean
     email: String
-    exchangeAct: String
     issuerName: String
     phoneNumber: String
     principalName: [String]
-    priorRaise: String
     raiseAmount: String
     raiseType: String
-    research: String
-    withinUS: String
+    pitchDocument: Document
   }
 
   input ApplicationInput {
     _id: String
     closeDate: String
-    disqualifyEvent: String
+    disqualifyEvent: Boolean
+    fundingVehicle: Boolean
+    priorRaise: Boolean
+    research: Boolean
+    withinUS: Boolean
+    exchangeAct: Boolean
     email: String
-    exchangeAct: String
     issuerName: String
     phoneNumber: String
     principalName: [String]
-    priorRaise: String
     raiseAmount: String
     raiseType: String
-    research: String
-    withinUS: String
+    pitchDocument: Upload
   }
 
   extend type Mutation {
