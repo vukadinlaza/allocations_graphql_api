@@ -7,6 +7,7 @@ const { capitalize, omit } = require('lodash');
 const { ObjectId } = require('mongodb');
 const { sendSPVDoc } = require('../mailers/spv-doc-mailer');
 const { wFormSigned } = require('../zaps/signedDocs')
+const { DocSpringApi } = require('./docspringApi');
 
 var config = new DocSpring.Configuration()
 config.apiTokenId = process.env.DOC_SPRING_API_ID
@@ -14,9 +15,9 @@ config.apiTokenSecret = process.env.DOC_SPRING_API_SECRET
 
 let docspring = new DocSpring.Client(config)
 
+const DocSpringAPI = new DocSpringApi(process.env.DOC_SPRING_API_ID, process.env.DOC_SPRING_API_SECRET)
 
 const getTemplateData = (input, user, templateId) => {
-
 	const SIGNATURE_ONLY_TEMPLATE = 'tpl_ctrRDXgQdKz5YGg9QK';
 	const oldTemplates = ['tpl_RrmjKbpFRr7qhKY3dD', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_Z6jkb55rjqThssk3jG', 'tpl_ARmHkgKjECPmDT6ad9', 'tpl_3nKjygaFgz44KyCANJ', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_RrmjKbpFRr7qhKY3dD']
 	const { investor_type, legalName, investmentAmount, country, state, accredited_investor_status, fullName } = input;
@@ -104,27 +105,22 @@ const updateSubmissionData = async (error, response, db, investmentId) => {
 }
 
 
-const updateUserDocuments = async (error, response, db, templateName, userId, payload) => {
-	if (error) {
-		console.log(error)
-		// throw error
-	}
-	let { submission } = response;
+const updateUserDocuments = async (response, db, templateName, userId, payload) => {
+	const { id, downloadUrl } = response;
 	const docObj = {
 		documentName: templateName,
-		submissionId: submission.id,
-		docspringPermDownloadLink: submission.permanent_download_url
+		submissionId: id,
+		docspringPermDownloadLink: downloadUrl
 	}
+
 	await db.users.updateOne({ _id: ObjectId(userId) }, {
 		$push: { documents: docObj },
 	})
 
-	if (response.status === 'success') {
-		wFormSigned(payload);
-	}
-
-	return new Promise((res, rej) => {
-		return res(submission)
+	wFormSigned(payload);
+	
+  	return new Promise((res, rej) => {
+		return res(response)
 	})
 }
 
@@ -185,10 +181,9 @@ const createTaxDocument = async ({ payload, user, db }) => {
 		wait: true,
 	}
 
-
-	return await Promise.resolve(docspring.generatePDF(kycTemplateId, submission_data, (error, response) => updateUserDocuments(error, response, db, kycTemplateName, user._id, payload).then((r) => {
-		return r
-	})))
+	const response = await DocSpringAPI.generatePDF(kycTemplateId, submission_data);
+	if (response.status !== 'success') return;
+	return await updateUserDocuments(response, db, kycTemplateName, user._id, payload);
 }
 
 
