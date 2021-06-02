@@ -172,7 +172,11 @@ const Mutations = {
     })
     await CommitmentMailer.sendNotice(deal, user, payload.investmentAmount)
 
-    await signedSPV(investment)
+    const zapData = {
+      ...investment,
+      dealName: deal.company_name
+    }
+    await signedSPV(zapData)
 
     return db.investments.findOne({ _id: ObjectId(investment._id) })
   },

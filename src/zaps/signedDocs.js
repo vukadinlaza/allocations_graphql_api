@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-const signedSPV = async ({ submissionData }) => {
+const signedSPV = async ({ submissionData, dealName }) => {
   let url = null;
   if (process.env.NODE_ENV === "production") {
     url = "https://hooks.zapier.com/hooks/catch/10079430/bykd5dx/";
@@ -10,6 +10,7 @@ const signedSPV = async ({ submissionData }) => {
   await fetch(url, {
     method: "post",
     body: JSON.stringify({
+      dealName,
       name:
         submissionData.investor_type === "entity"
           ? submissionData.fullName
