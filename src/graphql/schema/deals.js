@@ -22,6 +22,8 @@ type Deal {
   target: String
   amount_raised: String
   investment: Investment
+  investmentType: String
+  differentPortfolioTerms: Boolean
   investments: [Investment]
   emailInvites: [EmailInvite]
   invitedInvestors: [User]
@@ -176,11 +178,13 @@ input DealInput {
   status: String
   closed: Boolean
   allInvited: Boolean
+  differentPortfolioTerms: Boolean
   wireDoc: Upload
   memo: String
   amount: Int
   target: String
   amount_raised: String
+  investmentType: String
   dealParams: DealParamsInput
   last_valuation: String
   no_exchange: Boolean
