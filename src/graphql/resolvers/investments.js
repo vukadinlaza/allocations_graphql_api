@@ -8,8 +8,9 @@ const Uploader = require('../../uploaders/investor-docs')
 const Investments = require('../schema/investments')
 const { getTemplate, getInvestmentPreview } = require("../../docspring")
 const { signForInvestment } = require('../../zaps/signedDocs')
-const CommitmentMailer = require('../../mailers/commitment-mailer')
-const CommitmentCancelledMailer = require('../../mailers/commitment-cancelled-mailer')
+const Mailer = require('../../mailers/mailer')
+const commitmentTemplate = require('../../mailers/templates/commitment-template')
+const commitmentCancelledTemplate = require('../../mailers/templates/commitment-cancelled-template')
 const { signedSPV } = require('../../zaps/signedDocs')
 
 /**
@@ -170,7 +171,24 @@ const Mutations = {
     await db.deals.updateOne({ _id: ObjectId(deal._id) }, {
       $pull: { usersViewed: ObjectId(user._id) }
     })
-    await CommitmentMailer.sendNotice(deal, user, payload.investmentAmount)
+
+    const emailData = {
+      mainData: {
+        to: user.email,
+        from: "support@allocations.com",
+        subject: `Commitment to invest`,
+      },
+      template: commitmentTemplate,
+      templateData: {
+        username: user.first_name? `${user.first_name}` : user.email,
+        issuer: deal.company_name || '',
+        price: '$59',
+        totalAmount: `$${payload.investmentAmount}`,
+        deadline: moment(deal.dealParams.signDeadline).subtract(2, 'days').format('MMM DD, YYYY')
+      }
+    }
+
+    await Mailer.sendEmail(emailData)
 
     const zapData = {
       ...investment,
@@ -189,9 +207,27 @@ const Mutations = {
     try {
       const investment = await db.investments.findOne({ _id: ObjectId(_id) })
       if (!investment) return false
+
       const deal = await db.deals.findOne({ _id: ObjectId(investment.deal_id) })
       let res = await db.investments.deleteOne({ _id: ObjectId(_id) })
-      await CommitmentCancelledMailer.sendNotice(deal, user, investment, reason)
+
+      const emailData = {
+        mainData: {
+          to: user.email,
+          from: "support@allocations.com",
+          subject: `Commitment Cancelled`,
+        },
+        template: commitmentCancelledTemplate,
+        templateData: {
+          username: user.first_name? `${user.first_name}` : user.email,
+          issuer: deal.company_name || '',
+          reason,
+          refundAmount: `$${investment.amount}`,
+          refundDate: moment(new Date()).add(2, 'days').format('MMM DD, YYYY')
+        }
+      }
+
+      await Mailer.sendEmail(emailData)
       return res.deletedCount === 1
     } catch (e) {
       return false

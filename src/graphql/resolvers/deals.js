@@ -1,13 +1,16 @@
 const { ObjectId } = require("mongodb")
 const _ = require('lodash')
 const fetch = require('node-fetch');
+const moment = require('moment');
+const { AuthenticationError } = require('apollo-server-express')
 const { isAdmin, isOrgAdmin, ensureFundAdmin, isFundAdmin } = require('../permissions')
 const Cloudfront = require('../../cloudfront')
 const DealDocUploader = require('../../uploaders/deal-docs')
 const DealMailer = require('../../mailers/deal-mailer')
 const Deals = require('../schema/deals')
 const logger = require('../../utils/logger')
-const { AuthenticationError } = require('apollo-server-express')
+const Mailer = require('../../mailers/mailer')
+const txConfirmationTemplate = require('../../mailers/templates/tx-confirmation-template')
 
 /**
 
@@ -173,6 +176,7 @@ const Mutations = {
   },
   /** special handling for wire instructions upload **/
   updateDeal: async (_, { org, deal: { _id, wireDoc, ...deal } }, ctx) => {
+    const { user } = ctx;
     if (deal.isPostingComment) {
       const res = await ctx.db.deals.findOneAndUpdate(
         { _id: ObjectId(_id) },
@@ -193,7 +197,29 @@ const Mutations = {
     }
 
     if (deal.status === 'closed') {
+      const investment = await ctx.db.investments.findOne({deal_id: ObjectId(_id), user_id: user._id})
       await ctx.db.investments.updateMany({ deal_id: ObjectId(_id), status: 'wired' }, { $set: { status: 'complete' } })
+      if(investment){
+        const emailData = {
+          mainData: {
+            to: user.email,
+            from: "support@allocations.com",
+            subject: `Commitment to invest`,
+          },
+          template: txConfirmationTemplate,
+          templateData: {
+            username: user.first_name? `${user.first_name}` : user.email,
+            issuer: deal.company_name || '',
+            type: 'SAFE',
+            price: 50,
+            totalSold: investment.amount * 5,
+            totalAmount: investment.amount,
+            date: moment(new Date()).format('MMM DD, YYYY')
+          }
+        }
+
+        await Mailer.sendEmail(emailData)
+      }
     }
 
     const res = await ctx.db.deals.findOneAndUpdate(
