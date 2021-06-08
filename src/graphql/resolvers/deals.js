@@ -11,6 +11,7 @@ const Deals = require('../schema/deals')
 const logger = require('../../utils/logger')
 const Mailer = require('../../mailers/mailer')
 const txConfirmationTemplate = require('../../mailers/templates/tx-confirmation-template')
+const { nWithCommas } = require('../../utils/common.js')
 
 /**
 
@@ -197,28 +198,50 @@ const Mutations = {
     }
 
     if (deal.status === 'closed') {
-      const investment = await ctx.db.investments.findOne({deal_id: ObjectId(_id), user_id: user._id})
-      await ctx.db.investments.updateMany({ deal_id: ObjectId(_id), status: 'wired' }, { $set: { status: 'complete' } })
-      if(investment){
-        const emailData = {
-          mainData: {
-            to: user.email,
-            from: "support@allocations.com",
-            subject: `Commitment to invest`,
-          },
-          template: txConfirmationTemplate,
-          templateData: {
-            username: user.first_name? `${user.first_name}` : user.email,
-            issuer: deal.company_name || '',
-            type: 'SAFE',
-            price: 50,
-            totalSold: investment.amount * 5,
-            totalAmount: investment.amount,
-            date: moment(new Date()).format('MMM DD, YYYY')
-          }
-        }
+      const investments = await ctx.db.investments.aggregate([
+        { $match: { deal_id: ObjectId(_id) } },
+        {
+            $lookup: {
+               from: 'users',
+               localField: 'user_id',
+               foreignField: "_id",
+               as: 'user'
+             }
+         },
+         { $unwind: '$user' },
+         {
+           $project: { user: { email: 1, first_name: 1 }, amount: 1 }
+         }
+       ]).toArray()
 
-        await Mailer.sendEmail(emailData)
+      await ctx.db.investments.updateMany({ deal_id: ObjectId(_id), status: 'wired' }, { $set: { status: 'complete' } })
+
+      if(investments.length){
+        const price = 50;
+        investments.forEach(async investment => {
+          const { user } = investment;
+          const emailData = {
+            mainData: {
+              to: user.email,
+              from: "support@allocations.com",
+              subject: `Commitment to invest`,
+            },
+            template: txConfirmationTemplate,
+            templateData: {
+              username: user.first_name? `${user.first_name}` : user.email,
+              issuer: deal.company_name || '',
+              type: 'SAFE',
+              price,
+              totalSold: nWithCommas(investment.amount * 5),
+              totalAmount: nWithCommas(investment.amount),
+              unitsOwned: nWithCommas(investment.amount/price),
+              date: moment(new Date()).format('MMM DD, YYYY')
+            }
+          }
+
+          await Mailer.sendEmail(emailData)
+
+        });
       }
     }
 

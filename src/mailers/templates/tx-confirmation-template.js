@@ -1,5 +1,5 @@
 
-module.exports = function template ({ username, issuer, type, price, totalSold, totalAmount, date }) {
+module.exports = function template ({ username, issuer, type, price, totalSold, totalAmount, unitsOwned, date }) {
   return `
 
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -293,7 +293,7 @@ module.exports = function template ({ username, issuer, type, price, totalSold, 
                                                               <td class="paragraph bullet value" height="100%" valign="top" bgcolor="" role="module-content">
                                                                 <div style="font-family: inherit; text-align: start">
                                                                   <span style="font-family: helvetica, sans-serif;">
-                                                                    ${Math.floor(totalAmount/price)}
+                                                                    ${unitsOwned}
                                                                   </span>
                                                                 </div>
                                                               </td>
