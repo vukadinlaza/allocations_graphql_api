@@ -20,11 +20,12 @@ const DocSpringAPI = new DocSpringApi(process.env.DOC_SPRING_API_ID, process.env
 const getTemplateData = (input, user, templateId) => {
 	const SIGNATURE_ONLY_TEMPLATE = 'tpl_ctrRDXgQdKz5YGg9QK';
 	const oldTemplates = ['tpl_RrmjKbpFRr7qhKY3dD', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_Z6jkb55rjqThssk3jG', 'tpl_ARmHkgKjECPmDT6ad9', 'tpl_3nKjygaFgz44KyCANJ', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_RrmjKbpFRr7qhKY3dD']
-	const { investor_type, legalName, investmentAmount, country, state, accredited_investor_status, fullName } = input;
+	const { investor_type, legalName, investmentAmount, country, state, accredited_investor_status, fullName, title } = input;
 	const isTypeIndividual = (investor_type === 'individual');
 	const isTypeEntity = (investor_type === 'entity');
 	const countryWithState = country + (country === 'United States' ? `, ${state}` : '');
 	const nameToUse = isTypeIndividual ? legalName : fullName;
+  const communeDeals = ['tpl_hK65xPJdKpgTPyks9H', 'tpl_Y6hNCEc6CqzNkqpyPp']
 
 	if (templateId === SIGNATURE_ONLY_TEMPLATE) {
 		return {
@@ -44,6 +45,21 @@ const getTemplateData = (input, user, templateId) => {
 			signature: nameToUse,
 			memberName: legalName,
 			date: moment(new Date()).format('MM/DD/YYYY')
+		}
+	} else if(communeDeals.includes(templateId)) {
+		return {
+			'InvestorType': capitalize(investor_type),
+			'MemberName': legalName,
+			'SubAmount': investmentAmount,
+			'USStateIndividual': isTypeIndividual ? countryWithState : '',
+			'USStateEntity': isTypeEntity ? countryWithState : '',
+			'AccredIndiv': isTypeIndividual ? accredited_investor_status : '',
+			'AccredEntity': isTypeIndividual ? '' : accredited_investor_status,
+			'Email': user.email,
+			'FullName': nameToUse,
+			'Signature': nameToUse,
+			'Date Signed': moment(new Date()).format('MM/DD/YYYY'),
+      'Title': title
 		}
 	} else {
 		return {
