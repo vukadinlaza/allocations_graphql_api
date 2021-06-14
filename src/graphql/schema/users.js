@@ -73,6 +73,7 @@ input UserInput {
 extend type Query {
   investor(email: String, _id: String, deal_id: String): User
   allInvestors: [User]
+  allUsers(filterField: String, filterValue: String, pagination: Int!, currentPage: Int!, sortField: String, sortOrder: Int): [User]
   searchUsers(org: String!, q: String!, limit: Int): [User]
   getLink(input: Object): Object
 }
