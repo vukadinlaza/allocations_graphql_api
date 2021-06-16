@@ -135,7 +135,7 @@ const Queries = {
     isAdmin(ctx)
     return ctx.db.collection("users").find({}).toArray()
   },
-  allUsers: (_, { filterField, filterValue, pagination, currentPage, sortField, sortOrder }, ctx) => {
+  allUsers: (_, { pagination: { filterField, filterValue, pagination, currentPage, sortField, sortOrder } }, ctx) => {
     isAdmin(ctx)
     const documentsToSkip = pagination * (currentPage)
     const match = {};
