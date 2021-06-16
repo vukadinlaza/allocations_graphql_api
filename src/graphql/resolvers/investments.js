@@ -85,7 +85,7 @@ const Queries = {
 
     aggregation.push({$match: match})
     if(sortField && sortOrder) aggregation.push({$sort: sortBy})
-    console.log({  pagination, currentPage, filterField, filterValue, filterNestedKey, filterNestedCollection, filterLocalFieldKey, sortField, sortOrder, sortNestedKey, sortNestedCollection, sortLocalFieldKey }, JSON.stringify(aggregation));
+
     let query = ctx.db.collection("investments")
                       .aggregate(aggregation)
                       .skip(documentsToSkip)
