@@ -229,8 +229,9 @@ const Mutations = {
         deadline: moment(deal.dealParams.signDeadline).subtract(2, 'days').format('MMM DD, YYYY')
       }
     }
-
-    await Mailer.sendEmail(emailData)
+    if (deal && deal.slug === 'luna-mega') {
+      await Mailer.sendEmail(emailData)
+    }
 
     const zapData = {
       ...investment,

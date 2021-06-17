@@ -216,7 +216,7 @@ const Mutations = {
 
       await ctx.db.investments.updateMany({ deal_id: ObjectId(_id), status: 'wired' }, { $set: { status: 'complete' } })
 
-      if(investments.length){
+      if(investments.length && deal && deal.slug === 'luna-mega'){
         const price = 50;
         investments.forEach(async investment => {
           const { user } = investment;
