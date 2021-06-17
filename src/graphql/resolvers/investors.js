@@ -133,7 +133,27 @@ const Queries = {
   },
   allInvestors: (_, args, ctx) => {
     isAdmin(ctx)
-    return db.collection("users").find({}).toArray()
+    return ctx.db.collection("users").find({}).toArray()
+  },
+  allUsers: (_, { pagination: { filterField, filterValue, pagination, currentPage, sortField, sortOrder } }, ctx) => {
+    isAdmin(ctx)
+    const documentsToSkip = pagination * (currentPage)
+    const match = {};
+    if(filterValue){
+      match[filterField] = { "$regex" : `/*${filterValue}/*` , "$options" : "i"}
+    }
+    let sortBy = {};
+    sortBy[`${sortField? sortField : filterField}`] = (sortOrder? sortOrder : 1)
+
+    let query = ctx.db.collection("users")
+                      .aggregate([
+                        {$match: match},
+                        {$sort: sortBy}
+                      ])
+                      .skip(documentsToSkip)
+                      .limit(pagination)
+                      .toArray()
+    return query;
   },
   searchUsers: async (_, { org, q, limit }, ctx) => {
     const orgRecord = await ensureFundAdmin(org, ctx)

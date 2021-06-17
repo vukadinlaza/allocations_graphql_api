@@ -11,7 +11,7 @@ const { putInvestorDoc } = require('../../uploaders/investor-docs')
 const { sendConfirmation } = require('../../mailers/signing-complete')
 const s3 = new S3({ apiVersion: '2006-03-01' })
 
-let Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-test"
+let Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : process.env.AWS_S3_BUCKET
 
 module.exports = Router()
   .post('/docusign', async (req, res, next) => {
