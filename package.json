@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "start": "npm run serve",
     "start:watch": "nodemon src/app.js",
     "deploy-prod": "yarn run test && git push heroku-prod",
@@ -110,5 +111,9 @@
     "testPathIgnorePatterns": [
       "test/*"
     ]
+  },
+  "resolutions": {
+    "fs-capacitor": "^6.2.0",
+    "graphql-upload": "^11.0.0"
   }
 }
