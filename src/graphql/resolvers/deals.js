@@ -281,6 +281,17 @@ const Mutations = {
       throw new Error("name collision")
     }
 
+    if (process.env.NODE_ENV === 'production') {
+      await fetch('https://hooks.zapier.com/hooks/catch/7904699/onwul0r/', {
+        method: 'post',
+        body: JSON.stringify({
+          organization: orgName,
+          dealName: deal.company_name
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
     const { ops: [org] } = await db.organizations.insertOne({
       name: orgName,
       created_at: Date.now(),
