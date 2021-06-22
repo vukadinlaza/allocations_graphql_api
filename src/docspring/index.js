@@ -18,7 +18,6 @@ let docspring = new DocSpring.Client(config)
 const DocSpringAPI = new DocSpringApi(process.env.DOC_SPRING_API_ID, process.env.DOC_SPRING_API_SECRET)
 
 const getTemplateData = (input, user, templateId) => {
-
   const {
     ssn,
     ein,

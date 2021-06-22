@@ -1,13 +1,17 @@
 const { ObjectId } = require("mongodb")
 const _ = require('lodash')
 const fetch = require('node-fetch');
+const moment = require('moment');
+const { AuthenticationError } = require('apollo-server-express')
 const { isAdmin, isOrgAdmin, ensureFundAdmin, isFundAdmin } = require('../permissions')
 const Cloudfront = require('../../cloudfront')
 const DealDocUploader = require('../../uploaders/deal-docs')
 const DealMailer = require('../../mailers/deal-mailer')
 const Deals = require('../schema/deals')
 const logger = require('../../utils/logger')
-const { AuthenticationError } = require('apollo-server-express')
+const Mailer = require('../../mailers/mailer')
+const txConfirmationTemplate = require('../../mailers/templates/tx-confirmation-template')
+const { nWithCommas } = require('../../utils/common.js')
 
 /**
 
@@ -173,6 +177,7 @@ const Mutations = {
   },
   /** special handling for wire instructions upload **/
   updateDeal: async (_, { org, deal: { _id, wireDoc, ...deal } }, ctx) => {
+    const { user } = ctx;
     if (deal.isPostingComment) {
       const res = await ctx.db.deals.findOneAndUpdate(
         { _id: ObjectId(_id) },
@@ -193,7 +198,51 @@ const Mutations = {
     }
 
     if (deal.status === 'closed') {
+      const investments = await ctx.db.investments.aggregate([
+        { $match: { deal_id: ObjectId(_id) } },
+        {
+            $lookup: {
+               from: 'users',
+               localField: 'user_id',
+               foreignField: "_id",
+               as: 'user'
+             }
+         },
+         { $unwind: '$user' },
+         {
+           $project: { user: { email: 1, first_name: 1 }, amount: 1 }
+         }
+       ]).toArray()
+
       await ctx.db.investments.updateMany({ deal_id: ObjectId(_id), status: 'wired' }, { $set: { status: 'complete' } })
+
+      if(investments.length && deal && deal.slug === 'luna-mega'){
+        const price = 50;
+        investments.forEach(async investment => {
+          const { user } = investment;
+          const emailData = {
+            mainData: {
+              to: user.email,
+              from: "support@allocations.com",
+              subject: `Commitment to invest`,
+            },
+            template: txConfirmationTemplate,
+            templateData: {
+              username: user.first_name? `${user.first_name}` : user.email,
+              issuer: deal.company_name || '',
+              type: 'SAFE',
+              price,
+              totalSold: nWithCommas(investment.amount * 5),
+              totalAmount: nWithCommas(investment.amount),
+              unitsOwned: nWithCommas(investment.amount/price),
+              date: moment(new Date()).format('MMM DD, YYYY')
+            }
+          }
+
+          await Mailer.sendEmail(emailData)
+
+        });
+      }
     }
 
     const res = await ctx.db.deals.findOneAndUpdate(
