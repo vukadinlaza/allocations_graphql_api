@@ -59,7 +59,7 @@ const getTemplateData = (input, user, templateId) => {
 			'FullName': nameToUse,
 			'Signature': nameToUse,
 			'Date Signed': moment(new Date()).format('MM/DD/YYYY'),
-			'Title': title || ''
+			'Title': isTypeIndividual ? '' : title || ''
 		}
 	} else {
 		return {
