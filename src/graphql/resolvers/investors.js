@@ -279,13 +279,23 @@ const Mutations = {
       headers: { 'Content-Type': 'application/json' },
     })
   },
+  
   submitTaxDocument: async (_, { payload }, { db, user }) => {
     if (payload.isDemo) {
       return db.users.findOne({ _id: ObjectId(user._id) })
     }
 
-    await createTaxDocument({ payload, user, db })
+    const { kycTemplateId, kycTemplateName  } = payload;
+    const isAllocationsUser = user.email.includes('@allocations.com;')
 
+    if (process.env.NODE_ENV === 'production' && !isAllocationsUser) {
+      fetch('https://hooks.zapier.com/hooks/catch/7904699/byt3rnq/', {
+        method: 'POST',
+        body: JSON.stringify({ ...payload, kycTemplateId, kycTemplateName }),
+      });
+    }
+
+    await createTaxDocument({ payload, user, db })
     return db.users.findOne({ _id: ObjectId(user._id) })
   }
 }
