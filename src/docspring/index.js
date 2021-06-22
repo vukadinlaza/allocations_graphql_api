@@ -25,7 +25,7 @@ const getTemplateData = (input, user, templateId) => {
 	const isTypeEntity = (investor_type === 'entity');
 	const countryWithState = country + (country === 'United States' ? `, ${state}` : '');
 	const nameToUse = isTypeIndividual ? legalName : fullName;
-  const communeDeals = ['tpl_hK65xPJdKpgTPyks9H', 'tpl_Y6hNCEc6CqzNkqpyPp']
+	const communeDeals = ['tpl_hK65xPJdKpgTPyks9H', 'tpl_Y6hNCEc6CqzNkqpyPp']
 
 	if (templateId === SIGNATURE_ONLY_TEMPLATE) {
 		return {
@@ -46,7 +46,7 @@ const getTemplateData = (input, user, templateId) => {
 			memberName: legalName,
 			date: moment(new Date()).format('MM/DD/YYYY')
 		}
-	} else if(communeDeals.includes(templateId)) {
+	} else if (communeDeals.includes(templateId)) {
 		return {
 			'InvestorType': capitalize(investor_type),
 			'MemberName': legalName,
@@ -59,7 +59,7 @@ const getTemplateData = (input, user, templateId) => {
 			'FullName': nameToUse,
 			'Signature': nameToUse,
 			'Date Signed': moment(new Date()).format('MM/DD/YYYY'),
-      'Title': title
+			'Title': title || ''
 		}
 	} else {
 		return {
@@ -134,8 +134,8 @@ const updateUserDocuments = async (response, db, templateName, userId, payload) 
 	})
 
 	wFormSigned(payload);
-	
-  	return new Promise((res, rej) => {
+
+	return new Promise((res, rej) => {
 		return res(response)
 	})
 }
