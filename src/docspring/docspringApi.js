@@ -125,11 +125,24 @@ class DocSpringApi {
         }, 2000);
       });
     } else {
-      const { status } = await response.json();
-      return { status };
+      const response = await response.json();
+      return { status: response.status || response.error};
     }
   }
 
+    /**
+   * @typedef GetTemplateResponse
+   * @property {string} [name]
+   * @property {string} [downloadUrl]
+   * @property {string} [permanentDocumentUrl]
+   * @property {string} status
+   */
+
+    /**
+   * Makes api call to get a template based in an ID
+   * @param {string} templateId - the id for the docspring template
+   * @return {Promise<GetTemplateResponse>} - a promise the resolves to GetTemplateResponse
+   */
   async getTemplate(templateId) {
     const response = await this.request(`${this.#url}/templates/${templateId}`, "GET")
 
@@ -144,8 +157,8 @@ class DocSpringApi {
       }
     }
     else {
-      const status = await response.json()
-      return { status };
+      const response = await response.json()
+      return { status: response.status || response.error };
     }
   }
 }
