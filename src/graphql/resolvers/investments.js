@@ -6,7 +6,7 @@ const { AuthenticationError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
 const Investments = require('../schema/investments')
-const { getTemplate, getInvestmentPreview } = require("../../docspring")
+const { getInvestmentPreview, getTemplate } = require("../../docspring")
 const { signForInvestment } = require('../../zaps/signedDocs')
 const Mailer = require('../../mailers/mailer')
 const commitmentTemplate = require('../../mailers/templates/commitment-template')
@@ -200,7 +200,7 @@ const Mutations = {
       await db.investments.updateOne({ _id: ObjectId(investment._id) }, { $set: { submissionData: x } })
     }
 
-    getTemplate({
+    const downloadUrl = await getTemplate({
       db,
       deal,
       payload: { ...payload, investmentId: investment._id },
@@ -235,7 +235,8 @@ const Mutations = {
 
     const zapData = {
       ...investment,
-      dealName: deal.company_name
+      dealName: deal.company_name,
+      downloadUrl
     }
     await signedSPV(zapData)
 
