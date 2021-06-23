@@ -102,7 +102,7 @@ const getTemplateData = (input, user, templateId) => {
       'Email': user.email || ' ',
       'FullName': isTypeEntity ? nameToUse : ' ',
       'EntityName': isTypeEntity ? nameToUse : ' ',
-      'InvestorName': isTypeIndividual ? legalName : ' ',
+      'InvestorName': isTypeIndividual ? (legalName || ' ') : (legalName || ' '),
       'IndividualName': isTypeIndividual ? nameToUse : ' ',
       'Signature': nameToUse,
       'EntitySignature': isTypeEntity ? nameToUse : ' ',
