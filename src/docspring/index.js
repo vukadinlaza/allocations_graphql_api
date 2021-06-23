@@ -175,17 +175,11 @@ const addPacket = async (db, user, payload) => {
 }
 
 
-const updateSubmissionData = async (error, response, db, investmentId) => {
-  if (error) {
-    console.log(response, error)
-    throw error
-  }
-
-  let { submission } = response;
-  await db.investments.updateOne({ _id: ObjectId(investmentId) }, {
-    $set: { 'submissionData.submissionId': submission.id },
-  })
-  return submission
+const updateSubmissionData = async (response, db, investmentId) => {
+	await db.investments.updateOne({ _id: ObjectId(investmentId) }, {
+		$set: { 'submissionData.submissionId': response.id },
+	})
+	return response
 }
 
 
@@ -209,40 +203,37 @@ const updateUserDocuments = async (response, db, templateName, userId, payload) 
 }
 
 
-const generateDocSpringPDF = (db, deal, user, input, templateName, timeStamp, templateId) => {
+const generateDocSpringPDF = async (db, deal, user, input, templateName, timeStamp, templateId) => {
 
+	let data = getTemplateData(input, user, templateId);
+	var submission_data = {
+		editable: false,
+		data: data,
+		metadata: {
+			user_id: user._id,
+			investmentId: input.investmentId,
+			templateName: templateName,
+			timeStamp: timeStamp
+		},
+		field_overrides: {
+			// title: {
+			// 	required: false,
+			// },
+		},
+	}
 
-  let data = getTemplateData(input, user, templateId);
-  var submission_data = {
-    editable: false,
-    data: data,
-    metadata: {
-      user_id: user._id,
-      investmentId: input.investmentId,
-      templateName: templateName,
-      timeStamp: timeStamp
-    },
-    field_overrides: {
-      // title: {
-      // 	required: false,
-      // },
-    },
-  }
+	const response = await DocSpringAPI.generatePDF(templateId, submission_data);
+	if (response.status !== 'success') return;
+	
+	const emailData = {
+		pdfDownloadUrl: response.downloadUrl,
+		email: user.email,
+		deal
+	} 
 
-
-  docspring.generatePDF(templateId, submission_data, (error, response) => {
-
-
-    const emailData = {
-      pdfDownloadUrl: response.submission.download_url,
-      email: user.email,
-      deal
-    }
-
-    sendSPVDoc(emailData)
-
-    return updateSubmissionData(error, response, db, input.investmentId)
-  })
+	sendSPVDoc(emailData)
+	updateSubmissionData(response, db, input.investmentId)
+	return response.downloadUrl
 }
 
 
@@ -300,34 +291,23 @@ const getInvestmentPreview = async ({ input, user }) => {
 }
 
 
-const getTemplate = ({ db, deal, payload, user, templateId, investmentDocs = [], investmentStatus }) => {
-  // let template = await axios.get(`https://api.docspring.com/api/v1/templates/${templateId}`)
-  return docspring.getTemplate(templateId, (error, template) => {
-    if (error) {
-      console.error(error);
-      throw error
-    } else {
-      const timeStamp = Date.now();
-      const adjTemplateName = template.name.replace(/\s+/g, "_");
-      const key = `investments/${payload.investmentId}/${timeStamp}-${adjTemplateName}.pdf`;
+const getTemplate = async ({db, deal, payload, user, templateId, investmentDocs = [], investmentStatus}) => {
+	const response = await DocSpringAPI.getTemplate(templateId);
+	if (response.status !== 'success') return;
+	
+		const timeStamp = Date.now();
+		const adjTemplateName = response.name.replace(/\s+/g, "_");
+		console.log('adjTemplateName :>> ', adjTemplateName);
+		const key = `investments/${payload.investmentId}/${timeStamp}-${adjTemplateName}.pdf`;
+	
+		const oldDocs = investmentDocs.filter(doc => !doc.includes(adjTemplateName))
+		const newDocsArray = [...oldDocs, key];
+	
+		const downloadUrl =  await generateDocSpringPDF(db, deal, user, payload, adjTemplateName, timeStamp, templateId);
+		updateInvestment(db, investmentStatus, payload, newDocsArray);
+		addPacket(db, user, payload)
 
-      const oldDocs = investmentDocs.filter(doc => !doc.includes(adjTemplateName))
-      const newDocsArray = [...oldDocs, key];
-
-      generateDocSpringPDF(db, deal, user, payload, adjTemplateName, timeStamp, templateId);
-
-      updateInvestment(db, investmentStatus, payload, newDocsArray);
-
-      addPacket(db, user, payload)
-
-      return template;
-
-    }
-  });
+		return downloadUrl;
 }
 
-
-
-
-
-module.exports = { generateDocSpringPDF, getTemplate, createTaxDocument, getInvestmentPreview }
+module.exports = {  generateDocSpringPDF, createTaxDocument, getInvestmentPreview, getTemplate }
