@@ -158,11 +158,11 @@ const generateDocSpringPDF = (db, deal, user, input, templateName, timeStamp, te
 			// 	required: false,
 			// },
 		},
+		test: process.env.NODE_ENV === 'production' ? false : true,
+		wait: true,
 	}
 
-
 	docspring.generatePDF(templateId, submission_data, (error, response) => {
-
 
 		const emailData = {
 			pdfDownloadUrl: response.submission.download_url,
@@ -203,8 +203,8 @@ const createTaxDocument = async ({ payload, user, db }) => {
 }
 
 
-const getInvestmentPreview = ({ input, user }) => {
-
+const getInvestmentPreview = ({ input, user, templateName }) => {
+	const timeStamp = Date.now();
 	const { docSpringTemplateId } = input;
 	let data = getTemplateData(input, user, docSpringTemplateId);
 
@@ -212,6 +212,9 @@ const getInvestmentPreview = ({ input, user }) => {
 		editable: false,
 		data: data,
 		metadata: {
+			user_id: user._id,
+			templateName: docSpringTemplateId,
+			timeStamp: timeStamp,
 			preview: true
 		},
 		field_overrides: {
