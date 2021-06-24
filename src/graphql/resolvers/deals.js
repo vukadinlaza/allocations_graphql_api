@@ -99,7 +99,7 @@ const Deal = {
 
 const Queries = {
   deal: async (_, args, ctx) => {
-    console.log({args});
+    console.log("AT DEAL", {args});
     const org = await ctx.db.organizations.findOne({ slug: args.fund_slug })
     if (org !== null && args.deal_slug) {
       const result = await ctx.db.deals.findOne({ slug: args.deal_slug, organization: ObjectId(org._id) })
