@@ -18,6 +18,7 @@ module.exports = gql(`
     n_deals: Int
     investments: [Investment]
     investment(_id: String): Investment
+    pagInvestments: [Investment]
     adminInvites: [EmailInvite]
     complianceTasks: [ComplianceTask]
     signingRequests: [SigningRequest]
@@ -92,6 +93,7 @@ module.exports = gql(`
 
   extend type Query {
     organization(slug: String!, offset: Int, limit: Int): Organization
+    pagOrganization(slug: String!, pagination: PaginationInput!): Organization
     organizationMembers(slug: String!): [User]
   }
 

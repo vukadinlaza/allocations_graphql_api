@@ -11,7 +11,8 @@ const { signForInvestment } = require('../../zaps/signedDocs')
 const Mailer = require('../../mailers/mailer')
 const commitmentTemplate = require('../../mailers/templates/commitment-template')
 const commitmentCancelledTemplate = require('../../mailers/templates/commitment-cancelled-template')
-const { signedSPV } = require('../../zaps/signedDocs')
+const { signedSPV } = require('../../zaps/signedDocs');
+const { getPagAggregation } = require('../helpers')
 
 /**
 
@@ -53,39 +54,12 @@ const Queries = {
     return db.investments.find({}).toArray()
   },
   investmentsList: (_, args, ctx) => {
-    const { pagination, currentPage, filterField, filterValue, filterNestedKey, filterNestedCollection, filterLocalFieldKey, sortField, sortOrder, sortNestedKey, sortNestedCollection, sortLocalFieldKey } = args.pagination;
+    const { pagination, currentPage } = args.pagination;
 
     isAdmin(ctx)
 
     const documentsToSkip = pagination * (currentPage)
-    const match = {};
-    if(filterValue){
-      let field = filterNestedKey? `${filterField}.${filterNestedKey}` : filterField;
-      match[field] = { "$regex" : `/*${filterValue}/*` , "$options" : "i"}
-    }
-    let sortBy = {};
-    sortBy[`${sortNestedKey? `${sortField}.${sortNestedKey}` : (sortField? sortField : filterField)}`] = (sortOrder? sortOrder : 1)
-
-    let aggregation = []
-    if(sortNestedKey && sortNestedCollection && sortLocalFieldKey) aggregation.push({
-      $lookup: {
-        from: sortNestedCollection,
-        localField: sortLocalFieldKey,
-        foreignField: '_id',
-        as: sortField
-      }
-    })
-    if(filterNestedKey && filterNestedCollection && filterLocalFieldKey) aggregation.push({
-      $lookup: {
-        from: filterNestedCollection,
-        localField: filterLocalFieldKey,
-        foreignField: '_id',
-        as: filterField
-      }
-    })
-
-    aggregation.push({$match: match})
-    if(sortField && sortOrder) aggregation.push({$sort: sortBy})
+    const aggregation = getPagAggregation(args.pagination)
 
     let query = ctx.db.collection("investments")
                       .aggregate(aggregation)
