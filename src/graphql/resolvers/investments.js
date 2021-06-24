@@ -180,7 +180,7 @@ const Mutations = {
 
     return db.investments.findOne({ _id: ObjectId(investment._id) })
   },
-  getInvestmentPreview: async (_, { payload }, { user, db }) => {
+  getInvestmentPreview: async (_, { payload }, { user }) => {
     const res = await getInvestmentPreview({ input: payload, templateId: payload.docSpringTemplateId, user })
     return { ...user, previewLink: res.download_url }
   },

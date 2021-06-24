@@ -203,7 +203,7 @@ const createTaxDocument = async ({ payload, user, db }) => {
 }
 
 
-const getInvestmentPreview = ({ input, user, templateName }) => {
+const getInvestmentPreview = ({ input, user }) => {
 	const timeStamp = Date.now();
 	const { docSpringTemplateId } = input;
 	let data = getTemplateData(input, user, docSpringTemplateId);
