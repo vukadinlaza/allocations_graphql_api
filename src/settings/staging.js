@@ -6,6 +6,6 @@ module.exports = {
     'https://staging.allocations.com',
     'https://demo.allocations.com',
     'https://allocations-staging-api.herokuapp.com',
-    'https://allocations-react-dashboard-mpp0m6okw-allocationsdev.vercel.app'
+    'https://allocations-react-dashboard.vercel.app'
   ]
 }
