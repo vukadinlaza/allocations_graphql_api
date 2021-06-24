@@ -46,6 +46,7 @@ enum InvestmentStatus {
 extend type Query {
   investment(_id: String): Investment
   allInvestments: [Investment]
+  investmentsList(pagination: PaginationInput!): [Investment]
 }
 
 extend type Mutation {
@@ -69,5 +70,20 @@ input InvestmentInput {
   user_id: String
   status: String
   documents: [Object]
+}
+
+input PaginationInput {
+  pagination: Int!
+  currentPage: Int!
+  filterField: String
+  filterValue: String
+  filterNestedKey: String
+  filterNestedCollection: String
+  filterLocalFieldKey: String
+  sortField: String
+  sortOrder: Int
+  sortNestedKey: String
+  sortNestedCollection: String
+  sortLocalFieldKey: String
 }
 `)

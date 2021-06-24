@@ -5,6 +5,8 @@ const fetch = require('node-fetch');
 const { AuthenticationError } = require('apollo-server-express')
 const { createUserAccountAndEntity } = require('./utils/createUser')
 const logger = require('pino')({ prettyPrint: process.env.NODE_ENV !== "production" })
+const Mailer = require('./mailers/mailer')
+const signUpTemplate = require('./mailers/templates/sign-up-template')
 
 const client = jwksClient({
   cache: true,
@@ -53,10 +55,27 @@ async function authenticate({ req, db }) {
     }
 
     // else create user
+    // else create user
     const res = await db.users.insertOne({ email: email })
-    const acctAndEntity = await createUserAccountAndEntity({ db, u: res.ops[0] })
-    await updateAirtableUsers({ user: res.ops[0] })
-    return res.ops[0]
+    const newUser = res.ops[0];
+    const acctAndEntity = await createUserAccountAndEntity({ db, u: newUser })
+    await updateAirtableUsers({ user: newUser })
+
+    const isDemo = ['localhost', 'demo'].some(str => req.headers.origin.includes(str))
+    if(isDemo){
+      const emailData = {
+        mainData: {
+          to: newUser.email,
+          from: "support@allocations.com",
+          subject: `Welcome to Allocations!`,
+        },
+        template: signUpTemplate
+      }
+
+      await Mailer.sendEmail(emailData)
+    }
+
+    return newUser
   } catch (e) {
     // logger.error(e)
     console.log('authenicate ERROR', e)
