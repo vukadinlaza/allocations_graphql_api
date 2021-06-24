@@ -173,7 +173,6 @@ const Mutations = {
 
 const Organization = {
   deals: (org, { order_by = "created_at", order_dir = -1, limit, offset, status }, { db }) => {
-    console.log('LIMIT', limit, offset, status)
     let activeStatus = status === 'active' ? ['onboarding', 'closing'] : ['onboarding',
       'closing',
       'closed',
