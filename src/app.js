@@ -36,6 +36,9 @@ function corsWhitelist(whitelist) {
   const origin = (origin, cb) => {
     console.log('WHITELIST', whitelist)
     console.log('ORIGIN', origin)
+    if (origin.includes('vercel.app')) {
+      cb(null, true)
+    }
     if (whitelist.includes(origin) || !origin) {
       cb(null, true)
     } else {
