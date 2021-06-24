@@ -6,8 +6,9 @@ const AdminMailer = require('../../mailers/admin-mailer')
 const { AuthenticationError, gql } = require('apollo-server-express')
 const Hellosign = require('../../hellosign')
 const Organizations = require('../schema/organizations')
-const { groupBy, map } = require('lodash')
-/** 
+const { groupBy, map } = require('lodash');
+const { getPagAggregation } = require('../helpers')
+/**
 
   all organization handling (sometimes called funds)
 
@@ -17,7 +18,6 @@ const Schema = Organizations
 
 const Queries = {
   organization: async (_, { slug, limit, offset }, { user, db }) => {
-    console.log('X', limit, offset)
     const org = await db.organizations.findOne({ slug })
     // short circuit with fund if superadmin
     if (user.admin) return org
@@ -26,6 +26,25 @@ const Queries = {
     if (org && user && (user.organizations_admin || []).map(id => id.toString()).includes(org._id.toString())) {
       return org
     }
+    throw new AuthenticationError('org query throw')
+  },
+  pagOrganization: async (_, args, ctx) => {
+    const { slug } = args
+    const { pagination, currentPage } = args.pagination;
+
+    const documentsToSkip = pagination * (currentPage)
+
+    let query = await ctx.db.organizations.findOne({ slug })
+
+    const result = {org: query, documentsToSkip, pagination, pagArgs: args.pagination}
+
+    if (ctx.user.admin) return result;
+    if (slug === 'demo-fund') return result;
+
+    if (query && ctx.user && (ctx.user.organizations_admin || []).map(id => id.toString()).includes(result.org._id.toString())) {
+      return result
+    }
+
     throw new AuthenticationError('org query throw')
   },
   /** members must have the org id on their .organizations_admin key **/
@@ -75,7 +94,7 @@ const Mutations = {
   deleteOrganization: async (_, { _id }, ctx) => {
     isAdmin(ctx)
 
-    /** 
+    /**
      * we need to delete a number of things here
      * 1) the org
      * 2) any deals from the org
@@ -120,7 +139,7 @@ const Mutations = {
   createComplianceTask: async (_, { slug, complianceTask }, ctx) => {
     isAdmin(ctx)
 
-    // if compliance task is a signature -> create signature request and 
+    // if compliance task is a signature -> create signature request and
     // store it in the compliance record
     if (complianceTask.is_signature) {
       const { signatures } = await Hellosign.createRequest(ctx.user, complianceTask.signature_template)
@@ -154,7 +173,6 @@ const Mutations = {
 
 const Organization = {
   deals: (org, { order_by = "created_at", order_dir = -1, limit, offset, status }, { db }) => {
-    console.log('LIMIT', limit, offset, status)
     let activeStatus = status === 'active' ? ['onboarding', 'closing'] : ['onboarding',
       'closing',
       'closed',
@@ -211,6 +229,22 @@ const Organization = {
 
     const deals = await db.collection("deals").find(dealQuery).toArray()
     return db.investments.find({ deal_id: { $in: deals.map(d => d._id) } }).toArray()
+  },
+  pagInvestments: async (result, _, { db }) => {
+    const { org, pagination, documentsToSkip, pagArgs } = result;
+    const aggregation = getPagAggregation(pagArgs)
+
+    const dealQuery = org.slug === "allocations"
+      ? { organization: { $in: [org._id, null] } }
+      : { organization: org._id }
+    const deals = await db.collection("deals").find(dealQuery).toArray()
+    aggregation.unshift({$match: { deal_id: { $in: deals.map(d => d._id) } } })
+
+    return db.investments
+              .aggregate(aggregation)
+              .skip(documentsToSkip)
+              .limit(pagination)
+              .toArray()
   },
   investment: (org, { _id }, { db }) => {
     return db.investments.findOne({ _id: ObjectId(_id), organization: org._id })
