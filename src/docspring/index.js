@@ -211,40 +211,38 @@ const updateUserDocuments = async (response, db, templateName, userId, payload) 
 
 const generateDocSpringPDF = (db, deal, user, input, templateName, timeStamp, templateId) => {
 
+	let data = getTemplateData(input, user, templateId);
+	var submission_data = {
+		editable: false,
+		data: data,
+		metadata: {
+			user_id: user._id,
+			investmentId: input.investmentId,
+			templateName: templateName,
+			timeStamp: timeStamp
+		},
+		field_overrides: {
+			// title: {
+			// 	required: false,
+			// },
+		},
+		test: process.env.NODE_ENV === 'production' ? false : true,
+		wait: true,
+	}
 
-  let data = getTemplateData(input, user, templateId);
-  var submission_data = {
-    editable: false,
-    data: data,
-    metadata: {
-      user_id: user._id,
-      investmentId: input.investmentId,
-      templateName: templateName,
-      timeStamp: timeStamp
-    },
-    field_overrides: {
-      // title: {
-      // 	required: false,
-      // },
-    },
-  }
+	docspring.generatePDF(templateId, submission_data, (error, response) => {
 
+		const emailData = {
+			pdfDownloadUrl: response.submission.download_url,
+			email: user.email,
+			deal
+		}
 
-  docspring.generatePDF(templateId, submission_data, (error, response) => {
+		sendSPVDoc(emailData)
 
-
-    const emailData = {
-      pdfDownloadUrl: response.submission.download_url,
-      email: user.email,
-      deal
-    }
-
-    sendSPVDoc(emailData)
-
-    return updateSubmissionData(error, response, db, input.investmentId)
-  })
+		return updateSubmissionData(error, response, db, input.investmentId)
+	})
 }
-
 
 const createTaxDocument = async ({ payload, user, db }) => {
 
@@ -271,34 +269,33 @@ const createTaxDocument = async ({ payload, user, db }) => {
   return await updateUserDocuments(response, db, kycTemplateName, user._id, payload);
 }
 
+const getInvestmentPreview = ({ input, user }) => {
+	const timeStamp = Date.now();
+	const { docSpringTemplateId } = input;
+	let data = getTemplateData(input, user, docSpringTemplateId);
 
-const getInvestmentPreview = async ({ input, user }) => {
+	var submission_data = {
+		editable: false,
+		data: data,
+		metadata: {
+			user_id: user._id,
+			templateName: docSpringTemplateId,
+			timeStamp: timeStamp,
+			preview: true
+		},
+		field_overrides: {
+		},
+		test: process.env.NODE_ENV === 'production' ? false : true,
+		wait: true,
+	}
 
-  const { docSpringTemplateId } = input;
-
-  let data = getTemplateData(input, user, docSpringTemplateId);
-
-
-  var submission_data = {
-    editable: false,
-    data: data,
-    metadata: {
-      preview: true
-    },
-    field_overrides: {
-    },
-    test: process.env.NODE_ENV === 'production' ? false : true,
-    wait: true,
-  }
-
-  return new Promise((resolve, reject) => {
-    docspring.generatePDF(docSpringTemplateId, submission_data, (error, response) => {
-      if (error) reject(error);
-      return resolve(response.submission)
-    })
-  })
+	return new Promise((resolve, reject) => {
+		docspring.generatePDF(docSpringTemplateId, submission_data, (error, response) => {
+			if (error) reject(error);
+			return resolve(response.submission)
+		})
+	})
 }
-
 
 const getTemplate = ({ db, deal, payload, user, templateId, investmentDocs = [], investmentStatus }) => {
   // let template = await axios.get(`https://api.docspring.com/api/v1/templates/${templateId}`)
@@ -325,9 +322,5 @@ const getTemplate = ({ db, deal, payload, user, templateId, investmentDocs = [],
     }
   });
 }
-
-
-
-
 
 module.exports = { generateDocSpringPDF, getTemplate, createTaxDocument, getInvestmentPreview }
