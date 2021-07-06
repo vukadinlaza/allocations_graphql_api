@@ -101,12 +101,10 @@ const Queries = {
   deal: async (_, args, ctx) => {
     const org = await ctx.db.organizations.findOne({ slug: args.fund_slug })
     if (org !== null && args.deal_slug) {
-      return await ctx.db.deals.findOne({ slug: args.deal_slug, organization: ObjectId(org._id) })
-    } else if (args._id) {
-      return ctx.db.deals.findOne({ _id: ObjectId(args._id) })
+      const result = await ctx.db.deals.findOne({ slug: args.deal_slug, organization: ObjectId(org._id) })
+      return result
     }
     return ctx.db.deals.findOne({ _id: ObjectId(args._id) })
-
   },
   allDeals: (_, args, ctx) => {
     isAdmin(ctx)

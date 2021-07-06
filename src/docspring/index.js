@@ -220,6 +220,8 @@ const generateDocSpringPDF = async (db, deal, user, input, templateName, timeSta
 			// 	required: false,
 			// },
 		},
+    test: process.env.NODE_ENV === 'production' ? false : true,
+		wait: true,
 	}
 
 	const response = await DocSpringAPI.generatePDF(templateId, submission_data);
@@ -235,7 +237,6 @@ const generateDocSpringPDF = async (db, deal, user, input, templateName, timeSta
 	updateSubmissionData(response, db, input.investmentId)
 	return response.downloadUrl
 }
-
 
 const createTaxDocument = async ({ payload, user, db }) => {
 
@@ -262,32 +263,32 @@ const createTaxDocument = async ({ payload, user, db }) => {
   return await updateUserDocuments(response, db, kycTemplateName, user._id, payload);
 }
 
+const getInvestmentPreview = ({ input, user }) => {
+	const timeStamp = Date.now();
+	const { docSpringTemplateId } = input;
+	let data = getTemplateData(input, user, docSpringTemplateId);
 
-const getInvestmentPreview = async ({ input, user }) => {
+	var submission_data = {
+		editable: false,
+		data: data,
+		metadata: {
+			user_id: user._id,
+			templateName: docSpringTemplateId,
+			timeStamp: timeStamp,
+			preview: true
+		},
+		field_overrides: {
+		},
+		test: process.env.NODE_ENV === 'production' ? false : true,
+		wait: true,
+	}
 
-  const { docSpringTemplateId } = input;
-
-  let data = getTemplateData(input, user, docSpringTemplateId);
-
-
-  var submission_data = {
-    editable: false,
-    data: data,
-    metadata: {
-      preview: true
-    },
-    field_overrides: {
-    },
-    test: process.env.NODE_ENV === 'production' ? false : true,
-    wait: true,
-  }
-
-  return new Promise((resolve, reject) => {
-    docspring.generatePDF(docSpringTemplateId, submission_data, (error, response) => {
-      if (error) reject(error);
-      return resolve(response.submission)
-    })
-  })
+	return new Promise((resolve, reject) => {
+		docspring.generatePDF(docSpringTemplateId, submission_data, (error, response) => {
+			if (error) reject(error);
+			return resolve(response.submission)
+		})
+	})
 }
 
 
