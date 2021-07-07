@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-const signedSPV = async ({ submissionData = {}, dealName }) => {
+const signedSPV = async ({ submissionData = {}, dealName, downloadUrl }) => {
   let url = null;
   if (process.env.NODE_ENV === "production") {
     url = "https://hooks.zapier.com/hooks/catch/10079430/bykd5dx/";
@@ -21,6 +21,7 @@ const signedSPV = async ({ submissionData = {}, dealName }) => {
           ? submissionData.legalName
           : "",
       amount: submissionData.investmentAmount,
+      downloadUrl
     }),
     headers: { "Content-Type": "application/json" },
   });
