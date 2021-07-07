@@ -3,13 +3,13 @@ const { gql } = require('apollo-server-express')
 module.exports = gql(`
 type Investment {
   _id: String
-  value: Int
+  value: Float
   invited_at: Int
   pledged_at: Int
   onboarded_at: Int
   completed_at: Int
   organization: String
-  amount: Int
+  amount: Float
   deal: Deal
   user: User
   status: InvestmentStatus
