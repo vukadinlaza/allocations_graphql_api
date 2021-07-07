@@ -1,7 +1,7 @@
 const { MongoClient } = require("mongodb")
 const { MONGO_URL, MONGO_DB, NODE_ENV } = process.env
 
-const cols = ["investments", "deals", "organizations", "users", "orders", "trades", "matchrequests", "compliancetasks", 'accounts', 'entities', 'signingpackets', 'comments', 'applications']
+const cols = ["investments", "deals", "organizations", "users", "orders", "trades", "matchrequests", "compliancetasks", 'accounts', 'entities', 'signingpackets', 'comments', 'applications', 'dealOnboarding']
 
 /** connects and attaches name of cols to db **/
 async function connect() {

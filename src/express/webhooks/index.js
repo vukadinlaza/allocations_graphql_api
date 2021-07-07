@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const { ObjectId } = require('mongodb')
 const { verifyRequestSignature } = require('@slack/events-api');
-const { get, every } = require('lodash')
+const { get, every, reverse } = require('lodash')
 const { connect } = require('../../mongo/index')
 const convert = require('xml-js');
 const S3 = require('aws-sdk/clients/s3')
@@ -234,6 +234,84 @@ module.exports = Router()
     }
     catch (err) {
       console.log('SOME ERROR')
+      console.log(err)
+      next(err);
+    }
+  })
+  .post('/process-street-spv', async (req, res, next) => {
+    try {
+      const db = await connect();
+      const { body } = req;
+      const { data } = body;
+
+      const dealData = {
+        psDealId: data.id,
+        dealName: data.name,
+        dealCreatedDate: data.audit.createdDate,
+        dealUpdatedDate: data.audit.updatedDate,
+        dealUpdatedBy: data.audit.updatedBy.email,
+        psTemplate: data.template.name,
+        dealTasks: data.tasks.map(t => {
+          return {
+            taskId: t.taskTemplateGroupId,
+            taskName: t.name,
+            taskStatus: t.status,
+            taskUpdatedDate: t.updatedDate,
+            taskUpdatedBy: t.updatedBy.email
+          }
+        })
+        // spvFormFields: data.formFields.map(f => f.label),
+      }
+      const dealOnboarded = await db.dealOnboarding.findOne({psDealId: dealData.psDealId})
+      if(dealOnboarded) return res.status(400).send(`The dealOnboarding with psDealId: ${dealData.psDealId} already exists`);
+
+      const onboarded = await db.dealOnboarding.insertOne(dealData)
+
+      if(onboarded.insertedCount) return res.sendStatus(200);
+      return res.status(400).send(`There was a problem creating dealOnboarding with psDealId: ${dealData.psDealId}`);
+      
+    }
+    catch (err) {
+      console.log('Error on Process Street Workflow Run')
+      console.log(err)
+      next(err);
+    }
+  })
+  .post('/process-street-tasks', async (req, res, next) => {
+    try {
+      const db = await connect();
+      const { body } = req;
+      const { data, data: { checklist: { id: psDealId } } } = body;
+
+      const taskData = {
+        taskId: data.taskTemplateGroupId,
+        taskName: data.name,
+        taskStatus: data.status,
+        taskUpdatedDate: data.updatedDate,
+        taskUpdatedBy: data.updatedBy.email,
+        taskCompletedDate: data.completedDate,
+        taskCompletedBy: data.completedBy? data.completedBy.name : '',
+        formFields: data.formFields? data.formFields.map(f => {
+          return {
+            fieldLabel: f.label,
+            fieldType: f.type,
+            fieldValue: f.value
+          }
+        }) : []
+      }
+
+      const onboardedDeal = await db.dealOnboarding.findOne({ psDealId })
+      if(!onboardedDeal) return res.status(400).send(`There are no deals with the psDealId: ${psDealId}`);
+
+      const currentTaskIndex = onboardedDeal.dealTasks.findIndex(task => task.taskId === taskData.taskId);
+      onboardedDeal.dealTasks[currentTaskIndex] = taskData;
+      const updatedDeal = await db.dealOnboarding.updateOne({ _id: ObjectId(onboardedDeal._id) }, { $set: {dealTasks: onboardedDeal.dealTasks } });
+
+      if(updatedDeal.modifiedCount) return res.sendStatus(200);
+      return res.status(400).send(`There was a problem updating dealOnboarding with psDealId: ${psDealId}`);
+    }
+    catch (err) {
+      console.log('Error on Process Street Task update')
       console.log(err)
       next(err);
     }
