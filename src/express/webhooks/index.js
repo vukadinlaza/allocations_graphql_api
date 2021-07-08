@@ -310,7 +310,10 @@ module.exports = Router()
       onboardedDeal.dealTasks[currentTaskIndex] = taskData;
       const updatedDeal = await db.dealOnboarding.updateOne({ _id: ObjectId(onboardedDeal._id) }, { $set: {dealTasks: onboardedDeal.dealTasks } });
 
-      if(updatedDeal.modifiedCount) return res.sendStatus(200);
+      if(updatedDeal.modifiedCount){
+        pubsub.publish('dealOnboarding', {dealOnboarding: dealData})
+        return res.sendStatus(200);
+      }
       return res.status(400).send(`There was a problem updating dealOnboarding with psDealId: ${psDealId}`);
     }
     catch (err) {

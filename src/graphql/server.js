@@ -13,14 +13,9 @@ function authedServer(db) {
     resolvers,
     context: async (payload) => {
       // public deal endpoint skips authentication  
-      console.log({payload}) 
-      // if (payload && payload.connection && payload.connection.query.includes('subscription')) {
-      //   return { db, pubsub }
-      // }
       if (payload.req && payload.req.body && publicEndpoints.includes(payload.req.body.operationName)) {
         return { db }
       }
-      console.log('FINALLY', payload.connection.context)
       const authToken = payload && payload.connection && payload.connection.context && payload.connection.context.authToken
       const user = await authenticate({ req: payload.req, db, authToken })
       return { user, db, pubsub }
