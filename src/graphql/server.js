@@ -1,8 +1,10 @@
-const { ApolloServer } = require('apollo-server-express')
+const { ApolloServer, PubSub } = require('apollo-server-express')
 const { verify, authenticate } = require('../auth')
 
 const logger = require('../utils/logger')
 const { typeDefs, resolvers } = require('../graphql/resolvers')
+
+const pubsub = new PubSub();
 
 function authedServer (db) {
   const publicEndpoints = ["PublicDeal"]
@@ -10,14 +12,16 @@ function authedServer (db) {
   return new ApolloServer({ 
     typeDefs,
     resolvers,
-    context: async ({ req }) => {
-      // public deal endpoint skips authentication    
-      if (publicEndpoints.includes(req.body.operationName)) {
+    context: async ( payload ) => {
+      // public deal endpoint skips authentication   
+      console.log({payload})
+      if (payload.req && payload.req.body && publicEndpoints.includes(req.body.operationName)) {
         return { db }
       }
 
-      const user = await authenticate({ req, db })
-      return { user, db }
+      const user = await authenticate({ req: payload.req, db })
+
+      return { user, db, pubsub }
     },
     plugins: [
       {
@@ -34,4 +38,4 @@ function authedServer (db) {
   })
 }
 
-module.exports = { authedServer }
+module.exports = { authedServer, pubsub }

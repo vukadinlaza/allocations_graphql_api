@@ -165,6 +165,10 @@ type Mutation {
   deleteUserAsViewed(deal_id: String!, user_id: String!): Deal 
 }
 
+type Subscription {
+  dealOnboarding(data: String): Object
+}
+
 
 input DealInput {
   _id: String

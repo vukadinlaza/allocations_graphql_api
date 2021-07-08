@@ -12,6 +12,7 @@ const logger = require('../../utils/logger')
 const Mailer = require('../../mailers/mailer')
 const txConfirmationTemplate = require('../../mailers/templates/tx-confirmation-template')
 const { nWithCommas } = require('../../utils/common.js')
+// const { pubsub } = require('googleapis/build/src/apis/pubsub')
 
 /**
 
@@ -176,6 +177,8 @@ const Mutations = {
   /** special handling for wire instructions upload **/
   updateDeal: async (_, { org, deal: { _id, wireDoc, ...deal } }, ctx) => {
     const { user } = ctx;
+    console.log('HEREEE')
+    ctx.pubsub.publish('dealOnboarding', {dealOnboarding: 'YES'})
     if (deal.isPostingComment) {
       const res = await ctx.db.deals.findOneAndUpdate(
         { _id: ObjectId(_id) },
@@ -436,9 +439,20 @@ const Mutations = {
 
 }
 
+const Subscriptions = {
+  dealOnboarding: {
+    subscribe: async (_, args, { pubsub }) => {
+
+      console.log({args})
+      return pubsub.asyncIterator('dealOnboarding');
+    }
+  }
+}
+
 module.exports = {
   Schema,
   Queries,
   Mutations,
+  Subscriptions,
   subResolvers: { Deal }
 }

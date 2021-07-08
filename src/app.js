@@ -15,6 +15,7 @@ const { connect } = require('./mongo')
 const { createEventAdapter } = require('@slack/events-api')
 const getSettings = require('./settings');
 const { last, mapValues, omit, keyBy } = require('lodash');
+const http = require('http');
 const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET, {
   includeBody: true,
   includeHeaders: true
@@ -52,6 +53,7 @@ async function run() {
   const app = express()
   const port = process.env.PORT || 4000
   const settings = await getSettings(NODE_ENV)
+  const httpServer = http.createServer(app);
 
   // only prevent CORS if in production
   if (NODE_ENV === "production" || NODE_ENV === "staging") {
@@ -100,8 +102,10 @@ async function run() {
   // init auth graphql server
   const authedGraphqlServer = authedServer(db)
   authedGraphqlServer.applyMiddleware({ app })
+  authedGraphqlServer.installSubscriptionHandlers(httpServer);
 
-  app.listen({ port }, () =>
+
+  httpServer.listen({ port }, () =>
     console.log(`🚀 Server ready at http://localhost:4000${authedGraphqlServer.graphqlPath}`)
   );
 }

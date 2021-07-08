@@ -10,6 +10,7 @@ const moment = require('moment')
 const { putInvestorDoc } = require('../../uploaders/investor-docs')
 const { sendConfirmation } = require('../../mailers/signing-complete')
 const s3 = new S3({ apiVersion: '2006-03-01' })
+const { pubsub } = require('../../graphql/server')
 
 let Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : process.env.AWS_S3_BUCKET
 
@@ -243,7 +244,6 @@ module.exports = Router()
       const db = await connect();
       const { body } = req;
       const { data } = body;
-
       const dealData = {
         psDealId: data.id,
         dealName: data.name,
@@ -264,10 +264,13 @@ module.exports = Router()
       }
       const dealOnboarded = await db.dealOnboarding.findOne({psDealId: dealData.psDealId})
       if(dealOnboarded) return res.status(400).send(`The dealOnboarding with psDealId: ${dealData.psDealId} already exists`);
-
+      
       const onboarded = await db.dealOnboarding.insertOne(dealData)
-
-      if(onboarded.insertedCount) return res.sendStatus(200);
+      
+      if(onboarded.insertedCount){
+        pubsub.publish('dealOnboarding', {dealOnboarding: dealData})
+        return res.sendStatus(200);
+      }
       return res.status(400).send(`There was a problem creating dealOnboarding with psDealId: ${dealData.psDealId}`);
       
     }

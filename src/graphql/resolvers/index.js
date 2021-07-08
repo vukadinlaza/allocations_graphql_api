@@ -26,6 +26,7 @@ const splatReduce = (key) => resolversRaw.reduce((acc, r) => ({ ...acc, ...r[key
 const resolvers = {
   Query: splatReduce("Queries"),
   Mutation: splatReduce("Mutations"),
+  Subscription: splatReduce("Subscriptions"),
   ...splatReduce("subResolvers")
 }
 
