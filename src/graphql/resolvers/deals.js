@@ -453,8 +453,6 @@ const Mutations = {
 const Subscriptions = {
   dealOnboarding: {
     subscribe: async (_, args, { pubsub }) => {
-
-      console.log({args})
       return pubsub.asyncIterator('dealOnboarding');
     }
   }
