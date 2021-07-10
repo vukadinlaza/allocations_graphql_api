@@ -44,6 +44,7 @@ type Deal {
   dealCoverImageKey: String
   isDemo: Boolean
   viewedUsers: [User]
+  dealOnboarding: dealOnboarding
 }
 
 type DealParams {
@@ -132,6 +133,25 @@ type EmailInvite {
   to: String
   opened: Boolean
   opened_at: Float
+}
+
+type dealOnboarding {
+  _id: String
+  psDealId: String
+  dealName: String
+  dealCreatedDate: String
+  dealUpdatedDate: String
+  dealUpdatedBy: String
+  psTemplate: String
+  dealTasks: [dealTask]
+}
+
+type dealTask {
+  taskId: String
+  taskName: String
+  taskStatus: String
+  taskUpdatedBy: String
+  taskUpdatedDate: String
 }
 
 enum DealStatus {

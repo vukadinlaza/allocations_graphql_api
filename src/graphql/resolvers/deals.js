@@ -95,7 +95,10 @@ const Deal = {
       return db.users.findOne({ _id: user })
     }))
   },
-
+  dealOnboarding: async (deal, _, { db }) => {
+    const dealOnboarding = await db.dealOnboarding.findOne({dealName: deal.company_name})
+    return dealOnboarding
+  }
 }
 
 const Queries = {
