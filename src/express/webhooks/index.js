@@ -268,7 +268,7 @@ module.exports = Router()
       const onboarded = await db.dealOnboarding.insertOne(dealData)
       
       if(onboarded.insertedCount){
-        // pubsub.publish('dealOnboarding', {dealOnboarding: dealData})
+        pubsub.publish('dealOnboarding', {dealOnboarding: dealData})
         return res.sendStatus(200);
       }
       return res.status(400).send(`There was a problem creating dealOnboarding with psDealId: ${dealData.psDealId}`);
