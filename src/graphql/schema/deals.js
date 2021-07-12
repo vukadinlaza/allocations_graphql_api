@@ -149,6 +149,7 @@ type dealOnboarding {
 type dealTask {
   taskId: String
   taskName: String
+  formFields: Object
   taskStatus: String
   taskUpdatedBy: String
   taskUpdatedDate: String
