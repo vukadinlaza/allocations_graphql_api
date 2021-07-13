@@ -5,6 +5,7 @@ module.exports = {
     'https://staging.allocations.co',
     'https://staging.allocations.com',
     'https://demo.allocations.com',
-    'https://allocations-staging-api.herokuapp.com'
+    'https://allocations-staging-api.herokuapp.com',
+    'https.tools.allocations.com',
   ]
 }
