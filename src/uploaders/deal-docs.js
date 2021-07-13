@@ -28,6 +28,13 @@ async function rmDoc({ title, deal_id }) {
 }
 
 
+async function rmImage({ deal_id }) {
+  const Key = `${path}/${deal_id}/dealCoverImage.png`
+  await s3.deleteObject({ Bucket: 'allocations-public', Key }).promise()
+  return Key
+}
+
+
 async function uploadImage({ logo, title, deal_id }) {
   // Read content from the file
   const { createReadStream, filename } = await logo
@@ -42,4 +49,5 @@ async function uploadImage({ logo, title, deal_id }) {
   return Key
 };
 
-module.exports = { addDoc, rmDoc, uploadImage }
+
+module.exports = { addDoc, rmDoc, uploadImage, rmImage }
