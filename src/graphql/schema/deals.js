@@ -179,6 +179,7 @@ type Mutation {
   uninviteInvestor(org: String!, user_id: String!, deal_id: String!): Deal
   addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
   addDealLogo(deal_id: String!, title: String!, logo: Upload!): Deal
+  rmDealLogo(deal_id: String!): Deal
   rmDealDoc(deal_id: String!, title: String!): Deal
   addDealDocs(deal_id: String!, docs: Upload): Deal
   addUserAsViewed(deal_id: String!, user_id: String!): Deal 
