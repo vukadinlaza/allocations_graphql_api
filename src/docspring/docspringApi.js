@@ -94,40 +94,46 @@ class DocSpringApi {
    * @return {Promise<GeneratePdfResponse>} - a promise the resolves to GeneratePdfResponse
    */
   async generatePDF(templateId, data) {
-    const response = await this.request(
-      `${this.#url}/templates/${templateId}/submissions`,
-      "POST",
-      data
-    );
-
-    if (response.status === 201) {
-      const { submission } = await response.json();
-
-      // Prevents us from having to make a recursive call in getSubmissionData
-      // by waiting 2 seconds before making an HTTP request
-      return new Promise((resolve, reject) => {
-        const timeoutId = setTimeout(async () => {
-          const { status, id, downloadUrl, permanentDownloadUrl } = await this.getSubmissionData(
-            submission.id
-          );
-          if (status !== "success") {
+    try {
+      const response = await this.request(
+        `${this.#url}/templates/${templateId}/submissions`,
+        "POST",
+        data
+      );
+      
+      if (response.status === 201) {
+        const { submission } = await response.json();
+  
+        // Prevents us from having to make a recursive call in getSubmissionData
+        // by waiting 2 seconds before making an HTTP request
+        return new Promise((resolve, reject) => {
+          const timeoutId = setTimeout(async () => {
+            const { status, id, downloadUrl, permanentDownloadUrl } = await this.getSubmissionData(
+              submission.id
+            );
+            if (status !== "success") {
+              clearTimeout(timeoutId);
+              reject(status);
+            }
+  
             clearTimeout(timeoutId);
-            reject(status);
-          }
-
-          clearTimeout(timeoutId);
-          resolve({
-            id,
-            downloadUrl,
-            status,
-            permanentDownloadUrl
-          });
-        }, 2000);
-      });
-    } else {
-      const response = await response.json();
-      return { status: response.status || response.error};
+            resolve({
+              id,
+              downloadUrl,
+              status,
+              permanentDownloadUrl
+            });
+          }, 2000);
+        });
+      } else {
+        const response = await response.json();
+        return { status: response.status || response.error};
+      }
+    } catch (error) {
+      console.log(`Error in generatePDF. Data: ${JSON.stringify(data)}`, error)
+      return { error }
     }
+
   }
 
     /**
