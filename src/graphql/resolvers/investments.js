@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb")
 const moment = require('moment');
 const { isNumber, forEach, get } = require('lodash')
 const { isAdmin, isAdminOrSameUser } = require('../permissions')
-const { AuthenticationError } = require('apollo-server-express')
+const { AuthenticationError, UserInputError } = require('apollo-server-express')
 const Cloudfront = require('../../cloudfront')
 const Uploader = require('../../uploaders/investor-docs')
 const Investments = require('../schema/investments')
@@ -188,30 +188,33 @@ const Mutations = {
       $pull: { usersViewed: ObjectId(user._id) }
     })
 
-    const emailData = {
-      mainData: {
-        to: user.email,
-        from: "support@allocations.com",
-        subject: `Commitment to invest`,
-      },
-      template: commitmentTemplate,
-      templateData: {
-        username: user.first_name? `${user.first_name}` : user.email,
-        issuer: deal.company_name || '',
-        price: '$59',
-        totalAmount: `$${payload.investmentAmount}`,
-        deadline: moment(deal.dealParams.signDeadline).subtract(2, 'days').format('MMM DD, YYYY')
-      }
-    }
     if (deal && deal.slug === 'luna-mega') {
+      const emailData = {
+        mainData: {
+          to: user.email,
+          from: "support@allocations.com",
+          subject: `Commitment to invest`,
+        },
+        template: commitmentTemplate,
+        templateData: {
+          username: user.first_name? `${user.first_name}` : user.email,
+          issuer: deal.company_name || '',
+          price: '$59',
+          totalAmount: `$${payload.investmentAmount}`,
+          deadline: moment(deal.dealParams.signDeadline).subtract(2, 'days').format('MMM DD, YYYY')
+        }
+      }
       await Mailer.sendEmail(emailData)
     }
+
+    if(!downloadUrl) throw new UserInputError('There was an error with Docspring');
 
     const zapData = {
       ...investment,
       dealName: deal.company_name,
       downloadUrl
     }
+
     await signedSPV(zapData)
 
     return db.investments.findOne({ _id: ObjectId(investment._id) })

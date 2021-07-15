@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb")
-const { gql } = require('apollo-server-express')
+const { gql, UserInputError } = require('apollo-server-express')
 const {
   isAdmin,
   isOrgAdmin,
@@ -295,7 +295,9 @@ const Mutations = {
       });
     }
 
-    await createTaxDocument({ payload, user, db })
+    const taxDocument = await createTaxDocument({ payload, user, db })
+    if(!taxDocument) throw new UserInputError('There was an error with Docspring');
+
     return db.users.findOne({ _id: ObjectId(user._id) })
   }
 }

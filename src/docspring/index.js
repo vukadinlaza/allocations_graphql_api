@@ -298,7 +298,7 @@ const getTemplate = async ({db, deal, payload, user, templateId, investmentDocs 
 	
 		const timeStamp = Date.now();
 		const adjTemplateName = response.name.replace(/\s+/g, "_");
-		console.log('adjTemplateName :>> ', adjTemplateName);
+
 		const key = `investments/${payload.investmentId}/${timeStamp}-${adjTemplateName}.pdf`;
 	
 		const oldDocs = investmentDocs.filter(doc => !doc.includes(adjTemplateName))
