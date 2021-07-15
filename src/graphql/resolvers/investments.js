@@ -31,9 +31,14 @@ const Investment = {
   },
   documents: (investment) => {
     if (Array.isArray(investment.documents)) {
-      return investment.documents.map(path => {
-        return { link: Cloudfront.getSignedUrl(path), path }
+       const docData =  investment.documents.map(doc => {
+        if (doc.path) {
+          return { ...doc, link: Cloudfront.getSignedUrl(doc.path) }
+        } else {
+          return { link: Cloudfront.getSignedUrl(doc), path: doc }
+        }
       })
+      return docData;
     } else {
       return []
     }
@@ -120,15 +125,29 @@ const Mutations = {
   /** uploads investment document, S3 & db path **/
   addInvestmentDoc: async (_, { investment_id, doc, isK1 }, ctx) => {
 
-    const file = await doc
+    const file = await doc    
+    const { filename, mimetype } = file;
+    const fileName = filename
+      .replace(/_/g, ' ')
+      .replace(/(?:-+)/, ' ')
+      .replace(/ +/g, ' ');
+
     const s3Path = await Uploader.putInvestmentDoc(investment_id, file, isK1)
+
+    const documentData = {
+      path: s3Path,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      type: mimetype,
+      fileName,
+    };
 
     await ctx.db.investments.updateOne(
       { _id: ObjectId(investment_id) },
-      { $addToSet: { documents: s3Path } }
+      { $addToSet: { documents: documentData } }
     )
 
-    return Cloudfront.getSignedUrl(s3Path)
+    return Cloudfront.getSignedUrl(s3Path);
   },
   /** deletes investment document, S3 & db path **/
   rmInvestmentDoc: async (_, { investment_id, file }, ctx) => {
@@ -136,8 +155,13 @@ const Mutations = {
     await Uploader.rmInvestmentDoc(investment_id, file)
     await ctx.db.investments.updateOne(
       { _id: ObjectId(investment_id) },
-      { $pull: { documents: `investments/${investment_id}/${file}` } }
-    )
+      {
+        $pull: {
+          documents: `investments/${investment_id}/${file}`,
+          documents: { path: `investments/${investment_id}/${file}` },
+        },
+      }
+    );
 
     return true
   },
@@ -170,8 +194,8 @@ const Mutations = {
       investment = invsRes.ops[0]
     } else {
       investment = await db.investments.findOne({ _id: ObjectId(payload.investmentId) })
-      const x = { ...investment.submissionData, ...payload }
-      await db.investments.updateOne({ _id: ObjectId(investment._id) }, { $set: { submissionData: x } })
+      const updatedInvestmentData = { ...investment.submissionData, ...payload }
+      await db.investments.updateOne({ _id: ObjectId(investment._id) }, { $set: { submissionData: updatedInvestmentData } })
     }
 
     const downloadUrl = await getTemplate({

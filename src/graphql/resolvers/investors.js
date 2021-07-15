@@ -213,7 +213,6 @@ const Mutations = {
   },
   /** updates user and handles file uploads **/
   updateUser: async (_, { input: { _id, passport, accredidation_doc, kycDoc, ...user } }, ctx) => {
-    console.log('user', user)
     isAdminOrSameUser({ _id }, ctx)
 
     // upload passport if passed

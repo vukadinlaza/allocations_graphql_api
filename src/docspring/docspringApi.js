@@ -141,6 +141,7 @@ class DocSpringApi {
    * @property {string} [name]
    * @property {string} [downloadUrl]
    * @property {string} [permanentDocumentUrl]
+   * @property {string} [templateType]
    * @property {string} status
    */
 
@@ -159,6 +160,7 @@ class DocSpringApi {
         name: data.name,
         downloadUrl: data.document_url,
         permanentDocumentUrl: data.permanent_document_url,
+        templateType: data.template_type,
         status: "success"
       }
     }

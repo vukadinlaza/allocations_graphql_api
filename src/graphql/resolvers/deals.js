@@ -440,9 +440,7 @@ const Mutations = {
     )
   },
   addUserAsViewed: async (_, { user_id, deal_id }, ctx) => {
-    console.log('USER DEAL', user_id, deal_id)
     const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
-    console.log(deal.usersViewed)
     if ((deal.usersViewed || []).map(i => String(i)).find(id => id === user_id)) {
       return deal
     }
