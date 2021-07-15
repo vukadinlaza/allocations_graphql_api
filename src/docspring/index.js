@@ -147,28 +147,14 @@ const getTemplateData = (input, user, templateId) => {
 }
 
 
-const updateInvestment = async (db, investmentStatus, payload, newDocs) => {
-  const { key: path, fileName, oldDocs } = newDocs;
+const updateInvestment = async (db, investmentStatus, payload, newDocsArray) => {
   const updatedInvestmentData = {
-    status: investmentStatus === "invited" ? "signed" : investmentStatus,
-    amount: parseFloat(payload.investmentAmount.replace(/,/g, "")),
-    documents: [
-      {
-        path,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        fileName,
-        type: fileName.slice(fileName.indexOf(".") + 1),
-      },
-      ...oldDocs,
-    ],
-  };
-
-  await db.investments.updateOne(
-    { _id: ObjectId(payload.investmentId) },
-    { $set: updatedInvestmentData }
-  );
-};
+    status: investmentStatus === 'invited' ? 'signed' : investmentStatus,
+    amount: parseFloat(payload.investmentAmount.replace(/,/g, '')),
+    documents: newDocsArray
+  }
+  await db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, { $set: updatedInvestmentData })
+}
 
 
 const addPacket = async (db, user, payload) => {
@@ -312,29 +298,14 @@ const getTemplate = async ({db, deal, payload, user, templateId, investmentDocs 
 	
 		const timeStamp = Date.now();
 		const adjTemplateName = response.name.replace(/\s+/g, "_");
-    const fileName = adjTemplateName
-        .replace(/_/g, " ")
-        .replace(/(?:-+)/, " ")
-        .replace(/ +/g, " ");
 
 		const key = `investments/${payload.investmentId}/${timeStamp}-${adjTemplateName}.pdf`;
-
-    const oldDocs = investmentDocs.filter((doc) => {
-      if (doc === Object(doc)) {
-        return !doc.path.includes(adjTemplateName);
-      } else {
-        return !doc.includes(adjTemplateName);
-      }
-    });
-  
-    const newDocs = {
-      oldDocs: [...oldDocs],
-      key,
-      fileName: `${fileName}.${response.templateType}`,
-    };
+	
+		const oldDocs = investmentDocs.filter(doc => !doc.includes(adjTemplateName))
+		const newDocsArray = [...oldDocs, key];
 	
 		const downloadUrl =  await generateDocSpringPDF(db, deal, user, payload, adjTemplateName, timeStamp, templateId);
-		updateInvestment(db, investmentStatus, payload, newDocs);
+		updateInvestment(db, investmentStatus, payload, newDocsArray);
 		addPacket(db, user, payload)
 
 		return downloadUrl;
