@@ -149,5 +149,6 @@ describe('Deal Resolver', () => {
     const updatedDeal = await apolloServer.db.deals.findOne({ _id: testDeal._id })
     expect(updatedDeal.usersViewed).not.toContainEqual(user._id)
   })
+  
 
 })
