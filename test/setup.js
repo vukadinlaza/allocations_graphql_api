@@ -6,10 +6,25 @@ const { typeDefs, resolvers } = require('../src/graphql/resolvers')
 
 const userFixtures = require('./fixtures/users')
 
+function uuid() {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+}
+
 const seeds = {
   standard: async (db) => {
     // seed some user data
     const { ops: [org]} = await db.organizations.insertOne({ name: "Cool Fund", slug: "cool-fund" })
+
+    const { ops: [deal]} = await db.deals.insertOne({
+      company_name: 'test-deal',
+      organization: org._id,
+      status: "onboarding",
+      dealParams: {},
+      slug: 'test-deal',
+      created_at: Date.now(),
+      inviteKey: uuid()
+    })
+
     await Promise.all(
       userFixtures.map(user => db.users.insertOne(user(org)))
     )
