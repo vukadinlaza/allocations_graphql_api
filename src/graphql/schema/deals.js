@@ -168,7 +168,7 @@ type Query {
   publicDeal(deal_slug: String!, fund_slug: String!, invite_code: String): Deal
   searchDeals(q: String!, limit: Int): [Deal]
   searchDealsByOrg(q: String!, org: String!, limit: Int): [Deal]
-  fundsAdminTables(pagination, investmentType)
+  fundAdminHighlights: Object
 }
 
 type Mutation {
