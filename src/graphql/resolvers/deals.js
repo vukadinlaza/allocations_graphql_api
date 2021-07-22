@@ -13,6 +13,7 @@ const Mailer = require('../../mailers/mailer')
 const txConfirmationTemplate = require('../../mailers/templates/tx-confirmation-template')
 const { nWithCommas } = require('../../utils/common.js')
 // const { pubsub } = require('googleapis/build/src/apis/pubsub')
+const { getPagAggregation } = require('../helpers')
 
 /**
 
@@ -98,6 +99,12 @@ const Deal = {
   dealOnboarding: async (deal, _, { db }) => {
     const dealOnboarding = await db.dealOnboarding.findOne({ dealName: deal.company_name })
     return dealOnboarding
+  },
+  AUM: async (deal, _, { db }) => {
+    const wiredInvestments = await db.investments.find({deal_id: deal._id, status: {$in: ['wired', 'complete']}}).toArray();
+    console.log(JSON.stringify(wiredInvestments))
+    const aum = wiredInvestments.length? wiredInvestments.map(inv => inv.amount).reduce((acc, n) => acc + n) : 0
+    return aum
   }
 }
 
@@ -137,13 +144,28 @@ const Queries = {
     }
     throw new AuthenticationError("permission denied")
   },
-
+  /** gets fund admin highlights tab data **/
   fundAdminHighlights: async (_, args, { db }) => {
     const funds = await db.deals.count({ investmentType: 'fund' });
     const SPVs = await db.deals.count({ investmentType: { $ne: 'fund' } });
     const investments = await db.investments.count();
 
     return { funds, SPVs, investments }
+  },
+  /** Gets fund admin Funds/SPVs tabs data**/
+  fundAdminTables: async (_, args, ctx) => {
+    isAdmin(ctx)
+    const { pagination, currentPage } = args.pagination;
+    const additionalFilter = { key: 'investmentType', filter: args.filter }
+    const documentsToSkip = pagination * (currentPage)
+    const aggregation = getPagAggregation(args.pagination, additionalFilter)
+
+    let query = ctx.db.collection("deals")
+                      .aggregate(aggregation)
+                      .skip(documentsToSkip)
+                      .limit(pagination)
+                      .toArray()
+    return query;
   }
 }
 
