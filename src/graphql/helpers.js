@@ -14,7 +14,7 @@ module.exports = {
 
       let sortBy = {};
       sortBy[`${sortNestedKey? `${sortField}.${sortNestedKey}` : (sortField? sortField : filterField)}`] = (sortOrder? sortOrder : 1)
-      
+
       let aggregation = []
       if(sortNestedKey && sortNestedCollection && sortLocalFieldKey) aggregation.push({
         $lookup: {

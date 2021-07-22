@@ -102,8 +102,7 @@ const Deal = {
   },
   AUM: async (deal, _, { db }) => {
     const wiredInvestments = await db.investments.find({deal_id: deal._id, status: {$in: ['wired', 'complete']}}).toArray();
-    console.log(JSON.stringify(wiredInvestments))
-    const aum = wiredInvestments.length? wiredInvestments.map(inv => inv.amount).reduce((acc, n) => acc + n) : 0
+    const aum = wiredInvestments.length? wiredInvestments.map(inv => inv.amount).reduce((acc, n) => Number(acc) + Number(n)) : 0
     return aum
   }
 }
