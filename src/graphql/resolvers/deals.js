@@ -13,6 +13,7 @@ const Mailer = require('../../mailers/mailer')
 const txConfirmationTemplate = require('../../mailers/templates/tx-confirmation-template')
 const { nWithCommas } = require('../../utils/common.js')
 // const { pubsub } = require('googleapis/build/src/apis/pubsub')
+const { getPagAggregation } = require('../helpers')
 
 /**
 
@@ -96,8 +97,13 @@ const Deal = {
     }))
   },
   dealOnboarding: async (deal, _, { db }) => {
-    const dealOnboarding = await db.dealOnboarding.findOne({dealName: deal.company_name})
+    const dealOnboarding = await db.dealOnboarding.findOne({ dealName: deal.company_name })
     return dealOnboarding
+  },
+  AUM: async (deal, _, { db }) => {
+    const wiredInvestments = await db.investments.find({deal_id: deal._id, status: {$in: ['wired', 'complete']}}).toArray();
+    const aum = wiredInvestments.length? wiredInvestments.map(inv => inv.amount).reduce((acc, n) => Number(acc) + Number(n)) : 0
+    return aum
   }
 }
 
@@ -136,6 +142,29 @@ const Queries = {
       return deal
     }
     throw new AuthenticationError("permission denied")
+  },
+  /** gets fund admin highlights tab data **/
+  fundAdminHighlights: async (_, args, { db }) => {
+    const funds = await db.deals.count({ investmentType: 'fund' });
+    const SPVs = await db.deals.count({ investmentType: { $ne: 'fund' } });
+    const investments = await db.investments.count();
+
+    return { funds, SPVs, investments }
+  },
+  /** Gets fund admin Funds/SPVs tabs data**/
+  fundAdminTables: async (_, args, ctx) => {
+    isAdmin(ctx)
+    const { pagination, currentPage } = args.pagination;
+    const additionalFilter = { key: 'investmentType', filter: args.filter }
+    const documentsToSkip = pagination * (currentPage)
+    const aggregation = getPagAggregation(args.pagination, additionalFilter)
+
+    let query = ctx.db.collection("deals")
+                      .aggregate(aggregation)
+                      .skip(documentsToSkip)
+                      .limit(pagination)
+                      .toArray()
+    return query;
   }
 }
 
@@ -181,7 +210,7 @@ const Mutations = {
   updateDeal: async (_, { org, deal: { _id, wireDoc, ...deal } }, ctx) => {
     const { user } = ctx;
     console.log('HEREEE')
-    ctx.pubsub.publish('dealOnboarding', {dealOnboarding: 'YES'})
+    ctx.pubsub.publish('dealOnboarding', { dealOnboarding: 'YES' })
     if (deal.isPostingComment) {
       const res = await ctx.db.deals.findOneAndUpdate(
         { _id: ObjectId(_id) },
@@ -205,22 +234,22 @@ const Mutations = {
       const investments = await ctx.db.investments.aggregate([
         { $match: { deal_id: ObjectId(_id) } },
         {
-            $lookup: {
-               from: 'users',
-               localField: 'user_id',
-               foreignField: "_id",
-               as: 'user'
-             }
-         },
-         { $unwind: '$user' },
-         {
-           $project: { user: { email: 1, first_name: 1 }, amount: 1 }
-         }
-       ]).toArray()
+          $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: "_id",
+            as: 'user'
+          }
+        },
+        { $unwind: '$user' },
+        {
+          $project: { user: { email: 1, first_name: 1 }, amount: 1 }
+        }
+      ]).toArray()
 
       await ctx.db.investments.updateMany({ deal_id: ObjectId(_id), status: 'wired' }, { $set: { status: 'complete' } })
 
-      if(investments.length && deal && deal.slug === 'luna-mega'){
+      if (investments.length && deal && deal.slug === 'luna-mega') {
         const price = 50;
         investments.forEach(async investment => {
           const { user } = investment;
@@ -232,13 +261,13 @@ const Mutations = {
             },
             template: txConfirmationTemplate,
             templateData: {
-              username: user.first_name? `${user.first_name}` : user.email,
+              username: user.first_name ? `${user.first_name}` : user.email,
               issuer: deal.company_name || '',
               type: 'SAFE',
               price,
               totalSold: nWithCommas(investment.amount * 5),
               totalAmount: nWithCommas(investment.amount),
-              unitsOwned: nWithCommas(investment.amount/price),
+              unitsOwned: nWithCommas(investment.amount / price),
               date: moment(new Date()).format('MMM DD, YYYY')
             }
           }

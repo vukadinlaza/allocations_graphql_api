@@ -45,6 +45,7 @@ type Deal {
   isDemo: Boolean
   viewedUsers: [User]
   dealOnboarding: dealOnboarding
+  AUM: Int
 }
 
 type DealParams {
@@ -168,6 +169,8 @@ type Query {
   publicDeal(deal_slug: String!, fund_slug: String!, invite_code: String): Deal
   searchDeals(q: String!, limit: Int): [Deal]
   searchDealsByOrg(q: String!, org: String!, limit: Int): [Deal]
+  fundAdminHighlights: Object
+  fundAdminTables(filter: Object, pagination: PaginationInput!): [Deal]
 }
 
 type Mutation {
