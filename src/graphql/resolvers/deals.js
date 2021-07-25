@@ -159,12 +159,18 @@ const Queries = {
     const documentsToSkip = pagination * (currentPage)
     const aggregation = getPagAggregation(args.pagination, additionalFilter)
 
-    let query = ctx.db.collection("deals")
-                      .aggregate(aggregation)
-                      .skip(documentsToSkip)
-                      .limit(pagination)
-                      .toArray()
-    return query;
+    let count = await ctx.db.collection("deals")
+                              .aggregate(aggregation)
+                              .toArray()
+    count = count.length
+    
+    let deals = await ctx.db.collection("deals")
+                            .aggregate(aggregation)
+                            .skip(documentsToSkip)
+                            .limit(pagination)
+                            .toArray()
+
+    return {count , deals};
   }
 }
 
