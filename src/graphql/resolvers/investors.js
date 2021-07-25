@@ -19,7 +19,8 @@ const {
   getAuthToken,
   getKYCTemplateId
 } = require('../../utils/docusign')
-const { createTaxDocument } = require('../../docspring/index')
+const { createTaxDocument } = require('../../docspring/index');
+const { getFilters, getNestedFilters, getSorting, getNestedSorting } = require('../pagHelpers')
 const Users = require('../schema/users')
 const fetch = require('node-fetch');
 const moment = require('moment')
@@ -135,24 +136,25 @@ const Queries = {
     isAdmin(ctx)
     return ctx.db.collection("users").find({}).toArray()
   },
-  allUsers: (_, { pagination: { filterField, filterValue, pagination, currentPage, sortField, sortOrder } }, ctx) => {
+  allUsers: async (_, args, ctx) => {
     isAdmin(ctx)
-    const documentsToSkip = pagination * (currentPage)
-    const match = {};
-    if(filterValue){
-      match[filterField] = { "$regex" : `/*${filterValue}/*` , "$options" : "i"}
-    }
-    let sortBy = {};
-    sortBy[`${sortField? sortField : filterField}`] = (sortOrder? sortOrder : 1)
+    const { pagination, currentPage, sortField } = args.pagination;
 
-    let query = ctx.db.collection("users")
-                      .aggregate([
-                        {$match: match},
-                        {$sort: sortBy}
-                      ])
+    const documentsToSkip = pagination * (currentPage)
+    const filter = getFilters(args.pagination);
+    const nestedFilters = getNestedFilters(args.pagination);
+    const sorting = getSorting(args.pagination);
+    const nestedSorting = getNestedSorting(args.pagination);
+
+    const aggregation = [nestedSorting, nestedFilters, filter, sorting]
+                        .filter(x => x && Object.keys(x).length);
+    
+    let query = await ctx.db.collection("users")
+                      .aggregate(aggregation)
                       .skip(documentsToSkip)
                       .limit(pagination)
                       .toArray()
+                      console.log(JSON.stringify(args.pagination, null, 2))
     return query;
   },
   searchUsers: async (_, { org, q, limit }, ctx) => {

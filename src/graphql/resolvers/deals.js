@@ -158,7 +158,7 @@ const Queries = {
     const additionalFilter = { key: 'investmentType', filter: args.filter }
     const documentsToSkip = pagination * (currentPage)
     const aggregation = getPagAggregation(args.pagination, additionalFilter)
-
+    console.log(JSON.stringify(args.pagination, null, 2))
     let query = ctx.db.collection("deals")
                       .aggregate(aggregation)
                       .skip(documentsToSkip)
