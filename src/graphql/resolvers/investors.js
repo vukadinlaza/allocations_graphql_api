@@ -154,7 +154,7 @@ const Queries = {
                       .skip(documentsToSkip)
                       .limit(pagination)
                       .toArray()
-                      console.log(JSON.stringify(args.pagination, null, 2))
+                      
     return query;
   },
   searchUsers: async (_, { org, q, limit }, ctx) => {

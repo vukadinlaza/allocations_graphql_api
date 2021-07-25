@@ -24,7 +24,7 @@ module.exports = {
         }
       }
     },
-    getSorting: ({ sortField, sortOrder, sortNestedKey }) => {
+    getSorting: ({ sortField, sortOrder, sortNestedKey, filterField }) => {
       let sortBy = {};
       sortBy[`${sortNestedKey? `${sortField}.${sortNestedKey}` : (sortField? sortField : filterField)}`] = (sortOrder? sortOrder : 1);
       return { $sort: sortBy }

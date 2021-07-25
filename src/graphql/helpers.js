@@ -37,6 +37,6 @@ module.exports = {
       if(sortField && sortOrder) aggregation.push({$sort: sortBy})
 
       return aggregation
-      // return (aggregation, {collation: {'locale':'en'}})
+      // return (aggregation, {collation: ({ locale: "en", caseLevel: true })})
     }
 }
