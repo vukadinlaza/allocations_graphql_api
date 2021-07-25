@@ -70,10 +70,15 @@ input UserInput {
   investorLimits: Object
 }
 
+type UserPagination {
+  count: Int
+  users: [User]
+}
+
 extend type Query {
   investor(email: String, _id: String, deal_id: String): User
   allInvestors: [User]
-  allUsers(pagination: PaginationInput!): [User]
+  allUsers(pagination: PaginationInput!): UserPagination
   searchUsers(org: String!, q: String!, limit: Int): [User]
   getLink(input: Object): Object
 }

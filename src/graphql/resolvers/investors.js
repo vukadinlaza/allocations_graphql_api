@@ -148,6 +148,12 @@ const Queries = {
 
     const aggregation = [nestedSorting, nestedFilters, filter, sorting]
                         .filter(x => x && Object.keys(x).length);
+    const countAggregation = [...aggregation, { $count: 'count' }]
+    
+    const usersCount = await ctx.db.collection("users")
+                              .aggregate(countAggregation)
+                              .toArray()
+    const count = usersCount[0].count
     
     let query = await ctx.db.collection("users")
                       .aggregate(aggregation)
@@ -155,7 +161,7 @@ const Queries = {
                       .limit(pagination)
                       .toArray()
                       
-    return query;
+    return {count, users: query};
   },
   searchUsers: async (_, { org, q, limit }, ctx) => {
     const orgRecord = await ensureFundAdmin(org, ctx)
