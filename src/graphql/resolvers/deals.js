@@ -166,8 +166,6 @@ const Queries = {
                               .aggregate(countAggregation)
                               .toArray()
     const count = dealsCount[0].count;
-    console.log(count, documentsToSkip)
-    const isLastPage = count <= (documentsToSkip + pagination);
     
     let deals = await ctx.db.collection("deals")
                             .aggregate(aggregation)
@@ -175,7 +173,7 @@ const Queries = {
                             .limit(pagination)
                             .toArray()
 
-    return {count , deals, isLastPage};
+    return {count , deals};
   }
 }
 

@@ -154,8 +154,6 @@ const Queries = {
                               .aggregate(countAggregation)
                               .toArray()
     const count = usersCount[0].count;
-
-    const isLastPage = count <= (documentsToSkip + pagination);
     
     let query = await ctx.db.collection("users")
                       .aggregate(aggregation)
@@ -163,7 +161,7 @@ const Queries = {
                       .limit(pagination)
                       .toArray()
                       
-    return {count, users: query, isLastPage};
+    return {count, users: query};
   },
   searchUsers: async (_, { org, q, limit }, ctx) => {
     const orgRecord = await ensureFundAdmin(org, ctx)
