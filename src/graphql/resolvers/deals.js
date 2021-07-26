@@ -98,11 +98,12 @@ const Deal = {
   },
   dealOnboarding: async (deal, _, { db }) => {
     const dealOnboarding = await db.dealOnboarding.findOne({ dealName: deal.company_name })
+
     return dealOnboarding
   },
   AUM: async (deal, _, { db }) => {
-    const wiredInvestments = await db.investments.find({deal_id: deal._id, status: {$in: ['wired', 'complete']}}).toArray();
-    const aum = wiredInvestments.length? wiredInvestments.map(inv => inv.amount).reduce((acc, n) => Number(acc) + Number(n)) : 0
+    const wiredInvestments = await db.investments.find({ deal_id: deal._id, status: { $in: ['wired', 'complete'] } }).toArray();
+    const aum = wiredInvestments.length ? wiredInvestments.map(inv => inv.amount).reduce((acc, n) => Number(acc) + Number(n)) : 0
     return aum
   }
 }
@@ -157,6 +158,7 @@ const Queries = {
     const { pagination, currentPage } = args.pagination;
     const additionalFilter = { key: 'investmentType', filter: args.filter }
     const documentsToSkip = pagination * (currentPage)
+    
     const aggregation = getPagAggregation(args.pagination, additionalFilter);
     const countAggregation = [...aggregation, { $count: 'count' }]
     
@@ -216,7 +218,7 @@ const Mutations = {
   /** special handling for wire instructions upload **/
   updateDeal: async (_, { org, deal: { _id, wireDoc, ...deal } }, ctx) => {
     const { user } = ctx;
-    console.log('HEREEE')
+
     ctx.pubsub.publish('dealOnboarding', { dealOnboarding: 'YES' })
     if (deal.isPostingComment) {
       const res = await ctx.db.deals.findOneAndUpdate(
@@ -476,9 +478,8 @@ const Mutations = {
     )
   },
   addUserAsViewed: async (_, { user_id, deal_id }, ctx) => {
-    console.log('USER DEAL', user_id, deal_id)
     const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) })
-    console.log(deal.usersViewed)
+
     if ((deal.usersViewed || []).map(i => String(i)).find(id => id === user_id)) {
       return deal
     }
