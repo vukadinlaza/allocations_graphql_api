@@ -156,6 +156,12 @@ type dealTask {
   taskUpdatedDate: String
 }
 
+type DealPagination {
+  count: Int
+  isLastPage: Boolean
+  deals: [Deal]
+}
+
 enum DealStatus {
   onboarding
   closing
@@ -170,7 +176,7 @@ type Query {
   searchDeals(q: String!, limit: Int): [Deal]
   searchDealsByOrg(q: String!, org: String!, limit: Int): [Deal]
   fundAdminHighlights: Object
-  fundAdminTables(filter: Object, pagination: PaginationInput!): [Deal]
+  fundAdminTables(filter: Object, pagination: PaginationInput!): DealPagination
 }
 
 type Mutation {

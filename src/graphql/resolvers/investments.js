@@ -12,7 +12,8 @@ const Mailer = require('../../mailers/mailer')
 const commitmentTemplate = require('../../mailers/templates/commitment-template')
 const commitmentCancelledTemplate = require('../../mailers/templates/commitment-cancelled-template')
 const { signedSPV } = require('../../zaps/signedDocs');
-const { getPagAggregation } = require('../helpers')
+const { getFilters, getNestedFilters, getSorting, getNestedSorting } = require('../pagHelpers');
+const { getPagAggregation } = require('../helpers');
 
 /**
 
@@ -54,12 +55,16 @@ const Queries = {
     return db.investments.find({}).toArray()
   },
   investmentsList: (_, args, ctx) => {
+    isAdmin(ctx)
     const { pagination, currentPage } = args.pagination;
 
-    isAdmin(ctx)
-
     const documentsToSkip = pagination * (currentPage)
-    const aggregation = getPagAggregation(args.pagination)
+    const filter = getFilters(args.pagination);
+    const nestedFilters = getNestedFilters(args.pagination);
+    const sorting = getSorting(args.pagination);
+    const nestedSorting = getNestedSorting(args.pagination);
+
+    const aggregation = [nestedSorting, nestedFilters, filter, sorting]
 
     let query = ctx.db.collection("investments")
                       .aggregate(aggregation)
@@ -67,7 +72,7 @@ const Queries = {
                       .limit(pagination)
                       .toArray()
     return query;
-  }
+  },
 }
 
 const Mutations = {
