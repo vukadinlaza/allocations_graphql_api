@@ -13,7 +13,7 @@ const Mailer = require('../../mailers/mailer')
 const txConfirmationTemplate = require('../../mailers/templates/tx-confirmation-template')
 const { nWithCommas } = require('../../utils/common.js')
 // const { pubsub } = require('googleapis/build/src/apis/pubsub')
-const { getPagAggregation } = require('../helpers')
+const { getFilters, getNestedFilters, getSorting, getNestedSorting, customDealsSorting } = require('../pagHelpers')
 
 /**
 
@@ -155,11 +155,21 @@ const Queries = {
   /** Gets fund admin Funds/SPVs tabs data**/
   fundAdminTables: async (_, args, ctx) => {
     isAdmin(ctx)
-    const { pagination, currentPage } = args.pagination;
+    const { pagination, currentPage, sortField } = args.pagination;
+
     const additionalFilter = { key: 'investmentType', filter: args.filter }
     const documentsToSkip = pagination * (currentPage)
+    const filter = getFilters(args.pagination, additionalFilter);
+    const nestedFilters = getNestedFilters(args.pagination);
+    let sorting = getSorting(args.pagination);
+    const nestedSorting = getNestedSorting(args.pagination);
+    
+    const customSorting = customDealsSorting(args.pagination);
+    if(customSorting) sorting = customSorting;
+    
+    const aggregation = [nestedSorting, nestedFilters, filter, ...sorting]
+                        .filter(x => x && Object.keys(x).length);
 
-    const aggregation = getPagAggregation(args.pagination, additionalFilter);
     const countAggregation = [...aggregation, { $count: 'count' }]
     
     const dealsCount = await ctx.db.collection("deals")
@@ -172,6 +182,12 @@ const Queries = {
                             .skip(documentsToSkip)
                             .limit(pagination)
                             .toArray()
+    
+    if(sortField === 'AUM'){
+      deals = deals.map(item => {
+        return { ...item.deal, AUM: item.AUM }
+      })  
+    }
 
     return {count , deals};
   }

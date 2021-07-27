@@ -7,7 +7,6 @@ const { AuthenticationError, gql } = require('apollo-server-express')
 const Hellosign = require('../../hellosign')
 const Organizations = require('../schema/organizations')
 const { groupBy, map } = require('lodash');
-const { getPagAggregation } = require('../helpers')
 /**
 
   all organization handling (sometimes called funds)
@@ -228,22 +227,6 @@ const Organization = {
 
     const deals = await db.collection("deals").find(dealQuery).toArray()
     return db.investments.find({ deal_id: { $in: deals.map(d => d._id) } }).toArray()
-  },
-  pagInvestments: async (result, _, { db }) => {
-    const { org, pagination, documentsToSkip, pagArgs } = result;
-    const aggregation = getPagAggregation(pagArgs)
-
-    const dealQuery = org.slug === "allocations"
-      ? { organization: { $in: [org._id, null] } }
-      : { organization: org._id }
-    const deals = await db.collection("deals").find(dealQuery).toArray()
-    aggregation.unshift({$match: { deal_id: { $in: deals.map(d => d._id) } } })
-
-    return db.investments
-              .aggregate(aggregation)
-              .skip(documentsToSkip)
-              .limit(pagination)
-              .toArray()
   },
   investment: (org, { _id }, { db }) => {
     return db.investments.findOne({ _id: ObjectId(_id), organization: org._id })
