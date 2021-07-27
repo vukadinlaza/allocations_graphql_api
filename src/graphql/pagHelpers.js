@@ -136,23 +136,3 @@ module.exports = {
       return null;
     }
   }
-  
-  
-  // return [
-  //   {
-  //     $lookup:{
-  //       from: 'investments',
-  //       "let": { "id": "$_id" },
-  //       "pipeline": [
-  //         { "$match": { "$expr": { "$eq": ["$user_id", "$$id"] }}},
-  //         { $addFields: { investmentsAmount: { $sum: '$$ROOT.amount' }, investments: { $sum: 1 } } },
-  //         { "$project": { '_id': 0,  investmentsAmount: 1, investments: 1 }}
-  //       ],
-  //       "as": "investments"       
-  //     }
-  //   },
-  //   { $unwind: '$investments'},
-  //   { $addFields: { investmentsAmount: '$investments.investmentsAmount', investments: '$investments.investments' } },
-  //   { $project: { documents: 0} },
-  //   { $sort: { [sortField]: (sortOrder ? sortOrder : 1) } },
-  // ]
