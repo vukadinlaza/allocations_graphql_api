@@ -13,7 +13,6 @@ const commitmentTemplate = require('../../mailers/templates/commitment-template'
 const commitmentCancelledTemplate = require('../../mailers/templates/commitment-cancelled-template')
 const { signedSPV } = require('../../zaps/signedDocs');
 const { getFilters, getNestedFilters, getSorting, getNestedSorting } = require('../pagHelpers');
-const { getPagAggregation } = require('../helpers');
 
 /**
 

@@ -20,7 +20,7 @@ const {
   getKYCTemplateId
 } = require('../../utils/docusign')
 const { createTaxDocument } = require('../../docspring/index');
-const { getFilters, getNestedFilters, getSorting, getNestedSorting } = require('../pagHelpers')
+const { getFilters, getNestedFilters, getSorting, getNestedSorting, customUsersSorting } = require('../pagHelpers')
 const Users = require('../schema/users')
 const fetch = require('node-fetch');
 const moment = require('moment')
@@ -143,27 +143,39 @@ const Queries = {
     const documentsToSkip = pagination * (currentPage)
     const filter = getFilters(args.pagination);
     const nestedFilters = getNestedFilters(args.pagination);
-    const sorting = getSorting(args.pagination);
+    let sorting = getSorting(args.pagination);
     const nestedSorting = getNestedSorting(args.pagination);
+    
+    const customSorting = customUsersSorting(args.pagination);
+    if(customSorting) sorting = customSorting;
 
-    const aggregation = [nestedSorting, nestedFilters, filter, sorting]
+    const aggregation = [nestedSorting, nestedFilters, filter, ...sorting]
                         .filter(x => x && Object.keys(x).length);
+                        
     const countAggregation = [...aggregation, { $count: 'count' }]
     
     const usersCount = await ctx.db.collection("users")
                               .aggregate(countAggregation)
                               .toArray()
     const count = usersCount[0].count;
-
-    const isLastPage = count <= (documentsToSkip + pagination);
     
-    let query = await ctx.db.collection("users")
+    let users = await ctx.db.collection("users")
                       .aggregate(aggregation)
                       .skip(documentsToSkip)
                       .limit(pagination)
                       .toArray()
+
+    if(['investmentAmount', 'investments'].includes(sortField)){
+      users = users.map(item => {
+        return { 
+          ...item.user, 
+          investmentAmount: item.investmentAmount, 
+          investments: item.investments 
+        }
+      })  
+    }
                       
-    return {count, users: query, isLastPage};
+    return {count, users};
   },
   searchUsers: async (_, { org, q, limit }, ctx) => {
     const orgRecord = await ensureFundAdmin(org, ctx)

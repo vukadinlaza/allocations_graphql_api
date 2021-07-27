@@ -72,7 +72,6 @@ input UserInput {
 
 type UserPagination {
   count: Int
-  isLastPage: Boolean
   users: [User]
 }
 

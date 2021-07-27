@@ -158,7 +158,6 @@ type dealTask {
 
 type DealPagination {
   count: Int
-  isLastPage: Boolean
   deals: [Deal]
 }
 
