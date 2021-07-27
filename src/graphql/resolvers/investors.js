@@ -151,7 +151,6 @@ const Queries = {
 
     const aggregation = [nestedSorting, nestedFilters, filter, ...sorting]
                         .filter(x => x && Object.keys(x).length);
-                        console.log(JSON.stringify(aggregation, null, 2))
                         
     const countAggregation = [...aggregation, { $count: 'count' }]
     
