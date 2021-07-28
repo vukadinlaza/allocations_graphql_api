@@ -13,7 +13,7 @@ const Mailer = require('../../mailers/mailer')
 const txConfirmationTemplate = require('../../mailers/templates/tx-confirmation-template')
 const { nWithCommas } = require('../../utils/common.js')
 // const { pubsub } = require('googleapis/build/src/apis/pubsub')
-const { getFilters, getNestedFilters, getSorting, getNestedSorting, customDealsSorting } = require('../pagHelpers')
+const { getFilters, getNestedFilters, getSorting, getNestedSorting, customDealsSorting, getHighlights } = require('../pagHelpers')
 
 /**
 
@@ -146,11 +146,8 @@ const Queries = {
   },
   /** gets fund admin highlights tab data **/
   fundAdminHighlights: async (_, args, { db }) => {
-    const funds = await db.deals.count({ investmentType: 'fund' });
-    const SPVs = await db.deals.count({ investmentType: { $ne: 'fund' } });
-    const investments = await db.investments.count();
-
-    return { funds, SPVs, investments }
+    const highlights = await db.deals.aggregate(getHighlights()).toArray()
+    return highlights[0]
   },
   /** Gets fund admin Funds/SPVs tabs data**/
   fundAdminTables: async (_, args, ctx) => {
