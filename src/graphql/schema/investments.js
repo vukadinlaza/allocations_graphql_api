@@ -10,6 +10,7 @@ type Investment {
   completed_at: Int
   organization: String
   amount: Float
+  capitalWiredAmount: Float
   deal: Deal
   user: User
   status: InvestmentStatus
