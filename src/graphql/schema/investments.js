@@ -71,6 +71,7 @@ input InvestmentInput {
   user_id: String
   status: String
   documents: [Object]
+  capitalWiredAmount: Float
 }
 
 input PaginationInput {
