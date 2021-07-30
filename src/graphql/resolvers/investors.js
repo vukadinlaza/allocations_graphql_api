@@ -145,37 +145,37 @@ const Queries = {
     const nestedFilters = getNestedFilters(args.pagination);
     let sorting = getSorting(args.pagination);
     const nestedSorting = getNestedSorting(args.pagination);
-    
+
     const customSorting = customUsersSorting(args.pagination);
-    if(customSorting) sorting = customSorting;
+    if (customSorting) sorting = customSorting;
 
     const aggregation = [nestedSorting, nestedFilters, filter, ...sorting]
-                        .filter(x => x && Object.keys(x).length);
-                        
-    const countAggregation = [...aggregation, { $count: 'count' }]
-    
-    const usersCount = await ctx.db.collection("users")
-                              .aggregate(countAggregation)
-                              .toArray()
-    const count = usersCount[0].count;
-    
-    let users = await ctx.db.collection("users")
-                      .aggregate(aggregation)
-                      .skip(documentsToSkip)
-                      .limit(pagination)
-                      .toArray()
+      .filter(x => x && Object.keys(x).length);
 
-    if(['investmentAmount', 'investments'].includes(sortField)){
+    const countAggregation = [...aggregation, { $count: 'count' }]
+
+    const usersCount = await ctx.db.collection("users")
+      .aggregate(countAggregation)
+      .toArray()
+    const count = usersCount[0].count;
+
+    let users = await ctx.db.collection("users")
+      .aggregate(aggregation)
+      .skip(documentsToSkip)
+      .limit(pagination)
+      .toArray()
+
+    if (['investmentAmount', 'investments'].includes(sortField)) {
       users = users.map(item => {
-        return { 
-          ...item.user, 
-          investmentAmount: item.investmentAmount, 
-          investments: item.investments 
+        return {
+          ...item.user,
+          investmentAmount: item.investmentAmount,
+          investments: item.investments
         }
-      })  
+      })
     }
-                      
-    return {count, users};
+
+    return { count, users };
   },
   searchUsers: async (_, { org, q, limit }, ctx) => {
     const orgRecord = await ensureFundAdmin(org, ctx)
@@ -265,9 +265,10 @@ const Mutations = {
         { $set: { ...user, accredidation_doc: s3Path } }
       )
     }
-    const options = ['investor_type', 'country', 'state', 'first_name', 'last_name', 'entity_name', 'signer_full_name', 'accredited_investor_status', 'email', 'accountId']
+    const options = ['investor_type', 'country', 'state', 'first_name', 'last_name', 'entity_name', 'signer_full_name', 'accredited_investor_status', 'email', 'accountId', 'accredidation_status']
     const data = pick({ ...user }, options)
     if (!isEmpty(data)) {
+
       const updatedEntity = await ctx.db.entities.updateOne({ user: ObjectId(_id), isPrimaryEntity: true }, { $set: data })
     }
     const update = await ctx.db.users.updateOne(
@@ -301,13 +302,13 @@ const Mutations = {
       headers: { 'Content-Type': 'application/json' },
     })
   },
-  
+
   submitTaxDocument: async (_, { payload }, { db, user }) => {
     if (payload.isDemo) {
       return db.users.findOne({ _id: ObjectId(user._id) })
     }
 
-    const { kycTemplateId, kycTemplateName  } = payload;
+    const { kycTemplateId, kycTemplateName } = payload;
     const isAllocationsUser = user.email.includes('@allocations.com;')
 
     if (process.env.NODE_ENV === 'production' && !isAllocationsUser) {
@@ -318,7 +319,7 @@ const Mutations = {
     }
 
     const taxDocument = await createTaxDocument({ payload, user, db })
-    if(!taxDocument) throw new UserInputError('There was an error with Docspring');
+    if (!taxDocument) throw new UserInputError('There was an error with Docspring');
 
     return db.users.findOne({ _id: ObjectId(user._id) })
   }
