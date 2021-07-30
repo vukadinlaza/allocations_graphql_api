@@ -7,7 +7,7 @@ const { AuthenticationError, gql } = require('apollo-server-express')
 const Hellosign = require('../../hellosign')
 const Organizations = require('../schema/organizations')
 const { groupBy, map } = require('lodash');
-const { getPagAggregation } = require('../helpers')
+const { getOrgOverviewData } = require('../mongoHelpers.js')
 /**
 
   all organization handling (sometimes called funds)
@@ -52,6 +52,11 @@ const Queries = {
     const org = await db.organizations.findOne({ slug })
 
     return db.users.find({ organizations_admin: org._id }).toArray()
+  },
+  overviewData: async (_, { slug }, { user, db }) => {
+    const aggregation = getOrgOverviewData(slug);
+    const data = await db.deals.aggregate(aggregation).toArray()
+    return data[0]
   }
 }
 
