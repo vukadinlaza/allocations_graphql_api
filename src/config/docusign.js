@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const settings = 
 {
   "dsClientId": `${process.env.DOCUSIGN_ACCOUNT_ID}`,

@@ -13,6 +13,7 @@
     "watch-node": "nodemon dist/app.js",
     "watch": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-sass\" \"npm run watch-ts\" \"npm run watch-node\"",
     "test": "jest",
+    "test-coverage": "jest --coverage",
     "watch-test": "npm run test -- --watchAll",
     "watch-ts": "tsc -w",
     "build-sass": "node-sass src/public/css/main.scss dist/public/css/main.css",
@@ -27,6 +28,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/cli": "^7.14.5",
+    "@babel/core": "^7.14.6",
+    "@babel/plugin-proposal-class-properties": "^7.14.5",
+    "@babel/plugin-transform-runtime": "^7.14.5",
+    "@babel/preset-env": "^7.14.7",
     "@types/compression": "^1.0.1",
     "@types/cors": "^2.8.6",
     "@types/dotenv": "^6.1.1",
@@ -44,6 +50,8 @@
     "typescript": "^3.6.4"
   },
   "dependencies": {
+    "@babel/plugin-proposal-async-generator-functions": "^7.14.7",
+    "@babel/plugin-transform-flow-strip-types": "^7.14.5",
     "@sendgrid/mail": "^6.5.2",
     "@slack/client": "^5.0.2",
     "@slack/events-api": "^2.3.4",
@@ -64,6 +72,9 @@
     "aws-cloudfront-sign": "^2.2.0",
     "aws-sdk": "^2.580.0",
     "axios": "^0.19.2",
+    "babel-plugin-transform-async-generator-functions": "^6.24.1",
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
     "base64topdf": "^1.1.8",
     "body-parser": "^1.19.0",
     "check-types": "^10.0.0",
@@ -115,5 +126,21 @@
   "resolutions": {
     "fs-capacitor": "^6.2.0",
     "graphql-upload": "^11.0.0"
+  },
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "node": "current"
+          }
+        }
+      ]
+    ],
+    "plugins": [
+      "transform-async-generator-functions",
+      "transform-async-to-generator"
+    ]
   }
 }
