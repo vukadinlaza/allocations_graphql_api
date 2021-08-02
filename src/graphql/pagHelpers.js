@@ -150,7 +150,6 @@ pagHelpers = {
         return null;
       },
       customOrgPagination: ({ sortField, sortOrder, ...pagProps }) => {
-        console.log({sortField})
         const orgFilters = pagHelpers.getFilters(pagProps);
         const aggregation = [
           orgFilters,
@@ -335,114 +334,7 @@ pagHelpers = {
 
           { $sort: { [sortField]: (sortOrder ? sortOrder : 1) } }
         ]
-
-      // let sum = { $sum: '$investments.amount' };
-      // if(['totalAUM', 'totalPrivateFunds'].includes(sortField)) {
-      //   sum = sortField === 'totalPrivateFunds'? {$sum:  1} : {$sum: "$investments.amount"}
-      // }
-      // if(['totalFundAUM', 'totalFunds'].includes(sortField)) sum = {
-      //   $sum: {$cond: { if: {$eq: ['$deals.investmentType', 'fund']}, 
-      //     then: sortField === 'totalFunds'? 1 : "$investments.amount", 
-      //     else: 0 
-      //   }}
-      // }
-      // if(['totalSPVAUM', 'totalSPVs'].includes(sortField)) sum = {
-      //   $sum: {$cond: { if: {$ne: ['$deals.investmentType', 'fund']}, 
-      //     then: sortField === 'totalSPVs'? 1 : "$investments.amount", 
-      //     else: 0 
-      //   }}
-      // }
-      // if(['totalAUM', 'totalFundAUM', 'totalSPVAUM'].includes(sortField)){
-      //   aggregation.push(...[
-      //     { 
-      //       $lookup:{
-      //          from: 'deals',
-      //          localField: '_id',
-      //          foreignField: 'organization',
-      //          as: 'deals'
-      //        }
-      //    },
-      //    { $unwind: '$deals' },
-      //    { 
-      //       $lookup:{
-      //          from: 'investments',
-      //          localField: 'deals._id',
-      //          foreignField: 'deal_id',
-      //          as: 'investments'
-      //        }
-      //    },
-      //    {
-      //        $unwind: '$investments'
-      //    },
-      //    {
-      //        $match: { 'investments.status': { $in: ['complete', 'wired'] }}
-      //    },
-      //    {
-      //        $group: { 
-      //            _id: '$_id',
-      //            [sortField]: sum,
-      //            organization: { '$first': '$$ROOT' }
-      //        }
-      //    },
-      //    {
-      //        $project: { 'organization': 1, [sortField]: 1 }
-      //    },
-      //    { $sort: { [sortField]: (sortOrder ? sortOrder : 1) } }
-      //   ])
-      // }else if(['totalPrivateFunds', 'totalFunds', 'totalSPVs'].includes(sortField)){
-      //   aggregation.push(...[
-      //     { 
-      //       $lookup:{
-      //          from: 'deals',
-      //          localField: '_id',
-      //          foreignField: 'organization',
-      //          as: 'deals'
-      //        }
-      //    },
-      //    { $unwind: '$deals' },
-      //     {
-      //        $group: { 
-      //            _id: '$_id',
-      //            [sortField]: sum,
-      //            organization: { '$first': '$$ROOT' }
-      //        }
-      //    },
-      //    {
-      //        $project: { 'organization': 1, [sortField]: 1 }
-      //    },
-      //    { $sort: { [sortField]: (sortOrder ? sortOrder : 1) } }
-      //   ])
-      // }else if(sortField === 'totalInvestors'){
-      //   aggregation.push(...[
-      //     { 
-      //       $lookup:{
-      //          from: 'deals',
-      //          localField: '_id',
-      //          foreignField: 'organization',
-      //          as: 'deals'
-      //        }
-      //    },
-      //    { $unwind: '$deals' },
-      //    { 
-      //       $lookup:{
-      //          from: 'investments',
-      //          localField: 'deals._id',
-      //          foreignField: 'deal_id',
-      //          as: 'investments'
-      //        }
-      //    },
-      //     {
-      //        $group: { 
-      //            _id: '$investments.user_id',
-      //            organization: { '$first': '$$ROOT' }
-      //        }
-      //    },
-      //    {
-      //        $project: { 'organization': 1, [sortField]: {$size: '$_id'} }
-      //    },
-      //    { $sort: { [sortField]: (sortOrder ? sortOrder : 1) } }
-      //   ])
-      // }
+        
       return aggregation
     },
     getHighlights: () => {

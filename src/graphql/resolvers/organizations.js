@@ -64,7 +64,7 @@ const Queries = {
                               .aggregate(countAggregation)
                               .toArray()
     const count = organizationsCount[0].count;
-    console.log(JSON.stringify(aggregation, null, 2))
+
     let organizations = await ctx.db.collection("organizations")
                             .aggregate(aggregation)
                             .skip(documentsToSkip)
