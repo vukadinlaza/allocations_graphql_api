@@ -311,39 +311,6 @@ const Organization = {
     console.log(x)
     return x
   },
-  // overview: async (org, args, { db }) => {
-  //   const orgDeals = await db.deals.find({organization: org._id}).toArray();
-  //   const orgFunds = orgDeals.filter(deal => deal.investmentType === 'fund')
-  //                             .map(deal => deal._id)
-  //   const orgSPVs = orgDeals.filter(deal => deal.investmentType !== 'fund')
-  //                           .map(deal => deal._id)
-  //   const orgFundsInvestments = await db.investments.find({deal_id: {$in: orgFunds}, status: {$in: ['wired', 'complete']}}).toArray();
-  //   const orgSPVsInvestments = await db.investments.find({deal_id: {$in: orgSPVs}, status: {$in: ['wired', 'complete']}}).toArray();
-  //   const totalFundAUM =  orgFundsInvestments
-  //                         .map(inv => inv.amount? Number(inv.amount): 0)
-  //                         .reduce((acc, n) => acc + n, 0)
-  //   const totalSPVAUM = orgSPVsInvestments
-  //                         .map(inv => inv.amount? Number(inv.amount): 0)
-  //                         .reduce((acc, n) => acc + n, 0)
-  //   const totalFunds = orgFunds.length
-  //   const totalSPVs = orgSPVs.length
-  //   const overviewData = {
-  //     totalFundAUM,
-  //     totalSPVAUM,
-  //     totalFunds,
-  //     totalSPVs,
-  //     totalInvestors: [...new Set(
-  //       [
-  //         ...orgFundsInvestments.map(i => i.user_id),
-  //         ...orgSPVsInvestments.map(i => i.user_id)
-  //       ]
-  //     )].length,
-  //     totalAUM: totalFundAUM + totalSPVAUM,
-  //     totalPrivateFunds: totalFunds + totalSPVs
-  //   }
-
-  //   return overviewData
-  // }
 }
 
 const ComplianceTask = {
