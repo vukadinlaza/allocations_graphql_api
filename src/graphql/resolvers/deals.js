@@ -13,7 +13,8 @@ const Mailer = require('../../mailers/mailer')
 const txConfirmationTemplate = require('../../mailers/templates/tx-confirmation-template')
 const { nWithCommas } = require('../../utils/common.js')
 // const { pubsub } = require('googleapis/build/src/apis/pubsub')
-const { getDefaultPagAggregation, getHighlights } = require('../pagHelpers')
+const { getDefaultPagAggregation } = require('../pagHelpers')
+const { getHighlights } = require('../mongoHelpers.js')
 
 /**
 
