@@ -46,8 +46,10 @@ const getTemplateData = (input, user, templateId) => {
     limited_partnership,
     tenants_by_entirety,
     accredited_investor_status,
+    secondInvestor,
   } = input;
 
+  
   const SIGNATURE_ONLY_TEMPLATE = 'tpl_ctrRDXgQdKz5YGg9QK';
   const oldTemplates = ['tpl_RrmjKbpFRr7qhKY3dD', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_Z6jkb55rjqThssk3jG', 'tpl_ARmHkgKjECPmDT6ad9', 'tpl_3nKjygaFgz44KyCANJ', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_RrmjKbpFRr7qhKY3dD']
   const isTypeIndividual = (investor_type === 'individual');
@@ -127,7 +129,14 @@ const getTemplateData = (input, user, templateId) => {
       'JointTenants': joint_tenants || false,
       'TenantsByEntirety': tenants_by_entirety || false,
       'TenantsInCommon': tenants_in_commons || false,
-      'Initials': initials || ' '
+      'Initials': initials || ' ',
+      'IndividualName2': isTypeIndividual && secondInvestor ? secondInvestor.secondLegalName : ' ',
+      'InvestorName2' :isTypeIndividual && secondInvestor ? secondInvestor.secondLegalName : ' ',
+      'IndividualSignature2': isTypeIndividual && secondInvestor ? secondInvestor.secondLegalName : ' ',
+      'Signature2': isTypeIndividual && secondInvestor ? secondInvestor.secondLegalName : ' ',
+      'SocialSecurityNumber2': isTypeIndividual && secondInvestor ? secondInvestor.secondSignerSSN : ' ',
+      'Email2': isTypeIndividual && secondInvestor ? secondInvestor.secondEmail : ' ',
+      'Initials2': isTypeIndividual && secondInvestor ? secondInvestor.secondSignerInitials : ' ',
     }
   } else {
     return {
