@@ -10,6 +10,7 @@ type Investment {
   completed_at: Int
   organization: String
   amount: Float
+  capitalWiredAmount: Float
   deal: Deal
   user: User
   status: InvestmentStatus
@@ -70,6 +71,7 @@ input InvestmentInput {
   user_id: String
   status: String
   documents: [Object]
+  capitalWiredAmount: Float
 }
 
 input PaginationInput {

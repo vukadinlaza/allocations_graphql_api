@@ -66,10 +66,10 @@ const Queries = {
     const aggregation = [nestedSorting, nestedFilters, filter, sorting]
 
     let query = ctx.db.collection("investments")
-                      .aggregate(aggregation)
-                      .skip(documentsToSkip)
-                      .limit(pagination)
-                      .toArray()
+      .aggregate(aggregation)
+      .skip(documentsToSkip)
+      .limit(pagination)
+      .toArray()
     return query;
   },
 }
@@ -102,6 +102,7 @@ const Mutations = {
     if (savedInvestment.status !== investment.status) {
       investment[`${investment.status}_at`] = Date.now()
     }
+
     return ctx.db.investments.updateOne(
       { _id: ObjectId(_id) },
       { $set: { ...investment, updated_at: Date.now() } },
@@ -201,7 +202,7 @@ const Mutations = {
         },
         template: commitmentTemplate,
         templateData: {
-          username: user.first_name? `${user.first_name}` : user.email,
+          username: user.first_name ? `${user.first_name}` : user.email,
           issuer: deal.company_name || '',
           price: '$59',
           totalAmount: `$${payload.investmentAmount}`,
@@ -211,7 +212,7 @@ const Mutations = {
       await Mailer.sendEmail(emailData)
     }
 
-    if(!downloadUrl) throw new UserInputError('There was an error with Docspring');
+    if (!downloadUrl) throw new UserInputError('There was an error with Docspring');
 
     const zapData = {
       ...investment,
@@ -244,7 +245,7 @@ const Mutations = {
         },
         template: commitmentCancelledTemplate,
         templateData: {
-          username: user.first_name? `${user.first_name}` : user.email,
+          username: user.first_name ? `${user.first_name}` : user.email,
           issuer: deal.company_name || '',
           reason,
           refundAmount: `$${investment.amount}`,
