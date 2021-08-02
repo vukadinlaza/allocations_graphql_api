@@ -8,6 +8,7 @@ const Hellosign = require('../../hellosign')
 const Organizations = require('../schema/organizations')
 const { groupBy, map } = require('lodash');
 const { customOrgPagination } = require('../pagHelpers')
+const { getOrgOverviewData } = require('../mongoHelpers.js')
 /**
 
   all organization handling (sometimes called funds)
@@ -72,6 +73,11 @@ const Queries = {
                             .toArray()
 
     return {count , organizations};
+  },
+  overviewData: async (_, { slug }, { user, db }) => {
+    const aggregation = getOrgOverviewData(slug);
+    const data = await db.deals.aggregate(aggregation).toArray()
+    return data[0]
   }
 }
 

@@ -108,6 +108,7 @@ module.exports = gql(`
     pagOrganization(slug: String!, pagination: PaginationInput!): Organization
     organizationMembers(slug: String!): [User]
     pagOrganizations(pagination: PaginationInput!): OrganizationPagination
+    overviewData(slug: String!): Object
   }
 
   extend type Mutation {

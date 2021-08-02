@@ -55,7 +55,7 @@ const getTemplateData = (input, user, templateId) => {
   const countryWithState = country + (country === 'United States' ? `, ${state}` : '');
   const nameToUse = isTypeIndividual ? legalName : fullName;
   const communeDeals = ['tpl_hK65xPJdKpgTPyks9H', 'tpl_Y6hNCEc6CqzNkqpyPp']
-  const irishAngelsDeals = ['tpl_ratHTKYeHh9qcd2eYx']
+  const irishAngelsDeals = ['tpl_ratHTKYeHh9qcd2eYx', 'tpl_5tPkcRZYQ6mmpZAsKJ']
 
 
   if (templateId === SIGNATURE_ONLY_TEMPLATE) {

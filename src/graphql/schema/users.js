@@ -61,6 +61,7 @@ input UserInput {
   email: String
   passport: Upload
   accredidation_doc: Upload
+  accredidation_status: Boolean
   terms_of_service: Boolean
   showInvestAndMrkPlc: Boolean
   showCredit: Boolean
