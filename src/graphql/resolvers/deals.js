@@ -62,7 +62,7 @@ const Deal = {
   dealParams: (deal) => {
     let m = 1
     if (deal.dealParams) {
-      m = parseInt(deal.dealParams.dealMultiple || '1')
+      m = parseFloat(deal.dealParams.dealMultiple || '1')
       deal.dealParams.dealMultiple = m
     }
     return deal.dealParams || {}
@@ -164,7 +164,7 @@ const Queries = {
                               .aggregate(countAggregation)
                               .toArray()
     const count = dealsCount[0].count;
-    
+
     let deals = await ctx.db.collection("deals")
                             .aggregate(aggregation)
                             .skip(documentsToSkip)
@@ -200,6 +200,7 @@ const Mutations = {
       await fetch('https://hooks.zapier.com/hooks/catch/7904699/onwul0r/', {
         method: 'post',
         body: JSON.stringify({
+          dealId: deal._id,
           organization: org.name,
           dealName: deal.company_name
         }),
@@ -290,6 +291,12 @@ const Mutations = {
         });
       }
     }
+    
+    if(deal.dealParams){
+      const currentDeal = await ctx.db.deals.findOne({ _id: ObjectId(_id) })
+      deal.dealParams = {...currentDeal.dealParams, ...deal.dealParams}
+    }
+    
 
     const res = await ctx.db.deals.findOneAndUpdate(
       { _id: ObjectId(_id) },
