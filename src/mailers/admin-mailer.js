@@ -1,5 +1,7 @@
-const mailer = require('./mailer')
+const mailer = require('@sendgrid/mail')
 const logger = require('../utils/logger')
+
+mailer.setApiKey(process.env.SENDGRID_API_KEY)
 
 async function sendInvite ({ org, to }) {
   const html = adminInviteTemplate({ org })
@@ -13,7 +15,7 @@ async function sendInvite ({ org, to }) {
   }
 
   try {
-    const res = await mailer.send(msg)
+    await mailer.send(msg)
     return { status: "sent", sent_at: Date.now(), to }
   } catch (e) {
     logger.error(e)
