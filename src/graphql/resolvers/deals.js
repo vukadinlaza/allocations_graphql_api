@@ -13,7 +13,8 @@ const Mailer = require('../../mailers/mailer')
 const txConfirmationTemplate = require('../../mailers/templates/tx-confirmation-template')
 const { nWithCommas } = require('../../utils/common.js')
 // const { pubsub } = require('googleapis/build/src/apis/pubsub')
-const { getFilters, getNestedFilters, getSorting, getNestedSorting, customDealsSorting, getHighlights } = require('../pagHelpers')
+const { getDefaultPagAggregation } = require('../pagHelpers')
+const { getHighlights } = require('../mongoHelpers.js')
 
 /**
 
@@ -154,19 +155,9 @@ const Queries = {
     isAdmin(ctx)
     const { pagination, currentPage, sortField } = args.pagination;
 
-    const additionalFilter = { key: 'investmentType', filter: args.filter }
     const documentsToSkip = pagination * (currentPage)
-    const filter = getFilters(args.pagination, additionalFilter);
-    const nestedFilters = getNestedFilters(args.pagination);
-    let sorting = getSorting(args.pagination);
-    const nestedSorting = getNestedSorting(args.pagination);
-    
-    const customSorting = customDealsSorting(args.pagination);
-    if(customSorting) sorting = customSorting;
-    
-    const aggregation = [nestedSorting, nestedFilters, filter, ...sorting]
-                        .filter(x => x && Object.keys(x).length);
-
+    const additionalFilter = { key: 'investmentType', filter: args.filter }
+    const aggregation = getDefaultPagAggregation(args.pagination, 'customDealsSorting', additionalFilter)
     const countAggregation = [...aggregation, { $count: 'count' }]
     
     const dealsCount = await ctx.db.collection("deals")

@@ -31,6 +31,13 @@ module.exports = gql(`
     trades: [Trade]
     orders: [Order]
     orgInvestors: [User]
+    totalAUM: Int
+    totalPrivateFunds: Int
+    totalFunds: Int
+    totalSPVs: Int
+    totalFundAUM: Int
+    totalSPVAUM: Int
+    totalInvestors: Int
   }
 
   type Filing {
@@ -91,10 +98,16 @@ module.exports = gql(`
     logo: Upload
   }
 
+  type OrganizationPagination {
+    count: Int
+    organizations: [Organization]
+  }
+
   extend type Query {
     organization(slug: String!, offset: Int, limit: Int): Organization
     pagOrganization(slug: String!, pagination: PaginationInput!): Organization
     organizationMembers(slug: String!): [User]
+    pagOrganizations(pagination: PaginationInput!): OrganizationPagination
     overviewData(slug: String!): Object
   }
 

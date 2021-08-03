@@ -7,6 +7,7 @@ const { AuthenticationError, gql } = require('apollo-server-express')
 const Hellosign = require('../../hellosign')
 const Organizations = require('../schema/organizations')
 const { groupBy, map } = require('lodash');
+const { customOrgPagination } = require('../pagHelpers')
 const { getOrgOverviewData } = require('../mongoHelpers.js')
 /**
 
@@ -52,6 +53,26 @@ const Queries = {
     const org = await db.organizations.findOne({ slug })
 
     return db.users.find({ organizations_admin: org._id }).toArray()
+  },
+  pagOrganizations: async (_, args, ctx) => {
+    isAdmin(ctx)
+    const { pagination, currentPage, sortField } = args.pagination;
+
+    const documentsToSkip = pagination * (currentPage)
+    const aggregation = customOrgPagination(args.pagination);
+    const countAggregation = [...aggregation, { $count: 'count' }]
+    const organizationsCount = await ctx.db.collection("organizations")
+                              .aggregate(countAggregation)
+                              .toArray()
+    const count = organizationsCount[0].count;
+
+    let organizations = await ctx.db.collection("organizations")
+                            .aggregate(aggregation)
+                            .skip(documentsToSkip)
+                            .limit(pagination)
+                            .toArray()
+
+    return {count , organizations};
   },
   overviewData: async (_, { slug }, { user, db }) => {
     const aggregation = getOrgOverviewData(slug);
@@ -305,3 +326,4 @@ module.exports = {
   Mutations,
   subResolvers: { Organization, ComplianceTask }
 }
+

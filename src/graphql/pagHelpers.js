@@ -1,6 +1,5 @@
 
-
-module.exports = {
+pagHelpers = {
     getFilters: ({ filterField, filterValue, filterNestedKey }, additionalFilter) => {
       const match = {};
       if(filterValue){
@@ -40,6 +39,21 @@ module.exports = {
           }
         }
       }
+    },
+    getDefaultPagAggregation: (paginationProps, customSortingMethod, additionalFilter) => {
+      const filter = pagHelpers.getFilters(paginationProps, additionalFilter);
+      const nestedFilters = pagHelpers.getNestedFilters(paginationProps);
+      let sorting = pagHelpers.getSorting(paginationProps);
+      const nestedSorting = pagHelpers.getNestedSorting(paginationProps);
+
+      if(customSortingMethod){
+        const customSorting = pagHelpers[customSortingMethod](paginationProps);
+        if(customSorting) sorting = customSorting;
+      }
+      
+      const aggregation = [nestedSorting, nestedFilters, filter, ...sorting]
+                          .filter(x => x && Object.keys(x).length);
+      return aggregation
     },
     customDealsSorting: ({sortField, sortNestedKey, sortOrder}) => {
       if(sortField === 'AUM'){
@@ -131,98 +145,198 @@ module.exports = {
                $project: { 'user': 1, 'investmentAmount': 1, investments: 1 }
            },
            { $sort: { [sortField]: (sortOrder ? sortOrder : 1) } },
-        ]
-      }
-      return null;
-    },
-    getHighlights: () => {
-      return [
-        {
-          $facet: {
-            "funds": [
-              { $match: { investmentType: 'fund' } },
-              { $count: 'count' }
-            ],
-            "SPVs": [
-              { $match: { investmentType: { $ne: 'fund' } } },
-              { $count: 'count' }
-            ],
-            "investments": [
-              { 
+          ]
+        }
+        return null;
+      },
+      customOrgPagination: ({ sortField, sortOrder, ...pagProps }) => {
+        const orgFilters = pagHelpers.getFilters(pagProps);
+        const aggregation = [
+          orgFilters,
+          { 
+            $lookup:{
+              from: 'deals',
+              localField: '_id',
+              foreignField: 'organization',
+              as: 'deals'
+            }
+          },
+          { $unwind: '$deals' },
+          {
+            $facet: {
+              'totalAUM': [
+                  { 
+                    $lookup:{
+                      from: 'investments',
+                      localField: 'deals._id',
+                      foreignField: 'deal_id',
+                      as: 'investments'
+                    }
+                  },
+                  {
+                    $unwind: '$investments'
+                  },
+                {
+                  $match: { 'investments.status': { $in: ['complete', 'wired'] }}
+                },
+                {
+                  $group: { 
+                      _id: '$_id',
+                      'totalAUM': {$sum: "$investments.amount"},
+                      'slug': {$first: '$slug'},
+                      'name': {$first: '$name'}
+                  }
+                },
+              ],
+              'totalFundAUM': [
+                  { 
+                    $lookup:{
+                      from: 'investments',
+                      localField: 'deals._id',
+                      foreignField: 'deal_id',
+                      as: 'investments'
+                    }
+                  },
+                  {
+                    $unwind: '$investments'
+                  },
+                {
+                  $match: { 'deals.investmentType': 'fund', 'investments.status': { $in: ['complete', 'wired'] }}
+                },
+                {
+                  $group: { 
+                      _id: '$_id',
+                      'totalFundAUM': {$sum: "$investments.amount"},
+                      'slug': {$first: '$slug'},
+                      'name': {$first: '$name'}
+                  }
+                },
+              ],
+              'totalSPVAUM': [
+                  { 
+                    $lookup:{
+                      from: 'investments',
+                      localField: 'deals._id',
+                      foreignField: 'deal_id',
+                      as: 'investments'
+                    }
+                  },
+                  {
+                    $unwind: '$investments'
+                  },
+                {
+                  $match: { 'deals.investmentType': {$ne: 'fund'}, 'investments.status': { $in: ['complete', 'wired'] }}
+                },
+                {
+                  $group: { 
+                      _id: '$_id',
+                      'name': {$first: '$name'},
+                      'slug': {$first: '$slug'},
+                      'totalSPVAUM': {$sum: "$investments.amount"},
+                  }
+                },
+              ],
+              'totalPrivateFunds': [
+                {
+                  $group: { 
+                      _id: '$_id',
+                      'name': {$first: '$name'},
+                      'slug': {$first: '$slug'},
+                      'totalPrivateFunds': {$sum: 1},
+                  }
+                },
+              ],
+              'totalSPVs': [
+                {
+                  $match: { 'deals.investmentType': {$ne: 'fund'}}
+                },
+                {
+                  $group: { 
+                      _id: '$_id',
+                      'name': {$first: '$name'},
+                      'slug': {$first: '$slug'},
+                      'totalSPVs': {$sum: 1},
+                  }
+                },
+              ],
+              'totalFunds': [
+                {
+                  $match: { 'deals.investmentType': 'fund'}
+                },
+                {
+                  $group: { 
+                      _id: '$_id',
+                      'name': {$first: '$name'},
+                      'slug': {$first: '$slug'},
+                      'totalFunds': {$sum: 1},
+                  }
+                },
+              ],
+              'totalInvestors': [
+                 { 
                     $lookup:{
                        from: 'investments',
-                       localField: '_id',
+                       localField: 'deals._id',
                        foreignField: 'deal_id',
                        as: 'investments'
                      }
                  },
+                 {$unwind: '$investments'},
                  {
-                     $unwind: '$investments'
+                     $group: { 
+                         _id: '$_id',
+                         'name': {$first: '$name'},
+                         'orgInvestments': {$push: '$investments.user_id'}
+                     }
                  },
-              { $count: 'count' }
-            ],
-            "fundsAUM": [
-              { $match: { investmentType: 'fund' } },
-              { 
-                $lookup:{
-                   from: 'investments',
-                   localField: '_id',
-                   foreignField: 'deal_id',
-                   as: 'investments'
-                 }
-             },
-             {
-                 $unwind: '$investments'
-             },
-             {
-                 $match: { 'investments.status': { $in: ['complete', 'wired'] }}
-             },
-             {
-                  $group: {
-                      _id: '',
-                      total: { $sum: '$investments.amount' }
-                  }
-              }
-            ],
-            "SPVsAUM": [
-              { $match: { investmentType: { $ne: 'fund' } } },
-              { 
-                $lookup:{
-                   from: 'investments',
-                   localField: '_id',
-                   foreignField: 'deal_id',
-                   as: 'investments'
-                 }
-             },
-             {
-                 $unwind: '$investments'
-             },
-             {
-                 $match: { 'investments.status': { $in: ['complete', 'wired'] }}
-              },
-             {
-                  $group: {
-                      _id: '',
-                      total: { $sum: '$investments.amount' }
-                  }
-              }
-            ],
+                 {
+                     $group: { 
+                         _id: '$_id',
+                         'name': {$first: '$name'},
+                         'slug': {$first: '$slug'},
+                         'totalInvestors': { "$sum": { "$size": { "$setUnion": [ [], "$orgInvestments" ] } } }
+                     }
+                 },
+              ],
+            }
           },
-      },
-      { $unwind: '$funds' },
-      { $unwind: '$SPVs' },
-      { $unwind: '$investments' },
-      { $unwind: '$fundsAUM' },
-      { $unwind: '$SPVsAUM' },
-      {
-          $addFields: {
-              'funds': '$funds.count',
-              'SPVs': '$SPVs.count',
-              'investments': '$investments.count',
-              'fundsAUM': '$fundsAUM.total',
-              'SPVsAUM': '$SPVsAUM.total'
-          }
-      }
-      ]
-    }
+          {
+            $project: {
+              all: {
+                $concatArrays: [ "$totalFundAUM", "$totalAUM", "$totalSPVAUM", "$totalPrivateFunds", "$totalSPVs", "$totalFunds", "$totalInvestors" ]
+              },
+            }
+          },
+          {
+            $unwind: "$all"
+          },
+          {
+            $group: {
+              _id: "$all._id",
+              totalAUM: { $push: "$all.totalAUM" },
+              totalFundAUM: { $push: "$all.totalFundAUM" },
+              totalSPVAUM: { $push: "$all.totalSPVAUM" },
+              totalPrivateFunds: { $push: "$all.totalPrivateFunds" },
+              totalSPVs: { $push: "$all.totalSPVs" },
+              totalFunds: { $push: "$all.totalFunds" },
+              totalInvestors: { $push: "$all.totalInvestors" },
+              name: {$first: '$all.name'},
+              slug: {$first: '$all.slug'},
+            }
+          },
+          { $unwind: { path: '$totalAUM', preserveNullAndEmptyArrays: true } },
+          { $unwind: { path: '$totalFundAUM', preserveNullAndEmptyArrays: true } },
+          { $unwind: { path: '$totalSPVAUM', preserveNullAndEmptyArrays: true } },
+          { $unwind: { path: '$totalPrivateFunds', preserveNullAndEmptyArrays: true } },
+          { $unwind: { path: '$totalSPVs', preserveNullAndEmptyArrays: true } },
+          { $unwind: { path: '$totalFunds', preserveNullAndEmptyArrays: true } },
+          { $unwind: { path: '$totalInvestors', preserveNullAndEmptyArrays: true } },
+
+          { $sort: { [sortField]: (sortOrder ? sortOrder : 1) } }
+        ]
+        
+      return aggregation
+    },
   }
+
+  module.exports = pagHelpers;
