@@ -120,6 +120,16 @@ const User = {
     let userInvesments = await db.investments.find({ user_id: user._id }).toArray();
     let lastInvestment = userInvesments.filter(investment => investment.submissionData).pop();
     return lastInvestment;
+  },
+  investorTaxDocuments:  async (_, args, ctx) => {
+    const { db, user } = ctx;
+    const u = await db.users.findOne({_id: ObjectId(user._id)})
+    if(!u) {
+      return []
+    }
+
+    const docs = u.documents.filter(d => d && d.submissionId && d.submissionId.includes('sub')).map(d => ({link: `app.docspring.com/submissions/${d.submissionId}/download`, name: d.documentName})) || []
+    return docs;
   }
 }
 

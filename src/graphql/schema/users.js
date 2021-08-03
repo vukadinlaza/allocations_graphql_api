@@ -47,6 +47,7 @@ type User {
   profileImageKey: String,
   investorPersonalInfo: Investment
   investorLimits: Object
+  investorTaxDocuments: [Object]
 }
 
 input UserInput {
