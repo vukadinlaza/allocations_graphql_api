@@ -1,5 +1,5 @@
 
-pagHelpers = {
+const pagHelpers = {
     getFilters: ({ filterField, filterValue, filterNestedKey }, additionalFilter) => {
       const match = {};
       if(filterValue){

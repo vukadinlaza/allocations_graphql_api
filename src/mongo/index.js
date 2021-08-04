@@ -3,9 +3,11 @@ const { MONGO_URL, MONGO_DB, NODE_ENV } = process.env
 
 const cols = ["investments", "deals", "organizations", "users", "orders", "trades", "matchrequests", "compliancetasks", 'accounts', 'entities', 'signingpackets', 'comments', 'applications', 'dealOnboarding']
 
+let client;
+
 /** connects and attaches name of cols to db **/
 async function connect() {
-    const client = new MongoClient(MONGO_URL, {
+    client = new MongoClient(MONGO_URL, {
         useUnifiedTopology: true,
         useNewUrlParser: true,
     })
@@ -22,6 +24,10 @@ async function connect() {
     return db
 }
 
+async function closeConnection(){
+    return await client.close();
+}
+
 async function drop(db) {
     // THIS SHOULD ONLY HAPPEN IN TEST
     if (NODE_ENV === "test" && MONGO_URL === "mongodb://localhost:27017") {
@@ -29,4 +35,4 @@ async function drop(db) {
     }
 }
 
-module.exports = { connect, drop }
+module.exports = { connect, drop, closeConnection }

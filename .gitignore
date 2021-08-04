@@ -141,3 +141,7 @@ temp/
 src/priv/*
 
 # End of https://www.gitignore.io/api/node,macos
+
+
+# https://github.com/shelfio/jest-mongodb/blob/master/.gitignore
+globalConfig.json

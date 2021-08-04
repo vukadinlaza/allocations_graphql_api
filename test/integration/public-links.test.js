@@ -5,10 +5,19 @@ const READ_ONLY_PASS = "3UqdCe62Jxw4bbqj"
 const READ_ONLY_USER = "read_only"
 const MONGO_URL = `mongodb+srv://${READ_ONLY_USER}:${READ_ONLY_PASS}@allocations-3plbs.gcp.mongodb.net/`
 
-const client = new MongoClient(MONGO_URL, {
-  useUnifiedTopology: true,
-  useNewUrlParser: true,
-})
+
+// let client;
+
+// beforeAll(async () => {
+//   client = await MongoClient.connect(MONGO_URL, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true
+//   });
+// });
+
+// afterAll(async () => {
+//   await client.close();
+// });
 
 const browsers = ['chrome', 'safari']
 
@@ -16,7 +25,7 @@ test.skip('ensure all public links work and speed test', async () => {
   const times = []
   for (const browser of browsers) {
     const driver = await new Builder().forBrowser(browser).build()
-    const db = (await client.connect()).db("allocations-dashboard")
+    const db = await client.db("allocations-dashboard")
     const deals = await db.collection("deals").find({ status: { $ne: "closed" }}).toArray()
 
     const links = await Promise.all(deals.map(async d => {

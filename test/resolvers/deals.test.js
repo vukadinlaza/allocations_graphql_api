@@ -37,6 +37,12 @@ describe('Deal Resolver', () => {
 
   })
 
+
+  afterAll(async () => {
+    await testServer.closeMongoConnetion();
+    await testServer.stop()
+  });
+
   /** CREATE **/
 
   test('super admin can create deal', async () => {

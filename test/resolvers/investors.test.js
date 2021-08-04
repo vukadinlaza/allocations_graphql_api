@@ -18,6 +18,11 @@ describe('Deal Resolver', () => {
     apolloServer = await testServer()
     db = apolloServer.db
   })
+
+  afterAll(async () => {
+    await testServer.closeMongoConnetion();
+    await testServer.stop()
+  });
     
   /** GET **/
 

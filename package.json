@@ -11,7 +11,8 @@
     "serve": "node src/app.js",
     "watch-node": "nodemon dist/app.js",
     "watch": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-sass\" \"npm run watch-ts\" \"npm run watch-node\"",
-    "test": "jest",
+    "test": "jest --forceExit",
+    "jest-debug": "NODE_TLS_REJECT_UNAUTHORIZED='0' node --inspect-brk node_modules/.bin/jest --runInBand --no-watchman --detectOpenHandles",
     "test-coverage": "jest --coverage",
     "watch-test": "yarn run test -- --watchAll",
     "watch-ts": "tsc -w",
@@ -32,6 +33,7 @@
     "@babel/plugin-proposal-class-properties": "^7.14.5",
     "@babel/plugin-transform-runtime": "^7.14.5",
     "@babel/preset-env": "^7.14.7",
+    "@shelf/jest-mongodb": "^2.0.1",
     "@types/compression": "^1.0.1",
     "@types/cors": "^2.8.6",
     "@types/dotenv": "^6.1.1",
@@ -46,7 +48,9 @@
     "selenium-webdriver": "^4.0.0-alpha.7",
     "ts-jest": "^24.1.0",
     "tslint": "^5.20.0",
-    "typescript": "^3.6.4"
+    "typescript": "^3.6.4",
+    "why-is-node-running": "^2.2.0",
+    "wtfnode": "^0.9.1"
   },
   "dependencies": {
     "@babel/plugin-proposal-async-generator-functions": "^7.14.7",
@@ -114,8 +118,8 @@
     "xml-js": "^1.6.11"
   },
   "engines": {
-    "node": "^12.17 || ^14 || ^16",
-    "npm": "6.x",
+    "node": "^12.22.0 || ^14 || ^16",
+    "npm": "^6 || ^7",
     "yarn": "1.x"
   },
   "jest": {
