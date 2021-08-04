@@ -1,3 +1,4 @@
+const { GraphQLUpload } = require('graphql-upload')
 /**
 
   merges all the resolvers into one typeDef and resolver names 'resolvers'
@@ -27,7 +28,8 @@ const resolvers = {
   Query: splatReduce("Queries"),
   Mutation: splatReduce("Mutations"),
   Subscription: splatReduce("Subscriptions"),
-  ...splatReduce("subResolvers")
+  ...splatReduce("subResolvers"),
+  Upload: GraphQLUpload
 }
 
 module.exports = {
