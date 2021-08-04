@@ -1,6 +1,6 @@
 const S3 = require('aws-sdk/clients/s3')
 
-const Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : "allocations-encrypted-dev"
+const Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : process.env.AWS_S3_BUCKET
 const url = `https://${Bucket}.s3.us-east-2.amazonaws.com`
 
 const s3 = new S3({ apiVersion: '2006-03-01' })
