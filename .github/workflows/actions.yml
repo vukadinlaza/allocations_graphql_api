@@ -10,10 +10,11 @@ name: Run Tests Node CI
 on:
   push: 
     branches:
-      - actions-test-staging #TODO: enable for master and staging only
+      - master 
+      - staging 
   pull_request:
     branches:
-      - actions-test-*
+      - '**' # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#patterns-to-match-branches-and-tags
 
 jobs:
   test:
