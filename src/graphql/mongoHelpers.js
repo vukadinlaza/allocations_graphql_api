@@ -88,6 +88,7 @@ module.exports = {
                     "$match": {
                       "investments.status": {
                         "$in": [
+                          "signed",
                           "complete",
                           "wired"
                         ]

@@ -116,6 +116,23 @@ pagHelpers = {
            },
            { $sort: { 'hasProcessStreet': (sortOrder ? sortOrder : 1) } }
           ]
+      }else if(sortField === 'dealMultiple'){
+        return [
+          {
+            $addFields: {
+              doubleDealMultiple: {
+                   $convert:
+                      {
+                         input: "$dealParams.dealMultiple",
+                         to: 'double',
+                         onError: 0, 
+                         onNull: 0  
+                      }
+              }
+            }
+          },
+          { $sort : {doubleDealMultiple : (sortOrder ? sortOrder : 1)} },
+          ]
       }
       return null;
     },
@@ -282,6 +299,9 @@ pagHelpers = {
                      }
                  },
                  {$unwind: '$investments'},
+                 {
+                    $match: {'investments.status': { $in: ['signed', 'complete', 'wired'] }}
+                  },
                  {
                      $group: { 
                          _id: '$_id',
