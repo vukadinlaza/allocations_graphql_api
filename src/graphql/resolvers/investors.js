@@ -121,8 +121,8 @@ const User = {
     let lastInvestment = userInvesments.filter(investment => investment.submissionData).pop();
     return lastInvestment;
   },
-  investorTaxDocuments:  async (_, args, ctx) => {
-    const { db, user } = ctx;
+  investorTaxDocuments:  async (user, args, ctx) => {
+    const { db } = ctx;
     const u = await db.users.findOne({_id: ObjectId(user._id)})
     if(!u) {
       return []
