@@ -1,11 +1,10 @@
 {
-  "name": "api",
+  "name": "allocations-graphql-api",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
   "scripts": {
-    "preinstall": "npm install --package-lock-only --ignore-scripts && npx npm-force-resolutions",
-    "start": "npm run serve",
+    "start": "yarn run serve",
     "start:watch": "nodemon src/app.js",
     "deploy-prod": "yarn run test && git push heroku-prod",
     "deploy-staging": "yarn run test && git push heroku-staging",
@@ -14,13 +13,13 @@
     "watch": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-sass\" \"npm run watch-ts\" \"npm run watch-node\"",
     "test": "jest",
     "test-coverage": "jest --coverage",
-    "watch-test": "npm run test -- --watchAll",
+    "watch-test": "yarn run test -- --watchAll",
     "watch-ts": "tsc -w",
     "build-sass": "node-sass src/public/css/main.scss dist/public/css/main.css",
     "watch-sass": "node-sass -w src/public/css/main.scss dist/public/css/main.css",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "copy-static-assets": "ts-node copyStaticAssets.ts",
-    "debug": "npm run build && npm run watch-debug",
+    "debug": "yarn run build && yarn run watch-debug",
     "serve-debug": "nodemon --inspect dist/server.js",
     "watch-debug": "concurrently -k -p \"[{name}]\" -n \"Sass,TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-sass\" \"npm run watch-ts\" \"npm run serve-debug\""
   },
@@ -115,7 +114,7 @@
     "xml-js": "^1.6.11"
   },
   "engines": {
-    "node": "12.17.0",
+    "node": "^12.17 || ^14 || ^16",
     "npm": "6.x",
     "yarn": "1.x"
   },

@@ -1,18 +1,30 @@
-### GraphQL API
+### Allocations GraphQL API
+
+## Yarn Docs
+
+[NPM and Yarn commands comparison](https://classic.yarnpkg.com/en/docs/migrating-from-npm/#toc-cli-commands-comparison)
 
 #### Install Node packages listed in package.json
-``` 
-npm install
+
+```
+yarn install
+```
+
+#### Start development server
+
+```
+yarn run start:watch
 ```
 
 #### Build the project
-```
-npm run build
-```
-
-#### Run the project 
 
 ```
-npm run start
+yarn run build
+```
+
+#### Run the project
+
+```
+yarn run start
 
 ```
