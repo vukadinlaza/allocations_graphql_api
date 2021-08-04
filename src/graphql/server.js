@@ -11,6 +11,7 @@ function authedServer(db) {
   return new ApolloServer({
     typeDefs,
     resolvers,
+    uploads: false,
     context: async (payload) => {
       // public deal endpoint skips authentication  
       if (payload.req && payload.req.body && publicEndpoints.includes(payload.req.body.operationName)) {
