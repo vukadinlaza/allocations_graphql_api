@@ -1,6 +1,8 @@
 const { gql } = require('apollo-server-express')
 
 module.exports = gql(`
+scalar Upload
+
 type Deal {
   _id: String
   created_at: String

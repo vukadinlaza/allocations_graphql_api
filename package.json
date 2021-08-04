@@ -94,6 +94,7 @@
     "googleapis": "39",
     "graphql": "^14.5.8",
     "graphql-subscriptions": "^1.1.0",
+    "graphql-upload": "^12.0.0",
     "hellosign-sdk": "^1.4.0",
     "helmet": "^3.21.1",
     "http": "0.0.0",
@@ -124,8 +125,8 @@
     ]
   },
   "resolutions": {
-    "fs-capacitor": "^6.2.0",
-    "graphql-upload": "^11.0.0"
+    "**/**/fs-capacitor": "^6.2.0",
+    "**/graphql-upload": "^11.0.0"
   },
   "babel": {
     "presets": [

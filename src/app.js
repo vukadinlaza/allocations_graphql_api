@@ -15,6 +15,7 @@ const { connect } = require('./mongo')
 const { createEventAdapter } = require('@slack/events-api')
 const getSettings = require('./settings');
 const { last, mapValues, omit, keyBy } = require('lodash');
+const { graphqlUploadExpress } = require("graphql-upload");
 const http = require('http');
 const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET, {
   includeBody: true,
@@ -68,9 +69,10 @@ async function run() {
       req.rawBody = buf.toString(encoding || 'utf8');
     }
   };
-
-  app.use(bodyParser.urlencoded({ verify: rawBodyBuffer, extended: true }));
-  app.use(bodyParser.json({ verify: rawBodyBuffer }));
+  
+  app.use(express.urlencoded({ verify: rawBodyBuffer, extended: true }));
+  app.use(express.json({ verify: rawBodyBuffer }));
+  app.use(graphqlUploadExpress({ maxFileSize: 1000000000, maxFiles: 10 }));
 
 
   //slack API
