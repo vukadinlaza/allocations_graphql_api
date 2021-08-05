@@ -8,12 +8,13 @@
 name: Run Tests Node CI
 
 on:
-  push: 
+  push:
     branches:
-      - actions-test-staging #TODO: enable for master and staging only
+      - master
+      - staging
   pull_request:
     branches:
-      - actions-test-*
+      - "**" # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#patterns-to-match-branches-and-tags
 
 jobs:
   test:
@@ -25,30 +26,26 @@ jobs:
       AUTH0_KEY: ${{ secrets.AUTH0_KEY }}
       AUTH0_NAMESPACE: ${{ secrets.AUTH0_NAMESPACE }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
-      CLOUDFRONT_PUBLIC_KEY: ${{ secrets.CLOUDFRONT_PUBLIC_KEY }} 
-      CLOUDFRONT_URL: ${{ secrets.CLOUDFRONT_URL }} 
-      CLOUDFRONT_ENCRYPTED_URL: ${{ secrets.CLOUDFRONT_ENCRYPTED_URL }} 
-      CLOUDFRONT_SECRET_NAME: ${{ secrets.CLOUDFRONT_SECRET_NAME }} 
-      GOOGLE_SHEETS_PRIVATE_KEY: ${{ secrets.GOOGLE_SHEETS_PRIVATE_KEY }} 
-      MONGO_DB: ${{ secrets.MONGO_DB }} 
-      MONGO_URL: ${{ secrets.MONGO_URL }} 
-      ROLLBAR_ACCESS_TOKEN: ${{ secrets.ROLLBAR_ACCESS_TOKEN }} 
-      S3_INVESTMENT_DOCS_BUCKET: ${{ secrets.S3_INVESTMENT_DOCS_BUCKET }} 
-      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }} 
-      DOCUSIGN_ACCOUNT_ID: ${{ secrets.DOCUSIGN_ACCOUNT_ID }} 
-      DOCUSIGN_CLIENT_ID: ${{ secrets.DOCUSIGN_CLIENT_ID }} 
-      DOCUSIGN_CLIENT_PRIVATE_KEY: ${{ secrets.DOCUSIGN_CLIENT_PRIVATE_KEY }} 
-      DS_USER_GUID: ${{ secrets.DS_USER_GUID }} 
-      DS_JWT_CLIENT_ID: ${{ secrets.DS_JWT_CLIENT_ID }} 
-      DS_APP_URL: ${{ secrets.DS_APP_URL }} 
-      VERIFY_INVESTOR_URL: ${{ secrets.VERIFY_INVESTOR_URL }} 
-      SLACK_CLIENT_ID: ${{ secrets.SLACK_CLIENT_ID }} 
-      SLACK_CLIENT_SECRET: ${{ secrets.SLACK_CLIENT_SECRET }} 
-      SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }} 
-      AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }} 
-      DOC_SPRING_API_ID: ${{ secrets.DOC_SPRING_API_ID }} 
-      DOC_SPRING_API_SECRET: ${{ secrets.DOC_SPRING_API_SECRET }} 
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      CLOUDFRONT_PUBLIC_KEY: ${{ secrets.CLOUDFRONT_PUBLIC_KEY }}
+      CLOUDFRONT_URL: ${{ secrets.CLOUDFRONT_URL }}
+      CLOUDFRONT_ENCRYPTED_URL: ${{ secrets.CLOUDFRONT_ENCRYPTED_URL }}
+      CLOUDFRONT_SECRET_NAME: ${{ secrets.CLOUDFRONT_SECRET_NAME }}
+      GOOGLE_SHEETS_PRIVATE_KEY: ${{ secrets.GOOGLE_SHEETS_PRIVATE_KEY }}
+      MONGO_DB: ${{ secrets.MONGO_DB }}
+      MONGO_URL: ${{ secrets.MONGO_URL }}
+      S3_INVESTMENT_DOCS_BUCKET: ${{ secrets.S3_INVESTMENT_DOCS_BUCKET }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      DOCUSIGN_ACCOUNT_ID: ${{ secrets.DOCUSIGN_ACCOUNT_ID }}
+      DOCUSIGN_CLIENT_ID: ${{ secrets.DOCUSIGN_CLIENT_ID }}
+      DOCUSIGN_CLIENT_PRIVATE_KEY: ${{ secrets.DOCUSIGN_CLIENT_PRIVATE_KEY }}
+      DS_USER_GUID: ${{ secrets.DS_USER_GUID }}
+      DS_JWT_CLIENT_ID: ${{ secrets.DS_JWT_CLIENT_ID }}
+      DS_APP_URL: ${{ secrets.DS_APP_URL }}
+      VERIFY_INVESTOR_URL: ${{ secrets.VERIFY_INVESTOR_URL }}
+      AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+      DOC_SPRING_API_ID: ${{ secrets.DOC_SPRING_API_ID }}
+      DOC_SPRING_API_SECRET: ${{ secrets.DOC_SPRING_API_SECRET }}
 
     strategy:
       matrix:
@@ -57,11 +54,11 @@ jobs:
         # https://devcenter.heroku.com/articles/nodejs-support#specifying-a-node-js-version
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'yarn'
-    - run: yarn install --frozen-lockfile
-    - run: yarn test
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
+      - run: yarn install --frozen-lockfile
+      - run: yarn test
