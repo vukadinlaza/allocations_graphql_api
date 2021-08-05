@@ -1,74 +1,101 @@
-const { Router } = require('express');
-const { ObjectId } = require('mongodb')
-const { get, every } = require('lodash')
-const { connect } = require('../../mongo/index')
-const convert = require('xml-js');
-const S3 = require('aws-sdk/clients/s3')
-const fetch = require('node-fetch');
-const moment = require('moment')
-const { sendConfirmation } = require('../../mailers/signing-complete')
-const s3 = new S3({ apiVersion: '2006-03-01' })
-const { pubsub } = require('../../graphql/server')
+const { Router } = require("express");
+const { ObjectId } = require("mongodb");
+const { get, every } = require("lodash");
+const { connect } = require("../../mongo/index");
+const convert = require("xml-js");
+const S3 = require("aws-sdk/clients/s3");
+const fetch = require("node-fetch");
+const moment = require("moment");
+const { sendConfirmation } = require("../../mailers/signing-complete");
+const s3 = new S3({ apiVersion: "2006-03-01" });
+const { pubsub } = require("../../graphql/server");
 
-let Bucket = process.env.NODE_ENV === "production" ? "allocations-encrypted" : process.env.AWS_S3_BUCKET
+let Bucket =
+  process.env.NODE_ENV === "production"
+    ? "allocations-encrypted"
+    : process.env.AWS_S3_BUCKET;
 
 module.exports = Router()
-  .post('/docusign', async (req, res, next) => {
+  .post("/docusign", async (req, res, next) => {
     try {
       const { rawBody } = req;
       const db = await connect();
 
-      const docusignData = JSON.parse(convert.xml2json(rawBody, { compact: true, spaces: 4 }));
-      let lpRecipientStatus = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.RecipientStatuses.RecipientStatus', {})
-      console.log('BEFORE', lpRecipientStatus)
+      const docusignData = JSON.parse(
+        convert.xml2json(rawBody, { compact: true, spaces: 4 })
+      );
+      let lpRecipientStatus = get(
+        docusignData,
+        "DocuSignEnvelopeInformation.EnvelopeStatus.RecipientStatuses.RecipientStatus",
+        {}
+      );
+      console.log("BEFORE", lpRecipientStatus);
       if (Array.isArray(lpRecipientStatus)) {
-        lpRecipientStatus = get(lpRecipientStatus, '[0]')
+        lpRecipientStatus = get(lpRecipientStatus, "[0]");
       }
-      console.log('AFTER', lpRecipientStatus)
+      console.log("AFTER", lpRecipientStatus);
       // Gets User data from Docusign body
-      const signerEmail = get(lpRecipientStatus, 'Email._text', '')
-      const signedAt = get(lpRecipientStatus, 'Signed._text')
-      const signerDocusignId = get(lpRecipientStatus, 'RecipientId._text')
+      const signerEmail = get(lpRecipientStatus, "Email._text", "");
+      const signedAt = get(lpRecipientStatus, "Signed._text");
+      const signerDocusignId = get(lpRecipientStatus, "RecipientId._text");
 
       // Gets Document/Envelope data
-      const envelopeId = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.EnvelopeID._text')
-      const documentName = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.DocumentStatuses.DocumentStatus.Name._text')
-      const documentId = get(docusignData, 'DocuSignEnvelopeInformation.EnvelopeStatus.DocumentStatuses.DocumentStatus.ID._text')
+      const envelopeId = get(
+        docusignData,
+        "DocuSignEnvelopeInformation.EnvelopeStatus.EnvelopeID._text"
+      );
+      const documentName = get(
+        docusignData,
+        "DocuSignEnvelopeInformation.EnvelopeStatus.DocumentStatuses.DocumentStatus.Name._text"
+      );
+      const documentId = get(
+        docusignData,
+        "DocuSignEnvelopeInformation.EnvelopeStatus.DocumentStatuses.DocumentStatus.ID._text"
+      );
 
-
-      let fieldData = get(lpRecipientStatus, 'FormData.xfdf.fields.field', [])
+      let fieldData = get(lpRecipientStatus, "FormData.xfdf.fields.field", []);
       if (!Array.isArray(fieldData)) {
-        fieldData = [fieldData]
+        fieldData = [fieldData];
       }
 
-      const dealFeild = fieldData.find(f => f._attributes.name === 'Deal-ID')
-      const emailfield = fieldData.find(f => f._attributes.name === 'userEmail')
-      const dealId = get(dealFeild, 'value._text')
-      const userEmail = get(emailfield, 'value._text')
+      const dealFeild = fieldData.find((f) => f._attributes.name === "Deal-ID");
+      const emailfield = fieldData.find(
+        (f) => f._attributes.name === "userEmail"
+      );
+      const dealId = get(dealFeild, "value._text");
+      const userEmail = get(emailfield, "value._text");
 
-      console.log('DOC NAME', documentName)
-      if (documentName.includes('Allocations Services Agreement')) {
-        const atIdField = fieldData.find(f => f._attributes.name === 'build-airtable-id')
-        const airTableId = get(atIdField, 'value._text');
+      console.log("DOC NAME", documentName);
+      if (documentName.includes("Allocations Services Agreement")) {
+        const atIdField = fieldData.find(
+          (f) => f._attributes.name === "build-airtable-id"
+        );
+        const airTableId = get(atIdField, "value._text");
         const payload = {
           records: [
             {
               id: airTableId,
-              fields: { ['Signed Provision of Service']: true, ['Review']: true },
+              fields: {
+                ["Signed Provision of Service"]: true,
+                ["Review"]: true,
+              },
             },
           ],
         };
-        const BASE = 'appdPrRjapx8iYnIn';
-        const TABEL_NAME = 'Deals';
-        const atres = await fetch(`https://api.airtable.com/v0/${BASE}/${TABEL_NAME}`, {
-          method: 'patch', // make sure it is a "PATCH request"
-          body: JSON.stringify(payload),
-          headers: {
-            Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`, // API key
-            'Content-Type': 'application/json', // we will recive a json object
-          },
-        });
-        console.log("RES", atres)
+        const BASE = "appdPrRjapx8iYnIn";
+        const TABEL_NAME = "Deals";
+        const atres = await fetch(
+          `https://api.airtable.com/v0/${BASE}/${TABEL_NAME}`,
+          {
+            method: "patch", // make sure it is a "PATCH request"
+            body: JSON.stringify(payload),
+            headers: {
+              Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`, // API key
+              "Content-Type": "application/json", // we will recive a json object
+            },
+          }
+        );
+        console.log("RES", atres);
         return res.status(200).end();
       }
       let user = await db.users.findOne({ email: signerEmail.toLowerCase() });
@@ -87,157 +114,199 @@ module.exports = Router()
         let investment = await db.investments.findOne({
           deal_id: ObjectId(dealId),
           user_id: ObjectId(user._id),
-        })
+        });
 
-        const deal = await db.deals.findOne({ _id: ObjectId(dealId) })
+        const deal = await db.deals.findOne({ _id: ObjectId(dealId) });
         if (investment === null) {
           investment = await db.investments.insertOne({
             user_id: ObjectId(user._id),
             deal_id: ObjectId(dealId),
-            status: 'invited',
+            status: "invited",
             created_at: Date.now(),
             invitied_at: Date.now(),
             oranization: deal.organization,
-            amount: 0
-          })
-          investment._id = investment.insertedId
+            amount: 0,
+          });
+          investment._id = investment.insertedId;
         }
-        const numDocs = (investment.documents || []).filter(d => {
-          return d.includes(documentName)
-        })
-        console.log('------------ NUM OF DOCS THAT MATCH ----------------------------------')
-        console.log('NUM:', numDocs.length)
-        const tag = numDocs.length > 0 ? (`${numDocs.length + 1}_`) : ''
-        console.log('TAG: ', tag)
-        const pdf = get(docusignData, 'DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text')
-        const key = `investments/${investment._id}/${tag}${documentName}`
-        const buf = Buffer.from(pdf, 'base64')
-
+        const numDocs = (investment.documents || []).filter((d) => {
+          return d.includes(documentName);
+        });
+        console.log(
+          "------------ NUM OF DOCS THAT MATCH ----------------------------------"
+        );
+        console.log("NUM:", numDocs.length);
+        const tag = numDocs.length > 0 ? `${numDocs.length + 1}_` : "";
+        console.log("TAG: ", tag);
+        const pdf = get(
+          docusignData,
+          "DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text"
+        );
+        const key = `investments/${investment._id}/${tag}${documentName}`;
+        const buf = Buffer.from(pdf, "base64");
 
         const obj = {
           Bucket,
           Key: key,
           Body: buf,
-          ContentEncoding: 'base64',
+          ContentEncoding: "base64",
           ContentType: "application/pdf",
-        }
+        };
 
-        const s3Res = await s3.upload(obj).promise()
+        const s3Res = await s3.upload(obj).promise();
 
-        investment = await db.investments.findOne({ _id: ObjectId(investment._id) })
+        investment = await db.investments.findOne({
+          _id: ObjectId(investment._id),
+        });
 
-        const newStatus = (investment.status === 'wired' || investment.status === 'complete') ? investment.status : 'signed'
-        await db.investments.updateMany({
-          deal_id: ObjectId(dealId),
-          user_id: ObjectId(user._id)
-        },
+        const newStatus =
+          investment.status === "wired" || investment.status === "complete"
+            ? investment.status
+            : "signed";
+        await db.investments.updateMany(
+          {
+            deal_id: ObjectId(dealId),
+            user_id: ObjectId(user._id),
+          },
           {
             $set: { status: newStatus },
-            $push: { documents: key }
+            $push: { documents: key },
           }
         );
-        await sendConfirmation({ deal, to: user.email })
+        await sendConfirmation({ deal, to: user.email });
       }
 
-      await db.users.findOneAndUpdate({ _id: ObjectId(user._id) }, { $push: { documents: { signedAt, signerDocusignId, envelopeId, documentName, documentId } } });
+      await db.users.findOneAndUpdate(
+        { _id: ObjectId(user._id) },
+        {
+          $push: {
+            documents: {
+              signedAt,
+              signerDocusignId,
+              envelopeId,
+              documentName,
+              documentId,
+            },
+          },
+        }
+      );
 
       return res.status(200).end();
-
     } catch (err) {
-      console.log(err)
+      console.log(err);
       next(err);
     }
   })
-  .post('/verifyinvestor', async (req, res, next) => {
+  .post("/verifyinvestor", async (req, res, next) => {
     try {
       const db = await connect();
-      const userId = get(req, 'body.eapi_identifier')
-      const status = get(req, 'body.status')
-      const verifyInvestorId = get(req, 'body.investor_id')
-      const requestId = get(req, 'body.verification_request_id')
+      const userId = get(req, "body.eapi_identifier");
+      const status = get(req, "body.status");
+      const verifyInvestorId = get(req, "body.investor_id");
+      const requestId = get(req, "body.verification_request_id");
 
-      if (userId && status === 'accredited') {
-        const cerficate = await fetch(`${process.env.VERIFY_INVESTOR_URL}/${requestId}/certificate`, {
-          method: 'get',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}` },
-        })
+      if (userId && status === "accredited") {
+        const cerficate = await fetch(
+          `${process.env.VERIFY_INVESTOR_URL}/${requestId}/certificate`,
+          {
+            method: "get",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Token ${process.env.VERIFY_INVESTOR_API_TOKEN}`,
+            },
+          }
+        );
 
-        const expirationDate = moment(Date.now()).add(90, 'days').toDate();;
+        const expirationDate = moment(Date.now()).add(90, "days").toDate();
 
-        const key = `investors/${userId}/accredidation_doc`
+        const key = `investors/${userId}/accredidation_doc`;
 
         const obj = {
           Bucket,
           Key: key,
           Body: cerficate.body,
-          ContentType: "application/pdf"
-        }
-        await s3.upload(obj).promise()
+          ContentType: "application/pdf",
+        };
+        await s3.upload(obj).promise();
 
-        await db.users.findOneAndUpdate({ _id: ObjectId(userId) },
+        await db.users.findOneAndUpdate(
+          { _id: ObjectId(userId) },
           {
-            $push: { documents: { documentName: 'Verify Investor Certificate', status, expirationDate, verifyInvestorId, requestId } },
+            $push: {
+              documents: {
+                documentName: "Verify Investor Certificate",
+                status,
+                expirationDate,
+                verifyInvestorId,
+                requestId,
+              },
+            },
             $set: { accredidation_doc: key, accredidation_status: true },
-          });
+          }
+        );
       }
 
-      if (userId && status === 'not_accredited') {
-        await db.users.findOneAndUpdate({ _id: ObjectId(userId) },
+      if (userId && status === "not_accredited") {
+        await db.users.findOneAndUpdate(
+          { _id: ObjectId(userId) },
           {
             $set: { accredidation_status: false },
-          });
+          }
+        );
       }
 
       return res.status(200).end();
-
     } catch (err) {
-      console.log(err)
+      console.log(err);
       next(err);
     }
   })
-  .post('/slack', async (req, res, next) => {
+  .post("/slack", async (req, res, next) => {
     try {
       // console.log('HELP HOOKS FIRES')
       // if (res && res.body && res.body.challenge) {
       //   return res.sendStatus(200).json({ challenge: res.body.challenge })
       // }
-      res.sendStatus(200)
-      next()
-    }
-    catch (err) {
-      console.log('SOME ERROR')
-      console.log(err)
+      res.sendStatus(200);
+      next();
+    } catch (err) {
+      console.log("SOME ERROR");
+      console.log(err);
       next(err);
     }
   })
-  .post('/bankwire-notifications', async (req, res, next) => {
+  .post("/bankwire-notifications", async (req, res, next) => {
     try {
-      const { body } = req
-      console.log(body)
+      const { body } = req;
+      console.log(body);
 
       const db = await connect();
-      const deals = await db.deals.find({ company_name: body.dealName }).toArray()
-      const user = await db.users.findOne({ email: body.email.toLowerCase() })
-      if (!user._id || !every(deals, '_id')
-      ) {
-        return res.sendStatus(200)
+      const deals = await db.deals
+        .find({ company_name: body.dealName })
+        .toArray();
+      const user = await db.users.findOne({ email: body.email.toLowerCase() });
+      if (!user._id || !every(deals, "_id")) {
+        return res.sendStatus(200);
       }
-      const dealIds = deals.map(d => d._id).filter(d => d)
-      const investment = await db.investments.updateMany({
-        user_id: user._id, deal_id: {
-          $in: dealIds
-        }
-      }, { $set: { status: 'wired' } })
-      res.sendStatus(200)
-      next()
-    }
-    catch (err) {
-      console.log('SOME ERROR')
-      console.log(err)
+      const dealIds = deals.map((d) => d._id).filter((d) => d);
+      const investment = await db.investments.updateMany(
+        {
+          user_id: user._id,
+          deal_id: {
+            $in: dealIds,
+          },
+        },
+        { $set: { status: "wired" } }
+      );
+      res.sendStatus(200);
+      next();
+    } catch (err) {
+      console.log("SOME ERROR");
+      console.log(err);
       next(err);
     }
   })
-  .post('/process-street-spv', async (req, res, next) => {
+  .post("/process-street-spv", async (req, res, next) => {
     try {
       const db = await connect();
       const { body } = req;
@@ -249,40 +318,54 @@ module.exports = Router()
         dealUpdatedDate: data.audit.updatedDate,
         dealUpdatedBy: data.audit.updatedBy.email,
         psTemplate: data.template.name,
-        dealTasks: data.tasks.map(t => {
+        dealTasks: data.tasks.map((t) => {
           return {
             taskId: t.taskTemplateGroupId,
             taskName: t.name,
             taskStatus: t.status,
             taskUpdatedDate: t.updatedDate,
-            taskUpdatedBy: t.updatedBy.email
-          }
-        })
+            taskUpdatedBy: t.updatedBy.email,
+          };
+        }),
         // spvFormFields: data.formFields.map(f => f.label),
-      }
-      const dealOnboarded = await db.dealOnboarding.findOne({psDealId: dealData.psDealId})
-      if(dealOnboarded) return res.status(400).send(`The dealOnboarding with psDealId: ${dealData.psDealId} already exists`);
-      
-      const onboarded = await db.dealOnboarding.insertOne(dealData)
-      
-      if(onboarded.insertedCount){
-        pubsub.publish('dealOnboarding', {dealOnboarding: dealData})
+      };
+      const dealOnboarded = await db.dealOnboarding.findOne({
+        psDealId: dealData.psDealId,
+      });
+      if (dealOnboarded)
+        return res
+          .status(400)
+          .send(
+            `The dealOnboarding with psDealId: ${dealData.psDealId} already exists`
+          );
+
+      const onboarded = await db.dealOnboarding.insertOne(dealData);
+
+      if (onboarded.insertedCount) {
+        pubsub.publish("dealOnboarding", { dealOnboarding: dealData });
         return res.sendStatus(200);
       }
-      return res.status(400).send(`There was a problem creating dealOnboarding with psDealId: ${dealData.psDealId}`);
-      
-    }
-    catch (err) {
-      console.log('Error on Process Street Workflow Run')
-      console.log(err)
+      return res
+        .status(400)
+        .send(
+          `There was a problem creating dealOnboarding with psDealId: ${dealData.psDealId}`
+        );
+    } catch (err) {
+      console.log("Error on Process Street Workflow Run");
+      console.log(err);
       next(err);
     }
   })
-  .post('/process-street-tasks', async (req, res, next) => {
+  .post("/process-street-tasks", async (req, res, next) => {
     try {
       const db = await connect();
       const { body } = req;
-      const { data, data: { checklist: { id: psDealId } } } = body;
+      const {
+        data,
+        data: {
+          checklist: { id: psDealId },
+        },
+      } = body;
 
       const taskData = {
         taskId: data.taskTemplateGroupId,
@@ -291,32 +374,45 @@ module.exports = Router()
         taskUpdatedDate: data.updatedDate,
         taskUpdatedBy: data.updatedBy.email,
         taskCompletedDate: data.completedDate,
-        taskCompletedBy: data.completedBy? data.completedBy.name : '',
-        formFields: data.formFields? data.formFields.map(f => {
-          return {
-            fieldLabel: f.label,
-            fieldType: f.type,
-            fieldValue: f.value
-          }
-        }) : []
-      }
+        taskCompletedBy: data.completedBy ? data.completedBy.name : "",
+        formFields: data.formFields
+          ? data.formFields.map((f) => {
+              return {
+                fieldLabel: f.label,
+                fieldType: f.type,
+                fieldValue: f.value,
+              };
+            })
+          : [],
+      };
 
-      const onboardedDeal = await db.dealOnboarding.findOne({ psDealId })
-      if(!onboardedDeal) return res.status(400).send(`There are no deals with the psDealId: ${psDealId}`);
+      const onboardedDeal = await db.dealOnboarding.findOne({ psDealId });
+      if (!onboardedDeal)
+        return res
+          .status(400)
+          .send(`There are no deals with the psDealId: ${psDealId}`);
 
-      const currentTaskIndex = onboardedDeal.dealTasks.findIndex(task => task.taskId === taskData.taskId);
+      const currentTaskIndex = onboardedDeal.dealTasks.findIndex(
+        (task) => task.taskId === taskData.taskId
+      );
       onboardedDeal.dealTasks[currentTaskIndex] = taskData;
-      const updatedDeal = await db.dealOnboarding.updateOne({ _id: ObjectId(onboardedDeal._id) }, { $set: {dealTasks: onboardedDeal.dealTasks } });
+      const updatedDeal = await db.dealOnboarding.updateOne(
+        { _id: ObjectId(onboardedDeal._id) },
+        { $set: { dealTasks: onboardedDeal.dealTasks } }
+      );
 
-      if(updatedDeal.modifiedCount){
-        pubsub.publish('dealOnboarding', {dealOnboarding: taskData})
+      if (updatedDeal.modifiedCount) {
+        pubsub.publish("dealOnboarding", { dealOnboarding: taskData });
         return res.sendStatus(200);
       }
-      return res.status(400).send(`There was a problem updating dealOnboarding with psDealId: ${psDealId}`);
-    }
-    catch (err) {
-      console.log('Error on Process Street Task update')
-      console.log(err)
+      return res
+        .status(400)
+        .send(
+          `There was a problem updating dealOnboarding with psDealId: ${psDealId}`
+        );
+    } catch (err) {
+      console.log("Error on Process Street Task update");
+      console.log(err);
       next(err);
     }
-  })
+  });
