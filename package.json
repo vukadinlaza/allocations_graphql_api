@@ -11,7 +11,7 @@
     "test": "jest --forceExit",
     "test:watch": "jest --watch",
     "test:debug": "NODE_TLS_REJECT_UNAUTHORIZED='0' node --inspect-brk node_modules/.bin/jest --runInBand --no-watchman --detectOpenHandles",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
     "prepare": "husky install"
   },
   "keywords": [],
