@@ -1,6 +1,6 @@
 const { ApolloServer } = require('apollo-server-express')
 const { createTestClient } = require('apollo-server-integration-testing')
-const { connect, drop, closeConnection } = require('../src/mongo')
+const { connect, drop, endDBConnection } = require('../src/mongo')
 const { authenticate } = require('./auth')
 const { typeDefs, resolvers } = require('../src/graphql/resolvers')
 
@@ -71,7 +71,7 @@ async function testServer () {
 
   // expose db for tests to access
   server.db = db
-  server.closeMongoConnetion = closeConnection
+  server.closeMongoConnetion = endDBConnection
   
   return server
 }

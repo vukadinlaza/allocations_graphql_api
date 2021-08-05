@@ -3,8 +3,8 @@ const { MONGO_URL, MONGO_DB, NODE_ENV } = process.env
 
 const cols = ["investments", "deals", "organizations", "users", "orders", "trades", "matchrequests", "compliancetasks", 'accounts', 'entities', 'signingpackets', 'comments', 'applications', 'dealOnboarding']
 
-let client;
-
+let db = null
+let client = null
 /** connects and attaches name of cols to db **/
 async function connect() {
     client = new MongoClient(MONGO_URL, {
@@ -14,7 +14,7 @@ async function connect() {
 
     const conn = await client.connect()
     console.log("🔗 Connected to Mongo")
-    const db = conn.db(MONGO_DB)
+    db = conn.db(MONGO_DB)
 
     // attach collections directly to db
     cols.forEach(col => {
@@ -24,8 +24,13 @@ async function connect() {
     return db
 }
 
-async function closeConnection(){
-    return await client.close();
+const getDB = async() => {
+    if(!db) await connect();
+    return db;
+}
+
+const endDBConnection =  async() => {
+    if(client) await client.end();
 }
 
 async function drop(db) {
@@ -35,4 +40,4 @@ async function drop(db) {
     }
 }
 
-module.exports = { connect, drop, closeConnection }
+module.exports = { connect, drop, getDB, endDBConnection }
