@@ -1,32 +1,18 @@
 // import ENVs from .env (gitignored)
 require('dotenv').config();
 
-// const { ApolloServer, gql } = require('apollo-server-express')
-const bodyParser = require('body-parser')
 const compression = require('compression')
 const cors = require('cors')
 const express = require('express')
-const { execute, subscribe } = require('graphql')
 const helmet = require('helmet')
 const xmlparser = require('express-xml-bodyparser');
-const { WebClient, LogLevel } = require('@slack/web-api');
 const { authedServer } = require('./graphql/server')
 const { connect } = require('./mongo')
-const { createEventAdapter } = require('@slack/events-api')
 const getSettings = require('./settings');
-const { last, mapValues, omit, keyBy } = require('lodash');
 const { graphqlUploadExpress } = require("graphql-upload");
 const http = require('http');
-const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET, {
-  includeBody: true,
-  includeHeaders: true
-});
-const slack = new WebClient(process.env.SLACK_CLIENT_TOKEN, {
-  logLevel: LogLevel.DEBUG,
 
-});
 const { NODE_ENV } = process.env
-
 
 /**
 
@@ -60,7 +46,6 @@ async function run() {
   }
 
   // standard express middlewares
-  app.use('/api/webhooks/slack', slackEvents.requestListener())
   app.use(helmet())
   app.use(compression())
   app.use(xmlparser());
@@ -74,8 +59,6 @@ async function run() {
   app.use(express.json({ verify: rawBodyBuffer }));
   app.use(graphqlUploadExpress({ maxFileSize: 1000000000, maxFiles: 10 }));
 
-
-  //slack API
   app.use('/api/webhooks', require('./express/webhooks/index'))
   app.use('/api/users', require('./express/api/user'))
   app.use('/api/deal', require('./express/api/deal'))
