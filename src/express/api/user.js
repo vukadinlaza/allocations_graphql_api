@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const { get, pick } = require('lodash')
-const { connect } = require('../../mongo/index')
+const {getDB } = require('../../mongo/index')
 
 const apiKeys = [{ key: '5fa2d72131ed7b7bc4666fe5', source: 'TVC' }]
 module.exports = Router()
@@ -22,7 +22,7 @@ module.exports = Router()
 					error: 'Please provide an email address to create a user'
 				})
 			}
-			const db = await connect();
+			const db = await getDB();
 			const user = await db.users.findOne({ email: req.body.email })
 			if (user) {
 				return res.status(400).send({
@@ -50,7 +50,7 @@ module.exports = Router()
 
 			const payload = pick(req.body, ['email', 'first_name', 'last_name', 'investor_type', 'entity_name'])
 
-			const db = await connect();
+			  const db = await getDB();
 
 			const user = await db.users.findOne({ email: req.body.email })
 			if (!user) {

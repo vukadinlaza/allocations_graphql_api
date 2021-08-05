@@ -57,7 +57,7 @@ const getTemplateData = (input, user, templateId) => {
   const countryWithState = country + (country === 'United States' ? `, ${state}` : '');
   const nameToUse = isTypeIndividual ? legalName : fullName;
   const communeDeals = ['tpl_hK65xPJdKpgTPyks9H', 'tpl_Y6hNCEc6CqzNkqpyPp']
-  const irishAngelsDeals = ['tpl_ratHTKYeHh9qcd2eYx', 'tpl_5tPkcRZYQ6mmpZAsKJ']
+  const irishAngelsDeals = ['tpl_ratHTKYeHh9qcd2eYx', 'tpl_5tPkcRZYQ6mmpZAsKJ', 'tpl_XkPZF7xHnKmHgXtfpk']
 
 
   if (templateId === SIGNATURE_ONLY_TEMPLATE) {
@@ -137,6 +137,9 @@ const getTemplateData = (input, user, templateId) => {
       'SocialSecurityNumber2': isTypeIndividual && secondInvestor ? secondInvestor.secondSignerSSN : ' ',
       'Email2': isTypeIndividual && secondInvestor ? secondInvestor.secondEmail : ' ',
       'Initials2': isTypeIndividual && secondInvestor ? secondInvestor.secondSignerInitials : ' ',
+      'InvestorType2': !secondInvestor ? '' : capitalize(investor_type) || ' ',
+      'Date Signed2': !secondInvestor ? '' : moment(new Date()).format('MM/DD/YYYY') || ' ',
+
     }
   } else {
     return {
@@ -295,7 +298,7 @@ const getInvestmentPreview = ({ input, user }) => {
 	return new Promise((resolve, reject) => {
 		docspring.generatePDF(docSpringTemplateId, submission_data, (error, response) => {
 			if (error) reject(error);
-			return resolve(response.submission)
+			else resolve(response.submission)
 		})
 	})
 }

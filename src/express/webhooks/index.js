@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const { ObjectId } = require("mongodb");
 const { get, every } = require("lodash");
-const { connect } = require("../../mongo/index");
+const { getDB } = require("../../mongo/index");
 const convert = require("xml-js");
 const S3 = require("aws-sdk/clients/s3");
 const fetch = require("node-fetch");
@@ -19,7 +19,7 @@ module.exports = Router()
   .post("/docusign", async (req, res, next) => {
     try {
       const { rawBody } = req;
-      const db = await connect();
+      const db = await getDB();
 
       const docusignData = JSON.parse(
         convert.xml2json(rawBody, { compact: true, spaces: 4 })
@@ -199,11 +199,11 @@ module.exports = Router()
   })
   .post("/verifyinvestor", async (req, res, next) => {
     try {
-      const db = await connect();
-      const userId = get(req, "body.eapi_identifier");
-      const status = get(req, "body.status");
-      const verifyInvestorId = get(req, "body.investor_id");
-      const requestId = get(req, "body.verification_request_id");
+      const db = await getDB();
+      const userId = get(req, 'body.eapi_identifier')
+      const status = get(req, 'body.status')
+      const verifyInvestorId = get(req, 'body.investor_id')
+      const requestId = get(req, 'body.verification_request_id')
 
       if (userId && status === "accredited") {
         const cerficate = await fetch(
@@ -280,13 +280,12 @@ module.exports = Router()
       const { body } = req;
       console.log(body);
 
-      const db = await connect();
-      const deals = await db.deals
-        .find({ company_name: body.dealName })
-        .toArray();
-      const user = await db.users.findOne({ email: body.email.toLowerCase() });
-      if (!user._id || !every(deals, "_id")) {
-        return res.sendStatus(200);
+      const db = await getDB();
+      const deals = await db.deals.find({ company_name: body.dealName }).toArray()
+      const user = await db.users.findOne({ email: body.email.toLowerCase() })
+      if (!user._id || !every(deals, '_id')
+      ) {
+        return res.sendStatus(200)
       }
       const dealIds = deals.map((d) => d._id).filter((d) => d);
       const investment = await db.investments.updateMany(
@@ -308,7 +307,7 @@ module.exports = Router()
   })
   .post("/process-street-spv", async (req, res, next) => {
     try {
-      const db = await connect();
+      const db = await getDB();
       const { body } = req;
       const { data } = body;
       const dealData = {
@@ -358,7 +357,7 @@ module.exports = Router()
   })
   .post("/process-street-tasks", async (req, res, next) => {
     try {
-      const db = await connect();
+      const db = await getDB();
       const { body } = req;
       const {
         data,

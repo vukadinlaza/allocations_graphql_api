@@ -1,8 +1,9 @@
+require('dotenv').config();
 const { Router } = require('express');
 const { get, pick } = require('lodash')
-const { connect } = require('../../mongo/index')
+const {  getDB } = require('../../mongo/index')
 
-const apiKeys = [{ key: '12345' }]
+const apiKeys = [{ key: process.env.DEAL_IMG_KEY }]
 
 module.exports = Router()
 	.post('/', async (req, res, next) => {
@@ -17,7 +18,7 @@ module.exports = Router()
 				})
 			}
 
-			const db = await connect();
+			const db = await getDB();
 			const organization = await db.organizations.findOne({ slug: organizationSlug })
 
 			if(organization !== null && organization._id) {
