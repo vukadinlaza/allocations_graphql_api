@@ -20,7 +20,7 @@ const {
   getKYCTemplateId
 } = require('../../utils/docusign')
 const { createTaxDocument } = require('../../docspring/index');
-const { getFilters, getNestedFilters, getSorting, getNestedSorting, customUsersSorting } = require('../pagHelpers')
+const { customUserPagination } = require('../pagHelpers')
 const Users = require('../schema/users')
 const fetch = require('node-fetch');
 const moment = require('moment')
@@ -148,42 +148,24 @@ const Queries = {
   },
   allUsers: async (_, args, ctx) => {
     isAdmin(ctx)
-    const { pagination, currentPage, sortField } = args.pagination;
+    const { pagination, currentPage } = args.pagination;
 
     const documentsToSkip = pagination * (currentPage)
-    const filter = getFilters(args.pagination);
-    const nestedFilters = getNestedFilters(args.pagination);
-    let sorting = getSorting(args.pagination);
-    const nestedSorting = getNestedSorting(args.pagination);
-
-    const customSorting = customUsersSorting(args.pagination);
-    if (customSorting) sorting = customSorting;
-
-    const aggregation = [nestedSorting, nestedFilters, filter, ...sorting]
-      .filter(x => x && Object.keys(x).length);
-
+    const aggregation = customUserPagination(args.pagination)
     const countAggregation = [...aggregation, { $count: 'count' }]
 
     const usersCount = await ctx.db.collection("users")
-      .aggregate(countAggregation)
-      .toArray()
+                                    .aggregate(countAggregation)
+                                    .toArray()
     const count = usersCount[0].count;
 
     let users = await ctx.db.collection("users")
-      .aggregate(aggregation)
-      .skip(documentsToSkip)
-      .limit(pagination)
-      .toArray()
+                            .aggregate(aggregation)
+                            .skip(documentsToSkip)
+                            .limit(pagination)
+                            .toArray()
 
-    if (['investmentAmount', 'investments'].includes(sortField)) {
-      users = users.map(item => {
-        return {
-          ...item.user,
-          investmentAmount: item.investmentAmount,
-          investments: item.investments
-        }
-      })
-    }
+    users = users.map(item => item.user)
 
     return { count, users };
   },

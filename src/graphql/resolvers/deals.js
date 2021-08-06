@@ -13,7 +13,7 @@ const Mailer = require('../../mailers/mailer')
 const txConfirmationTemplate = require('../../mailers/templates/tx-confirmation-template')
 const { nWithCommas } = require('../../utils/common.js')
 // const { pubsub } = require('googleapis/build/src/apis/pubsub')
-const { getDefaultPagAggregation } = require('../pagHelpers')
+const { customDealPagination } = require('../pagHelpers')
 const { getHighlights } = require('../mongoHelpers.js')
 
 /**
@@ -153,11 +153,11 @@ const Queries = {
   /** Gets fund admin Funds/SPVs tabs data**/
   fundAdminTables: async (_, args, ctx) => {
     isAdmin(ctx)
-    const { pagination, currentPage, sortField } = args.pagination;
+    const { pagination, currentPage } = args.pagination;
 
     const documentsToSkip = pagination * (currentPage)
     const additionalFilter = { key: 'investmentType', filter: args.filter }
-    const aggregation = getDefaultPagAggregation(args.pagination, 'customDealsSorting', additionalFilter)
+    const aggregation = customDealPagination(args.pagination, additionalFilter)
     const countAggregation = [...aggregation, { $count: 'count' }]
     
     const dealsCount = await ctx.db.collection("deals")
@@ -171,11 +171,7 @@ const Queries = {
                             .limit(pagination)
                             .toArray()
     
-    if(sortField === 'AUM'){
-      deals = deals.map(item => {
-        return { ...item.deal, AUM: item.AUM }
-      })  
-    }
+    deals = deals.map(item => item.deal) 
 
     return {count , deals};
   }
