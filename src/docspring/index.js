@@ -1,21 +1,24 @@
 // Find your API tokens here: https://app.docspring.com/api_tokens
-require('dotenv').config();
-const moment = require('moment')
+require("dotenv").config();
+const moment = require("moment");
 
-const DocSpring = require('docspring');
-const { capitalize, omit } = require('lodash');
-const { ObjectId } = require('mongodb');
-const { sendSPVDoc } = require('../mailers/spv-doc-mailer');
-const { wFormSigned } = require('../zaps/signedDocs')
-const { DocSpringApi } = require('./docspringApi');
+const DocSpring = require("docspring");
+const { capitalize, omit } = require("lodash");
+const { ObjectId } = require("mongodb");
+const { sendSPVDoc } = require("../mailers/spv-doc-mailer");
+const { wFormSigned } = require("../zaps/signedDocs");
+const { DocSpringApi } = require("./docspringApi");
 
-var config = new DocSpring.Configuration()
-config.apiTokenId = process.env.DOC_SPRING_API_ID
-config.apiTokenSecret = process.env.DOC_SPRING_API_SECRET
+var config = new DocSpring.Configuration();
+config.apiTokenId = process.env.DOC_SPRING_API_ID;
+config.apiTokenSecret = process.env.DOC_SPRING_API_SECRET;
 
-let docspring = new DocSpring.Client(config)
+let docspring = new DocSpring.Client(config);
 
-const DocSpringAPI = new DocSpringApi(process.env.DOC_SPRING_API_ID, process.env.DOC_SPRING_API_SECRET)
+const DocSpringAPI = new DocSpringApi(
+  process.env.DOC_SPRING_API_ID,
+  process.env.DOC_SPRING_API_SECRET
+);
 
 const getTemplateData = (input, user, templateId) => {
   const {
@@ -49,131 +52,168 @@ const getTemplateData = (input, user, templateId) => {
     secondInvestor,
   } = input;
 
-  
-  const SIGNATURE_ONLY_TEMPLATE = 'tpl_ctrRDXgQdKz5YGg9QK';
-  const oldTemplates = ['tpl_RrmjKbpFRr7qhKY3dD', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_Z6jkb55rjqThssk3jG', 'tpl_ARmHkgKjECPmDT6ad9', 'tpl_3nKjygaFgz44KyCANJ', 'tpl_xhqLHTtbGrLnS4tYRS', 'tpl_RrmjKbpFRr7qhKY3dD']
-  const isTypeIndividual = (investor_type === 'individual');
-  const isTypeEntity = (investor_type === 'entity');
-  const countryWithState = country + (country === 'United States' ? `, ${state}` : '');
+  const SIGNATURE_ONLY_TEMPLATE = "tpl_ctrRDXgQdKz5YGg9QK";
+  const oldTemplates = [
+    "tpl_RrmjKbpFRr7qhKY3dD",
+    "tpl_xhqLHTtbGrLnS4tYRS",
+    "tpl_Z6jkb55rjqThssk3jG",
+    "tpl_ARmHkgKjECPmDT6ad9",
+    "tpl_3nKjygaFgz44KyCANJ",
+    "tpl_xhqLHTtbGrLnS4tYRS",
+    "tpl_RrmjKbpFRr7qhKY3dD",
+  ];
+  const isTypeIndividual = investor_type === "individual";
+  const isTypeEntity = investor_type === "entity";
+  const countryWithState =
+    country + (country === "United States" ? `, ${state}` : "");
   const nameToUse = isTypeIndividual ? legalName : fullName;
-  const communeDeals = ['tpl_hK65xPJdKpgTPyks9H', 'tpl_Y6hNCEc6CqzNkqpyPp']
-  const irishAngelsDeals = ['tpl_ratHTKYeHh9qcd2eYx', 'tpl_5tPkcRZYQ6mmpZAsKJ', 'tpl_XkPZF7xHnKmHgXtfpk']
-
+  const communeDeals = ["tpl_hK65xPJdKpgTPyks9H", "tpl_Y6hNCEc6CqzNkqpyPp"];
+  const irishAngelsDeals = [
+    "tpl_ratHTKYeHh9qcd2eYx",
+    "tpl_5tPkcRZYQ6mmpZAsKJ",
+    "tpl_XkPZF7xHnKmHgXtfpk",
+  ];
 
   if (templateId === SIGNATURE_ONLY_TEMPLATE) {
     return {
       signature: nameToUse,
-    }
+    };
   } else if (oldTemplates.includes(templateId)) {
     return {
       subscriptiondocsOne: capitalize(investor_type),
       subscriptiondocsTwo: legalName,
       investmentAmount: investmentAmount,
-      subscriptiondocsThree: isTypeIndividual ? countryWithState : '',
-      subscriptiondocsFour: isTypeEntity ? countryWithState : '',
-      subscriptiondocsFive: isTypeIndividual ? accredited_investor_status : '',
-      subscriptiondocsSix: isTypeIndividual ? '' : accredited_investor_status,
+      subscriptiondocsThree: isTypeIndividual ? countryWithState : "",
+      subscriptiondocsFour: isTypeEntity ? countryWithState : "",
+      subscriptiondocsFive: isTypeIndividual ? accredited_investor_status : "",
+      subscriptiondocsSix: isTypeIndividual ? "" : accredited_investor_status,
       email: user.email,
       fullName: nameToUse,
       signature: nameToUse,
       memberName: legalName,
-      date: moment(new Date()).format('MM/DD/YYYY')
-    }
+      date: moment(new Date()).format("MM/DD/YYYY"),
+    };
   } else if (communeDeals.includes(templateId)) {
     return {
-      'InvestorType': capitalize(investor_type),
-      'MemberName': legalName,
-      'SubAmount': investmentAmount,
-      'USStateIndividual': isTypeIndividual ? countryWithState : '',
-      'USStateEntity': isTypeEntity ? countryWithState : '',
-      'AccredIndiv': isTypeIndividual ? accredited_investor_status : '',
-      'AccredEntity': isTypeIndividual ? '' : accredited_investor_status,
-      'Email': user.email,
-      'FullName': nameToUse,
-      'Signature': nameToUse,
-      'Date Signed': moment(new Date()).format('MM/DD/YYYY'),
-      'Title': title
-    }
+      InvestorType: capitalize(investor_type),
+      MemberName: legalName,
+      SubAmount: investmentAmount,
+      USStateIndividual: isTypeIndividual ? countryWithState : "",
+      USStateEntity: isTypeEntity ? countryWithState : "",
+      AccredIndiv: isTypeIndividual ? accredited_investor_status : "",
+      AccredEntity: isTypeIndividual ? "" : accredited_investor_status,
+      Email: user.email,
+      FullName: nameToUse,
+      Signature: nameToUse,
+      "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
+      Title: title,
+    };
   } else if (irishAngelsDeals.includes(templateId)) {
     return {
-      'InvestorType': capitalize(investor_type) || ' ',
-      'MemberName': isTypeEntity ? legalName : ' ',
-      'SubAmount': investmentAmount || ' ',
-      'USStateIndividual': isTypeIndividual ? countryWithState : '',
-      'USStateEntity': isTypeEntity ? countryWithState : '',
-      'Email': user.email || ' ',
-      'FullName': isTypeEntity ? nameToUse : ' ',
-      'EntityName': isTypeEntity ? nameToUse : ' ',
-      'InvestorName': isTypeIndividual ? (legalName || ' ') : (legalName || ' '),
-      'IndividualName': isTypeIndividual ? nameToUse : ' ',
-      'Signature': nameToUse,
-      'EntitySignature': isTypeEntity ? nameToUse : ' ',
-      'IndividualSignature': isTypeIndividual ? nameToUse : ' ',
-      'Date Signed': moment(new Date()).format('MM/DD/YYYY'),
-      'Title': isTypeEntity ? title : ' ',
-      'EIN': isTypeEntity ? ein : ' ',
-      'SocialSecurityNumber': isTypeIndividual ? ssn : ' ',
-      'HomeAddress': home_address || ' ',
-      'MailingAddress': mailing_address || ' ',
-      'SoleMember': sole_member || false,
-      'MultiMember': multi_member || false,
-      'CCorporation': c_corporation || false,
-      'SCorporation': s_corporation || false,
-      'GeneralPartnership': general_partnership || false,
-      'LimitedPartnership': limited_partnership || false,
-      'IrrevocableTrust': irrevocable_trust || false,
-      'RevocableTrust': revocable_trust || false,
-      'IRAAccount': ira_account || false,
-      'Pension': pension || false,
-      'Individual': individual || false,
-      'JointTenants': joint_tenants || false,
-      'TenantsByEntirety': tenants_by_entirety || false,
-      'TenantsInCommon': tenants_in_commons || false,
-      'Initials': initials || ' ',
-      'IndividualName2': isTypeIndividual && secondInvestor ? secondInvestor.secondLegalName : ' ',
-      'InvestorName2' :isTypeIndividual && secondInvestor ? secondInvestor.secondLegalName : ' ',
-      'IndividualSignature2': isTypeIndividual && secondInvestor ? secondInvestor.secondLegalName : ' ',
-      'Signature2': isTypeIndividual && secondInvestor ? secondInvestor.secondLegalName : ' ',
-      'SocialSecurityNumber2': isTypeIndividual && secondInvestor ? secondInvestor.secondSignerSSN : ' ',
-      'Email2': isTypeIndividual && secondInvestor ? secondInvestor.secondEmail : ' ',
-      'Initials2': isTypeIndividual && secondInvestor ? secondInvestor.secondSignerInitials : ' ',
-      'InvestorType2': !secondInvestor ? '' : capitalize(investor_type) || ' ',
-      'Date Signed2': !secondInvestor ? '' : moment(new Date()).format('MM/DD/YYYY') || ' ',
-
-    }
+      InvestorType: capitalize(investor_type) || " ",
+      MemberName: isTypeEntity ? legalName : " ",
+      SubAmount: investmentAmount || " ",
+      USStateIndividual: isTypeIndividual ? countryWithState : "",
+      USStateEntity: isTypeEntity ? countryWithState : "",
+      Email: user.email || " ",
+      FullName: isTypeEntity ? nameToUse : " ",
+      EntityName: isTypeEntity ? nameToUse : " ",
+      InvestorName: isTypeIndividual ? legalName || " " : legalName || " ",
+      IndividualName: isTypeIndividual ? nameToUse : " ",
+      Signature: nameToUse,
+      EntitySignature: isTypeEntity ? nameToUse : " ",
+      IndividualSignature: isTypeIndividual ? nameToUse : " ",
+      "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
+      Title: isTypeEntity ? title : " ",
+      EIN: isTypeEntity ? ein : " ",
+      SocialSecurityNumber: isTypeIndividual ? ssn : " ",
+      HomeAddress: home_address || " ",
+      MailingAddress: mailing_address || " ",
+      SoleMember: sole_member || false,
+      MultiMember: multi_member || false,
+      CCorporation: c_corporation || false,
+      SCorporation: s_corporation || false,
+      GeneralPartnership: general_partnership || false,
+      LimitedPartnership: limited_partnership || false,
+      IrrevocableTrust: irrevocable_trust || false,
+      RevocableTrust: revocable_trust || false,
+      IRAAccount: ira_account || false,
+      Pension: pension || false,
+      Individual: individual || false,
+      JointTenants: joint_tenants || false,
+      TenantsByEntirety: tenants_by_entirety || false,
+      TenantsInCommon: tenants_in_commons || false,
+      Initials: initials || " ",
+      IndividualName2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : " ",
+      InvestorName2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : " ",
+      IndividualSignature2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : " ",
+      Signature2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : " ",
+      SocialSecurityNumber2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondSignerSSN
+          : " ",
+      Email2:
+        isTypeIndividual && secondInvestor ? secondInvestor.secondEmail : " ",
+      Initials2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondSignerInitials
+          : " ",
+      InvestorType2: !secondInvestor ? "" : capitalize(investor_type) || " ",
+      "Date Signed2": !secondInvestor
+        ? ""
+        : moment(new Date()).format("MM/DD/YYYY") || " ",
+    };
   } else {
     return {
-      'InvestorType': capitalize(investor_type),
-      'MemberName': legalName,
-      'SubAmount': investmentAmount,
-      'USStateIndividual': isTypeIndividual ? countryWithState : '',
-      'USStateEntity': isTypeEntity ? countryWithState : '',
-      'AccredIndiv': isTypeIndividual ? accredited_investor_status : '',
-      'AccredEntity': isTypeIndividual ? '' : accredited_investor_status,
-      'Email': user.email,
-      'FullName': nameToUse,
-      'Signature': nameToUse,
-      'Date Signed': moment(new Date()).format('MM/DD/YYYY')
-    }
+      InvestorType: capitalize(investor_type),
+      MemberName: legalName,
+      SubAmount: investmentAmount,
+      USStateIndividual: isTypeIndividual ? countryWithState : "",
+      USStateEntity: isTypeEntity ? countryWithState : "",
+      AccredIndiv: isTypeIndividual ? accredited_investor_status : "",
+      AccredEntity: isTypeIndividual ? "" : accredited_investor_status,
+      Email: user.email,
+      FullName: nameToUse,
+      Signature: nameToUse,
+      "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
+    };
   }
-}
+};
 
-
-const updateInvestment = async (db, investmentStatus, payload, newDocsArray) => {
+const updateInvestment = async (
+  db,
+  investmentStatus,
+  payload,
+  newDocsArray
+) => {
   const updatedInvestmentData = {
-    status: investmentStatus === 'invited' ? 'signed' : investmentStatus,
-    amount: parseFloat(payload.investmentAmount.replace(/,/g, '')),
-    documents: newDocsArray
-  }
-  await db.investments.updateOne({ _id: ObjectId(payload.investmentId) }, { $set: updatedInvestmentData })
-}
-
+    status: investmentStatus === "invited" ? "signed" : investmentStatus,
+    amount: parseFloat(payload.investmentAmount.replace(/,/g, "")),
+    documents: newDocsArray,
+  };
+  await db.investments.updateOne(
+    { _id: ObjectId(payload.investmentId) },
+    { $set: updatedInvestmentData }
+  );
+};
 
 const addPacket = async (db, user, payload) => {
   const signingpacket = {
     userEmail: user.email,
     userId: user._id,
-    authMethod: 'in-session',
+    authMethod: "in-session",
     signedAt: new Date(),
     clientIp: payload.clientIp,
     investmentId: ObjectId(payload.investmentId),
@@ -181,80 +221,103 @@ const addPacket = async (db, user, payload) => {
       ...payload,
       userEmail: user.email,
       userId: user._id,
-    }
-  }
-  await db.signingpackets.insertOne({ ...signingpacket })
-}
-
+    },
+  };
+  await db.signingpackets.insertOne({ ...signingpacket });
+};
 
 const updateSubmissionData = async (response, db, investmentId) => {
-	await db.investments.updateOne({ _id: ObjectId(investmentId) }, {
-		$set: { 'submissionData.submissionId': response.id },
-	})
-	return response
-}
+  await db.investments.updateOne(
+    { _id: ObjectId(investmentId) },
+    {
+      $set: { "submissionData.submissionId": response.id },
+    }
+  );
+  return response;
+};
 
-
-const updateUserDocuments = async (response, db, templateName, userId, payload) => {
-  const { id, downloadUrl } = response;
+const updateUserDocuments = async (
+  response,
+  db,
+  templateName,
+  userId,
+  payload
+) => {
+  const { id, permanentDownloadUrl } = response;
   const docObj = {
     documentName: templateName,
     submissionId: id,
-    docspringPermDownloadLink: downloadUrl
-  }
+    docspringPermDownloadLink: permanentDownloadUrl,
+  };
 
-  await db.users.updateOne({ _id: ObjectId(userId) }, {
-    $push: { documents: docObj },
-  })
+  await db.users.updateOne(
+    { _id: ObjectId(userId) },
+    {
+      $push: { documents: docObj },
+    }
+  );
 
   wFormSigned(payload);
 
   return new Promise((res, rej) => {
-    return res(response)
-  })
-}
+    return res(response);
+  });
+};
 
+const generateDocSpringPDF = async (
+  db,
+  deal,
+  user,
+  input,
+  templateName,
+  timeStamp,
+  templateId
+) => {
+  let data = getTemplateData(input, user, templateId);
+  var submission_data = {
+    editable: false,
+    data: data,
+    metadata: {
+      user_id: user._id,
+      investmentId: input.investmentId,
+      templateName: templateName,
+      timeStamp: timeStamp,
+    },
+    field_overrides: {
+      // title: {
+      // 	required: false,
+      // },
+    },
+    test: process.env.NODE_ENV === "production" ? false : true,
+    wait: true,
+  };
 
-const generateDocSpringPDF = async (db, deal, user, input, templateName, timeStamp, templateId) => {
+  const response = await DocSpringAPI.generatePDF(templateId, submission_data);
+  if (response.status !== "success") return;
 
-	let data = getTemplateData(input, user, templateId);
-	var submission_data = {
-		editable: false,
-		data: data,
-		metadata: {
-			user_id: user._id,
-			investmentId: input.investmentId,
-			templateName: templateName,
-			timeStamp: timeStamp
-		},
-		field_overrides: {
-			// title: {
-			// 	required: false,
-			// },
-		},
-    test: process.env.NODE_ENV === 'production' ? false : true,
-		wait: true,
-	}
+  const emailData = {
+    pdfDownloadUrl: response.downloadUrl,
+    email: user.email,
+    deal,
+  };
 
-	const response = await DocSpringAPI.generatePDF(templateId, submission_data);
-	if (response.status !== 'success') return;
-	
-	const emailData = {
-		pdfDownloadUrl: response.downloadUrl,
-		email: user.email,
-		deal
-	} 
-
-	sendSPVDoc(emailData)
-	updateSubmissionData(response, db, input.investmentId)
-	return response.downloadUrl
-}
+  sendSPVDoc(emailData);
+  updateSubmissionData(response, db, input.investmentId);
+  return response.permanentDownloadUrl;
+};
 
 const createTaxDocument = async ({ payload, user, db }) => {
-
   const { kycTemplateName, kycTemplateId } = payload;
-  const sig = kycTemplateName === 'W-9' ? payload.name_as_shown_on_your_income_tax_return_name_is_required_on_this_line_do_not_leave_this_line_blank : payload.signature;
-  const keysToOmit = ['kycTemplateId', 'kycTemplateName', 'tax_classification', 'isDemo']
+  const sig =
+    kycTemplateName === "W-9"
+      ? payload.name_as_shown_on_your_income_tax_return_name_is_required_on_this_line_do_not_leave_this_line_blank
+      : payload.signature;
+  const keysToOmit = [
+    "kycTemplateId",
+    "kycTemplateName",
+    "tax_classification",
+    "isDemo",
+  ];
   const data = omit({ ...payload, signature: sig }, keysToOmit);
 
   var submission_data = {
@@ -262,65 +325,98 @@ const createTaxDocument = async ({ payload, user, db }) => {
     data: data,
     metadata: {
       user_id: user._id,
-      templateName: kycTemplateName
+      templateName: kycTemplateName,
     },
-    field_overrides: {
-    },
-    test: process.env.NODE_ENV === 'production' ? false : true,
+    field_overrides: {},
+    test: process.env.NODE_ENV === "production" ? false : true,
     wait: true,
-  }
+  };
 
-  const response = await DocSpringAPI.generatePDF(kycTemplateId, submission_data);
-  if (response.status !== 'success') return;
-  return await updateUserDocuments(response, db, kycTemplateName, user._id, payload);
-}
+  const response = await DocSpringAPI.generatePDF(
+    kycTemplateId,
+    submission_data
+  );
+  if (response.status !== "success") return;
+  return await updateUserDocuments(
+    response,
+    db,
+    kycTemplateName,
+    user._id,
+    payload
+  );
+};
 
 const getInvestmentPreview = ({ input, user }) => {
-	const timeStamp = Date.now();
-	const { docSpringTemplateId } = input;
-	let data = getTemplateData(input, user, docSpringTemplateId);
+  const timeStamp = Date.now();
+  const { docSpringTemplateId } = input;
+  let data = getTemplateData(input, user, docSpringTemplateId);
 
-	var submission_data = {
-		editable: false,
-		data: data,
-		metadata: {
-			user_id: user._id,
-			templateName: docSpringTemplateId,
-			timeStamp: timeStamp,
-			preview: true
-		},
-		field_overrides: {
-		},
-		test: process.env.NODE_ENV === 'production' ? false : true,
-		wait: true,
-	}
+  var submission_data = {
+    editable: false,
+    data: data,
+    metadata: {
+      user_id: user._id,
+      templateName: docSpringTemplateId,
+      timeStamp: timeStamp,
+      preview: true,
+    },
+    field_overrides: {},
+    test: process.env.NODE_ENV === "production" ? false : true,
+    wait: true,
+  };
 
-	return new Promise((resolve, reject) => {
-		docspring.generatePDF(docSpringTemplateId, submission_data, (error, response) => {
-			if (error) reject(error);
-			else resolve(response.submission)
-		})
-	})
-}
+  return new Promise((resolve, reject) => {
+    docspring.generatePDF(
+      docSpringTemplateId,
+      submission_data,
+      (error, response) => {
+        if (error) reject(error);
+        else resolve(response.submission);
+      }
+    );
+  });
+};
 
+const getTemplate = async ({
+  db,
+  deal,
+  payload,
+  user,
+  templateId,
+  investmentDocs = [],
+  investmentStatus,
+}) => {
+  const response = await DocSpringAPI.getTemplate(templateId);
+  if (response.status !== "success") return;
 
-const getTemplate = async ({db, deal, payload, user, templateId, investmentDocs = [], investmentStatus}) => {
-	const response = await DocSpringAPI.getTemplate(templateId);
-	if (response.status !== 'success') return;
-	
-		const timeStamp = Date.now();
-		const adjTemplateName = response.name.replace(/\s+/g, "_");
+  const timeStamp = Date.now();
+  const adjTemplateName = response.name.replace(/\s+/g, "_");
 
-		const key = `investments/${payload.investmentId}/${timeStamp}-${adjTemplateName}.pdf`;
-	
-		const oldDocs = investmentDocs.filter(doc => !doc.includes(adjTemplateName))
-		const newDocsArray = [...oldDocs, key];
-	
-		const downloadUrl =  await generateDocSpringPDF(db, deal, user, payload, adjTemplateName, timeStamp, templateId);
-		updateInvestment(db, investmentStatus, payload, newDocsArray);
-		addPacket(db, user, payload)
+  const key = `investments/${payload.investmentId}/${timeStamp}-${adjTemplateName}.pdf`;
 
-		return downloadUrl;
-}
+  const oldDocs = investmentDocs.filter(
+    (doc) => !doc.includes(adjTemplateName)
+  );
+  const newDocsArray = [...oldDocs, key];
 
-module.exports = {  generateDocSpringPDF, createTaxDocument, getInvestmentPreview, getTemplate }
+  const permanentDownloadUrl = await generateDocSpringPDF(
+    db,
+    deal,
+    user,
+    payload,
+    adjTemplateName,
+    timeStamp,
+    templateId
+  );
+  updateInvestment(db, investmentStatus, payload, newDocsArray);
+  addPacket(db, user, payload);
+
+  return permanentDownloadUrl;
+};
+
+module.exports = {
+  generateDocSpringPDF,
+  createTaxDocument,
+  getInvestmentPreview,
+  getTemplate,
+};
