@@ -7,7 +7,7 @@ const express = require("express");
 const helmet = require("helmet");
 const xmlparser = require("express-xml-bodyparser");
 const { authedServer } = require("./graphql/server");
-const { getDB, endDBConnection} = require("./mongo");
+const { getDB, endDBConnection } = require("./mongo");
 const getSettings = require("./settings");
 const { graphqlUploadExpress } = require("graphql-upload");
 const http = require("http");
@@ -64,8 +64,7 @@ async function run() {
   app.use("/api/deal", require("./express/api/deal"));
 
   // connect to MongoDB
-  const db = await getDB()
-
+  const db = await getDB();
 
   // auth handling (only prod for now)
   console.log("⛰️ Environment: ", process.env.NODE_ENV);
@@ -98,6 +97,6 @@ process.on("unhandledRejection", (error) => {
   console.log("unhandledRejection", error);
   throw new Error(error);
 });
-process.on('SIGTERM', endDBConnection)
+process.on("SIGTERM", endDBConnection);
 
 run().then();

@@ -1,29 +1,29 @@
-const mailer = require('@sendgrid/mail')
-const logger = require('../utils/logger')
+const mailer = require("@sendgrid/mail");
+const logger = require("../utils/logger");
 
-mailer.setApiKey(process.env.SENDGRID_API_KEY)
+mailer.setApiKey(process.env.SENDGRID_API_KEY);
 
-async function sendInvite ({ org, to }) {
-  const html = adminInviteTemplate({ org })
+async function sendInvite({ org, to }) {
+  const html = adminInviteTemplate({ org });
 
   const msg = {
     to,
     from: "invites@allocations.com",
     subject: `You have been added as an admin for ${org.name} on Allocations`,
     text: `You have been added as an admin for ${org.name} on Allocations`,
-    html
-  }
+    html,
+  };
 
   try {
-    await mailer.send(msg)
-    return { status: "sent", sent_at: Date.now(), to }
+    await mailer.send(msg);
+    return { status: "sent", sent_at: Date.now(), to };
   } catch (e) {
-    logger.error(e)
-    return { status: "error" }
+    logger.error(e);
+    return { status: "error" };
   }
 }
 
-function adminInviteTemplate ({ org }) {
+function adminInviteTemplate({ org }) {
   return `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml">
@@ -207,7 +207,7 @@ function adminInviteTemplate ({ org }) {
       </center>
     </body>
   </html>
-  `
+  `;
 }
 
-module.exports = { sendInvite }
+module.exports = { sendInvite };

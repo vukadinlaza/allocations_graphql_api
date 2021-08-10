@@ -1,43 +1,54 @@
-const { MongoClient } = require("mongodb")
-const { MONGO_URL, MONGO_DB, NODE_ENV } = process.env
+const { MongoClient } = require("mongodb");
+const { MONGO_URL, MONGO_DB, NODE_ENV } = process.env;
 
-const cols = ["investments", "deals", "organizations", "users", "orders", "trades", "matchrequests", "compliancetasks", 'accounts', 'entities', 'signingpackets', 'comments', 'applications', 'dealOnboarding']
+const cols = [
+  "investments",
+  "deals",
+  "organizations",
+  "users",
+  "accounts",
+  "entities",
+  "signingpackets",
+  "comments",
+  "applications",
+  "dealOnboarding",
+];
 
-let db = null
-let client = null
+let db = null;
+let client = null;
 /** connects and attaches name of cols to db **/
 async function connect() {
-    client = new MongoClient(MONGO_URL, {
-        useUnifiedTopology: true,
-        useNewUrlParser: true,
-    })
+  client = new MongoClient(MONGO_URL, {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+  });
 
-    const conn = await client.connect()
-    console.log("🔗 Connected to Mongo")
-    db = conn.db(MONGO_DB)
+  const conn = await client.connect();
+  console.log("🔗 Connected to Mongo");
+  db = conn.db(MONGO_DB);
 
-    // attach collections directly to db
-    cols.forEach(col => {
-        db[col] = db.collection(col)
-    })
+  // attach collections directly to db
+  cols.forEach((col) => {
+    db[col] = db.collection(col);
+  });
 
-    return db
+  return db;
 }
 
-const getDB = async() => {
-    if(!db) await connect();
-    return db;
-}
+const getDB = async () => {
+  if (!db) await connect();
+  return db;
+};
 
-const endDBConnection =  async() => {
-    if(client) await client.end();
-}
+const endDBConnection = async () => {
+  if (client) await client.end();
+};
 
 async function drop(db) {
-    // THIS SHOULD ONLY HAPPEN IN TEST
-    if (NODE_ENV === "test" && MONGO_URL === "mongodb://localhost:27017") {
-        await Promise.all(cols.map(col => db[col].deleteMany()))
-    }
+  // THIS SHOULD ONLY HAPPEN IN TEST
+  if (NODE_ENV === "test" && MONGO_URL === "mongodb://localhost:27017") {
+    await Promise.all(cols.map((col) => db[col].deleteMany()));
+  }
 }
 
-module.exports = { connect, drop, getDB, endDBConnection }
+module.exports = { connect, drop, getDB, endDBConnection };

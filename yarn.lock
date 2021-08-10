@@ -1590,7 +1590,7 @@ bl@^4.0.3:
     inherits "^2.0.4"
     readable-stream "^3.4.0"
 
-body-parser@1.19.0, body-parser@^1.18.3, body-parser@^1.19.0:
+body-parser@1.19.0, body-parser@^1.18.3:
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/body-parser/-/body-parser-1.19.0.tgz#96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
   integrity sha512-dhEPs72UPbDnAQJ9ZKMNTP6ptJaionhP5cBb541nXPlW60Jepo9RV/a4fX4XWW9CuFNK22krhrj1+rgzifNCsw==
@@ -3038,7 +3038,7 @@ forever-agent@~0.6.1:
   resolved "https://registry.yarnpkg.com/forever-agent/-/forever-agent-0.6.1.tgz#fbc71f0c41adeb37f96c577ad1ed42d8fdacca91"
   integrity sha1-+8cfDEGt6zf5bFd60e1C2P2sypE=
 
-form-data@^2.3.1, form-data@^2.3.2, form-data@^2.5.0:
+form-data@^2.3.1, form-data@^2.5.0:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/form-data/-/form-data-2.5.1.tgz#f2cbec57b5e59e23716e128fe44d4e5dd23895f4"
   integrity sha512-m21N3WOmEEURgk6B9GLOE4RuWOFf28Lhh9qGYeNlGq4VDXUlJy2th2slBNU8Gp8EzloYZOibZJ7t5ecIrFSjVA==
@@ -3491,16 +3491,6 @@ has@^1.0.3:
   integrity sha512-f2dvO0VU6Oej7RkWJGrehjbzMAjFp5/VKPp5tTpWIV4JHHZK1/BxbFRtf/siA2SWTe09caDmVtYYzWEIbBS4zw==
   dependencies:
     function-bind "^1.1.1"
-
-hellosign-sdk@^1.4.0:
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/hellosign-sdk/-/hellosign-sdk-1.6.1.tgz#f34102fc0b474bd93db271be7410eaf7d5bb07a0"
-  integrity sha512-q76T4+YOqW+UREycgWoRc+IdR4ATrc1pBSGuj6748Fgw2KvNgk6P7nm6UJIJTQUoRsN9xu2h6hVGrEygGa1rpA==
-  dependencies:
-    expect "^24.9.0"
-    express "^4.17.1"
-    form-data "^2.3.2"
-    when "~3.1.0"
 
 helmet-crossdomain@0.4.0:
   version "0.4.0"
@@ -7302,11 +7292,6 @@ whatwg-url@^7.0.0:
     lodash.sortby "^4.7.0"
     tr46 "^1.0.1"
     webidl-conversions "^4.0.2"
-
-when@~3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/when/-/when-3.1.0.tgz#a2479659ca15f725541ecf52ebae091b781ee134"
-  integrity sha1-okeWWcoV9yVUHs9S664JG3ge4TQ=
 
 which-boxed-primitive@^1.0.2:
   version "1.0.2"

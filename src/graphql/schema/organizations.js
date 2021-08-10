@@ -1,127 +1,71 @@
-const { gql } = require('apollo-server-express')
+const { gql } = require("apollo-server-express");
 
 module.exports = gql(`
-  type Organization {
-    _id: String
-    name: String
-    legal_name: String
-    slug: String
-    logo: String
-    created_at: String
-    updated_at: String
-    approved: Boolean
-    admins: [User]
-    investors: [User]
-    investor(_id: String): User
-    deals(order_by: String, order_dir: String, offset: Int, limit: Int, status: String): [Deal]
-    deal(_id: String): Deal
-    n_deals: Int
-    investments: [Investment]
-    investment(_id: String): Investment
-    pagInvestments: [Investment]
-    adminInvites: [EmailInvite]
-    complianceTasks: [ComplianceTask]
-    signingRequests: [SigningRequest]
-    masterFiling: [Filing]
-    completedProvisionOfServices: Boolean
-    provisionOfServicesURL: String
-    documentTemplates: [DocumentTemplate]
-    exchangeDeals: [ExchangeDeal]
-    matchRequests: [MatchRequest]
-    trades: [Trade]
-    orders: [Order]
-    orgInvestors: [User]
-    totalAUM: Int
-    totalPrivateFunds: Int
-    totalFunds: Int
-    totalSPVs: Int
-    totalFundAUM: Int
-    totalSPVAUM: Int
-    totalInvestors: Int
-  }
+type Organization {
+  _id: String
+  name: String
+  legal_name: String
+  slug: String
+  logo: String
+  created_at: String
+  updated_at: String
+  approved: Boolean
+  admins: [User]
+  investors: [User]
+  investor(_id: String): User
+  deals(order_by: String, order_dir: String, offset: Int, limit: Int, status: String): [Deal]
+  deal(_id: String): Deal
+  n_deals: Int
+  investments: [Investment]
+  investment(_id: String): Investment
+  pagInvestments: [Investment]
+  adminInvites: [EmailInvite]
+  orgInvestors: [User]
+  totalAUM: Int
+  totalPrivateFunds: Int
+  totalFunds: Int
+  totalSPVs: Int
+  totalFundAUM: Int
+  totalSPVAUM: Int
+  totalInvestors: Int
+}
 
-  type Filing {
-    _id: String
-    subCategory: String
-    step: String
-    status: Int
-  }
+input OrganizationInput {
+  _id: String
+  name: String
+  slug: String
+  approved: Boolean
+  logo: Upload
+}
 
-  type DocumentTemplate {
-    _id: String
-    title: String
-  }
+type OrganizationPagination {
+  count: Int
+  organizations: [Organization]
+}
 
-  type SigningRequest {
-    _id: String
-    title: String
-    url: String
-    status: String
-    due: String
-  }
+type EmailInvite {
+  status: String
+  sent_at: Float
+  to: String
+  opened: Boolean
+  opened_at: Float
+}
 
-  type ComplianceTask {
-    _id: String
-    task: String
-    status: ComplianceTaskStatus
-    completed: Boolean
-    organization_id: String
+extend type Query {
+  organization(slug: String!, offset: Int, limit: Int): Organization
+  pagOrganization(slug: String!, pagination: PaginationInput!): Organization
+  organizationMembers(slug: String!): [User]
+  pagOrganizations(pagination: PaginationInput!): OrganizationPagination
+  overviewData(slug: String!): Object
+}
 
-    is_signature: Boolean
-    signature_template: String
-    signature_url: String
-  }
+extend type Mutation {
+  createOrganization(organization: OrganizationInput!): Organization
+  updateOrganization(organization: OrganizationInput!): Organization
+  deleteOrganization(_id: String!): Boolean
 
-  enum ComplianceTaskStatus {
-    not_started
-    waiting
-    in_progress
-    done
-  }
-
-  input ComplianceTaskInput {
-    _id: String
-    task: String
-    status: ComplianceTaskStatus
-    completed: Boolean
-
-    is_signature: Boolean
-    signature_template: String
-    signature_url: String
-  }
-
-  input OrganizationInput {
-    _id: String
-    name: String
-    slug: String
-    approved: Boolean
-    logo: Upload
-  }
-
-  type OrganizationPagination {
-    count: Int
-    organizations: [Organization]
-  }
-
-  extend type Query {
-    organization(slug: String!, offset: Int, limit: Int): Organization
-    pagOrganization(slug: String!, pagination: PaginationInput!): Organization
-    organizationMembers(slug: String!): [User]
-    pagOrganizations(pagination: PaginationInput!): OrganizationPagination
-    overviewData(slug: String!): Object
-  }
-
-  extend type Mutation {
-    createOrganization(organization: OrganizationInput!): Organization
-    updateOrganization(organization: OrganizationInput!): Organization
-    deleteOrganization(_id: String!): Boolean
-
-    addOrganizationMembership(slug: String!, user_id: String!): User
-    revokeOrganizationMembership(slug: String!, user_id: String!): User
-    sendAdminInvite(slug: String!, user_id: String!): EmailInvite
-
-    createComplianceTask(slug: String!, complianceTask: ComplianceTaskInput!): ComplianceTask
-    updateComplianceTask(slug: String!, complianceTask: ComplianceTaskInput!): ComplianceTask
-    deleteComplianceTask(_id: String!): Boolean
-  }
-`)
+  addOrganizationMembership(slug: String!, user_id: String!): User
+  revokeOrganizationMembership(slug: String!, user_id: String!): User
+  sendAdminInvite(slug: String!, user_id: String!): EmailInvite
+}
+`);

@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-express')
+const { gql } = require("apollo-server-express");
 
 module.exports = gql(`
 type Account {
@@ -6,6 +6,7 @@ type Account {
   rootAdmin: User,
   users: [User]
 }
+
 extend type Query {
   accountUsers: [User]
   rootAdmin: String 
@@ -17,4 +18,4 @@ extend type Mutation {
   confirmInvitation(accountId: String): Boolean
   removeAcctUser(accountId: String, userId: String): Boolean
 }
-`)
+`);

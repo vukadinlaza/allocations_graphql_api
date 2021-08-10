@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-express')
+const { gql } = require("apollo-server-express");
 
 module.exports = gql(`
 scalar Upload
@@ -27,12 +27,9 @@ type Deal {
   investmentType: String
   differentPortfolioTerms: Boolean
   investments: [Investment]
-  emailInvites: [EmailInvite]
-  invitedInvestors: [User]
   allInvited: Boolean
   inviteKey: String
   memo: String
-  pledges: [PubPledge]
   documents: [Document]
   appLink: String
   publicLink: String
@@ -124,20 +121,6 @@ input DealParamsInput {
   dealLogo: String
 }
 
-type PubPledge {
-  amount: Int
-  timestamp: String
-  initials: String
-}
-
-type EmailInvite {
-  status: String
-  sent_at: Float
-  to: String
-  opened: Boolean
-  opened_at: Float
-}
-
 type dealOnboarding {
   _id: String
   psDealId: String
@@ -146,16 +129,6 @@ type dealOnboarding {
   dealUpdatedDate: String
   dealUpdatedBy: String
   psTemplate: String
-  dealTasks: [dealTask]
-}
-
-type dealTask {
-  taskId: String
-  taskName: String
-  formFields: Object
-  taskStatus: String
-  taskUpdatedBy: String
-  taskUpdatedDate: String
 }
 
 type DealPagination {
@@ -185,9 +158,6 @@ type Mutation {
   createDeal(org: String!, deal: DealInput!): Deal
   deleteDeal(_id: String!): Boolean
   createOrgAndDeal(orgName: String!, deal: DealInput!): Deal
-  inviteNewUser(org: String!, deal_id: String!, email: String!): EmailInvite
-  inviteInvestor(org: String!, user_id: String!, deal_id: String!): Deal
-  uninviteInvestor(org: String!, user_id: String!, deal_id: String!): Deal
   addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
   addDealLogo(deal_id: String!, title: String!, logo: Upload!): Deal
   rmDealLogo(deal_id: String!): Deal
@@ -229,4 +199,4 @@ input DealInput {
   spvAgreementKey: String
   isPostingComment: Boolean
 }
-`)
+`);

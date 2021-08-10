@@ -56,7 +56,8 @@ class DocSpringApi {
     );
 
     if (response.status === 200) {
-      const { id, state, download_url, permanent_download_url } = await response.json();
+      const { id, state, download_url, permanent_download_url } =
+        await response.json();
       //	When we make the call to get submission data immediately after generating a pdf
       //  the state will come back as pending and we won't have the permanent_download_url
       //  we use recursion and only return data once state = processed
@@ -90,7 +91,7 @@ class DocSpringApi {
   /**
    * Makes api call to generate a pdf
    * @param {string} templateId - the id for the docspring template
-   * @param {object} data 
+   * @param {object} data
    * @return {Promise<GeneratePdfResponse>} - a promise the resolves to GeneratePdfResponse
    */
   async generatePDF(templateId, data) {
@@ -100,43 +101,41 @@ class DocSpringApi {
         "POST",
         data
       );
-      
+
       if (response.status === 201) {
         const { submission } = await response.json();
-  
+
         // Prevents us from having to make a recursive call in getSubmissionData
         // by waiting 2 seconds before making an HTTP request
         return new Promise((resolve, reject) => {
           const timeoutId = setTimeout(async () => {
-            const { status, id, downloadUrl, permanentDownloadUrl } = await this.getSubmissionData(
-              submission.id
-            );
+            const { status, id, downloadUrl, permanentDownloadUrl } =
+              await this.getSubmissionData(submission.id);
             if (status !== "success") {
               clearTimeout(timeoutId);
               reject(status);
             }
-  
+
             clearTimeout(timeoutId);
             resolve({
               id,
               downloadUrl,
               status,
-              permanentDownloadUrl
+              permanentDownloadUrl,
             });
           }, 2000);
         });
       } else {
         const response = await response.json();
-        return { status: response.status || response.error};
+        return { status: response.status || response.error };
       }
     } catch (error) {
-      console.log(`Error in generatePDF. Data: ${JSON.stringify(data)}`, error)
-      return { error }
+      console.log(`Error in generatePDF. Data: ${JSON.stringify(data)}`, error);
+      return { error };
     }
-
   }
 
-    /**
+  /**
    * @typedef GetTemplateResponse
    * @property {string} [name]
    * @property {string} [downloadUrl]
@@ -144,13 +143,16 @@ class DocSpringApi {
    * @property {string} status
    */
 
-    /**
+  /**
    * Makes api call to get a template based in an ID
    * @param {string} templateId - the id for the docspring template
    * @return {Promise<GetTemplateResponse>} - a promise the resolves to GetTemplateResponse
    */
   async getTemplate(templateId) {
-    const response = await this.request(`${this.#url}/templates/${templateId}`, "GET")
+    const response = await this.request(
+      `${this.#url}/templates/${templateId}`,
+      "GET"
+    );
 
     if (response.status === 200) {
       const data = await response.json();
@@ -159,11 +161,10 @@ class DocSpringApi {
         name: data.name,
         downloadUrl: data.document_url,
         permanentDocumentUrl: data.permanent_document_url,
-        status: "success"
-      }
-    }
-    else {
-      const response = await response.json()
+        status: "success",
+      };
+    } else {
+      const response = await response.json();
       return { status: response.status || response.error };
     }
   }

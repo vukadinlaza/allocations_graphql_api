@@ -1,23 +1,23 @@
-const mailer = require('./mailer')
-const logger = require('../utils/logger')
+const mailer = require("./mailer");
+const logger = require("../utils/logger");
 
 async function sendConfirmation({ deal, to }) {
-  const html = confirmationTemplate({ deal })
+  const html = confirmationTemplate({ deal });
 
   const msg = {
     to,
     from: "support@allocations.com",
     subject: `Completed documents for ${deal.company_name}`,
     text: `Completed documents for ${deal.company_name}`,
-    html
-  }
+    html,
+  };
 
   try {
-    const res = await mailer.send(msg)
-    return { status: "sent", sent_at: Date.now(), to }
+    const res = await mailer.send(msg);
+    return { status: "sent", sent_at: Date.now(), to };
   } catch (e) {
-    logger.error(e)
-    return { status: "error" }
+    logger.error(e);
+    return { status: "error" };
   }
 }
 
@@ -205,7 +205,7 @@ function confirmationTemplate({ deal }) {
       </center>
     </body>
   </html>
-  `
+  `;
 }
 
-module.exports = { sendConfirmation }
+module.exports = { sendConfirmation };

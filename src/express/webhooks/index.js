@@ -200,10 +200,10 @@ module.exports = Router()
   .post("/verifyinvestor", async (req, res, next) => {
     try {
       const db = await getDB();
-      const userId = get(req, 'body.eapi_identifier')
-      const status = get(req, 'body.status')
-      const verifyInvestorId = get(req, 'body.investor_id')
-      const requestId = get(req, 'body.verification_request_id')
+      const userId = get(req, "body.eapi_identifier");
+      const status = get(req, "body.status");
+      const verifyInvestorId = get(req, "body.investor_id");
+      const requestId = get(req, "body.verification_request_id");
 
       if (userId && status === "accredited") {
         const cerficate = await fetch(
@@ -281,11 +281,12 @@ module.exports = Router()
       console.log(body);
 
       const db = await getDB();
-      const deals = await db.deals.find({ company_name: body.dealName }).toArray()
-      const user = await db.users.findOne({ email: body.email.toLowerCase() })
-      if (!user._id || !every(deals, '_id')
-      ) {
-        return res.sendStatus(200)
+      const deals = await db.deals
+        .find({ company_name: body.dealName })
+        .toArray();
+      const user = await db.users.findOne({ email: body.email.toLowerCase() });
+      if (!user._id || !every(deals, "_id")) {
+        return res.sendStatus(200);
       }
       const dealIds = deals.map((d) => d._id).filter((d) => d);
       const investment = await db.investments.updateMany(

@@ -1,5 +1,5 @@
-const { isAdmin } = require('../permissions')
-const { gql } = require('apollo-server-express')
+const { isAdmin } = require("../permissions");
+const { gql } = require("apollo-server-express");
 
 const Schema = gql`
   type SuperAdmin {
@@ -11,30 +11,30 @@ const Schema = gql`
   extend type Query {
     superadmin: SuperAdmin
   }
-`
+`;
 
 const Queries = {
   /** empty obj that allows super to resolve all the deals, investors, orgs  **/
   superadmin: (_, __, ctx) => {
-    isAdmin(ctx)
-    return {}
-  }
-}
+    isAdmin(ctx);
+    return {};
+  },
+};
 
 const SuperAdmin = {
   deals: (_, __, { db }) => {
-    return db.deals.find().sort({ created_at: -1 }).toArray()
+    return db.deals.find().sort({ created_at: -1 }).toArray();
   },
   investors: (_, __, { db }) => {
-    return db.users.find().sort({ created_at: -1 }).toArray()
+    return db.users.find().sort({ created_at: -1 }).toArray();
   },
   organizations: (_, __, { db }) => {
-    return db.organizations.find().sort({ created_at: -1 }).toArray()
-  }
-}
+    return db.organizations.find().sort({ created_at: -1 }).toArray();
+  },
+};
 
-module.exports = { 
+module.exports = {
   Schema,
   Queries,
-  subResolvers: { SuperAdmin }
-}
+  subResolvers: { SuperAdmin },
+};

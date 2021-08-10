@@ -1,4 +1,3 @@
-
 module.exports = function spvDocTemplate({ deal }) {
   return `  
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -189,5 +188,5 @@ module.exports = function spvDocTemplate({ deal }) {
       </table>
       </div>
       </center>
-  </body></html>`
-}
+  </body></html>`;
+};

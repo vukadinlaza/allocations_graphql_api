@@ -1,5 +1,5 @@
-const { gql } = require('apollo-server')
-const { testClient, testServer } = require('../setup')
+const { gql } = require("apollo-server");
+const { testClient, testServer } = require("../setup");
 
 const CREATE_DEAL = gql`
   mutation CreateDeal($org: String!, $deal: DealInput!) {
@@ -17,7 +17,7 @@ const ADD_USER_AS_VIEWED = gql`
       _id
     }
   }
-`
+`;
 
 const DELETE_USER_AS_VIEWED = gql`
   mutation DeleteUserAsViewed($deal_id: String!, $user_id: String!) {
@@ -25,136 +25,136 @@ const DELETE_USER_AS_VIEWED = gql`
       _id
     }
   }
-`
+`;
 
-describe('Deal Resolver', () => {
+describe("Deal Resolver", () => {
   let apolloServer;
   let testDeal;
   beforeAll(async () => {
-    apolloServer = await testServer()
+    apolloServer = await testServer();
 
-    testDeal = await apolloServer.db.deals.findOne({ slug: "test-deal" })
-
-  })
-
+    testDeal = await apolloServer.db.deals.findOne({ slug: "test-deal" });
+  });
 
   afterAll(async () => {
     await testServer.closeMongoConnetion();
-    await testServer.stop()
+    await testServer.stop();
   });
 
   /** CREATE **/
 
-  test('super admin can create deal', async () => {
-    const { query } = testClient(apolloServer, "superAdmin")
-    const { data: { createDeal }, errors } = await query(CREATE_DEAL,
-      {
-        variables: {
-          org: "cool-fund",
-          deal: { company_name: "Crazy Test Deal" }
-        }
-      }
-    )
-    expect(createDeal).toMatchObject({ company_name: "Crazy Test Deal", slug: "crazy-test-deal" })
-  })
-
-  test('fund admin can create deal', async () => {
-    const { query } = testClient(apolloServer, "fundAdmin")
-    const res = await query(CREATE_DEAL,
-      {
-        variables: {
-          org: "cool-fund",
-          deal: { company_name: "Numerai" }
-        }
-      }
-    )
-    expect(res.data.createDeal).toMatchObject({ company_name: "Numerai" })
-  })
-
-  test('investor cant create deal', async () => {
-    const { query } = testClient(apolloServer, "investor")
-    const { errors: [error] } = await query(CREATE_DEAL,
-      {
-        variables: {
-          org: "cool-fund",
-          deal: { company_name: "Numerai" }
-        }
-      }
-    )
-    expect(error.message).toBe("permission denied")
-  })
-
-  test('cant create deal with same slug and org', async () => {
-    const { query } = testClient(apolloServer, "fundAdmin")
-    const { data: { createDeal } } = await query(CREATE_DEAL,
-      {
-        variables: {
-          org: "cool-fund",
-          deal: { company_name: "Big Deal" }
-        }
-      }
-    )
-    expect(createDeal)
-
-    const { errors: [error] } = await query(CREATE_DEAL,
-      {
-        variables: {
-          org: "cool-fund",
-          deal: { company_name: "Big Deal" }
-        }
-      }
-    )
-    expect(error.message).toBe("Deal with same name already exists")
+  test("super admin can create deal", async () => {
+    const { query } = testClient(apolloServer, "superAdmin");
+    const {
+      data: { createDeal },
+      errors,
+    } = await query(CREATE_DEAL, {
+      variables: {
+        org: "cool-fund",
+        deal: { company_name: "Crazy Test Deal" },
+      },
+    });
+    expect(createDeal).toMatchObject({
+      company_name: "Crazy Test Deal",
+      slug: "crazy-test-deal",
+    });
   });
 
-  test('adds investor as viewed on deal and updates DB', async () => {
-    const { query } = testClient(apolloServer, "investor")
-
-    const user = await apolloServer.db.users.findOne({ email: "investor@allocations.com" })
-
-    await query(ADD_USER_AS_VIEWED,
-      {
-        variables: {
-          user_id: user._id.toString(),
-          deal_id: testDeal._id.toString()
-        }
-      }
-    )
-
-    const updatedDeal = await apolloServer.db.deals.findOne({ _id: testDeal._id })
-
-    expect(updatedDeal.usersViewed).toContainEqual(user._id)
-    expect(updatedDeal.usersViewed).toBeInstanceOf(Array)
+  test("fund admin can create deal", async () => {
+    const { query } = testClient(apolloServer, "fundAdmin");
+    const res = await query(CREATE_DEAL, {
+      variables: {
+        org: "cool-fund",
+        deal: { company_name: "Numerai" },
+      },
+    });
+    expect(res.data.createDeal).toMatchObject({ company_name: "Numerai" });
   });
 
-  test('delete investor as viewed on deal and updates DB', async () => {
-    const { query } = testClient(apolloServer, "investor")
-    const user = await apolloServer.db.users.findOne({ email: "investor@allocations.com" })
+  test("investor cant create deal", async () => {
+    const { query } = testClient(apolloServer, "investor");
+    const {
+      errors: [error],
+    } = await query(CREATE_DEAL, {
+      variables: {
+        org: "cool-fund",
+        deal: { company_name: "Numerai" },
+      },
+    });
+    expect(error.message).toBe("permission denied");
+  });
 
-    await query(ADD_USER_AS_VIEWED,
-      {
-        variables: {
-          user_id: user._id.toString(),
-          deal_id: testDeal._id.toString()
-        }
-      }
-    )
+  test("cant create deal with same slug and org", async () => {
+    const { query } = testClient(apolloServer, "fundAdmin");
+    const {
+      data: { createDeal },
+    } = await query(CREATE_DEAL, {
+      variables: {
+        org: "cool-fund",
+        deal: { company_name: "Big Deal" },
+      },
+    });
+    expect(createDeal);
 
-    const deal = await apolloServer.db.deals.findOne({ _id: testDeal._id })
-    expect(deal.usersViewed).toContainEqual(user._id)
+    const {
+      errors: [error],
+    } = await query(CREATE_DEAL, {
+      variables: {
+        org: "cool-fund",
+        deal: { company_name: "Big Deal" },
+      },
+    });
+    expect(error.message).toBe("Deal with same name already exists");
+  });
 
-    await query(DELETE_USER_AS_VIEWED,
-      {
-        variables: {
-          user_id: user._id.toString(),
-          deal_id: testDeal._id.toString()
-        }
-      }
-    )
+  test("adds investor as viewed on deal and updates DB", async () => {
+    const { query } = testClient(apolloServer, "investor");
 
-    const updatedDeal = await apolloServer.db.deals.findOne({ _id: testDeal._id })
-    expect(updatedDeal.usersViewed).not.toContainEqual(user._id)
-  })
-  
+    const user = await apolloServer.db.users.findOne({
+      email: "investor@allocations.com",
+    });
 
-})
+    await query(ADD_USER_AS_VIEWED, {
+      variables: {
+        user_id: user._id.toString(),
+        deal_id: testDeal._id.toString(),
+      },
+    });
+
+    const updatedDeal = await apolloServer.db.deals.findOne({
+      _id: testDeal._id,
+    });
+
+    expect(updatedDeal.usersViewed).toContainEqual(user._id);
+    expect(updatedDeal.usersViewed).toBeInstanceOf(Array);
+  });
+
+  test("delete investor as viewed on deal and updates DB", async () => {
+    const { query } = testClient(apolloServer, "investor");
+    const user = await apolloServer.db.users.findOne({
+      email: "investor@allocations.com",
+    });
+
+    await query(ADD_USER_AS_VIEWED, {
+      variables: {
+        user_id: user._id.toString(),
+        deal_id: testDeal._id.toString(),
+      },
+    });
+
+    const deal = await apolloServer.db.deals.findOne({ _id: testDeal._id });
+    expect(deal.usersViewed).toContainEqual(user._id);
+
+    await query(DELETE_USER_AS_VIEWED, {
+      variables: {
+        user_id: user._id.toString(),
+        deal_id: testDeal._id.toString(),
+      },
+    });
+
+    const updatedDeal = await apolloServer.db.deals.findOne({
+      _id: testDeal._id,
+    });
+    expect(updatedDeal.usersViewed).not.toContainEqual(user._id);
+  });
+});

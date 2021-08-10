@@ -1,7 +1,7 @@
 const { ObjectId } = require("mongodb");
 const moment = require("moment");
-const { isNumber, forEach, get } = require("lodash");
-const { isAdmin, isAdminOrSameUser } = require("../permissions");
+const { get } = require("lodash");
+const { isAdmin } = require("../permissions");
 const {
   AuthenticationError,
   UserInputError,
@@ -10,7 +10,6 @@ const Cloudfront = require("../../cloudfront");
 const Uploader = require("../../uploaders/investor-docs");
 const Investments = require("../schema/investments");
 const { getInvestmentPreview, getTemplate } = require("../../docspring");
-const { signForInvestment } = require("../../zaps/signedDocs");
 const Mailer = require("../../mailers/mailer");
 const commitmentTemplate = require("../../mailers/templates/commitment-template");
 const commitmentCancelledTemplate = require("../../mailers/templates/commitment-cancelled-template");
@@ -21,12 +20,6 @@ const {
   getSorting,
   getNestedSorting,
 } = require("../pagHelpers");
-
-/**
-
-  handles all the investment flow
-
- **/
 
 const Schema = Investments;
 

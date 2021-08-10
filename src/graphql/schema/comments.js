@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-express')
+const { gql } = require("apollo-server-express");
 
 module.exports = gql(`
 type Comment {
@@ -8,6 +8,7 @@ type Comment {
   commentTarget: User
   deal: Deal
 }
+
 extend type Query {
     dealComments(deal_id: String): [Comment]
 }
@@ -24,4 +25,4 @@ input commentPayload {
   commentTargetId: String
 }
 
-`)
+`);

@@ -1,5 +1,5 @@
 module.exports = async (appEnv) => {
-  let defaults = {}
+  let defaults = {};
   let envSettings = await import(`./${appEnv}.js`);
-  return { ...defaults, ...envSettings, }
-}
+  return { ...defaults, ...envSettings };
+};

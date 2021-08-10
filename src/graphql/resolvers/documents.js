@@ -1,5 +1,6 @@
-const { gql } = require('apollo-server-express')
+const { gql } = require("apollo-server-express");
 
+// TODO: add to schemas
 const Schema = gql`
   type Document {
     path: String
@@ -11,6 +12,6 @@ const Schema = gql`
     mimetype: String!
     encoding: String!
   }
-`
+`;
 
-module.exports = { Schema }
+module.exports = { Schema };

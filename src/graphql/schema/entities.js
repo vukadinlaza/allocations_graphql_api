@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-express')
+const { gql } = require("apollo-server-express");
 
 module.exports = gql(`
 type Entity {
@@ -44,4 +44,4 @@ extend type Mutation {
 	deleteEntity(accountId: String, entityId: String): Boolean
 	updateEntity(payload: EntityInput): Entity
 }
-`)
+`);

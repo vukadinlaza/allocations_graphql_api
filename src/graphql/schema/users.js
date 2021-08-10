@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-express')
+const { gql } = require("apollo-server-express");
 
 module.exports = gql(`
 type User {
@@ -90,7 +90,6 @@ extend type Mutation {
   deleteInvestor(_id: String!): Boolean
   updateUser(input: UserInput): User
   updateInvestor(investment: InvestmentInput): User
-  postZap(data: Object): User
   submitTaxDocument(payload: Object): User
 }
-`)
+`);
