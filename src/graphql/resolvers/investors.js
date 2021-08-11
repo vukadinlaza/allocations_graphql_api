@@ -177,12 +177,11 @@ const Queries = {
     const documentsToSkip = pagination * currentPage;
     const aggregation = customUserPagination(args.pagination);
     const countAggregation = [...aggregation, { $count: "count" }];
-
     const usersCount = await ctx.db
       .collection("users")
       .aggregate(countAggregation)
       .toArray();
-    const count = usersCount[0].count;
+    const count = usersCount.length ? usersCount[0].count : 0;
 
     let users = await ctx.db
       .collection("users")

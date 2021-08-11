@@ -44,10 +44,15 @@ enum InvestmentStatus {
   pledged
 }
 
+type InvestmentPagination {
+  count: Int
+  investments: [Investment]
+}
+
 extend type Query {
   investment(_id: String): Investment
   allInvestments: [Investment]
-  investmentsList(pagination: PaginationInput!): [Investment]
+  investmentsList(pagination: PaginationInput!): InvestmentPagination
 }
 
 extend type Mutation {

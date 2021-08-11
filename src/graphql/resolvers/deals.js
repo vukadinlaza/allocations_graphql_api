@@ -179,7 +179,7 @@ const Queries = {
       .collection("deals")
       .aggregate(countAggregation)
       .toArray();
-    const count = dealsCount[0].count;
+    const count = dealsCount.length ? dealsCount[0].count : 0;
 
     let deals = await ctx.db
       .collection("deals")

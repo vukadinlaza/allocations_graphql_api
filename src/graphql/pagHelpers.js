@@ -457,6 +457,34 @@ const pagHelpers = {
       { $sort: { [`user.${sortField}`]: sortOrder ? sortOrder : 1 } },
     ];
   },
+  customInvestmentPagination: ({ ...paginationProps }) => {
+    const filter = pagHelpers.getFilters(paginationProps);
+    const nestedFilters = pagHelpers.getNestedFilters(paginationProps);
+    let sorting = pagHelpers.getSorting(paginationProps);
+    const nestedSorting = pagHelpers.getNestedSorting(paginationProps);
+    const amountToNumber = { 
+      '$addFields': { 
+          'amount': {
+            '$convert':
+                {
+                  input: '$amount',
+                  to: 'int',
+                  onError: 0,  // Optional.
+                  onNull: 0    // Optional.
+                }
+              }
+          }
+    }
+    const aggregation = [
+      nestedSorting,
+      nestedFilters,
+      filter,
+      amountToNumber,
+      ...sorting,
+    ].filter((x) => x && Object.keys(x).length);
+    return aggregation;
+  }
+
 };
 
 module.exports = pagHelpers;

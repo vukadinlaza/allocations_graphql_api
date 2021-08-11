@@ -14,12 +14,8 @@ const Mailer = require("../../mailers/mailer");
 const commitmentTemplate = require("../../mailers/templates/commitment-template");
 const commitmentCancelledTemplate = require("../../mailers/templates/commitment-cancelled-template");
 const { signedSPV } = require("../../zaps/signedDocs");
-const {
-  getFilters,
-  getNestedFilters,
-  getSorting,
-  getNestedSorting,
-} = require("../pagHelpers");
+const { customInvestmentPagination } = require("../pagHelpers");
+
 
 const Schema = Investments;
 
@@ -56,25 +52,26 @@ const Queries = {
   allInvestments: (_, __, ctx) => {
     return db.investments.find({}).toArray();
   },
-  investmentsList: (_, args, ctx) => {
+  investmentsList: async (_, args, ctx) => {
     isAdmin(ctx);
     const { pagination, currentPage } = args.pagination;
-
     const documentsToSkip = pagination * currentPage;
-    const filter = getFilters(args.pagination);
-    const nestedFilters = getNestedFilters(args.pagination);
-    const sorting = getSorting(args.pagination);
-    const nestedSorting = getNestedSorting(args.pagination);
+    const aggregation = customInvestmentPagination(args.pagination);
+    const countAggregation = [...aggregation, { $count: "count" }];
 
-    const aggregation = [nestedSorting, nestedFilters, filter, sorting];
+    const investmentsCount = await ctx.db
+    .collection("investments")
+    .aggregate(countAggregation)
+    .toArray();
+    const count = investmentsCount.length ? investmentsCount[0].count : 0;
 
-    let query = ctx.db
+    let investments = await ctx.db
       .collection("investments")
       .aggregate(aggregation)
       .skip(documentsToSkip)
       .limit(pagination)
       .toArray();
-    return query;
+    return { count, investments };
   },
 };
 

@@ -72,7 +72,7 @@ const Queries = {
   },
   pagOrganizations: async (_, args, ctx) => {
     isAdmin(ctx);
-    const { pagination, currentPage, sortField } = args.pagination;
+    const { pagination, currentPage } = args.pagination;
 
     const documentsToSkip = pagination * currentPage;
     const aggregation = customOrgPagination(args.pagination);
@@ -81,7 +81,7 @@ const Queries = {
       .collection("organizations")
       .aggregate(countAggregation)
       .toArray();
-    const count = organizationsCount[0].count;
+    const count = organizationsCount.length ? organizationsCount[0].count : 0;
 
     let organizations = await ctx.db
       .collection("organizations")
