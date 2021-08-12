@@ -51,7 +51,13 @@ const describeWithServer = (name, contextFn) => {
   };
 
   describe(name, () => {
-    beforeAll(async () => (db = await connect(global.__MONGO_URI__)));
+    beforeAll(
+      async () =>
+        (db = await connect({
+          url: global.__MONGO_URI__,
+          dbName: process.env.JEST_WORKER_ID,
+        }))
+    );
     beforeAll(() => (server = authedServer(db)));
     beforeEach(() => drop(db));
     beforeEach(() => seed(db));

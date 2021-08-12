@@ -17,7 +17,7 @@ const cols = [
 let db = null;
 let client = null;
 /** connects and attaches name of cols to db **/
-async function connect(url = MONGO_URL) {
+async function connect({ url = MONGO_URL, dbName = MONGO_DB } = {}) {
   client = new MongoClient(url, {
     useUnifiedTopology: true,
     useNewUrlParser: true,
@@ -25,7 +25,7 @@ async function connect(url = MONGO_URL) {
 
   const conn = await client.connect();
   console.log("🔗 Connected to Mongo");
-  db = conn.db(MONGO_DB);
+  db = conn.db(dbName);
 
   // attach collections directly to db
   cols.forEach((col) => {

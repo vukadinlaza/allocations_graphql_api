@@ -9,10 +9,10 @@
     "start:watch": "nodemon src/app.js",
     "deploy-prod": "yarn run test && git push heroku-prod",
     "deploy-staging": "yarn run test && git push heroku-staging",
-    "test": "jest --runInBand --forceExit",
-    "test:watch": "jest --runInBand  --watch",
-    "test:debug": "NODE_TLS_REJECT_UNAUTHORIZED='0' node --inspect-brk node_modules/.bin/jest --runInBand --no-watchman --detectOpenHandles",
-    "test:coverage": "jest --runInBand  --coverage"
+    "test": "jest --forceExit",
+    "test:watch": "jest  --watch",
+    "test:debug": "NODE_TLS_REJECT_UNAUTHORIZED='0' node --inspect-brk node_modules/.bin/jest --no-watchman --detectOpenHandles",
+    "test:coverage": "jest  --coverage"
   },
   "keywords": [],
   "author": "",
