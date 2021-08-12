@@ -82,7 +82,6 @@ async function authenticate({ req, db, authToken }) {
 
     return newUser;
   } catch (e) {
-    console.log("authenicate ERROR", e);
     throw new AuthenticationError("authenicate function catch statement");
   }
 }

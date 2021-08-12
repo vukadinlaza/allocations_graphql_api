@@ -1,0 +1,450 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Deals CREATE_DEAL duplicate company names cannot be created 1`] = `
+Object {
+  "data": Object {
+    "createDeal": null,
+  },
+  "errors": Array [
+    [GraphQLError: Deal with same name already exists],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals CREATE_DEAL fund admins can create a deal 1`] = `
+Object {
+  "_id": Any<ObjectID>,
+  "company_name": "hello",
+  "created_at": Any<Number>,
+  "dealParams": Object {},
+  "inviteKey": Any<String>,
+  "organization": "61119f11beeab561a48939d3",
+  "slug": "hello",
+  "status": "onboarding",
+}
+`;
+
+exports[`Deals CREATE_DEAL non fund admin cannot create a deal 1`] = `
+Object {
+  "data": Object {
+    "createDeal": null,
+  },
+  "errors": Array [
+    [GraphQLError: permission denied],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals CREATE_ORG_AND_DEAL a logged in user can create an org and a deal 1`] = `
+Object {
+  "_id": Any<ObjectID>,
+  "approved": true,
+  "created_at": Any<Number>,
+  "name": "A Great Org",
+  "slug": "a-great-org",
+}
+`;
+
+exports[`Deals CREATE_ORG_AND_DEAL a logged in user can create an org and a deal 2`] = `
+Object {
+  "_id": Any<ObjectID>,
+  "company_name": "A Good Deal",
+  "created_at": Any<Number>,
+  "dealParams": Object {},
+  "inviteKey": Any<String>,
+  "organization": Any<ObjectID>,
+  "slug": "a-good-deal",
+  "status": "onboarding",
+}
+`;
+
+exports[`Deals CREATE_ORG_AND_DEAL a logged in user cannot create a duplicate org and deal 1`] = `
+Object {
+  "data": Object {
+    "createOrgAndDeal": null,
+  },
+  "errors": Array [
+    [GraphQLError: name collision],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals CREATE_ORG_AND_DEAL a non-logged in user cannot create an org and deal 1`] = `[AuthenticationError: authenicate function catch statement]`;
+
+exports[`Deals DELETE_DEAL admins can delete deals 1`] = `
+Object {
+  "data": Object {
+    "deleteDeal": true,
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals DELETE_DEAL non-admins cannot delete deals 1`] = `
+Object {
+  "data": Object {
+    "deleteDeal": null,
+  },
+  "errors": Array [
+    [GraphQLError: permission denied],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals FUND_ADMIN_HIGHLIGHTS logged in users can get highlights 1`] = `
+Object {
+  "data": Object {
+    "fundAdminHighlights": Object {
+      "SPVs": 1,
+      "SPVsAUM": 5000,
+      "funds": 1,
+      "fundsAUM": 25000,
+      "investments": 3,
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals GET_ALL_DEALS admin users can get all deals 1`] = `
+Object {
+  "data": Object {
+    "allDeals": Array [
+      Object {
+        "AUM": 25000,
+        "_id": "601c54cbe40e5900230f505d",
+        "appLink": "/deals/cool-fund/test-deal",
+        "approved": true,
+        "investments": Array [
+          Object {
+            "_id": "6111bb42a4991d5a547352b6",
+          },
+          Object {
+            "_id": "6111bbe6ad565e63b254d0df",
+          },
+        ],
+        "organization": Object {
+          "_id": "61119f11beeab561a48939d3",
+          "slug": "cool-fund",
+        },
+        "publicLink": "/public/cool-fund/deals/test-deal?invite_code=3eaf5d8d-0537-4500-84d5-b873e260d85b",
+        "raised": 35000,
+        "viewedUsers": Array [
+          Object {
+            "_id": "611421d64bf8d10b94e61606",
+          },
+        ],
+      },
+      Object {
+        "AUM": 5000,
+        "_id": "61143ac37db3b3619db1df42",
+        "appLink": "/deals/cool-fund/spv-deal",
+        "approved": true,
+        "investments": Array [
+          Object {
+            "_id": "61143bc4aa6f42619d924309",
+          },
+        ],
+        "organization": Object {
+          "_id": "61119f11beeab561a48939d3",
+          "slug": "cool-fund",
+        },
+        "publicLink": "/public/cool-fund/deals/spv-deal?invite_code=3eaf5d8d-0537-4500-84d5-b873e260d85b",
+        "raised": 5000,
+        "viewedUsers": Array [
+          Object {
+            "_id": "611421d64bf8d10b94e61606",
+          },
+        ],
+      },
+    ],
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals GET_ALL_DEALS non-admin user cannot get all deals 1`] = `
+Object {
+  "data": Object {
+    "allDeals": null,
+  },
+  "errors": Array [
+    [GraphQLError: permission denied],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals GET_DEAL logged in user can get a deal by id 1`] = `
+Object {
+  "data": Object {
+    "deal": Object {
+      "AUM": 25000,
+      "_id": "601c54cbe40e5900230f505d",
+      "appLink": "/deals/cool-fund/test-deal",
+      "approved": true,
+      "dealParams": Object {
+        "valuation": "100000",
+      },
+      "investments": Array [
+        Object {
+          "_id": "6111bb42a4991d5a547352b6",
+        },
+        Object {
+          "_id": "6111bbe6ad565e63b254d0df",
+        },
+      ],
+      "organization": Object {
+        "_id": "61119f11beeab561a48939d3",
+        "slug": "cool-fund",
+      },
+      "publicLink": "/public/cool-fund/deals/test-deal?invite_code=3eaf5d8d-0537-4500-84d5-b873e260d85b",
+      "raised": 35000,
+      "viewedUsers": Array [
+        Object {
+          "_id": "611421d64bf8d10b94e61606",
+        },
+      ],
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals GET_DEAL non-user cannot get a deal 1`] = `[AuthenticationError: authenicate function catch statement]`;
+
+exports[`Deals SEARCH_DEALS admin users can search for deals 1`] = `
+Object {
+  "data": Object {
+    "searchDeals": Array [
+      Object {
+        "_id": "601c54cbe40e5900230f505d",
+      },
+    ],
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals SEARCH_DEALS non-admin users cannot search  1`] = `
+Object {
+  "data": Object {
+    "searchDeals": null,
+  },
+  "errors": Array [
+    [GraphQLError: permission denied],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals SEARCH_DEALS_BY_ORG fund admin users can search for deals by org 1`] = `
+Object {
+  "data": Object {
+    "searchDealsByOrg": Array [
+      Object {
+        "_id": "601c54cbe40e5900230f505d",
+      },
+    ],
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals SEARCH_DEALS_BY_ORG non fund admin users cannot search for deals by org 1`] = `
+Object {
+  "data": Object {
+    "searchDealsByOrg": null,
+  },
+  "errors": Array [
+    [GraphQLError: permission denied],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals UPDATE_DEAL fund admins can close a deal 1`] = `
+Object {
+  "data": Object {
+    "updateDeal": Object {
+      "_id": "601c54cbe40e5900230f505d",
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals UPDATE_DEAL fund admins can close a deal 2`] = `
+Object {
+  "_id": "601c54cbe40e5900230f505d",
+  "company_name": "test-deal",
+  "created_at": Any<Number>,
+  "dealParams": Object {
+    "valuation": "100000",
+  },
+  "investmentType": "fund",
+  "inviteKey": Any<String>,
+  "organization": "61119f11beeab561a48939d3",
+  "slug": "test-deal",
+  "status": "closed",
+  "updated_at": Any<Number>,
+  "usersViewed": Array [
+    "611421d64bf8d10b94e61606",
+  ],
+}
+`;
+
+exports[`Deals UPDATE_DEAL fund admins can close a deal 3`] = `
+Array [
+  Object {
+    "_id": "6111bb42a4991d5a547352b6",
+    "amount": 25000,
+    "deal_id": "601c54cbe40e5900230f505d",
+    "status": "complete",
+    "user_id": "611421d64bf8d10b94e61606",
+  },
+  Object {
+    "_id": "6111bbe6ad565e63b254d0df",
+    "amount": 10000,
+    "deal_id": "601c54cbe40e5900230f505d",
+    "status": "pending",
+    "user_id": "611421d64bf8d10b94e61606",
+  },
+]
+`;
+
+exports[`Deals UPDATE_DEAL fund admins can updatea a deal 1`] = `
+Object {
+  "data": Object {
+    "updateDeal": Object {
+      "_id": "601c54cbe40e5900230f505d",
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Deals UPDATE_DEAL fund admins can updatea a deal 2`] = `
+Object {
+  "_id": "601c54cbe40e5900230f505d",
+  "company_name": "best-deal",
+  "created_at": Any<Number>,
+  "dealParams": Object {
+    "managementFees": "3%",
+    "valuation": "100000",
+  },
+  "investmentType": "fund",
+  "inviteKey": Any<String>,
+  "organization": "61119f11beeab561a48939d3",
+  "slug": "test-deal",
+  "status": "onboarding",
+  "updated_at": Any<Number>,
+  "usersViewed": Array [
+    "611421d64bf8d10b94e61606",
+  ],
+}
+`;
+
+exports[`Deals UPDATE_DEAL non fund admins cannot update a deal 1`] = `
+Object {
+  "data": Object {
+    "updateDeal": null,
+  },
+  "errors": Array [
+    [GraphQLError: permission denied],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;

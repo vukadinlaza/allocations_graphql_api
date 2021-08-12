@@ -17,8 +17,8 @@ const cols = [
 let db = null;
 let client = null;
 /** connects and attaches name of cols to db **/
-async function connect() {
-  client = new MongoClient(MONGO_URL, {
+async function connect(url = MONGO_URL) {
+  client = new MongoClient(url, {
     useUnifiedTopology: true,
     useNewUrlParser: true,
   });
@@ -46,7 +46,7 @@ const endDBConnection = async () => {
 
 async function drop(db) {
   // THIS SHOULD ONLY HAPPEN IN TEST
-  if (NODE_ENV === "test" && MONGO_URL === "mongodb://localhost:27017") {
+  if (NODE_ENV === "test" && MONGO_URL === global.__MONGO_URI__) {
     await Promise.all(cols.map((col) => db[col].deleteMany()));
   }
 }

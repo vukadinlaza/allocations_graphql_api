@@ -11,7 +11,7 @@ const GET_INVESTOR = gql`
   }
 `;
 
-describe("Deal Resolver", () => {
+describe.skip("Deal Resolver", () => {
   var apolloServer;
   var db;
   beforeAll(async () => {

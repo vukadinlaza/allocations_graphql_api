@@ -34,8 +34,10 @@ function authedServer(db) {
         requestDidStart: (r) => {
           return {
             didEncounterErrors: ({ context, operationName, errors }) => {
-              logger.error(errors[0]);
-              logger.error({ user: context.user || {}, operationName });
+              if (process.env.NODE_ENV !== "test") {
+                logger.error(errors[0]);
+                logger.error({ user: context.user || {}, operationName });
+              }
             },
           };
         },
