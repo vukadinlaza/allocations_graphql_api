@@ -2,8 +2,9 @@ const { ObjectId } = require("mongodb");
 const _ = require("lodash");
 const fetch = require("node-fetch");
 const moment = require("moment");
+const { v4: uuid } = require("uuid");
 const { AuthenticationError } = require("apollo-server-express");
-const { isAdmin, ensureFundAdmin, isFundAdmin } = require("../permissions");
+const { isAdmin, ensureFundAdmin } = require("../permissions");
 const Cloudfront = require("../../cloudfront");
 const DealDocUploader = require("../../uploaders/deal-docs");
 const Deals = require("../schema/deals");
@@ -14,18 +15,6 @@ const { customDealPagination } = require("../pagHelpers");
 const { getHighlights } = require("../mongoHelpers.js");
 
 const Schema = Deals;
-
-function slugify(str) {
-  return str.toLowerCase().replace(" ", "-");
-}
-
-function investorInitials(investor) {
-  return (
-    (investor.first_name || "").slice(0, 1) +
-    (investor.last_name || "").slice(0, 1)
-  ).toUpperCase();
-}
-
 const Deal = {
   // investment denotes the `ctx.user` investment in this deal (can only be one)
   investment: (deal, _, { db, user }) => {
@@ -193,13 +182,6 @@ const Queries = {
     return { count, deals };
   },
 };
-
-function uuid() {
-  return (
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15)
-  );
-}
 
 const Mutations = {
   /** create deal ensures there isn't already a deal form org with same name **/
