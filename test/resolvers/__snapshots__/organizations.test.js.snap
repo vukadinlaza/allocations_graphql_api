@@ -1,0 +1,443 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Organizations ADD_ORGANIZATION_MEMBERSHIP admin users can add users to an organization 1`] = `
+Object {
+  "data": Object {
+    "addOrganizationMembership": Object {
+      "_id": null,
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations ADD_ORGANIZATION_MEMBERSHIP admin users can add users to an organization 2`] = `
+Object {
+  "_id": "61142198824e2509714fd54a",
+  "email": "altinvestor@allocations.com",
+  "first_name": "Luke",
+  "last_name": "Skywalker",
+  "organizations": Array [],
+  "organizations_admin": Array [
+    "61119f11beeab561a48939d3",
+  ],
+}
+`;
+
+exports[`Organizations ADD_ORGANIZATION_MEMBERSHIP non admin users cannot add users to an organization 1`] = `
+Object {
+  "data": Object {
+    "addOrganizationMembership": null,
+  },
+  "errors": Array [
+    [GraphQLError: permission denied],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations ADD_ORGANIZATION_MEMBERSHIP non admin users cannot add users to an organization 2`] = `
+Object {
+  "_id": "61142198824e2509714fd54a",
+  "email": "altinvestor@allocations.com",
+  "first_name": "Luke",
+  "last_name": "Skywalker",
+  "organizations": Array [],
+}
+`;
+
+exports[`Organizations CREATE_ORGANIZATION admin users can create organizations 1`] = `
+Object {
+  "data": Object {
+    "createOrganization": Object {
+      "admins": null,
+      "approved": true,
+      "name": "Test Org",
+      "slug": "test-org",
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations CREATE_ORGANIZATION admin users can create organizations 2`] = `
+Object {
+  "_id": Any<ObjectID>,
+  "approved": true,
+  "created_at": Any<Number>,
+  "name": "Test Org",
+  "slug": "test-org",
+}
+`;
+
+exports[`Organizations CREATE_ORGANIZATION non-admin users can create organizations 1`] = `
+Object {
+  "data": Object {
+    "createOrganization": null,
+  },
+  "errors": Array [
+    [GraphQLError: permission denied],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations CREATE_ORGANIZATION non-admin users can create organizations 2`] = `null`;
+
+exports[`Organizations GET_ORGANIZATION admin users can get an organization 1`] = `
+Object {
+  "data": Object {
+    "organization": Object {
+      "_id": "61119f11beeab561a48939d3",
+      "adminInvites": Array [],
+      "approved": true,
+      "deal": Object {
+        "company_name": "test-deal",
+      },
+      "deals": Array [
+        Object {
+          "_id": "601c54cbe40e5900230f505d",
+        },
+        Object {
+          "_id": "61143ac37db3b3619db1df42",
+        },
+      ],
+      "investments": Array [
+        Object {
+          "_id": "6111bb42a4991d5a547352b6",
+        },
+        Object {
+          "_id": "6111bbe6ad565e63b254d0df",
+        },
+        Object {
+          "_id": "61143bc4aa6f42619d924309",
+        },
+      ],
+      "investors": Array [
+        Object {
+          "_id": "611421d64bf8d10b94e61606",
+        },
+      ],
+      "n_deals": 2,
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations GET_ORGANIZATION fund admin users can get an organization 1`] = `
+Object {
+  "data": Object {
+    "organization": Object {
+      "_id": "61119f11beeab561a48939d3",
+      "adminInvites": Array [],
+      "approved": true,
+      "deal": Object {
+        "company_name": "test-deal",
+      },
+      "deals": Array [
+        Object {
+          "_id": "601c54cbe40e5900230f505d",
+        },
+        Object {
+          "_id": "61143ac37db3b3619db1df42",
+        },
+      ],
+      "investments": Array [
+        Object {
+          "_id": "6111bb42a4991d5a547352b6",
+        },
+        Object {
+          "_id": "6111bbe6ad565e63b254d0df",
+        },
+        Object {
+          "_id": "61143bc4aa6f42619d924309",
+        },
+      ],
+      "investors": Array [
+        Object {
+          "_id": "611421d64bf8d10b94e61606",
+        },
+      ],
+      "n_deals": 2,
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations GET_ORGANIZATION non fund admin users cannot get an organization 1`] = `
+Object {
+  "data": Object {
+    "organization": null,
+  },
+  "errors": Array [
+    [GraphQLError: org query throw],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations GET_ORGANIZATION_MEMBERS admin users can get all orginization members 1`] = `
+Object {
+  "data": Object {
+    "organizationMembers": Array [
+      Object {
+        "_id": "61142198824e2509714fd54e",
+      },
+    ],
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations GET_ORGANIZATION_MEMBERS non admin users cannot get all orginization members 1`] = `
+Object {
+  "data": Object {
+    "organizationMembers": null,
+  },
+  "errors": Array [
+    [GraphQLError: permission denied],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations GET_OVERVIEW_DATA logged in users can get overview data 1`] = `
+Object {
+  "data": Object {
+    "overviewData": Object {
+      "AUM": 30000,
+      "SPVs": 1,
+      "funds": 1,
+      "investors": 1,
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations GET_OVERVIEW_DATA non logged in users can get overview data 1`] = `
+Object {
+  "data": Object {
+    "overviewData": Object {
+      "AUM": 30000,
+      "SPVs": 1,
+      "funds": 1,
+      "investors": 1,
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations GET_PAGINATED_ORGANIZATIONS admin users can get paginated organization results 1`] = `
+Object {
+  "data": Object {
+    "pagOrganizations": Object {
+      "count": 1,
+      "organizations": Array [
+        Object {
+          "_id": "61119f11beeab561a48939d3",
+        },
+      ],
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations GET_PAGINATED_ORGANIZATIONS non-admin users cannot get paginated organization results 1`] = `
+Object {
+  "data": Object {
+    "pagOrganizations": null,
+  },
+  "errors": Array [
+    [GraphQLError: permission denied],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations REVOKE_ORGANIZATION_MEMBERSHIP admin users can remove users from an organization 1`] = `
+Object {
+  "data": Object {
+    "revokeOrganizationMembership": Object {
+      "_id": null,
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations REVOKE_ORGANIZATION_MEMBERSHIP admin users can remove users from an organization 2`] = `
+Object {
+  "_id": "61142198824e2509714fd54e",
+  "email": "fundadmin@allocations.com",
+  "first_name": "Warren",
+  "last_name": "Buffett",
+  "organizations_admin": Array [],
+}
+`;
+
+exports[`Organizations REVOKE_ORGANIZATION_MEMBERSHIP non admin users cannot remove users from an organization 1`] = `
+Object {
+  "data": Object {
+    "addOrganizationMembership": null,
+  },
+  "errors": Array [
+    [GraphQLError: permission denied],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations REVOKE_ORGANIZATION_MEMBERSHIP non admin users cannot remove users from an organization 2`] = `
+Object {
+  "_id": "61142198824e2509714fd54e",
+  "email": "fundadmin@allocations.com",
+  "first_name": "Warren",
+  "last_name": "Buffett",
+  "organizations_admin": Array [
+    "61119f11beeab561a48939d3",
+  ],
+}
+`;
+
+exports[`Organizations UPDATE_ORGANIZATION fund admin users can update an organization 1`] = `
+Object {
+  "data": Object {
+    "updateOrganization": Object {
+      "approved": false,
+      "name": "OK Org",
+      "slug": "cool-org",
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations UPDATE_ORGANIZATION fund admin users can update an organization 2`] = `
+Object {
+  "_id": "61119f11beeab561a48939d3",
+  "approved": false,
+  "name": "OK Org",
+  "slug": "cool-org",
+  "updated_at": Any<Number>,
+}
+`;
+
+exports[`Organizations UPDATE_ORGANIZATION non fund admin users cannot update an organization slug 1`] = `
+Object {
+  "data": Object {
+    "updateOrganization": null,
+  },
+  "errors": Array [
+    [GraphQLError: permission denied],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Organizations UPDATE_ORGANIZATION non fund admin users cannot update an organization slug 2`] = `
+Object {
+  "_id": "61119f11beeab561a48939d3",
+  "name": "Cool Fund",
+  "slug": "cool-fund",
+}
+`;

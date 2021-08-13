@@ -1,23 +1,16 @@
 const { ObjectId } = require("mongodb");
-const _ = require("lodash");
 const { isAdmin, isOrgAdmin } = require("../permissions");
 const PublicUploader = require("../../uploaders/public-docs");
 const AdminMailer = require("../../mailers/admin-mailer");
-const { AuthenticationError, gql } = require("apollo-server-express");
+const { AuthenticationError } = require("apollo-server-express");
 const Organizations = require("../schema/organizations");
-const { groupBy, map } = require("lodash");
 const { customOrgPagination } = require("../pagHelpers");
 const { getOrgOverviewData } = require("../mongoHelpers.js");
-/**
-
-  all organization handling (sometimes called funds)
-
- **/
 
 const Schema = Organizations;
 
 const Queries = {
-  organization: async (_, { slug, limit, offset }, { user, db }) => {
+  organization: async (_, { slug }, { user, db }) => {
     const org = await db.organizations.findOne({ slug });
     // short circuit with fund if superadmin
     if (user.admin) return org;
@@ -33,36 +26,6 @@ const Queries = {
     }
     throw new AuthenticationError("org query throw");
   },
-  pagOrganization: async (_, args, ctx) => {
-    const { slug } = args;
-    const { pagination, currentPage } = args.pagination;
-
-    const documentsToSkip = pagination * currentPage;
-
-    let query = await ctx.db.organizations.findOne({ slug });
-
-    const result = {
-      org: query,
-      documentsToSkip,
-      pagination,
-      pagArgs: args.pagination,
-    };
-
-    if (ctx.user.admin) return result;
-    if (slug === "demo-fund") return result;
-
-    if (
-      query &&
-      ctx.user &&
-      (ctx.user.organizations_admin || [])
-        .map((id) => id.toString())
-        .includes(result.org._id.toString())
-    ) {
-      return result;
-    }
-
-    throw new AuthenticationError("org query throw");
-  },
   /** members must have the org id on their .organizations_admin key **/
   organizationMembers: async (_, { slug }, { user, db }) => {
     isAdmin({ user, db });
@@ -70,6 +33,7 @@ const Queries = {
 
     return db.users.find({ organizations_admin: org._id }).toArray();
   },
+  // * onyl organizations with investments and deals show up
   pagOrganizations: async (_, args, ctx) => {
     isAdmin(ctx);
     const { pagination, currentPage } = args.pagination;
@@ -227,13 +191,6 @@ const Organization = {
       return db.users.find({ organizations: org._id }).toArray();
     }
   },
-  investor: (org, { _id }, { db }) => {
-    if (org.slug === "allocations") {
-      return db.users.findOne({ _id: ObjectId(_id) });
-    } else {
-      return db.users.findOne({ _id: ObjectId(_id), organization: org._id });
-    }
-  },
   investments: async (org, _, { db }) => {
     const dealQuery =
       org.slug === "allocations"
@@ -245,50 +202,12 @@ const Organization = {
       .find({ deal_id: { $in: deals.map((d) => d._id) } })
       .toArray();
   },
-  investment: (org, { _id }, { db }) => {
-    return db.investments.findOne({
-      _id: ObjectId(_id),
-      organization: org._id,
-    });
-  },
   adminInvites: (org) => {
     return org.adminInvites || [];
   },
   // since approved was added on later, we're going to assume any previous one IS approved
   approved: (org) => {
     return org.approved !== false;
-  },
-  orgInvestors: async (org, _, { db }) => {
-    console.log(org);
-    const investments = await db.investments
-      .find({ organization: ObjectId(org._id) })
-      .toArray();
-    const investmentsByUser = groupBy(investments, "user_id");
-    const x = await Promise.all(
-      map(investmentsByUser, (u) => {
-        return u;
-      })
-        .map((user) => {
-          const id = user[0];
-          const total = user.reduce((acc, u) => {
-            return (acc += u.amount);
-          }, 0);
-          if (!id) return;
-          return {
-            id: id.user_id,
-            amount: total,
-            numInvestments: user.length || 0,
-          };
-        })
-        .map(async (u) => {
-          const user = await db.users.findOne({ _id: ObjectId(u.id) });
-          if (user !== null) {
-            return { ...user, ...u };
-          }
-        })
-    );
-    console.log(x);
-    return x;
   },
 };
 

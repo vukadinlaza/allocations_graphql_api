@@ -1,5 +1,7 @@
 const { gql } = require("apollo-server-express");
 
+// TODO remove offset and limit from organization query
+
 module.exports = gql(`
 type Organization {
   _id: String
@@ -12,15 +14,12 @@ type Organization {
   approved: Boolean
   admins: [User]
   investors: [User]
-  investor(_id: String): User
   deals(order_by: String, order_dir: String, offset: Int, limit: Int, status: String): [Deal]
   deal(_id: String): Deal
   n_deals: Int
   investments: [Investment]
-  investment(_id: String): Investment
   pagInvestments: [Investment]
   adminInvites: [EmailInvite]
-  orgInvestors: [User]
   totalAUM: Int
   totalPrivateFunds: Int
   totalFunds: Int
@@ -53,7 +52,6 @@ type EmailInvite {
 
 extend type Query {
   organization(slug: String!, offset: Int, limit: Int): Organization
-  pagOrganization(slug: String!, pagination: PaginationInput!): Organization
   organizationMembers(slug: String!): [User]
   pagOrganizations(pagination: PaginationInput!): OrganizationPagination
   overviewData(slug: String!): Object

@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const { FUND_DEAL_ID, SPV_DEAL_ID } = require("./deals");
+const { INVESTOR_USER_ID } = require("./users");
 
 const WIRED_INVESTMENT_ID = "6111bb42a4991d5a547352b6";
 const PENDING_INVESTMENT_ID = "6111bbe6ad565e63b254d0df";
@@ -10,7 +11,7 @@ const wiredFundInvestment = {
   status: "wired",
   amount: 25000,
   deal_id: ObjectId(FUND_DEAL_ID),
-  user_id: ObjectId("611421d64bf8d10b94e61606"),
+  user_id: ObjectId(INVESTOR_USER_ID),
 };
 
 const pendingFundInvestment = {
@@ -18,7 +19,7 @@ const pendingFundInvestment = {
   status: "pending",
   amount: 10000,
   deal_id: ObjectId(FUND_DEAL_ID),
-  user_id: ObjectId("611421d64bf8d10b94e61606"),
+  user_id: ObjectId(INVESTOR_USER_ID),
 };
 
 const wiredSPVInvestment = {
@@ -26,7 +27,7 @@ const wiredSPVInvestment = {
   status: "wired",
   amount: 5000,
   deal_id: ObjectId(SPV_DEAL_ID),
-  user_id: ObjectId("611421d64bf8d10b94e61606"),
+  user_id: ObjectId(INVESTOR_USER_ID),
 };
 
 module.exports = {

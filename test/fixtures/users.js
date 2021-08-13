@@ -11,7 +11,7 @@ const superAdmin = {
   first_name: "Will",
   last_name: "Sheehan",
   email: "superadmin@allocations.com",
-  organizations_admin: [ObjectId(ORGANIZATION_ID)],
+  organizations_admin: [],
   admin: true,
 };
 
