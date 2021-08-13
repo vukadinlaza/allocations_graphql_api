@@ -3,7 +3,7 @@ const { ObjectId } = require("mongodb");
 const { getDB } = require("../../src/mongo");
 const { FUND_DEAL_ID } = require("../fixtures/deals");
 const { LOGGED_IN_USER_ID, INVESTOR_USER_ID } = require("../fixtures/users");
-const { describeWithServer } = require("../setup");
+const { describeWithServer, testError } = require("../setup");
 
 const GET_DEAL = gql`
   query GetDeal($id: String!) {
@@ -159,7 +159,7 @@ describeWithServer(
         ).toMatchSnapshot();
       });
 
-      test("non-user cannot get a deal", () => {
+      testError("non-user cannot get a deal", () => {
         expect(
           executeOperation({
             query: GET_DEAL,
@@ -176,7 +176,7 @@ describeWithServer(
         ).toMatchSnapshot();
       });
 
-      test("non-admin user cannot get all deals", async () => {
+      testError("non-admin user cannot get all deals", async () => {
         expect(
           await executeOperationAsLoggedIn({ query: GET_ALL_DEALS })
         ).toMatchSnapshot();
@@ -193,7 +193,7 @@ describeWithServer(
         ).toMatchSnapshot();
       });
 
-      test("non-admin users cannot search ", async () => {
+      testError("non-admin users cannot search ", async () => {
         expect(
           await executeOperationAsFundAdmin({
             query: SEARCH_DEALS,
@@ -213,14 +213,17 @@ describeWithServer(
         ).toMatchSnapshot();
       });
 
-      test("non fund admin users cannot search for deals by org", async () => {
-        expect(
-          await executeOperationAsInvestor({
-            query: SEARCH_DEALS_BY_ORG,
-            variables: { q: "TEST", org: "cool-fund" },
-          })
-        ).toMatchSnapshot();
-      });
+      testError(
+        "non fund admin users cannot search for deals by org",
+        async () => {
+          expect(
+            await executeOperationAsInvestor({
+              query: SEARCH_DEALS_BY_ORG,
+              variables: { q: "TEST", org: "cool-fund" },
+            })
+          ).toMatchSnapshot();
+        }
+      );
     });
 
     //! this is skipped because public deal uses operationName (which is not a secure way to expose public operations)
@@ -271,7 +274,7 @@ describeWithServer(
         });
       });
 
-      test("non fund admin cannot create a deal", async () => {
+      testError("non fund admin cannot create a deal", async () => {
         expect(
           await executeOperationAsInvestor({
             query: CREATE_DEAL,
@@ -285,7 +288,7 @@ describeWithServer(
         ).toMatchSnapshot();
       });
 
-      test("duplicate company names cannot be created", async () => {
+      testError("duplicate company names cannot be created", async () => {
         expect(
           await executeOperationAsFundAdmin({
             query: CREATE_DEAL,
@@ -360,7 +363,7 @@ describeWithServer(
         ).toMatchSnapshot();
       });
 
-      test("non fund admins cannot update a deal", async () => {
+      testError("non fund admins cannot update a deal", async () => {
         expect(
           await executeOperationAsLoggedIn({
             query: UPDATE_DEAL,
@@ -395,7 +398,7 @@ describeWithServer(
         ).toEqual(0);
       });
 
-      test("non-admins cannot delete deals", async () => {
+      testError("non-admins cannot delete deals", async () => {
         expect(
           await executeOperationAsFundAdmin({
             query: DELETE_DEAL,
@@ -437,19 +440,22 @@ describeWithServer(
         });
       });
 
-      test("a logged in user cannot create a duplicate org and deal", async () => {
-        expect(
-          await executeOperationAsLoggedIn({
-            query: CREATE_ORG_AND_DEAL,
-            variables: {
-              orgName: "Cool Fund",
-              deal: {
-                company_name: "A Good Deal",
+      testError(
+        "a logged in user cannot create a duplicate org and deal",
+        async () => {
+          expect(
+            await executeOperationAsLoggedIn({
+              query: CREATE_ORG_AND_DEAL,
+              variables: {
+                orgName: "Cool Fund",
+                deal: {
+                  company_name: "A Good Deal",
+                },
               },
-            },
-          })
-        ).toMatchSnapshot();
-      });
+            })
+          ).toMatchSnapshot();
+        }
+      );
 
       test("a non-logged in user cannot create an org and deal", async () => {
         expect(

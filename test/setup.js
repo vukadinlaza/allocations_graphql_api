@@ -1,6 +1,7 @@
 const { connect, drop, endDBConnection } = require("../src/mongo");
 const { authedServer } = require("../src/graphql/server");
 const { seed } = require("./seed");
+const logger = require("../src/utils/logger");
 
 jest.mock("jsonwebtoken", () => ({
   verify: (token, __, ___, cb) =>
@@ -67,4 +68,13 @@ const describeWithServer = (name, contextFn) => {
   });
 };
 
-module.exports = { describeWithServer };
+const testError = (name, testFn) => {
+  test(name, async () => {
+    const loggerError = logger.error;
+    logger.error = () => {};
+    await testFn();
+    logger.error = loggerError;
+  });
+};
+
+module.exports = { describeWithServer, testError };

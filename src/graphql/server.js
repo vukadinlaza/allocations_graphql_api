@@ -31,13 +31,11 @@ function authedServer(db) {
     },
     plugins: [
       {
-        requestDidStart: (r) => {
+        requestDidStart: () => {
           return {
             didEncounterErrors: ({ context, operationName, errors }) => {
-              if (process.env.NODE_ENV !== "test") {
-                logger.error(errors[0]);
-                logger.error({ user: context.user || {}, operationName });
-              }
+              logger.error(errors[0]);
+              logger.error({ user: context.user || {}, operationName });
             },
           };
         },
