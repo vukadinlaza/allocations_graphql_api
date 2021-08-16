@@ -483,8 +483,104 @@ const pagHelpers = {
       ...sorting,
     ].filter((x) => x && Object.keys(x).length);
     return aggregation;
+  },
+  customDocumentPagination: ({ sortField, sortOrder, filterValue, filterField, ...pagProps }, documentType ) => {
+    let aggregation = [];
+    const currentSortField = sortField === 'email'? 'userEmail' : sortField;
+    const currentFilterField = filterField === 'email'? 'userEmail' : filterField;
+    if(['KYC', 'K-12'].includes(documentType)){
+      const regex = documentType === 'KYC'? ["W-8", "W-9"].join("|") : "K-1"
+      aggregation = [
+        {
+          $match: {
+            "documents": {
+              "$exists": true
+            }
+          }
+        },
+        {
+          $unwind: "$documents"
+        },
+        {
+          $match: {
+            "documents.documentName": {
+              "$regex": regex
+            },
+      
+          }
+        },
+        {
+          $addFields: {
+            "documents.userEmail": "$email",
+            "documents.link": "$documents.docspringPermDownloadLink",
+            "documents.source": {
+              $cond: {
+                if: {$not: ["$documents.signerDocusignId"]},
+                then: 'DocSpring',
+                else: 'DocuSign',
+              },
+            },
+          }
+        }, 
+        {
+          $project: {
+            "email": 1,
+            "documents": 1
+          }
+        },
+        { $sort: { [`documents.${currentSortField}`]: sortOrder ? sortOrder : 1 } },
+        { $match: filterValue? { [`documents.${currentFilterField}`]: { $regex: `/*${filterValue}/*`, $options: "i" } } : {} }
+      ]
+    }else{
+      aggregation =  [
+        {
+          $lookup: {
+            from: "users",
+            localField: "user_id",
+            foreignField: "_id",
+            as: "user",
+          },
+        },
+      {
+        $match: {
+          "documents": {
+            "$exists": true
+          }
+        }
+      },
+      {
+        $unwind: "$documents"
+      },
+      {
+        $addFields: {
+          "documents.userEmail": "$user.email",
+          "documents.documentName": {
+            $cond: [{ $eq: [{ $type: '$documents' }, 'string'] }, { $arrayElemAt: [ { "$split": ["$documents","/"]}, -1 ] }, "$documents.documentName" ]
+         },
+          "documents.link": {
+            $cond: {
+              if: {$not: ["$documents.docspringPermDownloadLink"]},
+              then: "$documents",
+              else: "$documents.docspringPermDownloadLink",
+            },
+          },
+          "documents.source": {
+            $cond: {
+              if: {$not: ["$documents.signerDocusignId"]},
+              then: 'DocSpring',
+              else: 'DocuSign',
+            },
+          },
+        }
+      }, 
+      { $unwind: '$documents.userEmail' }, 
+      ]
+    }
+    aggregation.push({$project: {"documents": 1}});
+    aggregation.push({ $sort: { [`documents.${currentSortField}`]: sortOrder ? sortOrder : 1 } });
+    aggregation.push({ $match: filterValue? { [`documents.${currentFilterField}`]: { $regex: `/*${filterValue}/*`, $options: "i" } } : {} });
+    return aggregation
   }
-
 };
 
 module.exports = pagHelpers;

@@ -1,10 +1,16 @@
 const { gql } = require("apollo-server-express");
+const { isAdmin } = require("../permissions");
+const { customDocumentPagination } = require("../pagHelpers");
+const Cloudfront = require("../../cloudfront");
 
 // TODO: add to schemas
 const Schema = gql`
   type Document {
     path: String
     link: String
+    documentName: String
+    userEmail: String
+    source: String
   }
 
   type File {
@@ -12,6 +18,49 @@ const Schema = gql`
     mimetype: String!
     encoding: String!
   }
+
+  type DocumentPagination {
+    count: Int
+    documents: [Document]
+  }
+
+  extend type Query {
+    documentsManagement(documentType: Object, pagination: PaginationInput!): DocumentPagination
+  }
 `;
 
-module.exports = { Schema };
+const Queries = {
+  documentsManagement: async (_, args, ctx) => {
+    isAdmin(ctx);
+    const { pagination, currentPage } = args.pagination;
+    const documentsToSkip = pagination * currentPage;
+    const aggregation = customDocumentPagination(args.pagination, args.documentType);
+    const documentCollection = ['KYC', 'K-12'].includes(args.documentType)? 'users' : 'investments';
+    const countAggregation = [...aggregation, { $count: "count" }];
+
+    const documentsCount = await ctx.db
+      .collection(documentCollection)
+      .aggregate(countAggregation)
+      .toArray();
+    const count = documentsCount.length ? documentsCount[0].count : 0;
+
+    let documents = await ctx.db
+      .collection(documentCollection)
+      .aggregate(aggregation)
+      .skip(documentsToSkip)
+      .limit(pagination)
+      .toArray();
+
+    documents = documents.map((item) => { 
+      const link = ['KYC', 'K-12'].includes(args.documentType)? item.documents.link : Cloudfront.getSignedUrl(item.documents.link);
+      return {...item.documents, link }
+    });
+
+    return { count, documents };
+  },
+};
+
+module.exports = {
+  Schema,
+  Queries,
+};
