@@ -438,21 +438,72 @@ const pagHelpers = {
         $unwind: { path: "$investments", preserveNullAndEmptyArrays: true },
       },
       {
+        $lookup: {
+          from: "deals",
+          localField: "investments.deal_id",
+          foreignField: "_id",
+          as: "investments.deal",
+        },
+      },
+      {
+        $unwind: { path: "$investments.deal", preserveNullAndEmptyArrays: true },
+      },
+      {
+          $addFields: {
+              'investmentMultiple': {
+              '$convert':
+                {
+                  input: "$investments.deal.dealParams.dealMultiple",
+                  to: 'double',
+                  onError: 1,  // Optional.
+                  onNull: 1    // Optional.
+                }
+              },
+              'investmentIntValue': {
+              '$convert':
+                {
+                  input: "$investments.amount",
+                  to: 'int',
+                  onError: 0,  // Optional.
+                  onNull: 0    // Optional.
+                }
+              }
+          }
+      },
+      {
+          $addFields: {
+              "investmentNewValue":  { $multiply: [ "$investmentIntValue", "$investmentMultiple" ] }
+          }
+      },
+      {
         $group: {
           _id: "$_id",
-          investmentAmount: { $sum: "$investments.amount" },
+          investmentAmount: { $sum: "$investmentIntValue" },
+          portfolioValue: { $sum: "$investmentNewValue" },
           investments: { $sum: 1 },
           user: { $first: "$$ROOT" },
         },
       },
       {
         $addFields: {
+          "user._id": "$_id",
+          "user.avgMultiple": { $divide: ['$portfolioValue', { $cond: [ { $gte: ['$investmentAmount', 1] } , '$investmentAmount', 1 ] }] },
           "user.investmentAmount": "$investmentAmount",
-          "user.investments": "$investments",
+          "user.investmentsCount": "$investments",
+          "user.portfolioValue": "$portfolioValue"
         },
       },
       {
-        $project: { user: 1 },
+        $project: { 
+          'user._id': 1,
+          'user.first_name': 1,
+          'user.last_name': 1,
+          'user.email': 1,
+          'user.investmentAmount': 1, 
+          'user.investmentsCount': 1,
+          'user.avgMultiple': 1,
+          'user.portfolioValue': 1
+         },
       },
       { $sort: { [`user.${sortField}`]: sortOrder ? sortOrder : 1 } },
     ];

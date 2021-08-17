@@ -48,6 +48,10 @@ type User {
   investorPersonalInfo: Investment
   investorLimits: Object
   investorTaxDocuments: [Object]
+  investmentAmount: Int
+  investmentsCount: Int
+  avgMultiple: Float
+  portfolioValue: Float
 }
 
 input UserInput {
