@@ -129,6 +129,16 @@ type dealOnboarding {
   dealUpdatedDate: String
   dealUpdatedBy: String
   psTemplate: String
+  dealTasks: [dealTask]
+}
+
+type dealTask {
+  taskId: String
+  taskName: String
+  formFields: Object
+  taskStatus: String
+  taskUpdatedBy: String
+  taskUpdatedDate: String
 }
 
 type DealPagination {
