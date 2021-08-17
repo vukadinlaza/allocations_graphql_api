@@ -15,16 +15,17 @@ const cols = [
 ];
 
 let db = null;
-let client = null;
-/** connects and attaches name of cols to db **/
-async function connect({ url = MONGO_URL, dbName = MONGO_DB } = {}) {
-  client = new MongoClient(url, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-  });
+let client = new MongoClient(MONGO_URL, {
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+});
 
+// eslint-disable-next-line no-console
+client.on("open", () => console.log("🔗 Connected to Mongo"));
+
+/** connects and attaches name of cols to db **/
+async function connect({ dbName = MONGO_DB } = {}) {
   const conn = await client.connect();
-  console.log("🔗 Connected to Mongo");
   db = conn.db(dbName);
 
   // attach collections directly to db
@@ -41,7 +42,7 @@ const getDB = async () => {
 };
 
 const endDBConnection = async () => {
-  if (client) await client.end();
+  if (client.isConnected()) await client.close();
 };
 
 async function drop(db) {
