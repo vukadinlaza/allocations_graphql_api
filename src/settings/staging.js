@@ -8,5 +8,6 @@ module.exports = {
     "https://allocations-staging-api.herokuapp.com",
     "https.tools.allocations.com",
     "https://mono-fe-test.herokuapp.com",
+    "https://mono-tools-test.herokuapp.com",
   ],
 };
