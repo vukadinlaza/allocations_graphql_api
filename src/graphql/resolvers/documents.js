@@ -32,6 +32,20 @@ const Schema = gql`
 const Queries = {
   documentsManagement: async (_, args, ctx) => {
     isAdmin(ctx);
+
+    const allowedEmails = [
+      'lidia@allocations.com',
+      'olia@allocations.com',
+      'lindsay@allocations.com',
+      'jared@allocations.com',
+      'nicholas@allocations.com',
+      'elizabeth@allocations.com',
+      'adrian@allocations.com',
+    ];
+
+    if(!allowedEmails.includes(ctx.user.email)){
+      return { count: 0, documents: []}
+    }
     const { pagination, currentPage } = args.pagination;
     const documentsToSkip = pagination * currentPage;
     const aggregation = customDocumentPagination(args.pagination, args.documentType);
