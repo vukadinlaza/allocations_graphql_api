@@ -7,7 +7,7 @@ const Schema = gql`
 `;
 
 const Mutations = {
-  createSigningPacket: async (_, { payload }, { db, user }) => {
+  createSigningPacket: async () => {
     return true;
   },
 };

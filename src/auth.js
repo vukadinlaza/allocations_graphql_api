@@ -61,7 +61,7 @@ async function authenticate({ req, db, authToken }) {
     // else create user
     const res = await db.users.insertOne({ email: email });
     const newUser = res.ops[0];
-    const acctAndEntity = await createUserAccountAndEntity({ db, u: newUser });
+    await createUserAccountAndEntity({ db, u: newUser });
     await updateAirtableUsers({ user: newUser });
 
     const isDemo = ["localhost", "demo"].some((str) =>

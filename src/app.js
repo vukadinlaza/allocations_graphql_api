@@ -1,4 +1,5 @@
-// import ENVs from .env (gitignored)
+/* eslint-disable no-console */
+
 require("dotenv").config();
 
 const compression = require("compression");
@@ -71,11 +72,10 @@ async function run() {
 
   app.use((err, req, res, next) => {
     if (err.name === "UnauthorizedError") {
-      console.log(err);
+      console.log("UnauthorizedError :>>", err);
       res.status(401).send("invalid token");
     } else {
-      console.log("Uncaught Error");
-      console.log(err);
+      console.log("Uncaught Error :>> ", err);
       next(err);
     }
   });
@@ -94,7 +94,7 @@ async function run() {
 
 process.on("unhandledRejection", (error) => {
   // Will print "unhandledRejection err is not defined"
-  console.log("unhandledRejection", error);
+  console.log("unhandledRejection :>>", error);
   throw new Error(error);
 });
 process.on("SIGTERM", endDBConnection);

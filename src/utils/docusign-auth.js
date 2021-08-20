@@ -1,6 +1,6 @@
 "use strict";
 
-let DsJwtAuth = function _DsJwtAuth(req) {
+let DsJwtAuth = function _DsJwtAuth() {
   this._debug_prefix = "DsJwtAuth";
   this.accessToken = false;
   this.accountId = false;
@@ -13,7 +13,6 @@ let DsJwtAuth = function _DsJwtAuth(req) {
 module.exports = DsJwtAuth;
 
 const moment = require("moment"),
-  fs = require("fs"),
   docusign = require("docusign-esign"),
   dsConfig = require("../config/docusign").config,
   tokenReplaceMin = 10,

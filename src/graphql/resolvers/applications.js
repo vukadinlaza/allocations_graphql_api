@@ -5,7 +5,7 @@ const Uploader = require("../../uploaders/application-docs");
 const Schema = Applications;
 
 const Queries = {
-  application: async (_, { _id }, { user, db }) => {
+  application: async (_, { _id }, { db }) => {
     const application = await db.applications.findOne({ _id: ObjectId(_id) });
     return application;
   },

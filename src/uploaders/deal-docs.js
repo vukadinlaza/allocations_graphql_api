@@ -1,10 +1,7 @@
 const S3 = require("aws-sdk/clients/s3");
-
 const Bucket = "allocations-investment-docs";
-const url = `https://${Bucket}.s3.us-east-2.amazonaws.com`;
 
 const s3 = new S3({ apiVersion: "2006-03-01" });
-
 const path = process.env.NODE_ENV === "production" ? "deals" : "deals-test";
 
 async function addDoc({ doc, title, deal_id }) {

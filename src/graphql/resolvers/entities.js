@@ -7,8 +7,7 @@ const Schema = Entities;
 const Entity = {};
 
 const Queries = {
-  getEntity: async (_, { _id }, { user, db }) => {},
-  getEntities: async (_, { accountId }, { user, db }) => {
+  getEntities: async (_, __, { user, db }) => {
     const account = await db.accounts.findOne({ _id: ObjectId(user.account) });
     const entities = await db.entities
       .find({
@@ -24,7 +23,6 @@ const Queries = {
 
 const Mutations = {
   createEntity: async (_, { payload }, { user, db }) => {
-    console.log("FIRES", payload);
     const options = [
       "investor_type",
       "country",
@@ -46,14 +44,14 @@ const Mutations = {
     });
     return createdEntity.ops[0];
   },
-  deleteEntity: async (_, { entityId, accountId }, { user, db }) => {
+  deleteEntity: async (_, { entityId, accountId }, { db }) => {
     const res = await db.entities.deleteOne({
       _id: ObjectId(entityId),
       accountId: ObjectId(accountId),
     });
     return res.deletedCount === 1;
   },
-  updateEntity: async (_, { payload }, { user, db }) => {
+  updateEntity: async (_, { payload }, { db }) => {
     return await db.entities.updateOne(
       { _id: ObjectId(payload._id) },
       { $set: { ...omit(payload, "_id") } },

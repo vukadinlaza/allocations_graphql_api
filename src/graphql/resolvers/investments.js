@@ -2,10 +2,7 @@ const { ObjectId } = require("mongodb");
 const moment = require("moment");
 const { get } = require("lodash");
 const { isAdmin } = require("../permissions");
-const {
-  AuthenticationError,
-  UserInputError,
-} = require("apollo-server-express");
+const { UserInputError } = require("apollo-server-express");
 const Cloudfront = require("../../cloudfront");
 const Uploader = require("../../uploaders/investor-docs");
 const Investments = require("../schema/investments");
@@ -76,14 +73,12 @@ const Mutations = {
   createInvestment: async (
     _,
     { investment: { user_id, deal_id, ...investment } },
-    { user, db }
+    { db }
   ) => {
     const deal = await db
       .collection("deals")
       .findOne({ _id: ObjectId(deal_id) });
 
-    // superadmin OR all are invited OR is org admin
-    // if (user.admin || deal.allInvited || user.orgs.find(o => o._id.toString() === deal.organization.toString())) {
     const res = await db.investments.insertOne({
       status: "invited",
       invited_at: Date.now(),
@@ -95,15 +90,9 @@ const Mutations = {
       organization: ObjectId(deal.organization),
     });
     return res.ops[0];
-    // }
-    throw new AuthenticationError("permission denied");
   },
   /** updates investment and tracks the status change **/
-  updateInvestment: async (
-    _,
-    { org, investment: { _id, ...investment } },
-    ctx
-  ) => {
+  updateInvestment: async (_, { investment: { _id, ...investment } }, ctx) => {
     // we need to track status changes
     const savedInvestment = await ctx.db.investments.findOne({
       _id: ObjectId(_id),

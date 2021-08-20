@@ -4,13 +4,12 @@ const Bucket =
   process.env.NODE_ENV === "production"
     ? "allocations-encrypted"
     : process.env.AWS_S3_BUCKET;
-const url = `https://${Bucket}.s3.us-east-2.amazonaws.com`;
 
 const s3 = new S3({ apiVersion: "2006-03-01" });
 
 /** Investor docs like kyc docs **/
 async function putInvestorDoc(_id, doc, extension) {
-  const { createReadStream, filename } = doc;
+  const { createReadStream } = doc;
   const Key = `investors/${_id}/${extension}`;
   const obj = {
     Bucket,
@@ -25,7 +24,7 @@ async function putInvestorDoc(_id, doc, extension) {
 }
 
 /** Investment Docs for individual investments **/
-async function putInvestmentDoc(investment_id, doc, isK1) {
+async function putInvestmentDoc(investment_id, doc) {
   const { createReadStream, filename } = doc;
   const Key = `investments/${investment_id}/${filename}`;
 

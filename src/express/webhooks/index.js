@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 const { Router } = require("express");
 const { ObjectId } = require("mongodb");
 const { get, every } = require("lodash");
@@ -29,11 +31,9 @@ module.exports = Router()
         "DocuSignEnvelopeInformation.EnvelopeStatus.RecipientStatuses.RecipientStatus",
         {}
       );
-      console.log("BEFORE", lpRecipientStatus);
       if (Array.isArray(lpRecipientStatus)) {
         lpRecipientStatus = get(lpRecipientStatus, "[0]");
       }
-      console.log("AFTER", lpRecipientStatus);
       // Gets User data from Docusign body
       const signerEmail = get(lpRecipientStatus, "Email._text", "");
       const signedAt = get(lpRecipientStatus, "Signed._text");
@@ -65,7 +65,6 @@ module.exports = Router()
       const dealId = get(dealFeild, "value._text");
       const userEmail = get(emailfield, "value._text");
 
-      console.log("DOC NAME", documentName);
       if (documentName.includes("Allocations Services Agreement")) {
         const atIdField = fieldData.find(
           (f) => f._attributes.name === "build-airtable-id"
@@ -84,18 +83,14 @@ module.exports = Router()
         };
         const BASE = "appdPrRjapx8iYnIn";
         const TABEL_NAME = "Deals";
-        const atres = await fetch(
-          `https://api.airtable.com/v0/${BASE}/${TABEL_NAME}`,
-          {
-            method: "patch", // make sure it is a "PATCH request"
-            body: JSON.stringify(payload),
-            headers: {
-              Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`, // API key
-              "Content-Type": "application/json", // we will recive a json object
-            },
-          }
-        );
-        console.log("RES", atres);
+        await fetch(`https://api.airtable.com/v0/${BASE}/${TABEL_NAME}`, {
+          method: "patch", // make sure it is a "PATCH request"
+          body: JSON.stringify(payload),
+          headers: {
+            Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`, // API key
+            "Content-Type": "application/json", // we will recive a json object
+          },
+        });
         return res.status(200).end();
       }
       let user = await db.users.findOne({ email: signerEmail.toLowerCase() });
@@ -132,12 +127,8 @@ module.exports = Router()
         const numDocs = (investment.documents || []).filter((d) => {
           return d.includes(documentName);
         });
-        console.log(
-          "------------ NUM OF DOCS THAT MATCH ----------------------------------"
-        );
-        console.log("NUM:", numDocs.length);
+
         const tag = numDocs.length > 0 ? `${numDocs.length + 1}_` : "";
-        console.log("TAG: ", tag);
         const pdf = get(
           docusignData,
           "DocuSignEnvelopeInformation.DocumentPDFs.DocumentPDF.PDFBytes._text"
@@ -153,7 +144,7 @@ module.exports = Router()
           ContentType: "application/pdf",
         };
 
-        const s3Res = await s3.upload(obj).promise();
+        await s3.upload(obj).promise();
 
         investment = await db.investments.findOne({
           _id: ObjectId(investment._id),
@@ -263,22 +254,16 @@ module.exports = Router()
   })
   .post("/slack", async (req, res, next) => {
     try {
-      // console.log('HELP HOOKS FIRES')
-      // if (res && res.body && res.body.challenge) {
-      //   return res.sendStatus(200).json({ challenge: res.body.challenge })
-      // }
       res.sendStatus(200);
       next();
     } catch (err) {
-      console.log("SOME ERROR");
-      console.log(err);
+      console.log("post /slack error :>> ", err);
       next(err);
     }
   })
   .post("/bankwire-notifications", async (req, res, next) => {
     try {
       const { body } = req;
-      console.log(body);
 
       const db = await getDB();
       const deals = await db.deals
@@ -289,7 +274,7 @@ module.exports = Router()
         return res.sendStatus(200);
       }
       const dealIds = deals.map((d) => d._id).filter((d) => d);
-      const investment = await db.investments.updateMany(
+      await db.investments.updateMany(
         {
           user_id: user._id,
           deal_id: {
@@ -301,8 +286,7 @@ module.exports = Router()
       res.sendStatus(200);
       next();
     } catch (err) {
-      console.log("SOME ERROR");
-      console.log(err);
+      console.log("bankwire-notifications :>> ", err);
       next(err);
     }
   })
@@ -327,7 +311,6 @@ module.exports = Router()
             taskUpdatedBy: t.updatedBy.email,
           };
         }),
-        // spvFormFields: data.formFields.map(f => f.label),
       };
       const dealOnboarded = await db.dealOnboarding.findOne({
         psDealId: dealData.psDealId,
@@ -351,8 +334,7 @@ module.exports = Router()
           `There was a problem creating dealOnboarding with psDealId: ${dealData.psDealId}`
         );
     } catch (err) {
-      console.log("Error on Process Street Workflow Run");
-      console.log(err);
+      console.log("Error on Process Street Workflow Run :>> ", err);
       next(err);
     }
   })
@@ -411,8 +393,7 @@ module.exports = Router()
           `There was a problem updating dealOnboarding with psDealId: ${psDealId}`
         );
     } catch (err) {
-      console.log("Error on Process Street Task update");
-      console.log(err);
+      console.log("Error on Process Street Task update :>> ", err);
       next(err);
     }
   });

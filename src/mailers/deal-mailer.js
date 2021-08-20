@@ -19,7 +19,7 @@ async function sendInvite({ deal, sender, to, org }) {
   };
 
   try {
-    const res = await mailer.send(msg);
+    await mailer.send(msg);
     return { status: "sent", sent_at: Date.now(), to };
   } catch (e) {
     logger.error(e);

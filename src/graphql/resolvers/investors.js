@@ -194,7 +194,7 @@ const Queries = {
 
     return { count, users };
   },
-  searchUsers: async (_, { org, q, limit }, ctx) => {
+  searchUsers: async (_, { org, q }, ctx) => {
     const orgRecord = await ensureFundAdmin(org, ctx);
 
     const searchQ = {
@@ -216,8 +216,6 @@ const Queries = {
       .toArray();
   },
   getLink: async (_, data, ctx) => {
-    const token = await getAuthToken();
-    console.log("TOKEN FROM GETLINK", token);
     const accountId = process.env.DOCUSIGN_ACCOUNT_ID;
     const newUserData = pick(data.input, [
       "dob",
@@ -287,7 +285,6 @@ const Mutations = {
     { input: { _id, passport, accredidation_doc, kycDoc, ...user } },
     ctx
   ) => {
-    console.log("user", user);
     isAdminOrSameUser({ _id }, ctx);
 
     // upload passport if passed
@@ -336,15 +333,12 @@ const Mutations = {
     ];
     const data = pick({ ...user }, options);
     if (!isEmpty(data)) {
-      const updatedEntity = await ctx.db.entities.updateOne(
+      await ctx.db.entities.updateOne(
         { user: ObjectId(_id), isPrimaryEntity: true },
         { $set: data }
       );
     }
-    const update = await ctx.db.users.updateOne(
-      { _id: ObjectId(_id) },
-      { $set: user }
-    );
+    await ctx.db.users.updateOne({ _id: ObjectId(_id) }, { $set: user });
 
     return await ctx.db.users.findOne({ _id: ObjectId(_id) });
   },

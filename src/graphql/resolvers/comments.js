@@ -16,7 +16,7 @@ const Comment = {
 };
 
 const Queries = {
-  dealComments: async (_, { deal_id }, { user, db }) => {
+  dealComments: async (_, { deal_id }, { db }) => {
     return db.comments.find({ deal_id: ObjectId(deal_id) }).toArray();
   },
 };
@@ -25,7 +25,7 @@ const Mutations = {
   postComment: async (
     _,
     { payload: { deal_id, user_id, commentText, commentTargetId } },
-    { user, db }
+    { db }
   ) => {
     const postedComment = await db.comments.insertOne({
       user_id: ObjectId(user_id),

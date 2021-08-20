@@ -35,7 +35,6 @@ input EntityInput {
   }
 
 extend type Query {
-  getEntity: Entity
   getEntities(accountId: String): [Entity]
 }
 

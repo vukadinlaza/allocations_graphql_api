@@ -1,0 +1,3 @@
+# Ignore custom class using Private fields as Eslint does not support the standard yet
+# https://github.com/standard/standard/issues/1542
+src/docspring/docspringApi.js

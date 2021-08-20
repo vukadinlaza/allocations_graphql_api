@@ -2,7 +2,7 @@ const mailer = require("./mailer");
 const logger = require("../utils/logger");
 
 async function sendConfirmation({ deal, to }) {
-  const html = confirmationTemplate({ deal });
+  const html = confirmationTemplate();
 
   const msg = {
     to,
@@ -13,7 +13,7 @@ async function sendConfirmation({ deal, to }) {
   };
 
   try {
-    const res = await mailer.send(msg);
+    await mailer.send(msg);
     return { status: "sent", sent_at: Date.now(), to };
   } catch (e) {
     logger.error(e);
@@ -21,7 +21,7 @@ async function sendConfirmation({ deal, to }) {
   }
 }
 
-function confirmationTemplate({ deal }) {
+function confirmationTemplate() {
   return `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml">

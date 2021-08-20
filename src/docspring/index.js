@@ -259,7 +259,7 @@ const updateUserDocuments = async (
 
   wFormSigned(payload);
 
-  return new Promise((res, rej) => {
+  return new Promise((res) => {
     return res(response);
   });
 };

@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb");
-const { map, find, reduce, pick } = require("lodash");
+const { pick } = require("lodash");
 
 const createUserAccountAndEntity = async ({ db, u }) => {
   const res = await db.accounts.insertOne({ rootAdmin: ObjectId(u._id) });
@@ -19,7 +19,7 @@ const createUserAccountAndEntity = async ({ db, u }) => {
     "accountId",
   ];
   const data = pick(u, options);
-  const createdRootEntity = await db.entities.insertOne({
+  await db.entities.insertOne({
     ...data,
     isPrimaryEntity: true,
     accountId: ObjectId(createdAcct._id),

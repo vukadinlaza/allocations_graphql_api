@@ -4,7 +4,7 @@ const { getDB } = require("../../mongo/index");
 
 const apiKeys = [{ key: process.env.DEAL_IMG_KEY }];
 
-module.exports = Router().post("/", async (req, res, next) => {
+module.exports = Router().post("/", async (req, res) => {
   try {
     const { dealSlug, organizationSlug = "allocations", API_KEY } = req.body;
 

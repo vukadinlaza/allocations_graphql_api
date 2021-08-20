@@ -4,8 +4,7 @@ const { getDB } = require("../../mongo/index");
 
 const apiKeys = [{ key: "5fa2d72131ed7b7bc4666fe5", source: "TVC" }];
 module.exports = Router()
-  .post("/:API_KEY", async (req, res, next) => {
-    console.log(req.params);
+  .post("/:API_KEY", async (req, res) => {
     try {
       const key = apiKeys.find((k) => k.key === req.params.API_KEY);
       if (!key) {

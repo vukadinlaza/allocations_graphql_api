@@ -446,34 +446,37 @@ const pagHelpers = {
         },
       },
       {
-        $unwind: { path: "$investments.deal", preserveNullAndEmptyArrays: true },
+        $unwind: {
+          path: "$investments.deal",
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
-          $addFields: {
-              'investmentMultiple': {
-              '$convert':
-                {
-                  input: "$investments.deal.dealParams.dealMultiple",
-                  to: 'double',
-                  onError: 1,  // Optional.
-                  onNull: 1    // Optional.
-                }
-              },
-              'investmentIntValue': {
-              '$convert':
-                {
-                  input: "$investments.amount",
-                  to: 'int',
-                  onError: 0,  // Optional.
-                  onNull: 0    // Optional.
-                }
-              }
-          }
+        $addFields: {
+          investmentMultiple: {
+            $convert: {
+              input: "$investments.deal.dealParams.dealMultiple",
+              to: "double",
+              onError: 1, // Optional.
+              onNull: 1, // Optional.
+            },
+          },
+          investmentIntValue: {
+            $convert: {
+              input: "$investments.amount",
+              to: "int",
+              onError: 0, // Optional.
+              onNull: 0, // Optional.
+            },
+          },
+        },
       },
       {
-          $addFields: {
-              "investmentNewValue":  { $multiply: [ "$investmentIntValue", "$investmentMultiple" ] }
-          }
+        $addFields: {
+          investmentNewValue: {
+            $multiply: ["$investmentIntValue", "$investmentMultiple"],
+          },
+        },
       },
       {
         $group: {
@@ -487,23 +490,34 @@ const pagHelpers = {
       {
         $addFields: {
           "user._id": "$_id",
-          "user.avgMultiple": { $divide: ['$portfolioValue', { $cond: [ { $gte: ['$investmentAmount', 1] } , '$investmentAmount', 1 ] }] },
+          "user.avgMultiple": {
+            $divide: [
+              "$portfolioValue",
+              {
+                $cond: [
+                  { $gte: ["$investmentAmount", 1] },
+                  "$investmentAmount",
+                  1,
+                ],
+              },
+            ],
+          },
           "user.investmentAmount": "$investmentAmount",
           "user.investmentsCount": "$investments",
-          "user.portfolioValue": "$portfolioValue"
+          "user.portfolioValue": "$portfolioValue",
         },
       },
       {
-        $project: { 
-          'user._id': 1,
-          'user.first_name': 1,
-          'user.last_name': 1,
-          'user.email': 1,
-          'user.investmentAmount': 1, 
-          'user.investmentsCount': 1,
-          'user.avgMultiple': 1,
-          'user.portfolioValue': 1
-         },
+        $project: {
+          "user._id": 1,
+          "user.first_name": 1,
+          "user.last_name": 1,
+          "user.email": 1,
+          "user.investmentAmount": 1,
+          "user.investmentsCount": 1,
+          "user.avgMultiple": 1,
+          "user.portfolioValue": 1,
+        },
       },
       { $sort: { [`user.${sortField}`]: sortOrder ? sortOrder : 1 } },
     ];
@@ -513,19 +527,18 @@ const pagHelpers = {
     const nestedFilters = pagHelpers.getNestedFilters(paginationProps);
     let sorting = pagHelpers.getSorting(paginationProps);
     const nestedSorting = pagHelpers.getNestedSorting(paginationProps);
-    const amountToNumber = { 
-      '$addFields': { 
-          'amount': {
-            '$convert':
-                {
-                  input: '$amount',
-                  to: 'int',
-                  onError: 0,  // Optional.
-                  onNull: 0    // Optional.
-                }
-              }
-          }
-    }
+    const amountToNumber = {
+      $addFields: {
+        amount: {
+          $convert: {
+            input: "$amount",
+            to: "int",
+            onError: 0, // Optional.
+            onNull: 0, // Optional.
+          },
+        },
+      },
+    };
     const aggregation = [
       nestedSorting,
       nestedFilters,
@@ -535,30 +548,33 @@ const pagHelpers = {
     ].filter((x) => x && Object.keys(x).length);
     return aggregation;
   },
-  customDocumentPagination: ({ sortField, sortOrder, filterValue, filterField, ...pagProps }, documentType ) => {
+  customDocumentPagination: (
+    { sortField, sortOrder, filterValue, filterField },
+    documentType
+  ) => {
     let aggregation = [];
-    const currentSortField = sortField === 'email'? 'userEmail' : sortField;
-    const currentFilterField = filterField === 'email'? 'userEmail' : filterField;
-    if(['KYC', 'K-12'].includes(documentType)){
-      const regex = documentType === 'KYC'? ["W-8", "W-9"].join("|") : "K-1"
+    const currentSortField = sortField === "email" ? "userEmail" : sortField;
+    const currentFilterField =
+      filterField === "email" ? "userEmail" : filterField;
+    if (["KYC", "K-12"].includes(documentType)) {
+      const regex = documentType === "KYC" ? ["W-8", "W-9"].join("|") : "K-1";
       aggregation = [
         {
           $match: {
-            "documents": {
-              "$exists": true
-            }
-          }
+            documents: {
+              $exists: true,
+            },
+          },
         },
         {
-          $unwind: "$documents"
+          $unwind: "$documents",
         },
         {
           $match: {
             "documents.documentName": {
-              "$regex": regex
+              $regex: regex,
             },
-      
-          }
+          },
         },
         {
           $addFields: {
@@ -566,24 +582,37 @@ const pagHelpers = {
             "documents.link": "$documents.docspringPermDownloadLink",
             "documents.source": {
               $cond: {
-                if: {$not: ["$documents.signerDocusignId"]},
-                then: 'DocSpring',
-                else: 'DocuSign',
+                if: { $not: ["$documents.signerDocusignId"] },
+                then: "DocSpring",
+                else: "DocuSign",
               },
             },
-          }
-        }, 
+          },
+        },
         {
           $project: {
-            "email": 1,
-            "documents": 1
-          }
+            email: 1,
+            documents: 1,
+          },
         },
-        { $sort: { [`documents.${currentSortField}`]: sortOrder ? sortOrder : 1 } },
-        { $match: filterValue? { [`documents.${currentFilterField}`]: { $regex: `/*${filterValue}/*`, $options: "i" } } : {} }
-      ]
-    }else{
-      aggregation =  [
+        {
+          $sort: {
+            [`documents.${currentSortField}`]: sortOrder ? sortOrder : 1,
+          },
+        },
+        {
+          $match: filterValue
+            ? {
+                [`documents.${currentFilterField}`]: {
+                  $regex: `/*${filterValue}/*`,
+                  $options: "i",
+                },
+              }
+            : {},
+        },
+      ];
+    } else {
+      aggregation = [
         {
           $lookup: {
             from: "users",
@@ -592,46 +621,61 @@ const pagHelpers = {
             as: "user",
           },
         },
-      {
-        $match: {
-          "documents": {
-            "$exists": true
-          }
-        }
-      },
-      {
-        $unwind: "$documents"
-      },
-      {
-        $addFields: {
-          "documents.userEmail": "$user.email",
-          "documents.documentName": {
-            $cond: [{ $eq: [{ $type: '$documents' }, 'string'] }, { $arrayElemAt: [ { "$split": ["$documents","/"]}, -1 ] }, "$documents.documentName" ]
-         },
-          "documents.link": {
-            $cond: {
-              if: {$not: ["$documents.docspringPermDownloadLink"]},
-              then: "$documents",
-              else: "$documents.docspringPermDownloadLink",
+        {
+          $match: {
+            documents: {
+              $exists: true,
             },
           },
-          "documents.source": {
-            $cond: {
-              if: {$not: ["$documents.signerDocusignId"]},
-              then: 'DocSpring',
-              else: 'DocuSign',
+        },
+        {
+          $unwind: "$documents",
+        },
+        {
+          $addFields: {
+            "documents.userEmail": "$user.email",
+            "documents.documentName": {
+              $cond: [
+                { $eq: [{ $type: "$documents" }, "string"] },
+                { $arrayElemAt: [{ $split: ["$documents", "/"] }, -1] },
+                "$documents.documentName",
+              ],
+            },
+            "documents.link": {
+              $cond: {
+                if: { $not: ["$documents.docspringPermDownloadLink"] },
+                then: "$documents",
+                else: "$documents.docspringPermDownloadLink",
+              },
+            },
+            "documents.source": {
+              $cond: {
+                if: { $not: ["$documents.signerDocusignId"] },
+                then: "DocSpring",
+                else: "DocuSign",
+              },
             },
           },
-        }
-      }, 
-      { $unwind: '$documents.userEmail' }, 
-      ]
+        },
+        { $unwind: "$documents.userEmail" },
+      ];
     }
-    aggregation.push({$project: {"documents": 1}});
-    aggregation.push({ $sort: { [`documents.${currentSortField}`]: sortOrder ? sortOrder : 1 } });
-    aggregation.push({ $match: filterValue? { [`documents.${currentFilterField}`]: { $regex: `/*${filterValue}/*`, $options: "i" } } : {} });
-    return aggregation
-  }
+    aggregation.push({ $project: { documents: 1 } });
+    aggregation.push({
+      $sort: { [`documents.${currentSortField}`]: sortOrder ? sortOrder : 1 },
+    });
+    aggregation.push({
+      $match: filterValue
+        ? {
+            [`documents.${currentFilterField}`]: {
+              $regex: `/*${filterValue}/*`,
+              $options: "i",
+            },
+          }
+        : {},
+    });
+    return aggregation;
+  },
 };
 
 module.exports = pagHelpers;

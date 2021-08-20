@@ -1,7 +1,7 @@
 const docusign = require("docusign-esign");
 const apiClient = new docusign.ApiClient();
 const moment = require("moment");
-const { map, get } = require("lodash");
+const { get } = require("lodash");
 
 const basePath =
   process.env.NODE_ENV === "production"
@@ -19,10 +19,8 @@ let templatesApi = new docusign.TemplatesApi(apiClient);
 
 const getAuthToken = async () => {
   const hasToken = await DsJwtAuth.prototype.checkToken();
-  console.log("HAS TOKEN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", hasToken);
   if (!hasToken) {
     const token = await DsJwtAuth.prototype.getToken();
-    console.log("Bearer Token", token.accessToken);
     apiClient.addDefaultHeader("Authorization", "Bearer " + token.accessToken);
     return token.accessToken;
   }
@@ -211,7 +209,6 @@ const createEnvelope = async ({ envelopeDefinition, accountId }) => {
 const makeRecipientViewRequest = async ({
   user,
   dsPingUrl,
-  dsReturnUrl,
   envelopeId,
   accountId,
 }) => {
@@ -225,14 +222,13 @@ const makeRecipientViewRequest = async ({
   // Recipient information must match embedded recipient info
   // we used to create the envelope.
   viewRequest.email = user.email;
-  (viewRequest.name =
-    user.signer_full_name || `${user.firstName} ${user.lastName}`),
-    (viewRequest.userName =
-      user.signer_full_name || `${user.firstName} ${user.lastName}`),
-    (viewRequest.recipientId = "10001");
+  viewRequest.name =
+    user.signer_full_name || `${user.firstName} ${user.lastName}`;
+  viewRequest.userName =
+    user.signer_full_name || `${user.firstName} ${user.lastName}`;
+  viewRequest.recipientId = "10001";
   viewRequest.clientUserId = user.email;
   viewRequest.userId = env.signers.find((r) => r.email === user.email).userId;
-
   viewRequest.pingFrequency = "600";
   viewRequest.pingUrl = dsPingUrl;
 
@@ -304,40 +300,6 @@ const getKYCTemplateId = async ({ input, accountId }) => {
       doc.investor_type === input.investor_type
     );
   });
-};
-
-const createSignerTabs = ({ input }) => {
-  const x = [
-    {
-      tabLabel: "Street-Address",
-      label: "Street Address",
-      slug: "mail_street_address",
-    },
-    {
-      tabLabel: "Mailing-City-State-Zip-Province",
-      label: "City",
-      slug: "mail_city",
-    },
-    {
-      tabLabel: "Mailing-City-State-Zip-Province",
-      label: "State",
-      slug: "mail_state",
-    },
-    {
-      tabLabel: "Mailing-City-State-Zip-Province",
-      label: "Zip",
-      slug: "mail_zip",
-    },
-    { tabLabel: "Mailing-Country", label: "Country", slug: "mail_country" },
-  ];
-
-  const tabs = x.map((item) => {
-    return {
-      ...item,
-      value: input[item.slug],
-    };
-  });
-  return tabs;
 };
 
 module.exports = {

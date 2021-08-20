@@ -26,12 +26,12 @@ const Deal = {
   investments: (deal, _, { db }) => {
     return db.investments.find({ deal_id: deal._id }).toArray();
   },
-  wireInstructions: (deal, _, { db }) => {
+  wireInstructions: (deal) => {
     return deal.wireInstructions
       ? Cloudfront.getSignedUrl(deal.wireInstructions)
       : null;
   },
-  documents: async (deal, _, { db }) => {
+  documents: async (deal) => {
     return deal.documents
       ? deal.documents.map((d) => ({
           link: Cloudfront.getSignedUrl(d),
@@ -138,7 +138,7 @@ const Queries = {
       .toArray();
   },
   /** Public Deal fetches the deal info WITHOUT auth **/
-  publicDeal: async (_, { deal_slug, fund_slug, invite_code }, { db }) => {
+  publicDeal: async (_, { deal_slug, fund_slug }, { db }) => {
     const fund = await db.organizations.findOne({ slug: fund_slug });
     const deal = await db.deals.findOne({
       slug: deal_slug,
@@ -324,10 +324,11 @@ const Mutations = {
 
     try {
       // delete deal and all investments in deal
-      const s = await ctx.db.investments.deleteMany({ deal_id: ObjectId(_id) });
-      const x = await ctx.db.deals.deleteOne({ _id: ObjectId(_id) });
+      await ctx.db.investments.deleteMany({ deal_id: ObjectId(_id) });
+      await ctx.db.deals.deleteOne({ _id: ObjectId(_id) });
       return true;
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.log(e);
       return false;
     }
@@ -410,7 +411,7 @@ const Mutations = {
   addDealDocs: async (_, { deal_id, docs }, ctx) => {
     isAdmin(ctx);
 
-    const keys = await docs.map(async (doc) => {
+    await docs.map(async (doc) => {
       const path = await DealDocUploader.addDoc({ deal_id, doc });
       await ctx.db.deals.updateOne(
         { _id: ObjectId(deal_id) },
@@ -445,7 +446,6 @@ const Mutations = {
     );
   },
   deleteUserAsViewed: async (_, { user_id, deal_id }, ctx) => {
-    const deal = await ctx.db.deals.findOne({ _id: ObjectId(deal_id) });
     return ctx.db.deals.updateOne(
       { _id: ObjectId(deal_id) },
       {

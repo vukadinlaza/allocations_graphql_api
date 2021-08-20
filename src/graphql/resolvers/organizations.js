@@ -56,7 +56,7 @@ const Queries = {
 
     return { count, organizations };
   },
-  overviewData: async (_, { slug }, { user, db }) => {
+  overviewData: async (_, { slug }, { db }) => {
     const aggregation = getOrgOverviewData(slug);
     const data = await db.deals.aggregate(aggregation).toArray();
     return data[0];
