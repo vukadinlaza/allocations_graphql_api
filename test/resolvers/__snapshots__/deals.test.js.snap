@@ -388,7 +388,7 @@ Array [
     "_id": "6111bbe6ad565e63b254d0df",
     "amount": 10000,
     "deal_id": "601c54cbe40e5900230f505d",
-    "status": "pending",
+    "status": "invited",
     "user_id": "611421d64bf8d10b94e61606",
   },
 ]

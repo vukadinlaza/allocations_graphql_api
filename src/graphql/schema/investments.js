@@ -51,7 +51,6 @@ type InvestmentPagination {
 
 extend type Query {
   investment(_id: String): Investment
-  allInvestments: [Investment]
   investmentsList(pagination: PaginationInput!): InvestmentPagination
 }
 

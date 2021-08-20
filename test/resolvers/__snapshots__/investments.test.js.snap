@@ -1,0 +1,192 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Investments CREATE_INVESTMENT logged in users can make investments 1`] = `
+Object {
+  "data": Object {
+    "createInvestment": Object {
+      "status": "onboarded",
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Investments CREATE_INVESTMENT logged in users can make investments 2`] = `
+Object {
+  "_id": Any<ObjectID>,
+  "amount": 1000,
+  "created_at": Any<Number>,
+  "deal_id": "61143ac37db3b3619db1df42",
+  "invited_at": Any<Number>,
+  "onboarded_at": Any<Number>,
+  "organization": "61119f11beeab561a48939d3",
+  "status": "onboarded",
+  "user_id": "611421d64bf8d10b94e61606",
+}
+`;
+
+exports[`Investments CREATE_INVESTMENT non logged in users cannot make investments 1`] = `[AuthenticationError: authenicate function catch statement]`;
+
+exports[`Investments DELETE_INVESTMENT logged in users can delete investments 1`] = `
+Object {
+  "data": Object {
+    "deleteInvestment": true,
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Investments DELETE_INVESTMENT logged in users can delete investments 2`] = `null`;
+
+exports[`Investments DELETE_INVESTMENT non logged in users cannot delete investments 1`] = `[AuthenticationError: authenicate function catch statement]`;
+
+exports[`Investments DELETE_INVESTMENT non logged in users cannot delete investments 2`] = `
+Object {
+  "_id": "61143bc4aa6f42619d924309",
+  "amount": 5000,
+  "deal_id": "61143ac37db3b3619db1df42",
+  "status": "wired",
+  "user_id": "611421d64bf8d10b94e61606",
+}
+`;
+
+exports[`Investments GET_INVESTMENT logged in users can get investments 1`] = `
+Object {
+  "data": Object {
+    "investment": Object {
+      "_id": "6111bb42a4991d5a547352b6",
+      "deal": Object {
+        "_id": "601c54cbe40e5900230f505d",
+      },
+      "documents": Array [],
+      "investor": Object {
+        "_id": "611421d64bf8d10b94e61606",
+      },
+      "value": 25000,
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Investments GET_INVESTMENT non logged in users cannot get investments 1`] = `[AuthenticationError: authenicate function catch statement]`;
+
+exports[`Investments GET_INVESTMENTS_LIST admin users can get a paged list of investments 1`] = `
+Object {
+  "data": Object {
+    "investmentsList": Object {
+      "count": 3,
+      "investments": Array [
+        Object {
+          "_id": "6111bb42a4991d5a547352b6",
+        },
+      ],
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Investments GET_INVESTMENTS_LIST admin users can get a paged list of investments 2`] = `
+Object {
+  "data": Object {
+    "investmentsList": Object {
+      "count": 3,
+      "investments": Array [
+        Object {
+          "_id": "6111bbe6ad565e63b254d0df",
+        },
+      ],
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Investments GET_INVESTMENTS_LIST non admin users cannot get a paged list of investments 1`] = `
+Object {
+  "data": Object {
+    "investmentsList": null,
+  },
+  "errors": Array [
+    [GraphQLError: permission denied],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Investments UPDATE_INVESTMENT logged in users can update investments 1`] = `
+Object {
+  "data": Object {
+    "updateInvestment": Object {
+      "status": null,
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`Investments UPDATE_INVESTMENT logged in users can update investments 2`] = `
+Object {
+  "_id": "6111bbe6ad565e63b254d0df",
+  "amount": 1000,
+  "deal_id": "601c54cbe40e5900230f505d",
+  "status": "wired",
+  "updated_at": Any<Number>,
+  "user_id": "611421d64bf8d10b94e61606",
+  "wired_at": Any<Number>,
+}
+`;
+
+exports[`Investments UPDATE_INVESTMENT non logged in users cannot update investments 1`] = `[AuthenticationError: authenicate function catch statement]`;
+
+exports[`Investments UPDATE_INVESTMENT non logged in users cannot update investments 2`] = `
+Object {
+  "_id": "6111bbe6ad565e63b254d0df",
+  "amount": 10000,
+  "deal_id": "601c54cbe40e5900230f505d",
+  "status": "invited",
+  "user_id": "611421d64bf8d10b94e61606",
+}
+`;

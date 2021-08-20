@@ -16,7 +16,7 @@ const wiredFundInvestment = {
 
 const pendingFundInvestment = {
   _id: ObjectId(PENDING_INVESTMENT_ID),
-  status: "pending",
+  status: "invited",
   amount: 10000,
   deal_id: ObjectId(FUND_DEAL_ID),
   user_id: ObjectId(INVESTOR_USER_ID),

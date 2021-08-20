@@ -16,7 +16,6 @@ const commitmentCancelledTemplate = require("../../mailers/templates/commitment-
 const { signedSPV } = require("../../zaps/signedDocs");
 const { customInvestmentPagination } = require("../pagHelpers");
 
-
 const Schema = Investments;
 
 const Investment = {
@@ -49,9 +48,6 @@ const Queries = {
   investment: (_, args, ctx) => {
     return ctx.db.investments.findOne({ _id: ObjectId(args._id) });
   },
-  allInvestments: (_, __, ctx) => {
-    return db.investments.find({}).toArray();
-  },
   investmentsList: async (_, args, ctx) => {
     isAdmin(ctx);
     const { pagination, currentPage } = args.pagination;
@@ -60,9 +56,9 @@ const Queries = {
     const countAggregation = [...aggregation, { $count: "count" }];
 
     const investmentsCount = await ctx.db
-    .collection("investments")
-    .aggregate(countAggregation)
-    .toArray();
+      .collection("investments")
+      .aggregate(countAggregation)
+      .toArray();
     const count = investmentsCount.length ? investmentsCount[0].count : 0;
 
     let investments = await ctx.db
