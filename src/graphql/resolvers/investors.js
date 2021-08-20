@@ -14,7 +14,6 @@ const {
   createEnvelope,
   makeRecipientViewRequest,
   createRecipientView,
-  getAuthToken,
   getKYCTemplateId,
 } = require("../../utils/docusign");
 const { createTaxDocument } = require("../../docspring/index");
