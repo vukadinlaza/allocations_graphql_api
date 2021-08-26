@@ -72,6 +72,12 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_ratHTKYeHh9qcd2eYx",
     "tpl_5tPkcRZYQ6mmpZAsKJ",
     "tpl_XkPZF7xHnKmHgXtfpk",
+    "tpl_3mYnSE7HZKn3dDahSA",
+    "tpl_N6HL2caRJLaNQrYR9j",
+    "tpl_x6JhxyTyZ3fj49XAZg",
+    "tpl_EYxzxPx3Lh5dSEaDbM",
+    "tpl_RD3Y4ESZzeyqkK5sLG",
+    "tpl_hM9Z7kDTRQHQ5eZAj3",
   ];
 
   if (templateId === SIGNATURE_ONLY_TEMPLATE) {

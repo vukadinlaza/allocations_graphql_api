@@ -197,19 +197,6 @@ const Mutations = {
       throw new Error("Deal with same name already exists");
     }
 
-    if (process.env.NODE_ENV === "production") {
-      // TODO: move to a service
-      await fetch("https://hooks.zapier.com/hooks/catch/7904699/onwul0r/", {
-        method: "post",
-        body: JSON.stringify({
-          dealId: deal._id,
-          organization: org.name,
-          dealName: deal.company_name,
-        }),
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
     const res = await ctx.db.deals.insertOne({
       ...deal,
       organization: org._id,
@@ -219,6 +206,20 @@ const Mutations = {
       created_at: Date.now(),
       inviteKey: uuid(),
     });
+
+    if (process.env.NODE_ENV === "production") {
+      // TODO: move to a service
+      await fetch("https://hooks.zapier.com/hooks/catch/7904699/onwul0r/", {
+        method: "post",
+        body: JSON.stringify({
+          dealId: res.ops[0]._id,
+          organization: org.name,
+          dealName: deal.company_name,
+        }),
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     return res.ops[0];
   },
   /** special handling for wire instructions upload **/
@@ -378,6 +379,17 @@ const Mutations = {
       created_at: Date.now(),
       inviteKey: uuid(),
     });
+    if (process.env.NODE_ENV === "production") {
+      await fetch("https://hooks.zapier.com/hooks/catch/7904699/onwul0r/", {
+        method: "post",
+        body: JSON.stringify({
+          dealId: res.ops[0]._id,
+          organization: orgName,
+          dealName: deal.company_name,
+        }),
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     return res.ops[0];
   },
   /** upload deal doc, S3 & db **/
