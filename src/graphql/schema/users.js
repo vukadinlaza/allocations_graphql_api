@@ -52,6 +52,9 @@ type User {
   investmentsCount: Int
   avgMultiple: Float
   portfolioValue: Float
+  allocations_angel: Boolean
+  linkedinUrl: String
+  sectors: [Object]
 }
 
 input UserInput {
@@ -95,5 +98,6 @@ extend type Mutation {
   updateUser(input: UserInput): User
   updateInvestor(investment: InvestmentInput): User
   submitTaxDocument(payload: Object): User
+  addProfileImage(email: String!, image: Upload, linkedinUrl: String): User
 }
 `);

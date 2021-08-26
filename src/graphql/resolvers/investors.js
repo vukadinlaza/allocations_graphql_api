@@ -374,6 +374,24 @@ const Mutations = {
 
     return db.users.findOne({ _id: ObjectId(user._id) });
   },
+
+  addProfileImage: async (_, { email, image, linkedinUrl }, { db, user }) => {
+    const foundUser = await db.users.findOne({ email });
+    if (!foundUser) {
+      throw new Error("no user found!");
+    }
+    const file = await image;
+    const key = await Uploader.putInvestorProfileImage(
+      foundUser._id,
+      file,
+      "profileImage"
+    );
+    await db.users.updateOne(
+      { _id: ObjectId(foundUser._id) },
+      { $set: { profileImageKey: key, linkedinUrl } }
+    );
+    return foundUser;
+  },
 };
 
 module.exports = {

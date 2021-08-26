@@ -23,6 +23,21 @@ async function putInvestorDoc(_id, doc, extension) {
   return Key;
 }
 
+async function putInvestorProfileImage(_id, doc, filename) {
+  const { createReadStream } = doc;
+  const Key = `investors/${_id}/${filename}`;
+  const obj = {
+    Bucket: "allocations-user-img",
+    Key,
+    Body: createReadStream(),
+    ContentType: doc.mimetype,
+    ContentDisposition: "inline",
+  };
+  await s3.upload(obj).promise();
+
+  return Key;
+}
+
 /** Investment Docs for individual investments **/
 async function putInvestmentDoc(investment_id, doc) {
   const { createReadStream, filename } = doc;
@@ -46,4 +61,9 @@ function rmInvestmentDoc(investment_id, filename) {
     .promise();
 }
 
-module.exports = { putInvestmentDoc, rmInvestmentDoc, putInvestorDoc };
+module.exports = {
+  putInvestmentDoc,
+  rmInvestmentDoc,
+  putInvestorDoc,
+  putInvestorProfileImage,
+};
