@@ -377,9 +377,10 @@ const Mutations = {
 
   addProfileImage: async (_, { email, image, linkedinUrl }, { db, user }) => {
     const foundUser = await db.users.findOne({ email });
-    if (!foundUser) {
+    if (!foundUser || foundUser === null) {
       throw new Error("no user found!");
     }
+    console.log("FOUND USER", foundUser);
     const file = await image;
     const key = await Uploader.putInvestorProfileImage(
       foundUser._id,
@@ -390,6 +391,7 @@ const Mutations = {
       { _id: ObjectId(foundUser._id) },
       { $set: { profileImageKey: key, linkedinUrl } }
     );
+    console.log("KEY", key);
     return foundUser;
   },
 };
