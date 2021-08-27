@@ -89,6 +89,7 @@ const Deal = {
     return dealOnboarding;
   },
   AUM: async (deal, _, { db }) => {
+    if(deal.AUM) return deal.AUM
     const wiredInvestments = await db.investments
       .find({ deal_id: deal._id, status: { $in: ["wired", "complete"] } })
       .toArray();
@@ -169,7 +170,7 @@ const Queries = {
       .aggregate(countAggregation)
       .toArray();
     const count = dealsCount.length ? dealsCount[0].count : 0;
-
+  
     let deals = await ctx.db
       .collection("deals")
       .aggregate(aggregation)
@@ -177,9 +178,9 @@ const Queries = {
       .limit(pagination)
       .toArray();
 
-    deals = deals.map((item) => item.deal);
+      deals = deals.map((item) => item.deal);
 
-    return { count, deals };
+      return { count, deals };
   },
 };
 
