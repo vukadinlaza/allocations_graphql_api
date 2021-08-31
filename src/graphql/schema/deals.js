@@ -45,6 +45,8 @@ type Deal {
   viewedUsers: [User]
   dealOnboarding: dealOnboarding
   AUM: Int
+  slack_deal: Boolean
+  sector: String
 }
 
 type DealParams {

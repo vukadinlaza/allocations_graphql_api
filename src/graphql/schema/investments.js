@@ -21,6 +21,7 @@ type Investment {
   metaData: Object
   submissionData: SubmissionData
   previewLink: String
+  slack_investment: Boolean
 }
 
 type SubmissionData {

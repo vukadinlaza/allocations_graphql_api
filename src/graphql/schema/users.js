@@ -55,6 +55,7 @@ type User {
   allocations_angel: Boolean
   linkedinUrl: String
   sectors: [Object]
+  slackAmount: Int
 }
 
 input UserInput {
@@ -87,7 +88,7 @@ type UserPagination {
 extend type Query {
   investor(email: String, _id: String, deal_id: String): User
   allInvestors: [User]
-  allUsers(pagination: PaginationInput!): UserPagination
+  allUsers(pagination: PaginationInput!, additionalFilter: Object): UserPagination
   searchUsers(org: String!, q: String!, limit: Int): [User]
   getLink(input: Object): Object
 }

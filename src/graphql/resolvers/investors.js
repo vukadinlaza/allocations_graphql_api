@@ -172,9 +172,11 @@ const Queries = {
   allUsers: async (_, args, ctx) => {
     isAdmin(ctx);
     const { pagination, currentPage } = args.pagination;
-
     const documentsToSkip = pagination * currentPage;
-    const aggregation = customUserPagination(args.pagination);
+    const aggregation = customUserPagination(
+      args.pagination,
+      args.additionalFilter
+    );
     const countAggregation = [...aggregation, { $count: "count" }];
     const usersCount = await ctx.db
       .collection("users")
@@ -190,7 +192,6 @@ const Queries = {
       .toArray();
 
     users = users.map((item) => item.user);
-
     return { count, users };
   },
   searchUsers: async (_, { org, q }, ctx) => {
@@ -380,7 +381,7 @@ const Mutations = {
     if (!foundUser || foundUser === null) {
       throw new Error("no user found!");
     }
-    console.log("FOUND USER", foundUser);
+
     const file = await image;
     const key = await Uploader.putInvestorProfileImage(
       foundUser._id,

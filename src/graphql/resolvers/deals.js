@@ -89,7 +89,7 @@ const Deal = {
     return dealOnboarding;
   },
   AUM: async (deal, _, { db }) => {
-    if(deal.AUM) return deal.AUM
+    if (deal.AUM) return deal.AUM;
     const wiredInvestments = await db.investments
       .find({ deal_id: deal._id, status: { $in: ["wired", "complete"] } })
       .toArray();
@@ -159,10 +159,8 @@ const Queries = {
   fundAdminTables: async (_, args, ctx) => {
     isAdmin(ctx);
     const { pagination, currentPage } = args.pagination;
-
     const documentsToSkip = pagination * currentPage;
-    const additionalFilter = { key: "investmentType", filter: args.filter };
-    const aggregation = customDealPagination(args.pagination, additionalFilter);
+    const aggregation = customDealPagination(args.pagination, args.filter);
     const countAggregation = [...aggregation, { $count: "count" }];
 
     const dealsCount = await ctx.db
@@ -170,7 +168,7 @@ const Queries = {
       .aggregate(countAggregation)
       .toArray();
     const count = dealsCount.length ? dealsCount[0].count : 0;
-  
+
     let deals = await ctx.db
       .collection("deals")
       .aggregate(aggregation)
@@ -178,9 +176,9 @@ const Queries = {
       .limit(pagination)
       .toArray();
 
-      deals = deals.map((item) => item.deal);
+    deals = deals.map((item) => item.deal);
 
-      return { count, deals };
+    return { count, deals };
   },
 };
 

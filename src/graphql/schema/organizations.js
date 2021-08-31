@@ -27,6 +27,8 @@ type Organization {
   totalFundAUM: Int
   totalSPVAUM: Int
   totalInvestors: Int
+  totalClosed: Int
+  slackProspects: Int
 }
 
 input OrganizationInput {

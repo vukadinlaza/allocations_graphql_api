@@ -247,6 +247,34 @@ const pagHelpers = {
               },
             },
           ],
+          slackProspects: [
+            {
+              $addFields: {
+                isSlackDeal: {
+                  $cond: [{ $eq: ["$deals.slack_deal", true] }, 1, 0],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                name: { $first: "$name" },
+                slug: { $first: "$slug" },
+                slackDeals: { $sum: "$isSlackDeal" },
+              },
+            },
+          ],
+          totalClosed: [
+            { $match: { "deals.date_closed": { $exists: true, $ne: "" } } },
+            {
+              $group: {
+                _id: "$_id",
+                name: { $first: "$name" },
+                slug: { $first: "$slug" },
+                totalClosed: { $sum: 1 },
+              },
+            },
+          ],
         },
       },
       {
@@ -260,6 +288,8 @@ const pagHelpers = {
               "$totalSPVs",
               "$totalFunds",
               "$totalInvestors",
+              "$slackProspects",
+              "$totalClosed",
             ],
           },
         },
@@ -277,6 +307,8 @@ const pagHelpers = {
           totalSPVs: { $push: "$all.totalSPVs" },
           totalFunds: { $push: "$all.totalFunds" },
           totalInvestors: { $push: "$all.totalInvestors" },
+          slackProspects: { $push: "$all.slackDeals" },
+          totalClosed: { $push: "$all.totalClosed" },
           name: { $first: "$all.name" },
           slug: { $first: "$all.slug" },
         },
@@ -295,6 +327,10 @@ const pagHelpers = {
       {
         $unwind: { path: "$totalInvestors", preserveNullAndEmptyArrays: true },
       },
+      {
+        $unwind: { path: "$slackProspects", preserveNullAndEmptyArrays: true },
+      },
+      { $unwind: { path: "$totalClosed", preserveNullAndEmptyArrays: true } },
 
       { $sort: { [sortField]: sortOrder ? sortOrder : 1 } },
     ];
@@ -422,8 +458,11 @@ const pagHelpers = {
 
     return aggregation;
   },
-  customUserPagination: ({ sortField, sortOrder, ...pagProps }) => {
-    const userFilters = pagHelpers.getFilters(pagProps);
+  customUserPagination: (
+    { sortField, sortOrder, ...pagProps },
+    additionalFilter
+  ) => {
+    const userFilters = pagHelpers.getFilters(pagProps, additionalFilter);
     return [
       userFilters,
       {
@@ -476,6 +515,13 @@ const pagHelpers = {
           investmentNewValue: {
             $multiply: ["$investmentIntValue", "$investmentMultiple"],
           },
+          invSlackAmount: {
+            $cond: [
+              { $eq: ["$investments.deal.slack_deal", true] },
+              "$investmentIntValue",
+              0,
+            ],
+          },
         },
       },
       {
@@ -484,6 +530,7 @@ const pagHelpers = {
           investmentAmount: { $sum: "$investmentIntValue" },
           portfolioValue: { $sum: "$investmentNewValue" },
           investments: { $sum: 1 },
+          slackAmount: { $sum: "$invSlackAmount" },
           user: { $first: "$$ROOT" },
         },
       },
@@ -505,6 +552,7 @@ const pagHelpers = {
           "user.investmentAmount": "$investmentAmount",
           "user.investmentsCount": "$investments",
           "user.portfolioValue": "$portfolioValue",
+          "user.slackAmount": "$slackAmount",
         },
       },
       {
@@ -517,6 +565,11 @@ const pagHelpers = {
           "user.investmentsCount": 1,
           "user.avgMultiple": 1,
           "user.portfolioValue": 1,
+          "user.allocations_angel": 1,
+          "user.linkedinUrl": 1,
+          "user.sectors": 1,
+          "user.slackAmount": 1,
+          "user.country": 1,
         },
       },
       { $sort: { [`user.${sortField}`]: sortOrder ? sortOrder : 1 } },
