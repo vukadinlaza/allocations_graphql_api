@@ -28,6 +28,7 @@ type Organization {
   totalSPVAUM: Int
   totalInvestors: Int
   totalClosed: Int
+  totalOpen: Int
   slackProspects: Int
 }
 

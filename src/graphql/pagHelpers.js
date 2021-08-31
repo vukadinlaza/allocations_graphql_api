@@ -275,6 +275,24 @@ const pagHelpers = {
               },
             },
           ],
+          totalOpen: [
+            {
+              $match: {
+                $or: [
+                  { "deals.date_closed": { $exists: true, $eq: "" } },
+                  { "deals.date_closed": { $exists: false } },
+                ],
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                name: { $first: "$name" },
+                slug: { $first: "$slug" },
+                totalOpen: { $sum: 1 },
+              },
+            },
+          ],
         },
       },
       {
@@ -290,6 +308,7 @@ const pagHelpers = {
               "$totalInvestors",
               "$slackProspects",
               "$totalClosed",
+              "$totalOpen",
             ],
           },
         },
@@ -309,6 +328,7 @@ const pagHelpers = {
           totalInvestors: { $push: "$all.totalInvestors" },
           slackProspects: { $push: "$all.slackDeals" },
           totalClosed: { $push: "$all.totalClosed" },
+          totalOpen: { $push: "$all.totalOpen" },
           name: { $first: "$all.name" },
           slug: { $first: "$all.slug" },
         },
@@ -331,6 +351,7 @@ const pagHelpers = {
         $unwind: { path: "$slackProspects", preserveNullAndEmptyArrays: true },
       },
       { $unwind: { path: "$totalClosed", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$totalOpen", preserveNullAndEmptyArrays: true } },
 
       { $sort: { [sortField]: sortOrder ? sortOrder : 1 } },
     ];
