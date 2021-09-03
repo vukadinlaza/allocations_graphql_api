@@ -41,6 +41,7 @@ const Queries = {
       'nicholas@allocations.com',
       'elizabeth@allocations.com',
       'adrian@allocations.com',
+      'kingsley@allocations.com'
     ];
 
     if(!allowedEmails.includes(ctx.user.email)){
