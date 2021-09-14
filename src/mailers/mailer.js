@@ -4,11 +4,12 @@ const logger = require("../utils/logger");
 // configure with API key
 mailer.setApiKey(process.env.SENDGRID_API_KEY);
 
-async function sendEmail({ mainData, template, templateData }) {
-  const html = template(templateData);
-
-  const msg = { ...mainData, html };
+async function sendEmail(data) {
   try {
+    const { mainData, template, templateData } = data;
+    const html = template(templateData);
+    const msg = { ...mainData, html };
+
     await mailer.send(msg);
     return { status: "sent", sent_at: Date.now(), to: mainData.to };
   } catch (e) {

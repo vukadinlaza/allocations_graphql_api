@@ -1,18 +1,18 @@
-const mailer = require("./mailer");
+const { mailer } = require("./mailer");
 const logger = require("../utils/logger");
 
-async function sendConfirmation({ deal, to }) {
-  const html = confirmationTemplate();
-
-  const msg = {
-    to,
-    from: "support@allocations.com",
-    subject: `Completed documents for ${deal.company_name}`,
-    text: `Completed documents for ${deal.company_name}`,
-    html,
-  };
-
+async function sendConfirmation(confirmationDetails) {
   try {
+    const { deal, to } = confirmationDetails;
+    const html = confirmationTemplate();
+    const msg = {
+      to,
+      from: "support@allocations.com",
+      subject: `Completed documents for ${deal.company_name}`,
+      text: `Completed documents for ${deal.company_name}`,
+      html,
+    };
+
     await mailer.send(msg);
     return { status: "sent", sent_at: Date.now(), to };
   } catch (e) {

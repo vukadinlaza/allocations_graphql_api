@@ -1,20 +1,18 @@
-const mailer = require("@sendgrid/mail");
+const { mailer } = require("./mailer");
 const logger = require("../utils/logger");
 
-mailer.setApiKey(process.env.SENDGRID_API_KEY);
-
-async function sendInvite({ org, to }) {
-  const html = adminInviteTemplate({ org });
-
-  const msg = {
-    to,
-    from: "invites@allocations.com",
-    subject: `You have been added as an admin for ${org.name} on Allocations`,
-    text: `You have been added as an admin for ${org.name} on Allocations`,
-    html,
-  };
-
+async function sendInvite(inviteDetails) {
   try {
+    const { org, to } = inviteDetails;
+    const html = adminInviteTemplate({ org });
+    const msg = {
+      to,
+      from: "invites@allocations.com",
+      subject: `You have been added as an admin for ${org.name} on Allocations`,
+      text: `You have been added as an admin for ${org.name} on Allocations`,
+      html,
+    };
+
     await mailer.send(msg);
     return { status: "sent", sent_at: Date.now(), to };
   } catch (e) {

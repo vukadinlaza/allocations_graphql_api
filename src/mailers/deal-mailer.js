@@ -1,4 +1,4 @@
-const mailer = require("./mailer");
+const { mailer } = require("./mailer");
 const logger = require("../utils/logger");
 const dealInviteTemplate = require("./templates/deal-invite-template");
 const {
@@ -8,7 +8,7 @@ const {
 async function sendInvite({ deal, sender, to, org }) {
   sender.name = User.name(sender);
   const link = `https://dashboard.allocations.com/deals/${org.slug}/${deal.slug}?invite_code=${deal.inviteKey}`;
-  const html = dealInviteTemplate({ deal, sender, org, link });
+  const html = dealInviteTemplate({ org, link });
 
   const msg = {
     to,

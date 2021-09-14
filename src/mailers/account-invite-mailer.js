@@ -1,18 +1,18 @@
-const mailer = require("./mailer");
+const { mailer } = require("./mailer");
 const logger = require("../utils/logger");
 
-async function sendInvite({ sender, to }) {
-  const html = memberAccountInviteTemplate({ sender });
-
-  const msg = {
-    to,
-    from: "invites@allocations.com",
-    subject: `You have been added as an member to ${sender.email}'s account on Allocations`,
-    text: `You have been added as an member to ${sender.email}'s account on Allocations`,
-    html,
-  };
-
+async function sendInvite(inviteDetails) {
   try {
+    const { sender, to } = inviteDetails;
+    const html = memberAccountInviteTemplate({ sender });
+    const msg = {
+      to,
+      from: "invites@allocations.com",
+      subject: `You have been added as a member to ${sender.email}'s account on Allocations`,
+      text: `You have been added as a member to ${sender.email}'s account on Allocations`,
+      html,
+    };
+
     await mailer.send(msg);
     return { status: "sent", sent_at: Date.now(), to };
   } catch (e) {
