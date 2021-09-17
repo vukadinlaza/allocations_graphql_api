@@ -47,6 +47,7 @@ type Deal {
   AUM: Int
   slack_deal: Boolean
   sector: String
+  allocation_advisor: Boolean
 }
 
 type DealParams {

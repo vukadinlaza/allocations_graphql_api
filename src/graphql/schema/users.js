@@ -56,6 +56,8 @@ type User {
   linkedinUrl: String
   sectors: [Object]
   slackAmount: Int
+  username: String
+  display_username: Boolean
 }
 
 input UserInput {
@@ -76,8 +78,12 @@ input UserInput {
   showCredit: Boolean
   showBuild: Boolean
   kycDoc: Object
-  termsOfServiceCF: Boolean,
+  termsOfServiceCF: Boolean
   investorLimits: Object
+  state: String
+  linkedinUrl: String
+  username: String
+  display_username: Boolean
 }
 
 type UserPagination {
@@ -100,5 +106,9 @@ extend type Mutation {
   updateInvestor(investment: InvestmentInput): User
   submitTaxDocument(payload: Object): User
   addProfileImage(email: String!, image: Upload, linkedinUrl: String): User
+  updateProfileImage(email: String!, image: Upload): User
+  addSectors(email: String!, sector: String!): User
+  deleteSectors(email: String!, sector: String!): User
+  displayUsernameStatus(email: String!, display_username: Boolean): User
 }
 `);

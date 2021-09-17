@@ -330,6 +330,9 @@ const Mutations = {
       "email",
       "accountId",
       "accredidation_status",
+      "display_username",
+      "linkedinUrl",
+      "username",
     ];
     const data = pick({ ...user }, options);
     if (!isEmpty(data)) {
@@ -376,7 +379,7 @@ const Mutations = {
     return db.users.findOne({ _id: ObjectId(user._id) });
   },
 
-  addProfileImage: async (_, { email, image, linkedinUrl }, { db, user }) => {
+  addProfileImage: async (_, { email, image, linkedinUrl }, { db }) => {
     const foundUser = await db.users.findOne({ email });
     if (!foundUser || foundUser === null) {
       throw new Error("no user found!");
@@ -394,6 +397,66 @@ const Mutations = {
     );
     console.log("KEY", key);
     return foundUser;
+  },
+
+  updateProfileImage: async (_, { email, image }, { db }) => {
+    const foundUser = await db.users.findOne({ email });
+    if (!foundUser || foundUser === null) {
+      throw new Error("no user found!");
+    }
+
+    const imgKey = `${new Date()}-profileImage`;
+    const file = await image;
+    const key = await Uploader.putInvestorProfileImage(
+      foundUser._id,
+      file,
+      imgKey
+    );
+    await db.users.updateOne(
+      { _id: ObjectId(foundUser._id) },
+      { $set: { profileImageKey: key } }
+    );
+    console.log("KEY", key);
+    return foundUser;
+  },
+
+  addSectors: async (_, { email, sector }, { db }) => {
+    const foundUser = await db.users.findOne({ email });
+    if (!foundUser || foundUser === null) {
+      throw new Error("no user found!");
+    }
+    await db.users.updateOne(
+      { _id: ObjectId(foundUser._id) },
+      { $addToSet: { sectors: sector } }
+    );
+
+    return db.users.findOne({ email });
+  },
+
+  deleteSectors: async (_, { email, sector }, { db }) => {
+    const foundUser = await db.users.findOne({ email });
+    if (!foundUser || foundUser === null) {
+      throw new Error("no user found!");
+    }
+    await db.users.updateOne(
+      { _id: ObjectId(foundUser._id) },
+      { $pull: { sectors: sector } }
+    );
+
+    return db.users.findOne({ email });
+  },
+
+  displayUsernameStatus: async (_, { email, display_username }, { db }) => {
+    const foundUser = await db.users.findOne({ email });
+    if (!foundUser || foundUser === null) {
+      throw new Error("no user found!");
+    }
+    await db.users.updateOne(
+      { _id: ObjectId(foundUser._id) },
+      { $set: { display_username: display_username } }
+    );
+
+    return db.users.findOne({ email });
   },
 };
 
