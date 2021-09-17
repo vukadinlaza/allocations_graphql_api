@@ -144,7 +144,9 @@ const Mutations = {
 
   confirmInvestment: async (_, { payload }, { user, db }) => {
     const deal = await db.deals.findOne({ _id: ObjectId(payload.dealId) });
-
+    const organization = await db.organizations.findOne({
+      _id: ObjectId(deal.organization),
+    });
     const signDeadline = get(deal, "dealParams.signDeadline");
     const status = get(deal, "status");
 
@@ -224,6 +226,7 @@ const Mutations = {
       ...investment,
       dealName: deal.company_name,
       permanentDownloadUrl,
+      ...organization,
     };
 
     await signedSPV(zapData);

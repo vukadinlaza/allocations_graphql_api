@@ -1,9 +1,10 @@
 const fetch = require("node-fetch");
 
 const signedSPV = async ({
-  submissionData = {},
+  submissionData,
   dealName,
   permanentDownloadUrl,
+  name: organizationName,
 }) => {
   let url = null;
   if (process.env.NODE_ENV === "production") {
@@ -15,6 +16,7 @@ const signedSPV = async ({
     method: "post",
     body: JSON.stringify({
       dealName,
+      organization: organizationName,
       name:
         submissionData.investor_type === "entity"
           ? submissionData.fullName
