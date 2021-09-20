@@ -227,6 +227,7 @@ const Mutations = {
       dealName: deal.company_name,
       permanentDownloadUrl,
       ...organization,
+      email: user.email,
     };
 
     await signedSPV(zapData);
