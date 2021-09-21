@@ -79,7 +79,7 @@ const Queries = {
 
     documents = documents.map((item) => {
       const link = ["KYC", "K-12"].includes(args.documentType)
-        ? item.documents.link
+        ? `https://app.docspring.com/submissions/${item.documents.submissionId}/download`
         : Cloudfront.getSignedUrl(item.documents.link);
       return { ...item.documents, link };
     });
