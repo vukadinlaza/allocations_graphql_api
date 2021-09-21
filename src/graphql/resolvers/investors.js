@@ -405,7 +405,7 @@ const Mutations = {
       throw new Error("no user found!");
     }
 
-    const imgKey = `${new Date()}-profileImage`;
+    const imgKey = `${Date.now()}-profileImage`;
     const file = await image;
     const key = await Uploader.putInvestorProfileImage(
       foundUser._id,
