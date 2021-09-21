@@ -48,7 +48,7 @@ const Deal = {
   },
   dealParams: (deal) => {
     let m = 1;
-    if (deal.dealParams) {
+    if (deal.dealParams && deal.dealParams !== null) {
       m = parseFloat(deal.dealParams.dealMultiple || "1");
       deal.dealParams.dealMultiple = m;
     }
