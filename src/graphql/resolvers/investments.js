@@ -147,6 +147,7 @@ const Mutations = {
     const organization = await db.organizations.findOne({
       _id: ObjectId(deal.organization),
     });
+
     const signDeadline = get(deal, "dealParams.signDeadline");
     const status = get(deal, "status");
 

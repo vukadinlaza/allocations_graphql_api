@@ -87,6 +87,7 @@ type DealParams {
   fundManagementFeeType: String
   fundGeneralPartner: String
   fundEstimatedTerm: String
+  is3c7: Boolean
 }
 
 input DealParamsInput {
@@ -122,6 +123,7 @@ input DealParamsInput {
   fundGeneralPartner: String
   fundEstimatedTerm: String
   dealLogo: String
+  is3c7: Boolean
 }
 
 type dealOnboarding {

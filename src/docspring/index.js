@@ -50,6 +50,7 @@ const getTemplateData = (input, user, templateId) => {
     tenants_by_entirety,
     accredited_investor_status,
     secondInvestor,
+    is3c7_options_status,
   } = input;
 
   const SIGNATURE_ONLY_TEMPLATE = "tpl_ctrRDXgQdKz5YGg9QK";
@@ -78,7 +79,24 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_EYxzxPx3Lh5dSEaDbM",
     "tpl_RD3Y4ESZzeyqkK5sLG",
     "tpl_hM9Z7kDTRQHQ5eZAj3",
+    "tpl_RSMHzMg3bRh5FXexCy",
   ];
+  const kunalDeals = ["tpl_FbnCe3L7c9Qj32JHTG"];
+  if (kunalDeals.includes(templateId)) {
+    return {
+      InvestorType: capitalize(investor_type),
+      MemberName: legalName,
+      SubAmount: investmentAmount,
+      USStateIndividual: isTypeIndividual ? countryWithState : "",
+      USStateEntity: isTypeEntity ? countryWithState : "",
+      QualifiedPurchaserIndiv: isTypeIndividual ? is3c7_options_status : "",
+      QualifiedPurchaserEntity: isTypeIndividual ? "" : is3c7_options_status,
+      Email: user.email,
+      FullName: nameToUse,
+      Signature: nameToUse,
+      "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
+    };
+  }
 
   if (templateId === SIGNATURE_ONLY_TEMPLATE) {
     return {

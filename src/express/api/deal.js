@@ -6,31 +6,32 @@ const apiKeys = [{ key: process.env.DEAL_IMG_KEY }];
 
 module.exports = Router().post("/", async (req, res) => {
   try {
-    const { dealSlug, organizationSlug = "allocations", API_KEY } = req.body;
+    return res.send({});
+    // const { dealSlug, organizationSlug = "allocations", API_KEY } = req.body;
 
-    const key = apiKeys.find((k) => k.key === API_KEY);
-    if (!key) {
-      return res.send({
-        status: 400,
-        error: "Invalid API key",
-      });
-    }
+    // const key = apiKeys.find((k) => k.key === API_KEY);
+    // if (!key) {
+    //   return res.send({
+    //     status: 400,
+    //     error: "Invalid API key",
+    //   });
+    // }
 
-    const db = await getDB();
-    const organization = await db.organizations.findOne({
-      slug: organizationSlug,
-    });
+    // const db = await getDB();
+    // const organization = await db.organizations.findOne({
+    //   slug: organizationSlug,
+    // });
 
-    if (organization !== null && organization._id) {
-      const deal = await db.deals.findOne({
-        slug: dealSlug,
-        organization: organization._id,
-      });
+    // if (organization !== null && organization._id) {
+    //   const deal = await db.deals.findOne({
+    //     slug: dealSlug,
+    //     organization: organization._id,
+    //   });
 
-      return res.send(deal);
-    } else {
-      return res.sendStatus(200);
-    }
+    //   return res.send(deal);
+    // } else {
+    //   return res.sendStatus(200);
+    // }
   } catch (e) {
     throw new Error(e);
   }
