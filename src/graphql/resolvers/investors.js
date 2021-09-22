@@ -379,7 +379,7 @@ const Mutations = {
     return db.users.findOne({ _id: ObjectId(user._id) });
   },
 
-  addProfileImage: async (_, { email, image, linkedinUrl }, { db }) => {
+  addProfileImage: async (_, { email, image }, { db }) => {
     const foundUser = await db.users.findOne({ email });
     if (!foundUser || foundUser === null) {
       throw new Error("no user found!");
@@ -393,7 +393,7 @@ const Mutations = {
     );
     await db.users.updateOne(
       { _id: ObjectId(foundUser._id) },
-      { $set: { profileImageKey: key, linkedinUrl } }
+      { $set: { profileImageKey: key } }
     );
     console.log("KEY", key);
     return foundUser;
@@ -446,6 +446,19 @@ const Mutations = {
     return db.users.findOne({ email });
   },
 
+  deleteProfileImage: async (_, { email, profileImageKey }, { db }) => {
+    const foundUser = await db.users.findOne({ email });
+    if (!foundUser || foundUser === null) {
+      throw new Error("no user found!");
+    }
+    await db.users.updateOne(
+      { _id: ObjectId(foundUser._id) },
+      { $unset: { profileImageKey: profileImageKey } }
+    );
+
+    return db.users.findOne({ email });
+  },
+
   displayUsernameStatus: async (_, { email, display_username }, { db }) => {
     const foundUser = await db.users.findOne({ email });
     if (!foundUser || foundUser === null) {
@@ -454,6 +467,19 @@ const Mutations = {
     await db.users.updateOne(
       { _id: ObjectId(foundUser._id) },
       { $set: { display_username: display_username } }
+    );
+
+    return db.users.findOne({ email });
+  },
+
+  updateInvestorLinkedin: async (_, { email, linkedinUrl }, { db }) => {
+    const foundUser = await db.users.findOne({ email });
+    if (!foundUser || foundUser === null) {
+      throw new Error("no user found!");
+    }
+    await db.users.updateOne(
+      { _id: ObjectId(foundUser._id) },
+      { $set: { linkedinUrl: linkedinUrl } }
     );
 
     return db.users.findOne({ email });

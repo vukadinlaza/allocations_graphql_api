@@ -105,10 +105,12 @@ extend type Mutation {
   updateUser(input: UserInput): User
   updateInvestor(investment: InvestmentInput): User
   submitTaxDocument(payload: Object): User
-  addProfileImage(email: String!, image: Upload, linkedinUrl: String): User
+  addProfileImage(email: String!, image: Upload): User
   updateProfileImage(email: String!, image: Upload): User
   addSectors(email: String!, sector: String!): User
   deleteSectors(email: String!, sector: String!): User
+  deleteProfileImage(email: String!, profileImageKey: String!): User
   displayUsernameStatus(email: String!, display_username: Boolean): User
+  updateInvestorLinkedin(email: String!, linkedinUrl: String): User
 }
 `);
