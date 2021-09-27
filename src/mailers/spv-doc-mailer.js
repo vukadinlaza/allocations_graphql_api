@@ -6,8 +6,8 @@ const spvDocTemplate = require("./spv-doc-template");
 
 const sendSPVDoc = async (spvDocData) => {
   try {
-    const { pdfDownloadUrl, email, deal } = spvDocData;
-    const html = spvDocTemplate({ deal });
+    const { pdfDownloadUrl, email, deal, orgName } = spvDocData;
+    const html = spvDocTemplate({ orgName });
 
     const successful = function (response) {
       return response.statusCode >= 200 && response.statusCode < 300;

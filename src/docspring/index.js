@@ -317,12 +317,20 @@ const generateDocSpringPDF = async (
   };
 
   const response = await DocSpringAPI.generatePDF(templateId, submission_data);
-  if (response.status !== "success") return;
+  if (response.status !== "success")
+    return {
+      status: response.status,
+    };
+
+  const { name } = await db
+    .collection("organizations")
+    .findOne({ _id: deal.organization });
 
   const emailData = {
     pdfDownloadUrl: response.downloadUrl,
     email: user.email,
     deal,
+    orgName: name,
   };
 
   sendSPVDoc(emailData);
