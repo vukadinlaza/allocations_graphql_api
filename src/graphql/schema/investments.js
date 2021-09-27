@@ -71,7 +71,7 @@ scalar Object
 
 input InvestmentInput {
   _id: String
-  amount: Int
+  amount: Float
   deal_id: String
   user_id: String
   status: String
