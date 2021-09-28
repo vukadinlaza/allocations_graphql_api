@@ -591,6 +591,7 @@ const pagHelpers = {
           "user.sectors": 1,
           "user.slackAmount": 1,
           "user.country": 1,
+          "user.profileImageKey": 1,
         },
       },
       { $sort: { [`user.${sortField}`]: sortOrder ? sortOrder : 1 } },
