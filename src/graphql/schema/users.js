@@ -84,6 +84,7 @@ input UserInput {
   linkedinUrl: String
   username: String
   display_username: Boolean
+  city: String
 }
 
 type UserPagination {

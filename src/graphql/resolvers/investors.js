@@ -333,6 +333,7 @@ const Mutations = {
       "display_username",
       "linkedinUrl",
       "username",
+      "city",
     ];
     const data = pick({ ...user }, options);
     if (!isEmpty(data)) {
