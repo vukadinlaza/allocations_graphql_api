@@ -6,6 +6,7 @@ const signedSPV = async ({
   permanentDownloadUrl,
   name: organizationName,
   email,
+  location,
 }) => {
   let url = null;
   if (process.env.NODE_ENV === "production") {
@@ -23,6 +24,7 @@ const signedSPV = async ({
           ? submissionData.fullName
           : submissionData.legalName,
       email,
+      location,
       type: submissionData.investor_type,
       entityName:
         submissionData.investor_type === "entity"

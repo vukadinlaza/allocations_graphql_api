@@ -223,12 +223,17 @@ const Mutations = {
     if (!permanentDownloadUrl)
       throw new UserInputError("There was an error with Docspring");
 
+    let location = payload.country;
+    if (payload.country === "United States")
+      location = `${payload.country}, ${payload.state}`;
+
     const zapData = {
       ...investment,
       dealName: deal.company_name,
       permanentDownloadUrl,
       ...organization,
       email: user.email,
+      location,
     };
 
     await signedSPV(zapData);
