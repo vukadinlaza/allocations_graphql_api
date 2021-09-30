@@ -1,12 +1,17 @@
 const { ObjectId } = require("mongodb");
 const moment = require("moment");
+const fetch = require("node-fetch");
 const { get } = require("lodash");
 const { isAdmin } = require("../permissions");
 const { UserInputError } = require("apollo-server-express");
 const Cloudfront = require("../../cloudfront");
 const Uploader = require("../../uploaders/investor-docs");
 const Investments = require("../schema/investments");
-const { getInvestmentPreview, getTemplate } = require("../../docspring");
+const {
+  getInvestmentPreview,
+  getTemplate,
+  createCapitalAccountDoc,
+} = require("../../docspring");
 const Mailer = require("../../mailers/mailer");
 const commitmentTemplate = require("../../mailers/templates/commitment-template");
 const commitmentCancelledTemplate = require("../../mailers/templates/commitment-cancelled-template");
@@ -282,6 +287,7 @@ const Mutations = {
       return false;
     }
   },
+  
   sendWireReminders: async (_, { investment_ids, deal_id }, { db }) => {
     try {
       const deal = await db
@@ -356,6 +362,67 @@ const Mutations = {
       return err;
     }
   },
+  createCapPDF: async (_, { data }, { user, db }) => {
+    function nWithCommas(num) {
+      if (!num) return 0;
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    const timeStamp = Date.now();
+    const amountFormat = (amount) => {
+      if (!amount) return 0;
+      const floatAmount = parseFloat(amount).toFixed(2);
+      return nWithCommas(floatAmount);
+    };
+
+    const investment = await db.investments.findOne({
+      _id: ObjectId(data.investmentId),
+    });
+    if (!investment) {
+      return null;
+    }
+    if (
+      get(investment, "documents", []).find((doc) =>
+        doc.includes("Capital_Account_Statement")
+      )
+    ) {
+      return investment;
+    }
+
+    const payload = {
+      name: data.investorNameEntity ? data.investorNameEntity : data.name,
+      currentDate: moment(new Date()).format("MMM DD, YYYY"),
+      effectiveDate: moment(ObjectId(investment._id).getTimestamp()).format(
+        "MMM DD, YYYY"
+      ),
+      subscriptionAmount: `$${amountFormat(data.subscriptionAmount)}`,
+      privateFundExpenses: `$${amountFormat(data.privateFundExpenses)}`,
+      managementFee: `$${amountFormat(data.managementFee)}` || "$0",
+      carryPercent: `${data.carryPercentage || "0"}%`,
+      netInvestmentAmount: `$${amountFormat(data.netInvestment)}`,
+      ownershipPercentage: `${data.ownership.toString()}%`,
+    };
+
+    const docspringRes = await createCapitalAccountDoc({ payload });
+    const res = await fetch(docspringRes.download_url);
+
+    const buffer = await res.arrayBuffer();
+    const s3Path = await Uploader.putInvestmentCapitalAccount(
+      investment._id,
+      buffer,
+      timeStamp,
+      "Capital Account Statement"
+    );
+
+    await db.investments.updateOne(
+      { _id: ObjectId(investment._id) },
+      {
+        $push: {
+          documents: `${s3Path}`,
+        },
+      }
+    );
+    return db.investments.findOne({ _id: ObjectId(investment._id) });
+  }
 };
 
 module.exports = {

@@ -64,6 +64,7 @@ extend type Mutation {
   cancelCommitment(_id: String!, reason: String!): Boolean
   addInvestmentDoc(investment_id: String!, doc: Upload!, isK1: Boolean): String
   rmInvestmentDoc(investment_id: String!, file: String!): Boolean
+  createCapPDF(data: Object): Investment
   sendWireReminders(investment_ids: [String], deal_id: String): Boolean
 }
 

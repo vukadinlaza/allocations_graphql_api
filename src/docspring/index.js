@@ -1,7 +1,6 @@
 // Find your API tokens here: https://app.docspring.com/api_tokens
 require("dotenv").config();
 const moment = require("moment");
-
 const DocSpring = require("docspring");
 const { capitalize, omit } = require("lodash");
 const { ObjectId } = require("mongodb");
@@ -446,9 +445,31 @@ const getTemplate = async ({
   return permanentDownloadUrl;
 };
 
+const createCapitalAccountDoc = ({ payload }) => {
+  var submission_data = {
+    editable: false,
+    data: payload,
+    field_overrides: {},
+    test: process.env.NODE_ENV === "production" ? false : true,
+    wait: true,
+  };
+
+  return new Promise((resolve, reject) => {
+    docspring.generatePDF(
+      "tpl_X2jPRnxTt57kTF7jFP",
+      submission_data,
+      (error, response) => {
+        if (error) reject(error);
+        else resolve(response.submission);
+      }
+    );
+  });
+};
+
 module.exports = {
   generateDocSpringPDF,
   createTaxDocument,
   getInvestmentPreview,
   getTemplate,
+  createCapitalAccountDoc,
 };

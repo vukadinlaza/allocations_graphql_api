@@ -54,6 +54,29 @@ async function putInvestmentDoc(investment_id, doc) {
 
   return Key;
 }
+async function putInvestmentCapitalAccount(
+  investment_id,
+  buffer,
+  timestamp,
+  templateName
+) {
+  const Key =
+    `investments/${investment_id}/${timestamp}-${templateName}.pdf`.replace(
+      /\s/g,
+      "_"
+    );
+
+  const obj = {
+    Bucket,
+    Key,
+    Body: Buffer.from(buffer),
+    ContentType: "application/pdf",
+    ContentDisposition: "inline",
+  };
+  await s3.upload(obj).promise();
+
+  return Key;
+}
 
 function rmInvestmentDoc(investment_id, filename) {
   return s3
@@ -66,4 +89,5 @@ module.exports = {
   rmInvestmentDoc,
   putInvestorDoc,
   putInvestorProfileImage,
+  putInvestmentCapitalAccount,
 };
