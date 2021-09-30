@@ -55,6 +55,7 @@ type User {
   allocations_angel: Boolean
   linkedinUrl: String
   sectors: [Object]
+  stages: [Object]
   slackAmount: Int
   username: String
   display_username: Boolean
@@ -110,6 +111,8 @@ extend type Mutation {
   updateProfileImage(email: String!, image: Upload): User
   addSectors(email: String!, sector: String!): User
   deleteSectors(email: String!, sector: String!): User
+  addStages(email: String!, stage: String!): User
+  deleteStages(email: String!, stage: String!): User
   deleteProfileImage(email: String!, profileImageKey: String!): User
   displayUsernameStatus(email: String!, display_username: Boolean): User
   updateInvestorLinkedin(email: String!, linkedinUrl: String): User

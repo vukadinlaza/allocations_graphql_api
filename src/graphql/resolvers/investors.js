@@ -447,6 +447,32 @@ const Mutations = {
     return db.users.findOne({ email });
   },
 
+  addStages: async (_, { email, stage }, { db }) => {
+    const foundUser = await db.users.findOne({ email });
+    if (!foundUser || foundUser === null) {
+      throw new Error("no user found!");
+    }
+    await db.users.updateOne(
+      { _id: ObjectId(foundUser._id) },
+      { $addToSet: { stages: stage } }
+    );
+
+    return db.users.findOne({ email });
+  },
+
+  deleteStages: async (_, { email, stage }, { db }) => {
+    const foundUser = await db.users.findOne({ email });
+    if (!foundUser || foundUser === null) {
+      throw new Error("no user found!");
+    }
+    await db.users.updateOne(
+      { _id: ObjectId(foundUser._id) },
+      { $pull: { stages: stage } }
+    );
+
+    return db.users.findOne({ email });
+  },
+
   deleteProfileImage: async (_, { email, profileImageKey }, { db }) => {
     const foundUser = await db.users.findOne({ email });
     if (!foundUser || foundUser === null) {
