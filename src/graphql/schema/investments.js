@@ -62,9 +62,9 @@ extend type Mutation {
   confirmInvestment(payload: Object): Investment!
   deleteInvestment(_id: String!): Boolean
   cancelCommitment(_id: String!, reason: String!): Boolean
-
   addInvestmentDoc(investment_id: String!, doc: Upload!, isK1: Boolean): String
   rmInvestmentDoc(investment_id: String!, file: String!): Boolean
+  sendWireReminders(investment_ids: [String], deal_id: String): Boolean
 }
 
 scalar Object

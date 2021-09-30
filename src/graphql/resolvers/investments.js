@@ -12,6 +12,7 @@ const commitmentTemplate = require("../../mailers/templates/commitment-template"
 const commitmentCancelledTemplate = require("../../mailers/templates/commitment-cancelled-template");
 const { signedSPV } = require("../../zaps/signedDocs");
 const { customInvestmentPagination } = require("../pagHelpers");
+const { sendWireReminderEmail } = require("../../mailers/wire-reminder");
 
 const Schema = Investments;
 
@@ -279,6 +280,80 @@ const Mutations = {
       return res.deletedCount === 1;
     } catch (e) {
       return false;
+    }
+  },
+  sendWireReminders: async (_, { investment_ids, deal_id }, { db }) => {
+    try {
+      const deal = await db
+        .collection("deals")
+        .findOne({ _id: ObjectId(deal_id) });
+      const org = await db
+        .collection("organizations")
+        .findOne({ _id: ObjectId(deal.organization) });
+
+      const currentTime = Math.round(new Date().getTime() / 1000);
+      const yesterday = currentTime - 24 * 3600;
+      const sentEmailsToday =
+        deal.wireReminderSent >= new Date(yesterday * 1000).getTime();
+
+      if (sentEmailsToday) {
+        throw new Error("Wire reminders already sent today.");
+      }
+
+      const oids = investment_ids.map((id) => new ObjectId(id));
+      const investments = await db
+        .collection("investments")
+        .aggregate([
+          {
+            $match: {
+              _id: { $in: oids },
+            },
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "user_id",
+              foreignField: "_id",
+              as: "user",
+            },
+          },
+          {
+            $unwind: {
+              path: "$user",
+            },
+          },
+        ])
+        .toArray();
+
+      const emailItems = await Promise.all(
+        investments.map(async (investment) => {
+          return {
+            name:
+              investment?.submissionData?.legalName ||
+              investment.user.first_name ||
+              investment.user.email,
+            email: investment.user.email,
+            investmentAmount: investment.amount,
+            company_name: deal.company_name,
+            org_slug: org.slug,
+            deal_slug: deal.slug,
+          };
+        })
+      );
+
+      emailItems.forEach(async (email) => {
+        await sendWireReminderEmail({ ...email });
+      });
+
+      await db
+        .collection("deals")
+        .updateOne(
+          { _id: ObjectId(deal_id) },
+          { $set: { wireReminderSent: new Date() } }
+        );
+      return true;
+    } catch (err) {
+      return err;
     }
   },
 };
