@@ -500,6 +500,19 @@ const Mutations = {
     return db.users.findOne({ email });
   },
 
+  addFirstAndLastName: async (_, { email, first_name, last_name }, { db }) => {
+    const foundUser = await db.users.findOne({ email });
+    if (!foundUser || foundUser === null) {
+      throw new Error("no user found!");
+    }
+    await db.users.updateOne(
+      { _id: ObjectId(foundUser._id) },
+      { $set: { first_name: first_name, last_name: last_name } }
+    );
+
+    return db.users.findOne({ email });
+  },
+
   updateInvestorLinkedin: async (_, { email, linkedinUrl }, { db }) => {
     const foundUser = await db.users.findOne({ email });
     if (!foundUser || foundUser === null) {
