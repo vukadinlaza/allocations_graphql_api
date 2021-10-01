@@ -334,6 +334,7 @@ const Mutations = {
       "linkedinUrl",
       "username",
       "city",
+      "profileBio",
     ];
     const data = pick({ ...user }, options);
     if (!isEmpty(data)) {

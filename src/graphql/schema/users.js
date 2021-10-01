@@ -59,6 +59,7 @@ type User {
   slackAmount: Int
   username: String
   display_username: Boolean
+  profileBio: String
 }
 
 input UserInput {
@@ -86,6 +87,7 @@ input UserInput {
   username: String
   display_username: Boolean
   city: String
+  profileBio: String
 }
 
 type UserPagination {

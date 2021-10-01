@@ -287,7 +287,7 @@ const Mutations = {
       return false;
     }
   },
-  
+
   sendWireReminders: async (_, { investment_ids, deal_id }, { db }) => {
     try {
       const deal = await db
@@ -422,7 +422,7 @@ const Mutations = {
       }
     );
     return db.investments.findOne({ _id: ObjectId(investment._id) });
-  }
+  },
 };
 
 module.exports = {
