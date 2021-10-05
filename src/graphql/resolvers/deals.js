@@ -534,6 +534,7 @@ const Mutations = {
   },
   createBuild: async (_, __, { user }) => {
     const deal = await DealService.create(user._id);
+    console.log(deal);
     const x = await DealService.get(deal._id);
     return x;
   },
