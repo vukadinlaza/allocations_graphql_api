@@ -23,7 +23,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
       signDeadline: serviceDeal.sign_deadline,
       wireDeadline: serviceDeal.sign_deadline,
       estimatedSetupCostsDollar: "100000",
-      managementFees: serviceDeal.management_fee.value,
+      managementFees: serviceDeal.management_fee,
       managementFeeType: serviceDeal.management_fee_frequency,
     },
   };
