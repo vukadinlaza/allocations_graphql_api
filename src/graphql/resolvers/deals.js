@@ -443,7 +443,7 @@ const Mutations = {
       title: document.filename,
     });
 
-    return DealService.get(deal_id);
+    return true;
   },
   addDealLogo: async (_, params, ctx) => {
     const serviceDeal = DealService.get(params.deal_id);
