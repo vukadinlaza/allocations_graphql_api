@@ -17,13 +17,14 @@ const commitmentTemplate = require("../../mailers/templates/commitment-template"
 const commitmentCancelledTemplate = require("../../mailers/templates/commitment-cancelled-template");
 const { signedSPV } = require("../../zaps/signedDocs");
 const { customInvestmentPagination } = require("../pagHelpers");
+const { DealService } = require("@allocations/deal-service");
 const { sendWireReminderEmail } = require("../../mailers/wire-reminder");
 
 const Schema = Investments;
 
 const Investment = {
-  deal: (investment, _, { db }) => {
-    return db.collection("deals").findOne({ _id: investment.deal_id });
+  deal: (investment, _, { db, datasources }) => {
+    return datasources.deals.getDealById({ deal_id: investment.deal_id });
   },
   investor: (investment, _, { db }) => {
     return db.collection("users").findOne({ _id: investment.user_id });
@@ -37,10 +38,10 @@ const Investment = {
       return [];
     }
   },
-  value: async (investment, _, { db }) => {
-    const deal = await db
-      .collection("deals")
-      .findOne({ _id: investment.deal_id });
+  value: async (investment, _, { db, datasources }) => {
+    const deal = await datasources.deals.getDealById({
+      deal_id: investment.deal_id,
+    });
     const multiple = parseInt(deal.dealParams.dealMultiple || "1");
     const value = investment.amount * multiple;
     return value;
@@ -81,10 +82,11 @@ const Mutations = {
     { investment: { user_id, deal_id, ...investment } },
     { db }
   ) => {
-    const deal = await db
-      .collection("deals")
-      .findOne({ _id: ObjectId(deal_id) });
+    let deal = await db.collection("deals").findOne({ _id: ObjectId(deal_id) });
 
+    if (!deal) {
+      deal = await DealService.get(deal_id);
+    }
     const res = await db.investments.insertOne({
       status: "invited",
       invited_at: Date.now(),
@@ -148,8 +150,10 @@ const Mutations = {
     return true;
   },
 
-  confirmInvestment: async (_, { payload }, { user, db }) => {
-    const deal = await db.deals.findOne({ _id: ObjectId(payload.dealId) });
+  confirmInvestment: async (_, { payload }, { user, db, datasources }) => {
+    const deal = await datasources.deals.getDealById({
+      deal_id: ObjectId(payload.dealId),
+    });
     const organization = await db.organizations.findOne({
       _id: ObjectId(deal.organization),
     });

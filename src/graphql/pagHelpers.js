@@ -598,6 +598,127 @@ const pagHelpers = {
       { $sort: { [`user.${sortField}`]: sortOrder ? sortOrder : 1 } },
     ];
   },
+  customInvestorsTablePagination: (
+    { sortField, sortOrder, ...pagProps },
+    additionalFilter
+  ) => {
+    const userFilters = pagHelpers.getFilters(pagProps, additionalFilter);
+    return [
+      userFilters,
+      {
+        $lookup: {
+          from: "investments",
+          localField: "_id",
+          foreignField: "user_id",
+          as: "investments",
+        },
+      },
+      {
+        $unwind: { path: "$investments", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: "deals",
+          localField: "investments.deal_id",
+          foreignField: "_id",
+          as: "investments.deal",
+        },
+      },
+      {
+        $unwind: {
+          path: "$investments.deal",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          investmentMultiple: {
+            $convert: {
+              input: "$investments.deal.dealParams.dealMultiple",
+              to: "double",
+              onError: 1, // Optional.
+              onNull: 1, // Optional.
+            },
+          },
+          investmentIntValue: {
+            $convert: {
+              input: "$investments.amount",
+              to: "int",
+              onError: 0, // Optional.
+              onNull: 0, // Optional.
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          investmentNewValue: {
+            $multiply: ["$investmentIntValue", "$investmentMultiple"],
+          },
+          invSlackAmount: {
+            $cond: [
+              { $eq: ["$investments.deal.slack_deal", true] },
+              "$investmentIntValue",
+              0,
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          investmentAmount: { $sum: "$investmentIntValue" },
+          portfolioValue: { $sum: "$investmentNewValue" },
+          slackAmount: { $sum: "$invSlackAmount" },
+          user: { $first: "$$ROOT" },
+          lastInvestment: { $last: "$investments.submissionData" },
+          // investments: { $sum: 1 },
+        },
+      },
+      {
+        $addFields: {
+          "user._id": "$_id",
+          "user.avgMultiple": {
+            $divide: [
+              "$portfolioValue",
+              {
+                $cond: [
+                  { $gte: ["$investmentAmount", 1] },
+                  "$investmentAmount",
+                  1,
+                ],
+              },
+            ],
+          },
+          "user.investmentAmount": "$investmentAmount",
+          "user.investmentsCount": "$investments",
+          "user.portfolioValue": "$portfolioValue",
+          "user.slackAmount": "$slackAmount",
+          "user.submissionData": "$lastInvestment",
+        },
+      },
+      {
+        $project: {
+          "user._id": 1,
+          "user.first_name": 1,
+          "user.last_name": 1,
+          "user.email": 1,
+          "user.investmentAmount": 1,
+          "user.investmentsCount": 1,
+          "user.avgMultiple": 1,
+          "user.portfolioValue": 1,
+          "user.allocations_angel": 1,
+          "user.linkedinUrl": 1,
+          "user.sectors": 1,
+          "user.slackAmount": 1,
+          "user.country": 1,
+          "user.submissionData": 1,
+          // TODO: Add profileImageKey
+        },
+      },
+      { $sort: { [`user.${sortField}`]: sortOrder ? sortOrder : 1 } },
+    ];
+  },
   customInvestmentPagination: ({ ...paginationProps }) => {
     const filter = pagHelpers.getFilters(paginationProps);
     const nestedFilters = pagHelpers.getNestedFilters(paginationProps);

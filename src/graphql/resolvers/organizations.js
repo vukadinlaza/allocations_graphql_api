@@ -145,7 +145,7 @@ const Organization = {
   deals: (
     org,
     { order_by = "created_at", order_dir = -1, limit, offset, status },
-    { db }
+    { db, datasources }
   ) => {
     let activeStatus =
       status === "active"
@@ -160,28 +160,18 @@ const Organization = {
       status: { $in: activeStatus },
     };
     // default sort order is descending by created_at
-    return db.deals
-      .find(query)
-      .sort({ [order_by]: order_dir })
-      .skip(offset || 0)
-      .limit(limit || 50)
-      .toArray();
+    return datasources.deals.getAllDeals({ query });
   },
-  deal: (org, { _id }, { db }) => {
-    if (org.slug === "allocations") {
-      return db.deals.findOne({
-        _id: ObjectId(_id),
-        organization: { $in: [org._id, null] },
-      });
-    } else {
-      return db.deals.findOne({ _id: ObjectId(_id), organization: org._id });
-    }
+  deal: (org, { _id }, { db, datasources }) => {
+    return datasources.deals.getById({ deal_id: _id });
   },
   n_deals: (org, _, { db }) => {
     if (org.slug === "allocations") {
-      return db.deals.count({ organization: { $in: [org._id, null] } });
+      return datasources.deals.getAllDeals({
+        organization: { $in: [org._id, null] },
+      }).length;
     } else {
-      return db.deals.count({ organization: org._id });
+      return datasources.deals.getAllDeals({ organization: org._id }).length;
     }
   },
   investors: (org, _, { db }) => {

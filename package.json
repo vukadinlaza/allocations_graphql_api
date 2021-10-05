@@ -35,7 +35,10 @@
     "selenium-webdriver": "^4.0.0-alpha.7"
   },
   "dependencies": {
+    "@allocations/deal-service": "^0.0.2",
+    "@allocations/investment-agreement-service": "^0.0.2",
     "@sendgrid/mail": "^6.5.2",
+    "apollo-datasource-mongodb": "^0.5.2",
     "apollo-server": "^2.9.4",
     "apollo-server-express": "^2.9.4",
     "aws-cloudfront-sign": "^2.2.0",

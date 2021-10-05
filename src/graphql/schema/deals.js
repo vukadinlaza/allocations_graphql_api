@@ -48,6 +48,12 @@ type Deal {
   slack_deal: Boolean
   sector: String
   allocation_advisor: Boolean
+  phases: [Phase]
+  metadata: Object
+  manager_name: String
+  name: String
+  wire_deadline: String
+  phase: String
 }
 
 type DealParams {
@@ -126,6 +132,26 @@ input DealParamsInput {
   is3c7: Boolean
 }
 
+type Phase {
+  _id: String
+  name: String
+  deal_id: String
+  tasks: [Task]
+
+}
+type Task {
+  _id: String
+  title: String
+  description: String
+  type: String
+  complete: Boolean
+  done_by: String
+  metadata: Object
+  created_at: String
+  updated_at: String
+}
+
+
 type dealOnboarding {
   _id: String
   psDealId: String
@@ -158,6 +184,13 @@ enum DealStatus {
   draft
 }
 
+type DataRequest {
+  id: String
+  token_id: String
+  token_secret: String
+  link: String
+}
+
 type Query {
   deal(_id: String, deal_slug: String, fund_slug: String): Deal
   allDeals: [Deal]
@@ -166,20 +199,30 @@ type Query {
   searchDealsByOrg(q: String!, org: String!, limit: Int): [Deal]
   fundAdminHighlights: Object
   fundAdminTables(filter: Object, pagination: PaginationInput!): DealPagination
+  getDealWithTasks(deal_id: String): Deal
+  getDealDocService (task_id: String): ServiceDocument
+  getServiceAgreementLink(deal_id: String): DataRequest
+  getInvestmentAgreementLink(deal_id: String): DataRequest
 }
 
 type Mutation {
   updateDeal(org: String!, deal: DealInput!): Deal
+  updateDealService(task_id: String!, deal_id: String! phase: String!, payload: Object!): Deal
+  updateDealTask(task_id: String!, deal_id: String! phase: String!): Deal
   createDeal(org: String!, deal: DealInput!): Deal
   deleteDeal(_id: String!): Boolean
   createOrgAndDeal(orgName: String!, deal: DealInput!): Deal
   addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
+  addDealDocService(doc: Upload!, task_id: String, deal_id: String, phase: String): Boolean
   addDealLogo(deal_id: String!, title: String!, logo: Upload!): Deal
   rmDealLogo(deal_id: String!): Deal
   rmDealDoc(deal_id: String!, title: String!): Deal
   addDealDocs(deal_id: String!, docs: Upload): Deal
   addUserAsViewed(deal_id: String!, user_id: String!): Deal 
   deleteUserAsViewed(deal_id: String!, user_id: String!): Deal 
+  createBuild(payload: Object): Deal
+  deleteDealDocument(document_id: String!, phase_id: String!, task_id: String!): Object
+  setBuildInfo(deal_id: String, payload: Object): Deal
 }
 
 type Subscription {

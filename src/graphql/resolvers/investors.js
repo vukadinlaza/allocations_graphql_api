@@ -17,30 +17,29 @@ const {
   getKYCTemplateId,
 } = require("../../utils/docusign");
 const { createTaxDocument } = require("../../docspring/index");
-const { customUserPagination } = require("../pagHelpers");
+const {
+  customUserPagination,
+  customInvestorsTablePagination,
+} = require("../pagHelpers");
 const Users = require("../schema/users");
 const fetch = require("node-fetch");
+const { DealService } = require("@allocations/deal-service");
 
 const Schema = Users;
 
 const User = {
   /** invited deal show deal info based on ctx (if invited) **/
   invitedDeal: async (user, { deal_slug, fund_slug }, ctx) => {
+    console.log("fund_slug", fund_slug);
     const fund = await ctx.db.organizations.findOne({ slug: fund_slug });
-
-    // if fund admin or superadmin -> show
-    // if (isFundAdmin(fund_slug, ctx.user) || ctx.user.admin) {
-    //   return ctx.db.deals.findOne({ slug: deal_slug, organization: fund._id })
-    // } else {
-    // otherwise make sure they are invited!
-    const deal = await ctx.db.deals.findOne({
-      slug: deal_slug,
-      organization: fund._id,
-      // invitedInvestors: ObjectId(user._id)
+    console.log("fund", fund);
+    const deal = await ctx.datasources.deals.getDealByOrgIdAndDealslug({
+      deal_slug: deal_slug,
+      fund_id: ObjectId(fund._id),
     });
+
     if (deal) return deal;
     throw new AuthenticationError("REDIRECT");
-    // }
   },
   investments: (user, _, { db }) => {
     return db.investments.find({ user_id: user._id }).toArray();
@@ -89,10 +88,12 @@ const User = {
       })
       .toArray();
   },
-  deals: async (user, _, { db }) => {
+  deals: async (user, _, { db, datasources }) => {
     const deals = await Promise.all(
       (user.organizations_admin || []).map((org) => {
-        return db.deals.find({ organization: ObjectId(org) }).toArray() || [];
+        return (
+          datasources.deals.getAllDeals({ organization: ObjectId(org) }) || []
+        );
       })
     );
 
@@ -182,6 +183,32 @@ const Queries = {
       .collection("users")
       .aggregate(countAggregation)
       .toArray();
+    const count = usersCount.length ? usersCount[0].count : 0;
+
+    let users = await ctx.db
+      .collection("users")
+      .aggregate(aggregation)
+      .skip(documentsToSkip)
+      .limit(pagination)
+      .toArray();
+
+    users = users.map((item) => item.user);
+    return { count, users };
+  },
+  allUsersWithSubmissionData: async (_, args, ctx) => {
+    isAdmin(ctx);
+    const { pagination, currentPage } = args.pagination;
+    const documentsToSkip = pagination * currentPage;
+    const aggregation = customInvestorsTablePagination(
+      args.pagination,
+      args.additionalFilter
+    );
+    const countAggregation = [...aggregation, { $count: "count" }];
+    const usersCount = await ctx.db
+      .collection("users")
+      .aggregate(countAggregation)
+      .toArray();
+
     const count = usersCount.length ? usersCount[0].count : 0;
 
     let users = await ctx.db

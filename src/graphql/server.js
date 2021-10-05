@@ -2,7 +2,7 @@ const { ApolloServer, PubSub } = require("apollo-server-express");
 const { authenticate } = require("../auth");
 const logger = require("../utils/logger");
 const { typeDefs, resolvers } = require("../graphql/resolvers");
-
+const Deals = require("./datasources/Deals");
 const pubsub = new PubSub();
 
 function authedServer(db) {
@@ -13,13 +13,16 @@ function authedServer(db) {
     resolvers,
     uploads: false,
     context: async (payload) => {
+      const datasources = {
+        deals: new Deals(db.collection("deals")),
+      };
       // public deal endpoint skips authentication
       if (
         payload.req &&
         payload.req.body &&
         publicEndpoints.includes(payload.req.body.operationName)
       ) {
-        return { db };
+        return { db, datasources };
       }
       const authToken =
         payload &&
@@ -27,7 +30,8 @@ function authedServer(db) {
         payload.connection.context &&
         payload.connection.context.authToken;
       const user = await authenticate({ req: payload.req, db, authToken });
-      return { user, db, pubsub };
+
+      return { user, db, pubsub, datasources };
     },
     plugins: [
       {
