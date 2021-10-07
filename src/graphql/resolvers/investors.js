@@ -523,8 +523,6 @@ const Mutations = {
       { _id: ObjectId(foundUser._id) },
       { $set: { display_username: display_username } }
     );
-
-    return db.users.findOne({ email });
   },
 
   addFirstAndLastName: async (_, { email, first_name, last_name }, { db }) => {
