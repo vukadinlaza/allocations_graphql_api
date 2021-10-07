@@ -18,12 +18,10 @@ class Deals extends MongoDataSource {
       organization: fund_id,
     });
     if (!deal) {
-      console.log("XXXXXXX", fund_id, deal_slug);
       const serviceDeal = await DealService.getDealByFundIDAndDealSlug(
         fund_id,
         deal_slug
       );
-      console.log("SERVICE DEAL", serviceDeal);
       const coverImage = await DealService.getDocumentByTaskTitle(
         serviceDeal._id,
         "build",
@@ -38,14 +36,19 @@ class Deals extends MongoDataSource {
   async getAllDeals({ query }) {
     const legacyDeals = await this.collection.find(query).toArray();
     const serviceDeals = await DealService.getAllDeals(query);
-
-    return [...legacyDeals, serviceDeals.map((d) => transformServiceDeal(d))];
+    return [
+      ...legacyDeals,
+      ...serviceDeals.map((d) => transformServiceDeal({ serviceDeal: d })),
+    ];
   }
   async findDealsByFields({ query }) {
     const legacyDeals = await this.collection.find({ ...query }).toArray();
     const serviceDeals = await DealService.getAllDeals(query);
 
-    return [...legacyDeals, serviceDeals.map((d) => transformServiceDeal(d))];
+    return [
+      ...legacyDeals,
+      serviceDeals.map((d) => transformServiceDeal({ serviceDeal: d })),
+    ];
   }
   async updateDealById({ deal_id, deal }) {
     let updatedDeal = await this.collection.findOneAndUpdate(

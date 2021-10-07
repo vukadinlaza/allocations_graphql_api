@@ -76,7 +76,7 @@ type DealParams {
   estimatedSetupCosts: String
   estimatedSetupCostsDollar: String
   estimatedTerm: String
-  managementFees: String
+  managementFees: Object
   managementFeesDollar: String
   managementFeeType: String
   portfolioTotalCarry: String

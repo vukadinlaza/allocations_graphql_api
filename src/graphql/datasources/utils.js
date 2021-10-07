@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 
 const transformServiceDeal = ({ serviceDeal, coverImage }) => {
   return {
-    _id: ObjectId(serviceDeal.id),
+    _id: ObjectId(serviceDeal._id),
     approved: true,
     organization: ObjectId(serviceDeal.organization_id),
     created_at: serviceDeal.createdAt,

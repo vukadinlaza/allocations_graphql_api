@@ -142,7 +142,7 @@ const Mutations = {
 };
 
 const Organization = {
-  deals: (
+  deals: async (
     org,
     { order_by = "created_at", order_dir = -1, limit, offset, status },
     { db, datasources }
@@ -160,7 +160,7 @@ const Organization = {
       status: { $in: activeStatus },
     };
     // default sort order is descending by created_at
-    return datasources.deals.getAllDeals({ query });
+    return await datasources.deals.getAllDeals({ query });
   },
   deal: (org, { _id }, { db, datasources }) => {
     return datasources.deals.getById({ deal_id: _id });
