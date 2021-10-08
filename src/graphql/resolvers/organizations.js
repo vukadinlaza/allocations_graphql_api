@@ -163,7 +163,9 @@ const Organization = {
     return await datasources.deals.getAllDeals({ query });
   },
   deal: (org, { _id }, { db, datasources }) => {
-    return datasources.deals.getById({ deal_id: _id });
+    const deal = datasources.deals.getDealById({ deal_id: _id });
+    console.log("DEAL RETURNED", deal);
+    return deal;
   },
   n_deals: (org, _, { db }) => {
     if (org.slug === "allocations") {

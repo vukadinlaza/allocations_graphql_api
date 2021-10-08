@@ -1,8 +1,9 @@
 const { ObjectId } = require("mongodb");
 
 const transformServiceDeal = ({ serviceDeal, coverImage }) => {
+  if (!serviceDeal) return {};
   return {
-    _id: ObjectId(serviceDeal._id),
+    _id: serviceDeal._id,
     approved: true,
     organization: ObjectId(serviceDeal.organization_id),
     created_at: serviceDeal.createdAt,
@@ -11,19 +12,22 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
     date_closed: serviceDeal.closing_date,
     deal_lead: serviceDeal.manager_name,
     pledge_link: "",
-    status: serviceDeal.status,
+    status: serviceDeal.status || "onboarding",
+    appLink: `deals/${serviceDeal.org_slug || "allocations"}/${
+      serviceDeal.slug
+    }`,
     docSpringTemplateId:
       serviceDeal.docspring_template_id || "tpl_RrmjKbpFRr7qhKY3dD",
     slug: serviceDeal.slug,
     memo: serviceDeal.memo,
-    dealCoverImageKey: coverImage?.link || null,
+    dealCoverImageKey: coverImage?.link || "null",
     dealParams: {
       dealType: serviceDeal.offering_type,
       minimumInvestment: serviceDeal.minimum_subscription_amount,
       signDeadline: serviceDeal.sign_deadline,
       wireDeadline: serviceDeal.sign_deadline,
       estimatedSetupCostsDollar: "100000",
-      managementFees: serviceDeal.management_fee,
+      managementFees: serviceDeal?.management_fee?.value,
       managementFeeType: serviceDeal.management_fee_frequency,
     },
   };

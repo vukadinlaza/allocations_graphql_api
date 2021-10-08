@@ -2,11 +2,14 @@ const { MongoDataSource } = require("apollo-datasource-mongodb");
 const { ObjectId } = require("mongodb");
 const { DealService } = require("@allocations/deal-service");
 const { transformServiceDeal, transformLegacyDeal } = require("./utils");
+const { getDB } = require("../../mongo/index");
+const db = getDB();
 class Deals extends MongoDataSource {
   async getDealById({ deal_id }) {
     let deal = await this.collection.findOne({ _id: ObjectId(deal_id) });
     if (!deal) {
       const serviceDeal = await DealService.get(deal_id);
+
       deal = transformServiceDeal({ serviceDeal });
     }
     return deal;
@@ -36,6 +39,7 @@ class Deals extends MongoDataSource {
   async getAllDeals({ query }) {
     const legacyDeals = await this.collection.find(query).toArray();
     const serviceDeals = await DealService.getAllDeals(query);
+    console.log(serviceDeals, "XXX");
     return [
       ...legacyDeals,
       ...serviceDeals.map((d) => transformServiceDeal({ serviceDeal: d })),
@@ -47,7 +51,7 @@ class Deals extends MongoDataSource {
 
     return [
       ...legacyDeals,
-      serviceDeals.map((d) => transformServiceDeal({ serviceDeal: d })),
+      ...serviceDeals.map((d) => transformServiceDeal({ serviceDeal: d })),
     ];
   }
   async updateDealById({ deal_id, deal }) {

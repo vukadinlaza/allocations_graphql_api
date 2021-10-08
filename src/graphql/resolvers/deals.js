@@ -117,10 +117,11 @@ const Deal = {
 const Queries = {
   deal: async (_, args, ctx) => {
     const org = await ctx.db.organizations.findOne({ slug: args.fund_slug });
+
     if (org !== null && args.deal_slug) {
       const result = await ctx.datasources.deals.getDealByOrgIdAndDealslug({
         deal_slug: args.deal_slug,
-        fund_id: org._id,
+        fund_id: ObjectId(org._id),
       });
       return result;
     }
@@ -334,7 +335,9 @@ const Mutations = {
     }
 
     if (deal.dealParams) {
-      const currentDeal = await ctx.db.deals.findOne({ _id: ObjectId(_id) });
+      const currentDeal = await ctx.datasources.deals.getDealById({
+        deal_id: ObjectId(_id),
+      });
       deal.dealParams = { ...currentDeal.dealParams, ...deal.dealParams };
     }
 
@@ -534,8 +537,9 @@ const Mutations = {
   },
   createBuild: async (_, __, { user }) => {
     const deal = await DealService.create(user._id);
-    console.log(deal);
+    console.log("DEAL", deal);
     const x = await DealService.get(deal._id);
+    console.log("NEW DEAL", x);
     return x;
   },
   setBuildInfo: async (_, { deal_id, payload }, { user }) => {
@@ -544,8 +548,8 @@ const Mutations = {
     // Mock data for Demo purposes
     const mockDealData = {
       // What payload will contain
-      name: payload.portfolio_company_name || "Super App SPV",
-      slug: kebabCase(payload.portfolio_company_name),
+      name: payload.name || "Super App SPV",
+      slug: kebabCase(payload.name),
       asset_type: "startup",
       portfolio_company_name: payload.portfolio_company_name || "Tundra Trust",
       manager: {
