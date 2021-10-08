@@ -603,6 +603,7 @@ const Mutations = {
       spv_term: "Some terms",
       // minimum_subscription_amount is defaulted to 10000 in schema
       minimum_subscription_amount: 10000,
+      sectors: payload?.sectors || ["Space"],
     };
 
     // TODO: Use this dealData for non Demo
