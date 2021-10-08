@@ -204,7 +204,6 @@ const Queries = {
     return doc;
   },
   getServiceAgreementLink: async (_, { deal_id }) => {
-    console.log(deal_id);
     return DealService.getServiceAgreementLink(deal_id);
   },
   getInvestmentAgreementLink: async (_, { deal_id }) => {
