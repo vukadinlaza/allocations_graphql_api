@@ -719,6 +719,176 @@ const pagHelpers = {
       { $sort: { [`user.${sortField}`]: sortOrder ? sortOrder : 1 } },
     ];
   },
+  customFundManagerAggregation: (
+    { sortField, sortOrder, ...pagProps },
+    additionalFilter,
+    userId
+  ) => {
+    const userFilters = pagHelpers.getFilters(pagProps, additionalFilter);
+    return [
+      {
+        $match: {
+          _id: userId,
+          organizations_admin: {
+            $exists: true,
+          },
+        },
+      },
+      {
+        $unwind: {
+          path: "$organizations_admin",
+        },
+      },
+      {
+        $lookup: {
+          from: "deals",
+          localField: "organizations_admin",
+          foreignField: "organization",
+          as: "deals",
+        },
+      },
+      {
+        $match: {
+          deals: {
+            $exists: true,
+            $not: {
+              $size: 0,
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          deal: "$deals",
+        },
+      },
+      {
+        $unwind: {
+          path: "$deal",
+        },
+      },
+      {
+        $lookup: {
+          from: "investments",
+          localField: "deal._id",
+          foreignField: "deal_id",
+          as: "investments",
+        },
+      },
+      {
+        $unwind: {
+          path: "$investments",
+        },
+      },
+      {
+        $group: {
+          _id: "$investments.user_id",
+          investment: {
+            $first: "$investments",
+          },
+          investmentsCount: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "investment.user_id",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: {
+          path: "$user",
+        },
+      },
+      {
+        $addFields: {
+          "user.investmentsCount": {
+            $add: "$investmentsCount",
+          },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: "$user",
+        },
+      },
+      {
+        ...userFilters,
+      },
+      { $sort: { [`user.${sortField}`]: sortOrder ? sortOrder : 1 } },
+    ];
+  },
+  customAdminAggregation: (
+    { sortField, sortOrder, ...pagProps },
+    additionalFilter
+  ) => {
+    const userFilters = pagHelpers.getFilters(pagProps, additionalFilter);
+    return [
+      userFilters,
+      {
+        $lookup: {
+          from: "investments",
+          localField: "_id",
+          foreignField: "user_id",
+          as: "investments",
+        },
+      },
+      {
+        $unwind: {
+          path: "$investments",
+        },
+      },
+      {
+        $match: {
+          "investments._id": {
+            $exists: true,
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "deals",
+          localField: "investments.deal_id",
+          foreignField: "_id",
+          as: "investments.deal",
+        },
+      },
+      {
+        $unwind: {
+          path: "$investments.deal",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          investmentsCount: {
+            $sum: 1,
+          },
+          user: {
+            $first: "$$ROOT",
+          },
+        },
+      },
+      {
+        $addFields: {
+          "user.investmentsCount": {
+            $add: "$investmentsCount",
+          },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: "$user",
+        },
+      },
+      { $sort: { [`user.${sortField}`]: sortOrder ? sortOrder : 1 } },
+    ];
+  },
   customInvestmentPagination: ({ ...paginationProps }) => {
     const filter = pagHelpers.getFilters(paginationProps);
     const nestedFilters = pagHelpers.getNestedFilters(paginationProps);
@@ -731,7 +901,7 @@ const pagHelpers = {
             input: "$amount",
             to: "int",
             onError: 0, // Optional.
-            onNull: 0, // Optional.
+            onNull: 0,
           },
         },
       },

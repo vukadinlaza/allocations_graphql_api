@@ -19,7 +19,8 @@ const {
 const { createTaxDocument } = require("../../docspring/index");
 const {
   customUserPagination,
-  customInvestorsTablePagination,
+  customFundManagerAggregation,
+  customAdminAggregation,
 } = require("../pagHelpers");
 const Users = require("../schema/users");
 const fetch = require("node-fetch");
@@ -195,14 +196,25 @@ const Queries = {
     users = users.map((item) => item.user);
     return { count, users };
   },
-  allUsersWithSubmissionData: async (_, args, ctx) => {
-    isAdmin(ctx);
+  allUsersWithInvestmentsCount: async (_, args, ctx) => {
     const { pagination, currentPage } = args.pagination;
     const documentsToSkip = pagination * currentPage;
-    const aggregation = customInvestorsTablePagination(
-      args.pagination,
-      args.additionalFilter
-    );
+
+    let aggregation;
+
+    if (!ctx.user.admin) {
+      aggregation = customFundManagerAggregation(
+        args.pagination,
+        args.additionalFilter,
+        ctx.user._id
+      );
+    } else {
+      isAdmin(ctx);
+      aggregation = customAdminAggregation(
+        args.pagination,
+        args.additionalFilter
+      );
+    }
     const countAggregation = [...aggregation, { $count: "count" }];
     const usersCount = await ctx.db
       .collection("users")
@@ -218,7 +230,6 @@ const Queries = {
       .limit(pagination)
       .toArray();
 
-    users = users.map((item) => item.user);
     return { count, users };
   },
   searchUsers: async (_, { org, q }, ctx) => {
