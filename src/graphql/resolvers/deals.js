@@ -49,10 +49,12 @@ const Deal = {
       : null;
   },
   organization: (deal, _, { db }) => {
-    return db.organizations.findOne({ _id: deal.organization });
+    return db.organizations.findOne({ _id: ObjectId(deal.organization) });
   },
   approved: async (deal, _, { db }) => {
-    const org = await db.organizations.findOne({ _id: deal.organization });
+    const org = await db.organizations.findOne({
+      _id: ObjectId(deal.organization),
+    });
     return org.approved !== false;
   },
   dealParams: (deal) => {
@@ -64,13 +66,18 @@ const Deal = {
     return deal.dealParams || {};
   },
   appLink: async (deal, _, { db }) => {
-    const { slug } = await db.organizations.findOne({ _id: deal.organization });
+    const res = await db.organizations.findOne({
+      _id: ObjectId(deal.organization),
+    });
+    const { slug } = res;
     return slug && slug !== "allocations"
       ? `/deals/${slug}/${deal.slug}`
       : `/deals/${deal.slug}`;
   },
   publicLink: async (deal, _, { db }) => {
-    const { slug } = await db.organizations.findOne({ _id: deal.organization });
+    const { slug } = await db.organizations.findOne({
+      _id: ObjectId(deal.organization),
+    });
     return `/public/${slug}/deals/${deal.slug}?invite_code=${deal.inviteKey}`;
   },
   raised: async (deal, _, { db }) => {
@@ -536,14 +543,10 @@ const Mutations = {
   },
   createBuild: async (_, __, { user }) => {
     const deal = await DealService.create(user._id);
-    console.log("DEAL", deal);
     const x = await DealService.get(deal._id);
-    console.log("NEW DEAL", x);
     return x;
   },
   setBuildInfo: async (_, { deal_id, payload }, { user }) => {
-    console.log("PAYLOAD", payload);
-
     // Mock data for Demo purposes
     const mockDealData = {
       // What payload will contain

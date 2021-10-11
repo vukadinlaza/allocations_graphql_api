@@ -75,7 +75,9 @@ class Deals extends MongoDataSource {
       ...transformLegacyDeal({ legacyDeal: deal }),
     };
     const updatedServiceDeal = await DealService.updateDealById(dealData);
-    return DealService.get(updatedServiceDeal._id);
+    return transformServiceDeal({
+      serviceDeal: await DealService.get(updatedServiceDeal._id),
+    });
   }
   async createDeal({ deal, user_id }) {
     const newDeal = await DealService.create(user_id);

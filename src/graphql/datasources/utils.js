@@ -5,7 +5,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
   return {
     _id: serviceDeal._id,
     approved: true,
-    organization: ObjectId(serviceDeal.organization_id),
+    organization: serviceDeal.organization_id,
     created_at: serviceDeal.createdAt,
     company_name: serviceDeal.portfolio_company_name,
     company_description: serviceDeal.description,
@@ -38,9 +38,9 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
 };
 const transformLegacyDeal = ({ legacyDeal, coverImage }) => {
   return {
-    _id: ObjectId(legacyDeal._id),
+    _id: legacyDeal._id,
     approved: true,
-    organization_id: ObjectId(legacyDeal.organization),
+    organization_id: legacyDeal.organization,
     createdAt: legacyDeal.created_at,
     portfolio_company_name: legacyDeal.company_name,
     description: legacyDeal.company_description,
