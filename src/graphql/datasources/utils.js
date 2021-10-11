@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb");
-
+const moment = require("moment");
 const transformServiceDeal = ({ serviceDeal, coverImage }) => {
   if (!serviceDeal) return {};
   return {
@@ -24,8 +24,12 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
     dealParams: {
       dealType: serviceDeal.offering_type,
       minimumInvestment: serviceDeal.minimum_subscription_amount,
-      signDeadline: serviceDeal.sign_deadline,
-      wireDeadline: serviceDeal.sign_deadline,
+      signDeadline: moment(serviceDeal.sign_deadline).format(
+        "YYYY-MM-DD:HH:MM"
+      ),
+      wireDeadline: moment(serviceDeal.sign_deadline).format(
+        "YYYY-MM-DD:HH:MM"
+      ),
       estimatedSetupCostsDollar: "100000",
       managementFees: serviceDeal?.management_fee?.value,
       managementFeeType: serviceDeal.management_fee_frequency,
@@ -48,7 +52,6 @@ const transformLegacyDeal = ({ legacyDeal, coverImage }) => {
       legacyDeal.docSpringTemplateId || "tpl_RrmjKbpFRr7qhKY3dD",
     slug: legacyDeal.slug,
     memo: legacyDeal.memo,
-    dealCoverImageKey: coverImage.link || null,
     offering_type: legacyDeal.dealParams.dealType,
     minimum_subscription_amount: legacyDeal.dealParams.minimumInvestment,
     sign_deadline: legacyDeal.dealParams.signDeadline,

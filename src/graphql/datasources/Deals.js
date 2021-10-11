@@ -66,13 +66,15 @@ class Deals extends MongoDataSource {
       { returnOriginal: false }
     );
 
-    if (updatedDeal) {
+    if (updatedDeal.value !== null) {
       return updatedDeal.value;
     }
-    const updatedServiceDeal = await DealService.setBuildInfo(
+
+    const dealData = {
       deal_id,
-      transformLegacyDeal(deal)
-    );
+      ...transformLegacyDeal({ legacyDeal: deal }),
+    };
+    const updatedServiceDeal = await DealService.updateDealById(dealData);
     return DealService.get(updatedServiceDeal._id);
   }
   async createDeal({ deal, user_id }) {

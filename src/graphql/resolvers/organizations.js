@@ -162,9 +162,8 @@ const Organization = {
     // default sort order is descending by created_at
     return await datasources.deals.getAllDeals({ query });
   },
-  deal: (org, { _id }, { db, datasources }) => {
-    const deal = datasources.deals.getDealById({ deal_id: _id });
-    console.log("DEAL RETURNED", deal);
+  deal: async (org, { _id }, { db, datasources }) => {
+    const deal = await datasources.deals.getDealById({ deal_id: _id });
     return deal;
   },
   n_deals: (org, _, { db }) => {
