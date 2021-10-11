@@ -324,7 +324,7 @@ const generateDocSpringPDF = async (
 
   const { name } = await db
     .collection("organizations")
-    .findOne({ _id: deal.organization });
+    .findOne({ _id: ObjectId(deal.organization) });
 
   const emailData = {
     pdfDownloadUrl: response.downloadUrl,
