@@ -589,6 +589,7 @@ const pagHelpers = {
           "user.allocations_angel": 1,
           "user.linkedinUrl": 1,
           "user.sectors": 1,
+          "user.stages": 1,
           "user.slackAmount": 1,
           "user.country": 1,
           "user.profileImageKey": 1,
