@@ -547,32 +547,33 @@ const Mutations = {
     return x;
   },
   setBuildInfo: async (_, { deal_id, payload }, { user }) => {
+    console.log("PAYLOAD", payload);
     // Mock data for Demo purposes
     const mockDealData = {
       // What payload will contain
-      name: payload.name || "Super App SPV",
+      name: payload.portfolio_company_name || "Super App SPV",
       slug: kebabCase(payload.name),
       asset_type: "startup",
       portfolio_company_name: payload.portfolio_company_name || "Tundra Trust",
       manager: {
-        name: "Lance Merrill",
+        name: payload.manager_name || "Lance Merrill",
         // Double check type
         type: "individual",
         // email will be grabbed from user.email
-        email: "test123@allocations.com",
+        email: user.email || "test123@allocations.com",
         // title & entity_name not required & currently not in payload
         title: "",
         entity_name: "",
       },
       closing_date: Date.now(),
       carry_fee: {
-        type: "percent",
-        value: "20", // we want %
+        type: payload.carry_fee.type || "percent",
+        value: payload.carry_fee.value || "10", // we want %
         string_value: "Twenty percent",
       },
       management_fee: {
-        type: "percent",
-        value: "10%", // We wamt %,
+        type: payload.management_fee.type || "percent",
+        value: payload.management_fee.value || "10", // we want %
         string_value: "Ten percent",
       },
       management_fee_frequency: "one-time",
@@ -625,7 +626,10 @@ const Mutations = {
       },
     };
 
-    const res = await DealService.setBuildInfo(deal_id, mockDealData);
+    const res = await DealService.setBuildInfo(deal_id, {
+      ...mockDealData,
+      ...payload,
+    });
     if (res.acknowledged) {
       return await DealService.get(res._id);
     }
