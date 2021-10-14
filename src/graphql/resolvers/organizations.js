@@ -160,7 +160,7 @@ const Organization = {
       status: { $in: activeStatus },
     };
     // default sort order is descending by created_at
-    return await datasources.deals.getAllDeals({ query });
+    return datasources.deals.getAllDeals({ query });
   },
   deal: async (org, { _id }, { db, datasources }) => {
     const deal = await datasources.deals.getDealById({ deal_id: _id });
