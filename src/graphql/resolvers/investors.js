@@ -457,7 +457,7 @@ const Mutations = {
       { $set: { profileImageKey: key } }
     );
     console.log("KEY", key);
-    return foundUser;
+    return { ...foundUser, profileImageKey: key };
   },
 
   addSectors: async (_, { email, sector }, { db }) => {
