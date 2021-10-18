@@ -20,12 +20,12 @@ type Organization {
   investments: [Investment]
   pagInvestments: [Investment]
   adminInvites: [EmailInvite]
-  totalAUM: Int
+  totalAUM: Float
   totalPrivateFunds: Int
   totalFunds: Int
   totalSPVs: Int
-  totalFundAUM: Int
-  totalSPVAUM: Int
+  totalFundAUM: Float
+  totalSPVAUM: Float
   totalInvestors: Int
   totalClosed: Int
   totalOpen: Int
