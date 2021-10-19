@@ -301,17 +301,13 @@ const generateDocSpringPDF = async (
 ) => {
   let data = getTemplateData(input, user, templateId);
 
-  const sanitizedTemplateName = templateName
-    .replace(/[^a-zA-Z0-9 _-]/g, "") // removes unwanted special characters
-    .replace(/\s\s+/g, "_"); // removes extra spaces
-
   var submission_data = {
     editable: false,
     data: data,
     metadata: {
       user_id: user._id,
       investmentId: input.investmentId,
-      templateName: sanitizedTemplateName,
+      templateName: templateName,
       timeStamp: timeStamp,
     },
     field_overrides: {
@@ -431,7 +427,9 @@ const getTemplate = async ({
   const timeStamp = Date.now();
   const adjTemplateName = response.name
     .replace(/[^a-zA-Z0-9 _-]/g, "") // removes unwanted special characters
-    .replace(/\s\s+/g, "_"); // removes extra spaces
+    .replace(/\s\s+/g, "")
+    .replace(/ /g, "_"); // removes extra spaces
+
 
   const key = `investments/${payload.investmentId}/${timeStamp}-${adjTemplateName}.pdf`;
 
