@@ -429,7 +429,9 @@ const getTemplate = async ({
   if (response.status !== "success") return;
 
   const timeStamp = Date.now();
-  const adjTemplateName = response.name.replace(/\s+/g, "_");
+  const adjTemplateName = response.name
+    .replace(/[^a-zA-Z0-9 _-]/g, "") // removes unwanted special characters
+    .replace(/\s\s+/g, " "); // removes extra spaces
 
   const key = `investments/${payload.investmentId}/${timeStamp}-${adjTemplateName}.pdf`;
 
