@@ -547,16 +547,14 @@ const Mutations = {
     return x;
   },
   setBuildInfo: async (_, { deal_id, payload }, { user }) => {
-    console.log("PAYLOAD", payload);
-    // Mock data for Demo purposes
-    const mockDealData = {
+    const defaultDealData = {
       // What payload will contain
       name: payload.portfolio_company_name || "Super App SPV",
       slug: kebabCase(payload.name),
       asset_type: "startup",
       portfolio_company_name: payload.portfolio_company_name || "Tundra Trust",
       manager: {
-        name: payload.manager_name || "Lance Merrill",
+        name: payload.manager_name,
         // Double check type
         type: "individual",
         // email will be grabbed from user.email

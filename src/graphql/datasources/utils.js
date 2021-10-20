@@ -12,7 +12,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
     date_closed: serviceDeal.closing_date,
     deal_lead: serviceDeal.manager_name,
     pledge_link: "",
-    status: serviceDeal.status || "onboarding",
+    status: serviceDeal.phase || "onboarding",
     appLink: `deals/${serviceDeal.org_slug || "allocations"}/${
       serviceDeal.slug
     }`,

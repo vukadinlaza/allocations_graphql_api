@@ -40,7 +40,7 @@ class Deals extends MongoDataSource {
     const legacyDeals = await this.collection.find(query).toArray();
     const serviceDeals = await DealService.getAllDeals({
       ...query,
-      organization_id: query.organization,
+      organization_id: query?.organization,
     });
     return [
       ...legacyDeals,

@@ -166,7 +166,7 @@ const Organization = {
     const deal = await datasources.deals.getDealById({ deal_id: _id });
     return deal;
   },
-  n_deals: (org, _, { db }) => {
+  n_deals: (org, _, { db, datasources }) => {
     if (org.slug === "allocations") {
       return datasources.deals.getAllDeals({
         organization: { $in: [org._id, null] },

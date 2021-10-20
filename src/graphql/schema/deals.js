@@ -19,7 +19,7 @@ type Deal {
   onboarding_link: String
   wireInstructions: String
   embed_code: String
-  status: DealStatus
+  status: String
   amount: Int
   target: String
   amount_raised: String
@@ -175,13 +175,6 @@ type dealTask {
 type DealPagination {
   count: Int
   deals: [Deal]
-}
-
-enum DealStatus {
-  onboarding
-  closing
-  closed
-  draft
 }
 
 type DataRequest {
