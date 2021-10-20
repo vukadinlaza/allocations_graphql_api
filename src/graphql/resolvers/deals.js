@@ -547,91 +547,43 @@ const Mutations = {
     return x;
   },
   setBuildInfo: async (_, { deal_id, payload }, { user }) => {
-    const defaultDealData = {
-      // What payload will contain
-      name: payload.portfolio_company_name || "Super App SPV",
-      slug: kebabCase(payload.name),
-      asset_type: "startup",
-      portfolio_company_name: payload.portfolio_company_name || "Tundra Trust",
+    const deal = {
+      user_id: user._id,
+      name: `${payload.manager_name}'s Deal'`,
+      slug: kebabCase(
+        payload.name ? payload.name : `${payload.manager_name}-${Date.now()}`
+      ),
       manager: {
         name: payload.manager_name,
-        // Double check type
         type: "individual",
-        // email will be grabbed from user.email
-        email: user.email || "test123@allocations.com",
-        // title & entity_name not required & currently not in payload
+        email: user.email,
         title: "",
         entity_name: "",
       },
-      closing_date: Date.now(),
       carry_fee: {
-        type: payload.carry_fee.type || "percent",
-        value: payload.carry_fee.value || "10", // we want %
-        string_value: "Twenty percent",
+        type: payload.carry_fee.type,
+        value: payload.carry_fee.value,
+        string_value: `${payload.carry_fee.value} ${payload.carry_fee.type}`,
       },
       management_fee: {
-        type: payload.management_fee.type || "percent",
-        value: payload.management_fee.value || "10", // we want %
-        string_value: "Ten percent",
+        type: payload.management_fee.type,
+        value: payload.management_fee.value,
+        string_value: `${payload.management_fee.value} ${payload.management_fee.type}`,
       },
-      management_fee_frequency: "one-time",
-      side_letters: false,
-      // If investment_advisor === true chage to "Sharding Advisers LLC"
-      investment_advisor: "Sharding Advisers LLC",
-      custom_investment_agreement: false,
-      offering_type: "506c",
-      industry: "Space",
-      // Optional and might not come in Payload
-      memo: "some memo",
-
-      // Properties required in Schema but not provided in payload
-      // Grab org ID
-      organization_id: ObjectId("5ecd1a79563730002301759b"),
-      user_id: user._id,
-      wire_deadline: Date.now(),
-      sign_deadline: Date.now(),
       ica_exemption: {
         investor_type: "Accredited investors",
         exemption_type: "301",
       },
-
-      // Properties not required in Schema and not included in payload
-      legal_spv_name: "Atomizer 38",
-      master_series: "Atomizers",
       setup_cost: 20000,
-      angels_deal: true,
+      angels_deal: false,
       deal_multiple: 0,
-      description: "some description",
-      spv_term: "Some terms",
-      // minimum_subscription_amount is defaulted to 10000 in schema
-      minimum_subscription_amount: 10000,
-      sectors: payload?.sectors || ["Space"],
+      ...payload,
     };
 
-    // TODO: Use this dealData for non Demo
-    const dealData = {
-      ...payload,
-      // TODO: Grab organization_id
-      organization_id: ObjectId("5ecd1a79563730002301759b"),
-      user_id: user._id,
-      // TODO: Grab deadlines from somewhere
-      wire_deadline: Date.now(),
-      sign_deadline: Date.now(),
-      // TODO: Grab ica_exemption
-      ica_exemption: {
-        investor_type: "Accredited investors",
-        exemption_type: "301",
-      },
-    };
-
-    const res = await DealService.setBuildInfo(deal_id, {
-      ...defaultDealData,
-      ...payload,
-    });
+    const res = await DealService.setBuildInfo(deal_id, deal);
     if (res.acknowledged) {
       return await DealService.get(res._id);
     }
-    // Handle error
   },
 
   deleteDealDocument: async (
