@@ -625,7 +625,7 @@ const Mutations = {
     };
 
     const res = await DealService.setBuildInfo(deal_id, {
-      ...mockDealData,
+      ...defaultDealData,
       ...payload,
     });
     if (res.acknowledged) {
