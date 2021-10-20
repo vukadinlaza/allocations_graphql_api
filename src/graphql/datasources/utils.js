@@ -4,6 +4,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
   if (!serviceDeal) return {};
   return {
     _id: serviceDeal._id,
+    name: serviceDeal.name,
     approved: true,
     organization: serviceDeal.organization_id,
     created_at: serviceDeal.createdAt,

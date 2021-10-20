@@ -91,11 +91,7 @@ const Deal = {
     return amount;
   },
   viewedUsers: async (deal, _, { db }) => {
-    return await Promise.all(
-      (deal.usersViewed || []).map((user) => {
-        return db.users.findOne({ _id: user });
-      })
-    );
+    return db.users.find({ _id: { $in: deal.usersViewed || [] } }).toArray();
   },
   dealOnboarding: async (deal, _, { db }) => {
     const dealOnboarding = await db.dealOnboarding.findOne({
@@ -211,6 +207,7 @@ const Queries = {
     return doc;
   },
   getServiceAgreementLink: async (_, { deal_id }) => {
+    console.log(deal_id);
     return DealService.getServiceAgreementLink(deal_id);
   },
   getInvestmentAgreementLink: async (_, { deal_id }) => {
@@ -549,7 +546,7 @@ const Mutations = {
   setBuildInfo: async (_, { deal_id, payload }, { user }) => {
     const deal = {
       user_id: user._id,
-      name: `${payload.manager_name}'s Deal'`,
+      name: `${payload.manager_name}'s Deal`,
       slug: kebabCase(
         payload.name ? payload.name : `${payload.manager_name}-${Date.now()}`
       ),
