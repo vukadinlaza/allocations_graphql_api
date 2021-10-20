@@ -20,7 +20,7 @@ type Organization {
   investments: [Investment]
   pagInvestments: [Investment]
   adminInvites: [EmailInvite]
-  totalAUM: Int
+  totalAUM: Float
   totalPrivateFunds: Int
   totalFunds: Int
   totalSPVs: Int
@@ -41,7 +41,7 @@ input OrganizationInput {
 }
 
 type OrganizationPagination {
-  count: Int
+  count: Float
   organizations: [Organization]
 }
 
