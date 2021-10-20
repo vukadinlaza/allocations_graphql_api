@@ -149,7 +149,7 @@ const User = {
 
     const docs =
       u.documents
-        .filter((d) => d && d.submissionId && d.submissionId.includes("sub"))
+        ?.filter((d) => d && d.submissionId && d.submissionId.includes("sub"))
         .map((d) => ({
           link: `app.docspring.com/submissions/${d.submissionId}/download`,
           name: d.documentName,
