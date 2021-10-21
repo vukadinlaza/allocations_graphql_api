@@ -82,6 +82,7 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_y2pTERp3ZPnP6yeLKF",
     "tpl_pLCaA3MRhfeSfQYhdn",
     "tpl_9KMF9czg3QRCsYjHTt",
+    "tpl_TaFALsk9yKCbKXkqQe",
   ];
   const kunalDeals = ["tpl_FbnCe3L7c9Qj32JHTG"];
   if (kunalDeals.includes(templateId)) {
@@ -429,7 +430,6 @@ const getTemplate = async ({
     .replace(/[^a-zA-Z0-9 _-]/g, "") // removes unwanted special characters
     .replace(/\s\s+/g, "")
     .replace(/ /g, "_"); // removes extra spaces
-
 
   const key = `investments/${payload.investmentId}/${timeStamp}-${adjTemplateName}.pdf`;
 
