@@ -408,7 +408,7 @@ module.exports = Router()
       const regex = new RegExp(
         /Originator(\D+)to(\D+)Beneficiary(\D+)Information(\D+)(?<refNum>\d+)/
       );
-      const referenceName = regex.exec(data);
+      const referenceName = regex.exec(body.body);
       console.log(referenceName.groups.refNum);
 
       res.sendStatus(200);
