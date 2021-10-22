@@ -408,8 +408,13 @@ module.exports = Router()
       const regex = new RegExp(
         /Originator(\D+)to(\D+)Beneficiary(\D+)Information(\D+)(?<refNum>\d+)/
       );
+      const regexAmount = new RegExp(
+        /in(\D+)the(\D+)amount(\D+)of(\D+)(?'amount'\d+.\d+)/gm
+      );
       const referenceName = regex.exec(body.body);
-      console.log(referenceName.groups.refNum);
+      const amount = regex.exec(body.body);
+      console.log("NUMBER", referenceName.groups.refNum);
+      console.log("AMOUNT", referenceName.groups.amount);
 
       res.sendStatus(200);
       next();
