@@ -405,10 +405,11 @@ module.exports = Router()
       const db = await getDB();
       console.log("BODY", body);
 
-      const data = body.body;
-      const regex =
-        /Originator(\D+)to(\D+)Beneficiary(\D+)Information(\D+)(?'refNum'\d+)/g;
-      const match = regex.exec(data);
+      const regex = new RegExp(
+        /Originator(\D+)to(\D+)Beneficiary(\D+)Information(\D+)(?<refNum>\d+)/
+      );
+      const referenceName = regex.exec(data);
+      console.log(referenceName.groups.refNum);
       console.log("MATCH", match);
       console.log("refNAme", match.groups.refName);
 
