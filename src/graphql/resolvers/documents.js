@@ -66,7 +66,8 @@ const Queries = {
       "rachel@allocations.com",
       "lance@allocations.com",
       "danny@allocations.com",
-      "eli@allocations.com"
+      "eli@allocations.com",
+      "chase.abbott@allocations.com",
     ];
 
     if (!allowedEmails.includes(ctx.user.email)) {
