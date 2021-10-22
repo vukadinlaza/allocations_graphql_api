@@ -11,6 +11,7 @@ const moment = require("moment");
 const { sendConfirmation } = require("../../mailers/signing-complete");
 const s3 = new S3({ apiVersion: "2006-03-01" });
 const { pubsub } = require("../../graphql/server");
+const { regexp } = require("express-xml-bodyparser");
 
 let Bucket =
   process.env.NODE_ENV === "production"
@@ -403,6 +404,14 @@ module.exports = Router()
 
       const db = await getDB();
       console.log("BODY", body);
+
+      const data = body.body;
+      const regex =
+        /Originator(\D+)to(\D+)Beneficiary(\D+)Information(\D+)(?'refNum'\d+)/g;
+      const match = regex.exec(data);
+      console.log("MATCH", match);
+      console.log("refNAme", match.groups.refName);
+
       res.sendStatus(200);
       next();
     } catch (err) {
