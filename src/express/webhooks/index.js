@@ -403,7 +403,6 @@ module.exports = Router()
 
       const db = await getDB();
       console.log("BODY", body);
-      console.log("REQ", req);
       res.sendStatus(200);
       next();
     } catch (err) {
