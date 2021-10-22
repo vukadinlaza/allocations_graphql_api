@@ -396,4 +396,18 @@ module.exports = Router()
       console.log("Error on Process Street Task update :>> ", err);
       next(err);
     }
+  })
+  .post("/nd-bank-wire-notification", async (req, res, next) => {
+    try {
+      const { body } = req;
+
+      const db = await getDB();
+      console.log("BODY", body);
+      console.log("REQ", req);
+      res.sendStatus(200);
+      next();
+    } catch (err) {
+      console.log("bankwire-notifications :>> ", err);
+      next(err);
+    }
   });
