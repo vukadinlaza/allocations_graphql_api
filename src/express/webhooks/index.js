@@ -409,10 +409,10 @@ module.exports = Router()
         /Originator(\D+)to(\D+)Beneficiary(\D+)Information(\D+)(?<refNum>\d+)/
       );
       const regexAmount = new RegExp(
-        /in(\D+)the(\D+)amount(\D+)of(\D+)(?'amount'\d+.\d+)/gm
+        /in(\D+)the(\D+)amount(\D+)of(\D+)(?<amount>\d+.\d+)/gm
       );
       const referenceName = regex.exec(body.body);
-      const amount = regex.exec(body.body);
+      const amount = regexAmount.exec(body.body);
       console.log("NUMBER", referenceName.groups.refNum);
       console.log("AMOUNT", amount.groups.amount);
 
