@@ -410,8 +410,6 @@ module.exports = Router()
       );
       const referenceName = regex.exec(data);
       console.log(referenceName.groups.refNum);
-      console.log("MATCH", match);
-      console.log("refNAme", match.groups.refName);
 
       res.sendStatus(200);
       next();
