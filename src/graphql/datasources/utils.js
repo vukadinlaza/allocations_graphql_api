@@ -7,7 +7,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
     name: serviceDeal.name,
     approved: true,
     organization: serviceDeal.organization_id,
-    created_at: serviceDeal.createdAt,
+    created_at: serviceDeal.created_at,
     company_name: serviceDeal.portfolio_company_name,
     company_description: serviceDeal.description,
     date_closed: serviceDeal.closing_date,
