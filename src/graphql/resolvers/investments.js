@@ -42,7 +42,7 @@ const Investment = {
     const deal = await datasources.deals.getDealById({
       deal_id: investment.deal_id,
     });
-    const multiple = parseInt(deal.dealParams.dealMultiple || "1");
+    const multiple = parseInt(deal?.dealParams?.dealMultiple || 1);
     const value = investment.amount * multiple;
     return value;
   },
