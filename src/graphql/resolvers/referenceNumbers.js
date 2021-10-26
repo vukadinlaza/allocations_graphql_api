@@ -10,8 +10,7 @@ const ReferenceNumber = {};
 
 const Queries = {
   referenceNumbersByDealId: async (_, { deal_id }) => {
-    const res = await ReferenceNumberService.numbersByDealId({ deal_id });
-    console.log("RES", res);
+    return ReferenceNumberService.numbersByDealId({ deal_id });
   },
 };
 
