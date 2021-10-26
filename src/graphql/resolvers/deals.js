@@ -544,11 +544,21 @@ const Mutations = {
     return x;
   },
   setBuildInfo: async (_, { deal_id, payload }, { user }) => {
+    const investorDomainTypeMap = {
+      true: "International",
+      false: "Domestic",
+      unknown: "Unknown",
+    };
+
     const deal = {
       user_id: user._id,
-      name: `${payload.manager_name}'s Deal`,
+      portfolio_deal_name: payload.portfolio_deal_name
+        ? payload.portfolio_deal_name
+        : `${payload.manager_name}'s ${payload.portfolio_company_name} Deal`,
       slug: kebabCase(
-        payload.name ? payload.name : `${payload.manager_name}-${Date.now()}`
+        payload.portfolio_company_name
+          ? `${payload.portfolio_company_name}-${Date.now()}`
+          : `${payload.manager_name}-${Date.now()}`
       ),
       manager: {
         name: payload.manager_name,
@@ -574,6 +584,8 @@ const Mutations = {
       setup_cost: 20000,
       angels_deal: false,
       deal_multiple: 0,
+      investor_domain_type:
+        investorDomainTypeMap[payload.international_investors.status],
       ...payload,
     };
 
