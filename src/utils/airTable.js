@@ -39,6 +39,7 @@ const newDirectionTransactionsAddRow = async ({
       },
     ]);
   } catch (e) {
+    console.log(e);
     throw new Error(`Airtable ${TABLE_NAME} Error`);
   }
 };
@@ -64,6 +65,7 @@ const accountingCapitalAccountsAddRow = async ({
       },
     ]);
   } catch (e) {
+    console.log(e);
     throw new Error(`Airtable ${TABLE_NAME} Error`);
   }
 };
