@@ -467,10 +467,59 @@ const createCapitalAccountDoc = ({ payload }) => {
   });
 };
 
+const createInvestmentWireInstructions = ({
+  country,
+  providerName,
+  investmentId,
+  referenceNumber,
+}) => {
+  const providerMap = {
+    "New Directions": {
+      template_name: "Allocations_New_Directions_Wire_Instructions",
+      template_id:
+        country === "United States"
+          ? "tpl_3q73TzjRrYGDYzK6De"
+          : "tpl_6d2j2n327eFq5Xmd7C",
+    },
+  };
+  const templateData = providerMap[providerName];
+
+  const timeStamp = Date.now();
+
+  const submission_data = {
+    editable: false,
+    data: { "Reference Number": referenceNumber },
+    metadata: {
+      timeStamp,
+      investmentId,
+      templateName: templateData.template_name,
+    },
+    field_overrides: {},
+    test: process.env.NODE_ENV === "production" ? false : true,
+    wait: true,
+  };
+
+  new Promise((resolve, reject) => {
+    docspring.generatePDF(
+      templateData.template_id,
+      submission_data,
+      (error, response) => {
+        if (error) reject(error);
+        else resolve(response.submission);
+      }
+    );
+  });
+
+  const key = `investments/${investmentId}/${timeStamp}-${templateData.template_name}.pdf`;
+
+  return key;
+};
+
 module.exports = {
   generateDocSpringPDF,
   createTaxDocument,
   getInvestmentPreview,
   getTemplate,
   createCapitalAccountDoc,
+  createInvestmentWireInstructions,
 };

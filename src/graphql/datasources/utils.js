@@ -60,6 +60,7 @@ const transformLegacyDeal = ({ legacyDeal, coverImage }) => {
     estimatedSetupCostsDollar: legacyDeal.dealParams.estimatedSetupCostsDollar,
     "management_fee.value": legacyDeal.dealParams.managementFees,
     management_fee_frequency: legacyDeal.dealParams.managementFeeType,
+    nd_virtual_account_number: legacyDeal.nd_virtual_account_number,
   };
 };
 

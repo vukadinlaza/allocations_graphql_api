@@ -74,9 +74,14 @@ class Deals extends MongoDataSource {
       return updatedDeal.value;
     }
 
+    const serviceDeal = await DealService.get(deal_id);
+    const serviceDealTransformed = transformServiceDeal({ serviceDeal });
+
     const dealData = {
       deal_id,
-      ...transformLegacyDeal({ legacyDeal: deal }),
+      ...transformLegacyDeal({
+        legacyDeal: { ...serviceDealTransformed, ...deal },
+      }),
     };
     const updatedServiceDeal = await DealService.updateDealById(dealData);
     return transformServiceDeal({

@@ -249,5 +249,6 @@ input DealInput {
   docSpringTemplateId: String
   spvAgreementKey: String
   isPostingComment: Boolean
+  nd_virtual_account_number: String
 }
 `);

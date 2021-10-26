@@ -22,6 +22,7 @@ type Investment {
   submissionData: SubmissionData
   previewLink: String
   slack_investment: Boolean
+  wire_instructions: Document
 }
 
 type SubmissionData {

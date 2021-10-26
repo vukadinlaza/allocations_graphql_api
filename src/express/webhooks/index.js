@@ -11,7 +11,15 @@ const moment = require("moment");
 const { sendConfirmation } = require("../../mailers/signing-complete");
 const s3 = new S3({ apiVersion: "2006-03-01" });
 const { pubsub } = require("../../graphql/server");
-const { regexp } = require("express-xml-bodyparser");
+const {
+  newDirectionTransactionsAddRow,
+  accountingCapitalAccountsAddRow,
+} = require("../../utils/airTable");
+const Deals = require("../../graphql/datasources/Deals");
+const {
+  getReferenceNumber,
+  getWireAmount,
+} = require("../../utils/newDirections");
 
 let Bucket =
   process.env.NODE_ENV === "production"
@@ -398,28 +406,52 @@ module.exports = Router()
       next(err);
     }
   })
-  .post("/nd-bank-wire-notification", async (req, res, next) => {
+  .post("/nd-bank-wire-confirmation", async (req, res, next) => {
     try {
+      const db = await getDB();
+      const DealService = new Deals(db.collection("deals"));
+
       const { body } = req;
 
-      const db = await getDB();
-      console.log("BODY", body);
+      const referenceNumber = getReferenceNumber(body.body);
+      const amount = getWireAmount(body.body);
 
-      const regex = new RegExp(
-        /Originator(\D+)to(\D+)Beneficiary(\D+)Information(\D+)(?<refNum>\d+)/
-      );
-      const regexAmount = new RegExp(
-        /in(\D+)the(\D+)amount(\D+)of(\D+)(?<amount>\d+.\d+)/gm
-      );
-      const referenceName = regex.exec(body.body);
-      const amount = regexAmount.exec(body.body);
-      console.log("NUMBER", referenceName.groups.refNum);
-      console.log("AMOUNT", amount.groups.amount);
+      const investment = await db.investments.findOne({
+        "wire_instructions.reference_number": referenceNumber,
+      });
+      if (!investment) throw new Error("No Investment Found.");
+      const {
+        _id: investmentId,
+        deal_id,
+        user_id,
+        submissionData: { legalName },
+      } = investment;
+
+      const deal = await DealService.getDealById({ deal_id });
+      if (!deal) throw new Error("No Deal Found");
+      if (!deal.nd_virtual_account_number)
+        throw new Error("No Virtual Account Number");
+      const { nd_virtual_account_number } = deal;
+
+      await newDirectionTransactionsAddRow({
+        virtualAccountNumber: nd_virtual_account_number,
+        amount,
+        referenceNumber,
+        deal_id,
+        investmentId,
+        user_id,
+      });
+
+      await accountingCapitalAccountsAddRow({
+        user_name: legalName,
+        referenceNumber,
+        amount,
+      });
 
       res.sendStatus(200);
       next();
     } catch (err) {
-      console.log("bankwire-notifications :>> ", err);
+      console.log("nd-bank-wire-confirmation :>> ", err);
       next(err);
     }
   });

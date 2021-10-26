@@ -17,6 +17,7 @@ const resolversRaw = [
   "signingpackets",
   "comments",
   "applications",
+  "referenceNumbers",
 ].map((name) => require(`./${name}`));
 
 const splatReduce = (key) =>

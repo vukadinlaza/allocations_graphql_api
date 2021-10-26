@@ -11,6 +11,7 @@ const {
   getInvestmentPreview,
   getTemplate,
   createCapitalAccountDoc,
+  createInvestmentWireInstructions,
 } = require("../../docspring");
 const Mailer = require("../../mailers/mailer");
 const commitmentTemplate = require("../../mailers/templates/commitment-template");
@@ -45,6 +46,13 @@ const Investment = {
     const multiple = parseInt(deal?.dealParams?.dealMultiple || 1);
     const value = investment.amount * multiple;
     return value;
+  },
+  wire_instructions: (investment) => {
+    if (!investment.wire_instructions.s3Key) return null;
+    return {
+      link: Cloudfront.getSignedUrl(investment.wire_instructions?.s3Key),
+      path: investment.wire_instructions?.s3Key,
+    };
   },
 };
 
@@ -169,6 +177,14 @@ const Mutations = {
     }
 
     let investment = null;
+
+    //grab reference number object, set to null value if undefined
+    const referenceNumber =
+      (await datasources.referenceNumber.assignReferenceNumber({
+        deal_id: payload.dealId,
+      })) || null;
+
+    // add case for undefined referenceNumber
     if (!payload.investmentId) {
       const invsRes = await db.investments.insertOne({
         status: "invited",
@@ -179,8 +195,31 @@ const Mutations = {
         deal_id: ObjectId(payload.dealId),
         organization: ObjectId(deal.organization),
         submissionData: payload,
+        wire_instructions: {
+          // no dynamic data for acc/routing numbers yet
+          account_number: null,
+          routing_number: null,
+          reference_number: referenceNumber?.number || null,
+          // no dynamic data for provider yet
+          provider: "New Directions",
+        },
       });
       investment = invsRes.ops[0];
+
+      if (referenceNumber) {
+        //create wire instructions, and return key for AWS integration
+        const wireKey = createInvestmentWireInstructions({
+          country: payload.country,
+          providerName: "New Directions",
+          investmentId: investment._id,
+          referenceNumber: referenceNumber.number,
+        });
+        //update investment to include s3Key for docuspring integration
+        await db.investments.updateOne(
+          { _id: ObjectId(investment._id) },
+          { $set: { "wire_instructions.s3Key": wireKey } }
+        );
+      }
     } else {
       investment = await db.investments.findOne({
         _id: ObjectId(payload.investmentId),
