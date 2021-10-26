@@ -416,6 +416,9 @@ module.exports = Router()
       const referenceNumber = getReferenceNumber(body.body);
       const amount = getWireAmount(body.body);
 
+      console.log("NUMBER", referenceNumber);
+      console.log("AMOUNT", amount);
+
       const investment = await db.investments.findOne({
         "wire_instructions.reference_number": referenceNumber,
       });
