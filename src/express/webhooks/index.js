@@ -408,19 +408,12 @@ module.exports = Router()
   })
   .post("/nd-bank-wire-confirmation", async (req, res, next) => {
     try {
-      console.log("FIRES1");
       const db = await getDB();
-      console.log("FIRES2");
       const DealService = new Deals(db.collection("deals"));
-      console.log("FIRES3");
 
       const { body } = req;
-      console.log("FIRES4");
       const referenceNumber = getReferenceNumber(body.body);
       const amount = getWireAmount(body.body);
-
-      console.log("NUMBER", referenceNumber);
-      console.log("AMOUNT", amount);
 
       const investment = await db.investments.findOne({
         "wire_instructions.reference_number": referenceNumber,
