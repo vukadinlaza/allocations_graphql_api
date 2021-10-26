@@ -29,6 +29,7 @@ type Organization {
   totalInvestors: Int
   totalClosed: Int
   totalOpen: Int
+  totalInvestments: Int
   slackProspects: Int
 }
 

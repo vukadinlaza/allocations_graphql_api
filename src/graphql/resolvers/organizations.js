@@ -200,6 +200,76 @@ const Organization = {
   approved: (org) => {
     return org.approved !== false;
   },
+  totalAUM: async (org, _, { db }) => {
+    const [{ aum }] = await db.deals
+      .aggregate([
+        { $match: { organization: org._id } },
+        {
+          $lookup: {
+            from: "investments",
+            localField: "_id",
+            foreignField: "deal_id",
+            as: "investments",
+          },
+        },
+        { $unwind: "$investments" },
+        { $match: { "investments.status": { $in: ["complete", "wired"] } } },
+        { $project: { amount: { $toInt: "$investments.amount" } } },
+        {
+          $group: {
+            _id: null,
+            aum: { $sum: "$amount" },
+          },
+        },
+      ])
+      .toArray();
+
+    return aum;
+  },
+  totalSPVs: async (org, _, { db }) => {
+    const [{ spvs }] = await db.deals
+      .aggregate([
+        { $match: { organization: org._id, investmentType: { $ne: "fund" } } },
+        { $count: "spvs" },
+      ])
+      .toArray();
+
+    return spvs;
+  },
+  totalFunds: async (org, _, { db }) => {
+    const [{ funds }] = await db.deals
+      .aggregate([
+        { $match: { organization: org._id, investmentType: "fund" } },
+        { $count: "funds" },
+      ])
+      .toArray();
+
+    return funds;
+  },
+  totalInvestments: async (org, _, { db }) => {
+    const [{ investments }] = await db.deals
+      .aggregate([
+        { $match: { organization: org._id } },
+        {
+          $lookup: {
+            from: "investments",
+            localField: "_id",
+            foreignField: "deal_id",
+            as: "investments",
+          },
+        },
+        { $unwind: "$investments" },
+        {
+          $match: {
+            "investments.status": { $in: ["signed", "complete", "wired"] },
+          },
+        },
+        { $count: "investments" },
+      ])
+      .toArray();
+
+    return investments;
+  },
 };
 
 module.exports = {
