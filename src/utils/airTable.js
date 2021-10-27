@@ -39,38 +39,69 @@ const newDirectionTransactionsAddRow = async ({
       },
     ]);
   } catch (e) {
-    console.log(e);
     throw new Error(`Airtable ${TABLE_NAME} Error`);
   }
 };
 
-const accountingCapitalAccountsAddRow = async ({
+const bankTransactionsTransactionsAddRow = async ({
   user_name,
   amount,
   referenceNumber,
+  account,
 }) => {
-  // table:
+  // table: https://airtable.com/appPoxRLndZXMKzi8/tbl66sSPTRCGRFMiS/viwxpMFlyWSJzaQlH?blocks=hide
   const TABLE_NAME = "Transactions";
   const BASE_ID = process.env.AIR_TABLE_BANK_TRANSACTIONS_BASE_ID;
   try {
     const base = await getBase(BASE_ID);
-    await base(TABLE_NAME).create([
-      {
-        fields: {
-          "*Name": `Wire in from ${user_name}`,
-          "**Date": moment().format("YYYY-MM-DD"),
-          "**USD": Number(amount),
-          "ND Reference Number": referenceNumber,
+    await base(TABLE_NAME).create(
+      [
+        {
+          fields: {
+            "*Name": `Wire in from ${user_name}`,
+            "**Date": moment().format("YYYY-MM-DD"),
+            "**USD": Number(amount),
+            "**Account": [account],
+            "ND Reference Number": referenceNumber,
+          },
         },
-      },
-    ]);
+      ],
+      { typecast: true }
+    );
   } catch (e) {
-    console.log(e);
     throw new Error(`Airtable ${TABLE_NAME} Error`);
   }
 };
 
+const findOrCreateBankingTransactionsAccount = async (virtualAccountNumber) => {
+  // table: https://airtable.com/appPoxRLndZXMKzi8/tbllrhjQGmz7boL3G/viwAo38G3Xlto3Obd?blocks=hide
+  const TABLE_NAME = "Accounts";
+  const BASE_ID = process.env.AIR_TABLE_BANK_TRANSACTIONS_BASE_ID;
+  const accountName = `New Directions - ${virtualAccountNumber}`;
+  const base = await getBase(BASE_ID);
+  try {
+    const res = await base(TABLE_NAME)
+      .select({ filterByFormula: `{*Name} = '${accountName}'` })
+      .firstPage();
+    // If no row found, create new account
+    if (res.length == 0)
+      await base(TABLE_NAME).create([
+        {
+          fields: {
+            "*Name": accountName,
+            "**Institution": "New Directions",
+          },
+        },
+      ]);
+  } catch (e) {
+    throw new Error(`Airtable ${TABLE_NAME} Error`);
+  }
+  // Return the account name after either successfully finding, or creating an account by naming convention
+  return accountName;
+};
+
 module.exports = {
   newDirectionTransactionsAddRow,
-  accountingCapitalAccountsAddRow,
+  bankTransactionsTransactionsAddRow,
+  findOrCreateBankingTransactionsAccount,
 };

@@ -13,7 +13,8 @@ const s3 = new S3({ apiVersion: "2006-03-01" });
 const { pubsub } = require("../../graphql/server");
 const {
   newDirectionTransactionsAddRow,
-  accountingCapitalAccountsAddRow,
+  bankTransactionsTransactionsAddRow,
+  findOrCreateBankingTransactionsAccount,
 } = require("../../utils/airTable");
 const Deals = require("../../graphql/datasources/Deals");
 const {
@@ -441,9 +442,14 @@ module.exports = Router()
         user_id,
       });
 
-      await accountingCapitalAccountsAddRow({
+      const account = await findOrCreateBankingTransactionsAccount(
+        nd_virtual_account_number
+      );
+
+      await bankTransactionsTransactionsAddRow({
         user_name: legalName,
         referenceNumber,
+        account,
         amount,
       });
 
