@@ -54,6 +54,7 @@ type Deal {
   name: String
   wire_deadline: String
   phase: String
+  nd_virtual_account_number: String
 }
 
 type DealParams {
