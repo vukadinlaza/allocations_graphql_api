@@ -440,7 +440,7 @@ const Mutations = {
     }
     const buffer = await stream2buffer(document.createReadStream());
 
-    await DealService.uploadDocument(buffer, {
+    const { _id: documentId } = await DealService.uploadDocument(buffer, {
       deal_id,
       task_id,
       user_id: user._id,
@@ -449,7 +449,7 @@ const Mutations = {
       title: document.filename,
     });
 
-    return true;
+    return { success: true, _id: documentId };
   },
   addDealLogo: async (_, params, ctx) => {
     const serviceDeal = DealService.get(params.deal_id);
@@ -588,7 +588,7 @@ const Mutations = {
         investorDomainTypeMap[payload.international_investors.status],
       ...payload,
     };
-
+    console.log(deal);
     const res = await DealService.setBuildInfo(deal_id, deal);
     if (res.acknowledged) {
       return await DealService.get(res._id);

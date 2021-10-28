@@ -207,7 +207,7 @@ type Mutation {
   deleteDeal(_id: String!): Boolean
   createOrgAndDeal(orgName: String!, deal: DealInput!): Deal
   addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
-  addDealDocService(doc: Upload!, task_id: String, deal_id: String, phase: String): Boolean
+  addDealDocService(doc: Upload!, task_id: String, deal_id: String, phase: String): Object
   addDealLogo(deal_id: String!, title: String!, logo: Upload!): Deal
   rmDealLogo(deal_id: String!): Deal
   rmDealDoc(deal_id: String!, title: String!): Deal
