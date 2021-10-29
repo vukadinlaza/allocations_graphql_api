@@ -80,6 +80,9 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_hM9Z7kDTRQHQ5eZAj3",
     "tpl_RSMHzMg3bRh5FXexCy",
     "tpl_y2pTERp3ZPnP6yeLKF",
+    "tpl_pLCaA3MRhfeSfQYhdn",
+    "tpl_9KMF9czg3QRCsYjHTt",
+    "tpl_TaFALsk9yKCbKXkqQe",
   ];
   const kunalDeals = ["tpl_FbnCe3L7c9Qj32JHTG"];
   if (kunalDeals.includes(templateId)) {
@@ -298,6 +301,7 @@ const generateDocSpringPDF = async (
   templateId
 ) => {
   let data = getTemplateData(input, user, templateId);
+
   var submission_data = {
     editable: false,
     data: data,
@@ -422,7 +426,10 @@ const getTemplate = async ({
   if (response.status !== "success") return;
 
   const timeStamp = Date.now();
-  const adjTemplateName = response.name.replace(/\s+/g, "_");
+  const adjTemplateName = response.name
+    .replace(/[^a-zA-Z0-9 _-]/g, "") // removes unwanted special characters
+    .replace(/\s\s+/g, "")
+    .replace(/ /g, "_"); // removes extra spaces
 
   const key = `investments/${payload.investmentId}/${timeStamp}-${adjTemplateName}.pdf`;
 

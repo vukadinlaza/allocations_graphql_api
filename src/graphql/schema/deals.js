@@ -44,7 +44,7 @@ type Deal {
   isDemo: Boolean
   viewedUsers: [User]
   dealOnboarding: dealOnboarding
-  AUM: Int
+  AUM: Float
   slack_deal: Boolean
   sector: String
   allocation_advisor: Boolean

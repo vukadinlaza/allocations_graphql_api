@@ -24,8 +24,8 @@ type Organization {
   totalPrivateFunds: Int
   totalFunds: Int
   totalSPVs: Int
-  totalFundAUM: Int
-  totalSPVAUM: Int
+  totalFundAUM: Float
+  totalSPVAUM: Float
   totalInvestors: Int
   totalClosed: Int
   totalOpen: Int
