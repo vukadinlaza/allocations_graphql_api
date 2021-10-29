@@ -13,6 +13,7 @@ const s3 = new S3({ apiVersion: "2006-03-01" });
 const { pubsub } = require("../../graphql/server");
 const {
   newDirectionTransactionsAddRow,
+  bankTransactionsTransactionsTableOutbound,
   bankTransactionsTransactionsAddRow,
   findOrCreateBankingTransactionsAccount,
 } = require("../../utils/airTable");
@@ -21,6 +22,7 @@ const {
   getReferenceNumber,
   getWireAmount,
 } = require("../../utils/newDirections");
+const { verifyWebhook } = require("../../auth");
 
 let Bucket =
   process.env.NODE_ENV === "production"
@@ -409,6 +411,13 @@ module.exports = Router()
   })
   .post("/nd-bank-wire-confirmation", async (req, res, next) => {
     try {
+      const verified = verifyWebhook(req.headers.authorization);
+
+      if (!verified) {
+        res.sendStatus(401);
+        throw new Error("Invalid token");
+      }
+
       const db = await getDB();
       const DealService = new Deals(db.collection("deals"));
 
@@ -457,6 +466,43 @@ module.exports = Router()
       next();
     } catch (err) {
       console.log("nd-bank-wire-confirmation :>> ", err);
+      next(err);
+    }
+  })
+  .post("/nd-outbound-wire-confirmation", async (req, res, next) => {
+    try {
+      const verified = verifyWebhook(req.headers.authorization);
+
+      if (!verified) {
+        res.sendStatus(401);
+        throw new Error("Invalid token");
+      }
+
+      const db = await getDB();
+      const DealService = new Deals(db.collection("deals"));
+
+      const deal = await DealService.getDealById({ deal_id });
+      if (!deal) throw new Error("No Deal Found");
+      if (!deal.nd_virtual_account_number)
+        throw new Error("No Virtual Account Number");
+      const { nd_virtual_account_number } = deal;
+
+      const { body } = req;
+      const amount = getWireAmount(body.body);
+
+      const account = await findOrCreateBankingTransactionsAccount(
+        nd_virtual_account_number
+      );
+      await bankTransactionsTransactionsTableOutbound({
+        amount: amount * -1,
+        account,
+      });
+
+      res.sendStatus(200);
+
+      next();
+    } catch (err) {
+      console.log("nd-outbound-wire-confirmation :>> ", err);
       next(err);
     }
   });

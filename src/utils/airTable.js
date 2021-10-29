@@ -101,7 +101,36 @@ const findOrCreateBankingTransactionsAccount = async (virtualAccountNumber) => {
   return accountName;
 };
 
+const bankTransactionsTransactionsTableOutbound = async ({
+  amount,
+  account,
+}) => {
+  // table: https://airtable.com/appPoxRLndZXMKzi8/tbl66sSPTRCGRFMiS/viwxpMFlyWSJzaQlH?blocks=hide
+  const TABLE_NAME = "Transactions";
+  const BASE_ID = process.env.AIR_TABLE_BANK_TRANSACTIONS_BASE_ID;
+  try {
+    const base = await getBase(BASE_ID);
+    await base(TABLE_NAME).create(
+      [
+        {
+          fields: {
+            "*Name": "Outbound wire to portfolio company",
+            "**Date": moment().format("YYYY-MM-DD"),
+            "**Account": [account],
+            "**USD": Number(amount),
+          },
+        },
+      ],
+      { typecast: true }
+    );
+  } catch (e) {
+    console.log(e);
+    throw new Error(`Airtable ${TABLE_NAME} Error`);
+  }
+};
+
 module.exports = {
+  bankTransactionsTransactionsTableOutbound,
   newDirectionTransactionsAddRow,
   bankTransactionsTransactionsAddRow,
   findOrCreateBankingTransactionsAccount,

@@ -26,6 +26,10 @@ function getKey(header, cb) {
   });
 }
 
+function verifyWebhook(token) {
+  return token === process.env.ZAP_WEBHOOK_TOKEN;
+}
+
 async function verify(token) {
   return new Promise((resolve, reject) => {
     jwt.verify(token, getKey, options, (err, decoded) => {
@@ -101,4 +105,4 @@ const updateAirtableUsers = async ({ user }) => {
   }
 };
 
-module.exports = { verify, authenticate };
+module.exports = { verify, authenticate, verifyWebhook };
