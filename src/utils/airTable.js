@@ -35,6 +35,7 @@ const newDirectionTransactionsAddRow = async ({
           "Investment Id": investmentId,
           "User Id": user_id,
           "Created At": moment().format("YYYY-MM-DD"),
+          Processed: false,
         },
       },
     ]);
