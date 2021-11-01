@@ -600,12 +600,19 @@ const Mutations = {
     { document_id, phase_id, task_id },
     { user }
   ) => {
-    const res = await DealService.rejectDocument({
+    const res = await DealService.deleteDocument({
       id: document_id,
       phase: phase_id,
       user_id: user._id,
       task_id: task_id,
     });
+
+    if (!res.acknowledged) {
+      throw new Error({
+        status: res.status,
+        message: res.error || res.message,
+      });
+    }
     return res;
   },
 };
