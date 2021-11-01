@@ -59,10 +59,11 @@ async function run() {
   app.use(express.urlencoded({ verify: rawBodyBuffer, extended: true }));
   app.use(express.json({ verify: rawBodyBuffer }));
   app.use(graphqlUploadExpress({ maxFileSize: 1000000000, maxFiles: 10 }));
-
+  app.use(cors());
   app.use("/api/webhooks", require("./express/webhooks/index"));
   app.use("/api/users", require("./express/api/user"));
   app.use("/api/deal", require("./express/api/deal"));
+  app.use("/api/forumPay", require("./express/api/crypto"));
 
   // connect to MongoDB
   const db = await getDB();
