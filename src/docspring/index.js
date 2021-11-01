@@ -84,7 +84,7 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_9KMF9czg3QRCsYjHTt",
     "tpl_TaFALsk9yKCbKXkqQe",
   ];
-  const kunalDeals = ["tpl_FbnCe3L7c9Qj32JHTG"];
+  const kunalDeals = ["tpl_FbnCe3L7c9Qj32JHTG", "tpl_q42NLbhm5gRT4SKLkf"];
   if (kunalDeals.includes(templateId)) {
     return {
       InvestorType: capitalize(investor_type),
