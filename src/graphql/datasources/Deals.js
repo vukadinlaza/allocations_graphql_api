@@ -78,12 +78,9 @@ class Deals extends MongoDataSource {
     let updatedDeal = await this.collection.findOneAndUpdate(
       { _id: ObjectId(deal_id) },
       {
-        $set: {
-          ...deal,
-          updated_at: Date.now(),
-        },
+        $set: { ...deal, updated_at: Date.now() },
       },
-      { returnNewDocument: true }
+      { returnDocument: "after" }
     );
     /*
     REMOVED IN FAVOR OF USING ONLY LEGACY DB
@@ -107,21 +104,23 @@ class Deals extends MongoDataSource {
     */
     return updatedDeal;
   }
+
   async createDeal({ deal, user_id }) {
     /*
-REMOVED IN FAVOR OF USING ONLY LEGACY DB
-const newDeal = await DealService.create(user_id);
-await DealService.setBuildInfo(newDeal._id, transformLegacyDeal(deal));
-return DealService.get(newDeal._id);
-*/
-    const { insertedId } = await this.collection.insertOne({
+  REMOVED IN FAVOR OF USING ONLY LEGACY DB
+  const newDeal = await DealService.create(user_id);
+  await DealService.setBuildInfo(newDeal._id, transformLegacyDeal(deal));
+  return DealService.get(newDeal._id);
+  */
+    const { insertedId: _id } = await this.collection.insertOne({
       ...deal,
       user_id,
     });
-    const newDeal = this.collection.findOne({ insertedId });
+    const newDeal = await this.collection.findOne({ _id });
 
     return newDeal;
   }
+
   async deleteDealById({ deal_id }) {
     const deletedLegacyDeal = await this.collection.deleteOne({
       _id: ObjectId(deal_id),
