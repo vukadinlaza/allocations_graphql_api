@@ -9,5 +9,7 @@ module.exports = {
     "https.tools.allocations.com",
     "https://mono-fe-test.herokuapp.com",
     "https://mono-tools-test.herokuapp.com",
+    "https://allocations-fmdemo-fe.herokuapp.com",
+    "https://fmdemo.allocations.com",
   ],
 };
