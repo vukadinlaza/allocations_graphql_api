@@ -35,7 +35,7 @@
     "selenium-webdriver": "^4.0.0-alpha.7"
   },
   "dependencies": {
-    "@allocations/deal-service": "^0.1.2",
+    "@allocations/deal-service": "^0.1.4",
     "@allocations/investment-agreement-service": "^0.0.2",
     "@allocations/reference-number-service": "^0.1.0",
     "@sendgrid/mail": "^6.5.2",
