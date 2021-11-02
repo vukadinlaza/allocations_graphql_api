@@ -205,13 +205,13 @@ const Mutations = {
         },
       });
       investment = invsRes.ops[0];
-
       if (referenceNumber) {
         //create wire instructions, and return key for AWS integration
-        const wireKey = createInvestmentWireInstructions({
-          country: payload.country,
+        const wireKey = await createInvestmentWireInstructions({
           providerName: "New Directions",
           investmentId: investment._id,
+          investorName: investment.submissionData.legalName,
+          spvName: deal.company_name,
           referenceNumber: referenceNumber.number,
         });
         //update investment to include s3Key for docuspring integration

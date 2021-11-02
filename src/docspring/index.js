@@ -474,28 +474,33 @@ const createCapitalAccountDoc = ({ payload }) => {
   });
 };
 
+/**
+ * create dynamic wire instructions based on banking provider, return key for upload to aws
+ */
 const createInvestmentWireInstructions = ({
-  country,
   providerName,
   investmentId,
+  investorName,
+  spvName,
   referenceNumber,
 }) => {
+  //map containing template information per banking provider
   const providerMap = {
     "New Directions": {
       template_name: "Allocations_New_Directions_Wire_Instructions",
-      template_id:
-        country === "United States"
-          ? "tpl_3q73TzjRrYGDYzK6De"
-          : "tpl_6d2j2n327eFq5Xmd7C",
+      template_id: "tpl_3q73TzjRrYGDYzK6De",
     },
   };
   const templateData = providerMap[providerName];
 
   const timeStamp = Date.now();
-
   const submission_data = {
     editable: false,
-    data: { "Reference Number": referenceNumber },
+    data: {
+      "Reference Number": referenceNumber,
+      "Investor Name": investorName,
+      "SPV Name": spvName,
+    },
     metadata: {
       timeStamp,
       investmentId,
@@ -506,20 +511,18 @@ const createInvestmentWireInstructions = ({
     wait: true,
   };
 
-  new Promise((resolve, reject) => {
+  const key = `investments/${investmentId}/${timeStamp}-${templateData.template_name}.pdf`;
+
+  return new Promise((resolve, reject) => {
     docspring.generatePDF(
       templateData.template_id,
       submission_data,
-      (error, response) => {
+      (error) => {
         if (error) reject(error);
-        else resolve(response.submission);
+        else resolve(key);
       }
     );
   });
-
-  const key = `investments/${investmentId}/${timeStamp}-${templateData.template_name}.pdf`;
-
-  return key;
 };
 
 module.exports = {
