@@ -180,9 +180,10 @@ const Mutations = {
 
     //grab reference number object, set to null value if undefined
     const referenceNumber =
-      (await datasources.referenceNumber.assignReferenceNumber({
+      await datasources.referenceNumber.assignReferenceNumber({
         deal_id: payload.dealId,
-      })) || null;
+      });
+    console.log("reference number", referenceNumber);
 
     // add case for undefined referenceNumber
     if (!payload.investmentId) {

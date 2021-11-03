@@ -13,6 +13,9 @@ class NDReferenceNumber extends MongoDataSource {
 
   async assignReferenceNumber({ deal_id }) {
     const res = await ReferenceNumberService.assign({ deal_id });
+    console.log("res", res);
+    if (res.error) return null;
+
     return res;
   }
 }
