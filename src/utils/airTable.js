@@ -40,6 +40,7 @@ const newDirectionTransactionsAddRow = async ({
       },
     ]);
   } catch (e) {
+    console.log(e);
     throw new Error(`Airtable ${TABLE_NAME} Error`);
   }
 };
@@ -70,6 +71,7 @@ const bankTransactionsTransactionsAddRow = async ({
       { typecast: true }
     );
   } catch (e) {
+    console.log(e);
     throw new Error(`Airtable ${TABLE_NAME} Error`);
   }
 };
@@ -95,6 +97,7 @@ const findOrCreateBankingTransactionsAccount = async (virtualAccountNumber) => {
         },
       ]);
   } catch (e) {
+    console.log(e);
     throw new Error(`Airtable ${TABLE_NAME} Error`);
   }
   // Return the account name after either successfully finding, or creating an account by naming convention
