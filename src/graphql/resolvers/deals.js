@@ -452,31 +452,7 @@ const Mutations = {
     return { success: true, _id: documentId };
   },
   addDealLogo: async (_, params, ctx) => {
-    const serviceDeal = DealService.get(params.deal_id);
-    if (serviceDeal) {
-      const { deal_id, task_id, phase, document } = params;
-      const d = await doc;
-      function stream2buffer(stream) {
-        return new Promise((resolve, reject) => {
-          const _buf = [];
-          stream.on("data", (chunk) => _buf.push(chunk));
-          stream.on("end", () => resolve(Buffer.concat(_buf)));
-          stream.on("error", (err) => reject(err));
-        });
-      }
-      const buffer = await stream2buffer(d.createReadStream());
-
-      await DealService.uploadDocument(buffer, {
-        deal_id,
-        task_id,
-        user_id: user._id,
-        phase,
-        content_type: d.mimetype,
-        title: d.filename,
-      });
-
-      return DealService.get(deal_id);
-    }
+    isAdmin(ctx);
     const path = await DealDocUploader.uploadImage(params);
     await ctx.db.deals.updateOne(
       { _id: ObjectId(params.deal_id) },
