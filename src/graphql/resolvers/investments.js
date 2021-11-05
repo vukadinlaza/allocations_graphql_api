@@ -20,6 +20,7 @@ const { signedSPV } = require("../../zaps/signedDocs");
 const { customInvestmentPagination } = require("../pagHelpers");
 const { DealService } = require("@allocations/deal-service");
 const { sendWireReminderEmail } = require("../../mailers/wire-reminder");
+const { amountFormat } = require("../../utils/common");
 
 const Schema = Investments;
 
@@ -407,16 +408,7 @@ const Mutations = {
     }
   },
   createCapPDF: async (_, { data }, { user, db }) => {
-    function nWithCommas(num) {
-      if (!num) return 0;
-      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
     const timeStamp = Date.now();
-    const amountFormat = (amount) => {
-      if (!amount) return 0;
-      const floatAmount = parseFloat(amount).toFixed(2);
-      return nWithCommas(floatAmount);
-    };
 
     const investment = await db.investments.findOne({
       _id: ObjectId(data.investmentId),

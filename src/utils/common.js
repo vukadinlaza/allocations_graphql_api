@@ -3,4 +3,10 @@ function nWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-module.exports = { nWithCommas };
+function amountFormat(amount) {
+  if (!amount) return 0;
+  const floatAmount = parseFloat(amount).toFixed(2);
+  return nWithCommas(floatAmount);
+}
+
+module.exports = { nWithCommas, amountFormat };
