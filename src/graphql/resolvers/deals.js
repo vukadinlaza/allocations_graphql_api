@@ -247,7 +247,7 @@ const Mutations = {
       await fetch("https://hooks.zapier.com/hooks/catch/7904699/onwul0r/", {
         method: "post",
         body: JSON.stringify({
-          dealId: res.ops[0]._id,
+          dealId: res._id,
           organization: org.name,
           dealName: deal.company_name,
         }),
@@ -255,7 +255,7 @@ const Mutations = {
       });
     }
 
-    return res.ops[0];
+    return res;
   },
   /** special handling for wire instructions upload **/
   updateDealService: async (_, args, ctx) => {
