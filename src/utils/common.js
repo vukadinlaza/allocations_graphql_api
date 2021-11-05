@@ -9,4 +9,15 @@ function amountFormat(amount) {
   return nWithCommas(floatAmount);
 }
 
-module.exports = { nWithCommas, amountFormat };
+const formatCompanyName = (companyName) => {
+  if (companyName.includes("Fund")) return companyName;
+  const splitCompanyArray = companyName.split(" ");
+
+  if (splitCompanyArray[splitCompanyArray.length - 1] !== "SPV") {
+    return [...splitCompanyArray, "SPV"].join(" ");
+  }
+
+  return companyName;
+};
+
+module.exports = { nWithCommas, amountFormat, formatCompanyName };
