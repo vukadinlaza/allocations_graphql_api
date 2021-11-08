@@ -547,11 +547,13 @@ const Mutations = {
         type: payload.carry_fee.type,
         value: payload.carry_fee.value,
         string_value: `${payload.carry_fee.value} ${payload.carry_fee.type}`,
+        // custom: ,
       },
       management_fee: {
         type: payload.management_fee.type,
         value: payload.management_fee.value,
         string_value: `${payload.management_fee.value} ${payload.management_fee.type}`,
+        // custom: ,
       },
       ica_exemption: {
         investor_type: "Accredited investors",
