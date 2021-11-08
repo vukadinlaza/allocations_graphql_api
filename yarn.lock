@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@allocations/deal-service@^0.1.6":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@allocations/deal-service/-/deal-service-0.1.6.tgz#214e7164c8fa5504277eda6f1780486ba8de1f77"
-  integrity sha512-IBg2kNfImPFPwKejHOSutS2H9Uy3VuJGBy6o7PxTMXK80RSOPgems27BIsZF2lBXqy0qMgyawIjofLMylb27DA==
+"@allocations/deal-service@^0.1.7":
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/@allocations/deal-service/-/deal-service-0.1.7.tgz#c3d4281e5bd3258668a8a85cb8355508b703c77b"
+  integrity sha512-DFDhG1+EZUmZayOZ3MMAK0YuS5gHAcrk+5/Mlldk28T4xYnxHQjfmfM3aqe8WXXPvWl0ds+SrURWzOK4/xvQHQ==
   dependencies:
     "@allocations/service-common" "*"
     "@aws-sdk/client-s3" "^3.33.0"
