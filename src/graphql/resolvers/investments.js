@@ -424,12 +424,14 @@ const Mutations = {
     if (!investment) {
       return null;
     }
-    if (
-      get(investment, "documents", []).find((doc) =>
-        doc.includes("Capital_Account_Statement")
-      )
-    ) {
-      return investment;
+    const capDoc = get(investment, "documents", []).find((doc) =>
+      doc.includes("Capital_Account_Statement")
+    );
+    if (capDoc) {
+      await db.investments.updateOne(
+        { _id: ObjectId(investment._id) },
+        { $pull: { documents: capDoc } }
+      );
     }
 
     const payload = {
