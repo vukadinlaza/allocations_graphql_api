@@ -514,10 +514,12 @@ const Mutations = {
       }
     );
   },
-  createBuild: async (_, __, { user }) => {
-    const deal = await DealService.create(user._id);
-    const x = await DealService.get(deal._id);
-    return x;
+  createBuild: async (_, { payload }, { user }) => {
+    const { organization_id } = payload;
+
+    const deal = await DealService.create(user._id, organization_id);
+    const dealResponse = await DealService.get(deal._id);
+    return dealResponse;
   },
   setBuildInfo: async (_, { deal_id, payload }, { user }) => {
     const investorDomainTypeMap = {

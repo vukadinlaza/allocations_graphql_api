@@ -55,6 +55,8 @@ type Deal {
   wire_deadline: String
   phase: String
   nd_virtual_account_number: String
+  master_series: String
+  high_volume_partner: Boolean
 }
 
 type DealParams {
