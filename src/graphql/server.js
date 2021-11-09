@@ -10,6 +10,7 @@ function authedServer(db) {
   const publicEndpoints = ["PublicDeal"];
 
   return new ApolloServer({
+    introspection: true,
     typeDefs,
     resolvers,
     uploads: false,

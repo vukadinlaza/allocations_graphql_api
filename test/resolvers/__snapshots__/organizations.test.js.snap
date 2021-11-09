@@ -79,7 +79,7 @@ Object {
 
 exports[`Organizations CREATE_ORGANIZATION admin users can create organizations 2`] = `
 Object {
-  "_id": Any<ObjectID>,
+  "_id": Any<ObjectId>,
   "approved": true,
   "created_at": Any<Number>,
   "name": "Test Org",

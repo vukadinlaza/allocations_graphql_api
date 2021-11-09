@@ -271,6 +271,7 @@ describeWithServer(
           _id: expect.any(ObjectId),
           created_at: expect.any(Number),
           inviteKey: expect.any(String),
+          user_id: expect.any(ObjectId),
         });
       });
 
@@ -412,7 +413,7 @@ describeWithServer(
       test("a logged in user can create an org and a deal", async () => {
         const db = await getDB();
 
-        await executeOperationAsLoggedIn({
+        const result = await executeOperationAsLoggedIn({
           query: CREATE_ORG_AND_DEAL,
           variables: {
             orgName: "A Great Org",
@@ -423,7 +424,7 @@ describeWithServer(
         });
 
         // TODO: test user/org association
-
+        expect(result).toBeTruthy();
         expect(
           await db.organizations.findOne({ name: "A Great Org" })
         ).toMatchSnapshot({
@@ -437,6 +438,7 @@ describeWithServer(
           organization: expect.any(ObjectId),
           created_at: expect.any(Number),
           inviteKey: expect.any(String),
+          user_id: expect.any(ObjectId),
         });
       });
 

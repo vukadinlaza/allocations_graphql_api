@@ -65,7 +65,6 @@ describeWithServer(
   "Investments",
   ({
     executeOperationAsAdmin,
-    executeOperationAsFundAdmin,
     executeOperationAsInvestor,
     executeOperationAsLoggedIn,
     executeOperation,

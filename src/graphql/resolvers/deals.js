@@ -112,7 +112,7 @@ const Deal = {
       : 0;
     return aum;
   },
-  metadata: async (deal, _, ctx) => {
+  metadata: async (deal) => {
     return deal;
   },
 };
@@ -130,9 +130,9 @@ const Queries = {
     }
     return ctx.datasources.deals.getDealById({ deal_id: ObjectId(args._id) });
   },
-  allDeals: (_, args, { datasources }) => {
+  allDeals: (_, args, ctx) => {
     isAdmin(ctx);
-    return datasources.deals.getAllDeals({});
+    return ctx.datasources.deals.getAllDeals({});
   },
   searchDeals: (_, { q, limit }, ctx) => {
     isAdmin(ctx);
@@ -366,7 +366,11 @@ const Mutations = {
     }
   },
   /** case where new user is creating an org & a deal simultaneously **/
-  createOrgAndDeal: async (_parent, { orgName, deal }, { db, user }) => {
+  createOrgAndDeal: async (
+    _parent,
+    { orgName, deal },
+    { datasources, db, user }
+  ) => {
     // no auth required for this (anyone can do it once signed in)
 
     const slug = _.kebabCase(orgName);
@@ -375,9 +379,7 @@ const Mutations = {
       throw new Error("name collision");
     }
 
-    const {
-      ops: [org],
-    } = await db.organizations.insertOne({
+    const { insertedId: _id } = await db.organizations.insertOne({
       name: orgName,
       created_at: Date.now(),
       slug,
@@ -387,15 +389,15 @@ const Mutations = {
     // add user to org admin
     await db.users.updateOne(
       { _id: user._id },
-      { $push: { organizations_admin: org._id } }
+      { $push: { organizations_admin: _id } }
     );
 
-    const res = await ctx.datasources.deals.createDeal({
-      user_id: ctx.user._id,
+    const res = await datasources.deals.createDeal({
+      user_id: user._id,
       deal: {
         ...deal,
         slug: _.kebabCase(deal.company_name || deal.airtableId),
-        organization: org._id,
+        organization: _id,
         status: deal.status ? deal.status : "onboarding",
         dealParams: {},
         created_at: Date.now(),
@@ -451,6 +453,7 @@ const Mutations = {
 
     return { success: true, _id: documentId };
   },
+
   addDealLogo: async (_, params, ctx) => {
     isAdmin(ctx);
     const path = await DealDocUploader.uploadImage(params);

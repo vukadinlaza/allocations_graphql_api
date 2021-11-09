@@ -80,18 +80,17 @@ const Mutations = {
       });
     }
 
-    const res = await ctx.db.organizations.insertOne({
+    const { insertedId: _id } = await ctx.db.organizations.insertOne({
       ...organization,
       created_at: Date.now(),
     });
-    const org = res.ops[0];
 
     // add user to org admin
     await ctx.db.users.updateOne(
       { _id: ctx.user._id },
-      { $push: { organizations_admin: org._id } }
+      { $push: { organizations_admin: _id } }
     );
-    return org;
+    return { ...organization, _id };
   },
   /** simple update **/
   updateOrganization: async (
@@ -103,7 +102,7 @@ const Mutations = {
     const updatedOrg = await ctx.db.organizations.findOneAndUpdate(
       { _id: ObjectId(_id) },
       { $set: { ...organization, slug, updated_at: Date.now() } },
-      { returnOriginal: false }
+      { returnDocument: "after" }
     );
     return updatedOrg.value;
   },
@@ -142,11 +141,7 @@ const Mutations = {
 };
 
 const Organization = {
-  deals: async (
-    org,
-    { order_by = "created_at", order_dir = -1, limit, offset, status },
-    { db, datasources }
-  ) => {
+  deals: async (org, { status }, { datasources }) => {
     let activeStatus =
       status === "active"
         ? ["onboarding", "closing"]
@@ -162,11 +157,11 @@ const Organization = {
     // default sort order is descending by created_at
     return datasources.deals.getAllDeals({ query });
   },
-  deal: async (org, { _id }, { db, datasources }) => {
+  deal: async (org, { _id }, { datasources }) => {
     const deal = await datasources.deals.getDealById({ deal_id: _id });
     return deal;
   },
-  n_deals: (org, _, { db, datasources }) => {
+  n_deals: (org, _, { datasources }) => {
     if (org.slug === "allocations") {
       return datasources.deals.getAllDeals({
         organization: { $in: [org._id, null] },

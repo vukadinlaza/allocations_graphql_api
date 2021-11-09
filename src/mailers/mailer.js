@@ -5,6 +5,10 @@ const logger = require("../utils/logger");
 mailer.setApiKey(process.env.SENDGRID_API_KEY);
 
 async function sendEmail(data) {
+  // typescript_fixes_this
+  if (!data | !data?.template) {
+    return { status: "error" };
+  }
   try {
     const { mainData, template, templateData } = data;
     const html = template(templateData);
@@ -14,7 +18,7 @@ async function sendEmail(data) {
     return { status: "sent", sent_at: Date.now(), to: mainData.to };
   } catch (e) {
     logger.error(e);
-    return { status: "error" };
+    return { status: "error", message: e.message };
   }
 }
 

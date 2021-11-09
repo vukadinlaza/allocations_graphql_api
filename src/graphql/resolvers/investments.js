@@ -25,7 +25,7 @@ const { amountFormat } = require("../../utils/common");
 const Schema = Investments;
 
 const Investment = {
-  deal: (investment, _, { db, datasources }) => {
+  deal: (investment, _, { datasources }) => {
     return datasources.deals.getDealById({ deal_id: investment.deal_id });
   },
   investor: (investment, _, { db }) => {
@@ -40,7 +40,7 @@ const Investment = {
       return [];
     }
   },
-  value: async (investment, _, { db, datasources }) => {
+  value: async (investment, _, { datasources }) => {
     const deal = await datasources.deals.getDealById({
       deal_id: investment.deal_id,
     });
@@ -96,7 +96,8 @@ const Mutations = {
     if (!deal) {
       deal = await DealService.get(deal_id);
     }
-    const res = await db.investments.insertOne({
+
+    const newInvestment = {
       status: "invited",
       invited_at: Date.now(),
       created_at: Date.now(),
@@ -105,8 +106,16 @@ const Mutations = {
       user_id: ObjectId(user_id),
       deal_id: ObjectId(deal_id),
       organization: ObjectId(deal.organization),
-    });
-    return res.ops[0];
+    };
+
+    try {
+      await db.investments.insertOne(newInvestment);
+    } catch (error) {
+      // throw more descriptive error
+      throw new Error(`createInvestment failed: ${error.message}`);
+    }
+
+    return newInvestment;
   },
   /** updates investment and tracks the status change **/
   updateInvestment: async (_, { investment: { _id, ...investment } }, ctx) => {
@@ -407,7 +416,7 @@ const Mutations = {
       return err;
     }
   },
-  createCapPDF: async (_, { data }, { user, db }) => {
+  createCapPDF: async (_, { data }, { db }) => {
     const timeStamp = Date.now();
 
     const investment = await db.investments.findOne({

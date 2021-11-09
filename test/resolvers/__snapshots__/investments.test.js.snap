@@ -19,7 +19,7 @@ Object {
 
 exports[`Investments CREATE_INVESTMENT logged in users can make investments 2`] = `
 Object {
-  "_id": Any<ObjectID>,
+  "_id": Any<ObjectId>,
   "amount": 1000,
   "created_at": Any<Number>,
   "deal_id": "61143ac37db3b3619db1df42",
