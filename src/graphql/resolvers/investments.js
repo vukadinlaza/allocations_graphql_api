@@ -433,7 +433,7 @@ const Mutations = {
         { $pull: { documents: capDoc } }
       );
     }
-
+    console.log("CARRY", data.carry * 100);
     const payload = {
       name: data.investorNameEntity ? data.investorNameEntity : data.name,
       currentDate: moment(new Date()).format("MMM DD, YYYY"),
@@ -443,7 +443,7 @@ const Mutations = {
       subscriptionAmount: `$${amountFormat(data.subscriptionAmount)}`,
       privateFundExpenses: `$${amountFormat(data.privateFundExpenses)}`,
       managementFee: `$${amountFormat(data.managementFee)}` || "$0",
-      carryPercent: `${data.carryPercentage || "0"}%`,
+      carryPercent: `${data.carry * 100 || "0"}%`,
       netInvestmentAmount: `$${amountFormat(data.netInvestment)}`,
       ownershipPercentage: `${data.ownership.toString()}%`,
     };
