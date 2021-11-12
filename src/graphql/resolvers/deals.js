@@ -366,7 +366,11 @@ const Mutations = {
     }
   },
   /** case where new user is creating an org & a deal simultaneously **/
-  createOrgAndDeal: async (_parent, { orgName, deal }, { db, user }) => {
+  createOrgAndDeal: async (
+    _parent,
+    { orgName, deal },
+    { db, user, datasources }
+  ) => {
     // no auth required for this (anyone can do it once signed in)
 
     const slug = _.kebabCase(orgName);
@@ -390,8 +394,8 @@ const Mutations = {
       { $push: { organizations_admin: org._id } }
     );
 
-    const res = await ctx.datasources.deals.createDeal({
-      user_id: ctx.user._id,
+    const res = await datasources.deals.createDeal({
+      user_id: user._id,
       deal: {
         ...deal,
         slug: _.kebabCase(deal.company_name || deal.airtableId),
