@@ -222,24 +222,24 @@ const Organization = {
     return aum;
   },
   totalSPVs: async (org, _, { db }) => {
-    const [{ spvs }] = await db.deals
+    const res = await db.deals
       .aggregate([
         { $match: { organization: org._id, investmentType: { $ne: "fund" } } },
         { $count: "spvs" },
       ])
       .toArray();
 
-    return spvs;
+    return res[0]?.spvs;
   },
   totalFunds: async (org, _, { db }) => {
-    const [{ funds }] = await db.deals
+    const res = await db.deals
       .aggregate([
         { $match: { organization: org._id, investmentType: "fund" } },
         { $count: "funds" },
       ])
       .toArray();
 
-    return funds;
+    return res[0]?.funds;
   },
   totalInvestments: async (org, _, { db }) => {
     const [{ investments }] = await db.deals

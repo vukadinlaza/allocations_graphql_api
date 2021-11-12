@@ -425,12 +425,14 @@ const Mutations = {
     if (!investment) {
       return null;
     }
-    if (
-      get(investment, "documents", []).find((doc) =>
-        doc.includes("Capital_Account_Statement")
-      )
-    ) {
-      return investment;
+    const capDoc = get(investment, "documents", []).find((doc) =>
+      doc.includes("Capital_Account_Statement")
+    );
+    if (capDoc) {
+      await db.investments.updateOne(
+        { _id: ObjectId(investment._id) },
+        { $pull: { documents: capDoc } }
+      );
     }
 
     const payload = {
@@ -441,8 +443,8 @@ const Mutations = {
       ),
       subscriptionAmount: `$${amountFormat(data.subscriptionAmount)}`,
       privateFundExpenses: `$${amountFormat(data.privateFundExpenses)}`,
-      managementFee: `$${amountFormat(data.managementFee)}` || "$0",
-      carryPercent: `${data.carryPercentage || "0"}%`,
+      managementFee: `$${amountFormat(data.managementFee$)}` || "$0",
+      carryPercent: `${data.carry * 100 || "0"}%`,
       netInvestmentAmount: `$${amountFormat(data.netInvestment)}`,
       ownershipPercentage: `${data.ownership.toString()}%`,
     };
