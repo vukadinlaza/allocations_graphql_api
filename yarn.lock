@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@allocations/banking-service@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@allocations/banking-service/-/banking-service-0.0.3.tgz#899ba1689ee7cfcdb44bec6a75e649c8bcecf6dc"
-  integrity sha512-KPGRtqDqtkcOXaCkAlqSxDpqYWz7Kjipa/+RGaCKPX5A3+ETFHSWKr5+zfRRF0CIK63IlpPAhLh4IPEvePu9Eg==
+"@allocations/banking-service@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@allocations/banking-service/-/banking-service-0.0.4.tgz#c6aac79657d72955eeec233231b390964ce1080c"
+  integrity sha512-lDf+CXymWRFRioMmWFmZrQnctcbwQ3IBULiwYhqCB48H3szmM5eXpo7Dv7s8xhc1x45uOR6bKVD+Y2AB63IPJQ==
   dependencies:
     "@allocations/service-common" "*"
     mongodb "^4.1.1"
