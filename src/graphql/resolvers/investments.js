@@ -193,11 +193,10 @@ const Mutations = {
       await datasources.referenceNumber.assignReferenceNumber({
         deal_id: payload.dealId,
       });
-    console.log("reference number", referenceNumber);
 
     // add case for undefined referenceNumber
     if (!payload.investmentId) {
-      const invsRes = await db.investments.insertOne({
+      const data = await db.investments.insertOne({
         status: "invited",
         invited_at: Date.now(),
         created_at: Date.now(),
@@ -215,7 +214,9 @@ const Mutations = {
           provider: "New Directions",
         },
       });
-      investment = invsRes.ops[0];
+
+      investment = await db.investments.findOne({ _id: data.insertedId });
+
       if (referenceNumber) {
         //create wire instructions, and return key for AWS integration
         const wireKey = await createInvestmentWireInstructions({
@@ -235,10 +236,13 @@ const Mutations = {
       investment = await db.investments.findOne({
         _id: ObjectId(payload.investmentId),
       });
-      const x = { ...investment.submissionData, ...payload };
+      const updatedSubmissionData = {
+        ...investment.submissionData,
+        ...payload,
+      };
       await db.investments.updateOne(
         { _id: ObjectId(investment._id) },
-        { $set: { submissionData: x } }
+        { $set: { submissionData: updatedSubmissionData } }
       );
     }
 
