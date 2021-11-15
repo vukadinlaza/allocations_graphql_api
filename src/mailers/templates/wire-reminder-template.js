@@ -1,3 +1,5 @@
+const { amountFormat, formatCompanyName } = require("../../utils/common");
+
 module.exports = function template({
   name,
   company_name,
@@ -5,6 +7,10 @@ module.exports = function template({
   investmentAmount,
   org_slug,
 }) {
+  const formattedInvestment = amountFormat(investmentAmount);
+
+  const formattedCompanyName = formatCompanyName(company_name);
+
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
   <html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml">
   <head>
@@ -151,22 +157,22 @@ module.exports = function template({
     
       <tr>
         <td style="padding:18px 0px 18px 0px; line-height:30px; text-align:inherit;" height="100%" valign="top" bgcolor="" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="font-family: helvetica, sans-serif; font-size: 16px">
-        Hello ${name}, 
+        Hello Investor, 
                  <div>
   </div>
-        Thank you for completing the documents for your $${investmentAmount} investment in <br/> ${company_name} SPV. They have been received!
+        Thank you for completing the documents for your $${formattedInvestment} investment in <br/> ${formattedCompanyName}. They have been received!
         </span></div><div></div></div></td>
       </tr>
               <tr>
         <td style="padding:18px 0px 18px 0px; line-height:30px; text-align:inherit;" height="100%" valign="top" bgcolor="" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="font-family: helvetica, sans-serif; font-size: 16px">
-       We are sending a reminder to please complete your wire transfer to confirm your participation in ${company_name} SPV. You can find the wire instructions on the deal page by selecting the green "invest" button. The instructions are located on the right hand side under "deal documents".
+       We are sending a reminder to please complete your wire transfer to confirm your participation in ${formattedCompanyName}. You can find the wire instructions on the deal page by selecting the green "invest" button. The instructions are located on the right hand side under "deal documents".
 
         </span></div><div></div></div></td>
       </tr>
       <tr>
         <td style="padding:18px 0px 18px 0px; line-height:30px; text-align:inherit;" height="100%" valign="top" bgcolor="" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="font-family: helvetica, sans-serif; font-size: 16px">
        Here is the link to the deal page: 
-       <div>
+       <div style="font-size: 16px" >
        ${`https://dashboard.allocations.com/deals/${org_slug}/${deal_slug}`}
        </div>
 If your funds are already in route, please disregard this message. You will receive an email confirmation when your funds have been received. 
