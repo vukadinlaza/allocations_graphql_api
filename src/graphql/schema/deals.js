@@ -95,7 +95,6 @@ type DealParams {
   fundGeneralPartner: String
   fundEstimatedTerm: String
   is3c7: Boolean
-  customCurrency: String
 }
 
 input DealParamsInput {
