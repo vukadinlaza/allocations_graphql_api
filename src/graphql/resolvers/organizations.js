@@ -14,7 +14,11 @@ const Queries = {
     const org = await db.organizations.findOne({ slug });
     // short circuit with fund if superadmin
     if (user.admin) return org;
-    if (slug === "demo-fund") return org;
+    if (
+      slug === "demo-fund" ||
+      user.email === "allocationsdemo@allocations.com"
+    )
+      return org;
     if (
       org &&
       user &&
