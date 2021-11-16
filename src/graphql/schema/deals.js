@@ -57,6 +57,7 @@ type Deal {
   nd_virtual_account_number: String
   master_series: String
   high_volume_partner: Boolean
+  accept_crypto: Boolean
 }
 
 type DealParams {
@@ -200,6 +201,7 @@ type Query {
   getDealDocService (task_id: String): ServiceDocument
   getServiceAgreementLink(deal_id: String): DataRequest
   getInvestmentAgreementLink(deal_id: String): DataRequest
+  getCryptoWalletAddress(deal_id: String): String
 }
 
 type Mutation {

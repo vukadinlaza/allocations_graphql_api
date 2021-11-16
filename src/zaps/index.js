@@ -1,4 +1,4 @@
-const { subMerchant, payment } = require("./forumPay");
+const { alertCryptoWalletError } = require("./cryptoErrors");
 const { signedSPV, wFormSigned } = require("./signedDocs");
 
-module.exports = { subMerchant, payment, signedSPV, wFormSigned };
+module.exports = { alertCryptoWalletError, signedSPV, wFormSigned };

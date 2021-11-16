@@ -22,6 +22,8 @@ const { DealService } = require("@allocations/deal-service");
 const {
   InvestmentAgreementService,
 } = require("@allocations/investment-agreement-service");
+const { CryptoService } = require("@allocations/crypto-service");
+const { alertCryptoWalletError } = require("../../zaps");
 const { deallocateReferenceNumbers } = require("./newDirections");
 
 const Schema = Deals;
@@ -208,11 +210,17 @@ const Queries = {
     return doc;
   },
   getServiceAgreementLink: async (_, { deal_id }) => {
-    console.log(deal_id);
     return DealService.getServiceAgreementLink(deal_id);
   },
   getInvestmentAgreementLink: async (_, { deal_id }) => {
     return InvestmentAgreementService.getFmSignatureLink(deal_id);
+  },
+  getCryptoWalletAddress: async (_, { deal_id }) => {
+    const res = await CryptoService.getWallet(deal_id);
+    if (res.acknowledged) {
+      return res.wallet.deposit_address;
+    }
+    throw new Error(res.error);
   },
 };
 
@@ -372,7 +380,7 @@ const Mutations = {
       return ctx.datasources.deals.deleteDealById({ deal_id: _id });
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log(e);
+      console.log("Error Deleting Deal :>>", e);
       return false;
     }
   },
@@ -580,10 +588,19 @@ const Mutations = {
       deal_multiple: 0,
       investor_domain_type:
         investorDomainTypeMap[payload.international_investors.status],
+      accept_crypto: payload.accept_crypto === "true",
       ...payload,
     };
-    console.log(deal);
+
     const res = await DealService.setBuildInfo(deal_id, deal);
+
+    if (deal.accept_crypto) {
+      const response = await CryptoService.createWallet(deal_id);
+      if (!response.acknowledged || response.error) {
+        await alertCryptoWalletError(deal.portfolio_deal_name, deal_id);
+      }
+    }
+
     if (res.acknowledged) {
       return await DealService.get(res._id);
     }
