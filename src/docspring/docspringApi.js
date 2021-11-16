@@ -126,8 +126,8 @@ class DocSpringApi {
           }, 2000);
         });
       } else {
-        const response = await response.json();
-        return { status: response.status || response.error };
+        const res = await response.json();
+        return { status: res.status || res.error };
       }
     } catch (error) {
       console.log(`Error in generatePDF. Data: ${JSON.stringify(data)}`, error);

@@ -3,6 +3,7 @@ const { pick } = require("lodash");
 
 const createUserAccountAndEntity = async ({ db, u }) => {
   const res = await db.accounts.insertOne({ rootAdmin: ObjectId(u._id) });
+
   const createdAcct = res.ops[0];
 
   // Create the primary entity for the USER

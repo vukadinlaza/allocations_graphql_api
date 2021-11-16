@@ -68,6 +68,7 @@ const getTemplateData = (input, user, templateId) => {
     country + (country === "United States" ? `, ${state}` : "");
   const nameToUse = isTypeIndividual ? legalName : fullName;
   const communeDeals = ["tpl_hK65xPJdKpgTPyks9H", "tpl_Y6hNCEc6CqzNkqpyPp"];
+
   const irishAngelsDeals = [
     "tpl_ratHTKYeHh9qcd2eYx",
     "tpl_5tPkcRZYQ6mmpZAsKJ",
@@ -216,6 +217,23 @@ const getTemplateData = (input, user, templateId) => {
       FullName: nameToUse,
       Signature: nameToUse,
       "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
+      MemberName2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : " ",
+      FullName2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : "",
+      Signature2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : " ",
+      Email2:
+        isTypeIndividual && secondInvestor ? secondInvestor.secondEmail : " ",
+      // "Date Signed2": !secondInvestor
+      //   ? ""
+      //   : moment(new Date()).format("MM/DD/YYYY") || " ",
     };
   }
 };
@@ -387,7 +405,6 @@ const getInvestmentPreview = ({ input, user }) => {
   const timeStamp = Date.now();
   const { docSpringTemplateId } = input;
   let data = getTemplateData(input, user, docSpringTemplateId);
-
   var submission_data = {
     editable: false,
     data: data,

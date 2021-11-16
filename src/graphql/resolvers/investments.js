@@ -175,6 +175,7 @@ const Mutations = {
     const deal = await datasources.deals.getDealById({
       deal_id: ObjectId(payload.dealId),
     });
+
     const organization = await db.organizations.findOne({
       _id: ObjectId(deal.organization),
     });
@@ -218,7 +219,7 @@ const Mutations = {
       });
 
       investment = await db.investments.findOne({ _id: data.insertedId });
-
+      
       if (referenceNumber) {
         //create wire instructions, and return key for AWS integration
         const wireKey = await createInvestmentWireInstructions({
@@ -238,6 +239,7 @@ const Mutations = {
       investment = await db.investments.findOne({
         _id: ObjectId(payload.investmentId),
       });
+
       const updatedSubmissionData = {
         ...investment.submissionData,
         ...payload,
