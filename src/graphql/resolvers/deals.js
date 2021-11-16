@@ -22,6 +22,7 @@ const { DealService } = require("@allocations/deal-service");
 const {
   InvestmentAgreementService,
 } = require("@allocations/investment-agreement-service");
+const { deallocateReferenceNumbers } = require("./newDirections");
 
 const Schema = Deals;
 const Deal = {
@@ -286,6 +287,11 @@ const Mutations = {
     }
 
     if (deal.status === "closed") {
+      await deallocateReferenceNumbers({
+        dealDataSource: ctx.datasources.deals,
+        deal_id: _id,
+      });
+
       const investments = await ctx.db.investments
         .aggregate([
           { $match: { deal_id: ObjectId(_id) } },
@@ -356,6 +362,11 @@ const Mutations = {
     isAdmin(ctx);
 
     try {
+      await deallocateReferenceNumbers({
+        dealDataSource: ctx.datasources.deals,
+        deal_id: _id,
+      });
+
       // delete deal and all investments in deal
       await ctx.db.investments.deleteMany({ deal_id: ObjectId(_id) });
       return ctx.datasources.deals.deleteDealById({ deal_id: _id });

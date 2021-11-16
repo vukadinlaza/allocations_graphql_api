@@ -9,12 +9,25 @@ const ReferenceNumberSchema = require("../schema/newDirections");
 const { ApolloError } = require("apollo-server-errors");
 const moment = require("moment");
 
+const ND_BANKING_PROVIDER = "New Directions";
+
 const assignNDasBankingProvider = async (deals, deal_id) => {
-  const ND_BANKING_PROVIDER = "New Directions";
   await deals.updateDealById({
     deal_id,
     deal: { bankingProvider: ND_BANKING_PROVIDER },
   });
+};
+
+/*
+Frees up reference numbers for reuse
+Is dependance on deal.bankingProvider to be set to "New Directions"
+  this happens in referenceNumbersAllocate mutation
+*/
+const deallocateReferenceNumbers = async ({ dealDataSource, deal_id }) => {
+  const deal = dealDataSource.getDealById({ deal_id });
+  if (!deal) throw new ApolloError("No deal found");
+  if (deal.bankingProvider == ND_BANKING_PROVIDER)
+    await ReferenceNumberService.releaseByDealId({ deal_id });
 };
 
 const Schema = ReferenceNumberSchema;
@@ -90,18 +103,6 @@ const Mutations = {
     await assignNDasBankingProvider(ctx.datasources.deals, deal_id);
     return ReferenceNumberService.allocate({ deal_id });
   },
-  referenceNumbersAssign: async (_parent, { deal_id }, ctx) => {
-    isAdmin(ctx);
-    return ReferenceNumberService.assign({ deal_id });
-  },
-  referenceNumbersRelease: async (_parent, { referenceNumbers }, ctx) => {
-    isAdmin(ctx);
-    return ReferenceNumberService.release({ referenceNumbers });
-  },
-  referenceNumbersReleaseByDealId: async (_parent, { deal_id }, ctx) => {
-    isAdmin(ctx);
-    return ReferenceNumberService.releaseByDealId({ deal_id });
-  },
   createNDBankAccount: async (_parent, { accountInfo }, ctx) => {
     try {
       isAdmin(ctx);
@@ -135,4 +136,5 @@ module.exports = {
   validatePhoneNumber,
   validateEmail,
   validateDateOfBirth,
+  deallocateReferenceNumbers,
 };

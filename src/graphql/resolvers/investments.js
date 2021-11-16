@@ -21,6 +21,9 @@ const { customInvestmentPagination } = require("../pagHelpers");
 const { DealService } = require("@allocations/deal-service");
 const { sendWireReminderEmail } = require("../../mailers/wire-reminder");
 const { amountFormat } = require("../../utils/common");
+const {
+  ReferenceNumberService,
+} = require("@allocations/reference-number-service");
 
 const Schema = Investments;
 
@@ -189,10 +192,9 @@ const Mutations = {
     let investment = null;
 
     //grab reference number object, set to null value if undefined
-    const referenceNumber =
-      await datasources.referenceNumber.assignReferenceNumber({
-        deal_id: payload.dealId,
-      });
+    const referenceNumber = await ReferenceNumberService.assignReferenceNumber({
+      deal_id: payload.dealId,
+    });
 
     // add case for undefined referenceNumber
     if (!payload.investmentId) {

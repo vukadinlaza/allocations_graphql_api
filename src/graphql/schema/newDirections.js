@@ -41,9 +41,6 @@ extend type Query {
 
 extend type Mutation {
   referenceNumbersAllocate(deal_id: String!): [ReferenceNumber]
-  referenceNumbersAssign(deal_id: String!): [ReferenceNumber]
-  referenceNumbersRelease(referenceNumbers: [String]!): ReleaseResponse
-  referenceNumbersReleaseByDealId(deal_id: String!): ReleaseResponse
   createNDBankAccount(accountInfo: AccountInfo!): Success
 }
 `);
