@@ -37,7 +37,7 @@
   "dependencies": {
     "@allocations/crypto-service": "^0.0.4",
     "@allocations/banking-service": "^0.0.4",
-    "@allocations/deal-service": "^0.1.8",
+    "@allocations/deal-service": "^0.1.10",
     "@allocations/investment-agreement-service": "^0.0.2",
     "@allocations/reference-number-service": "^0.1.0",
     "@sendgrid/mail": "^6.5.2",
