@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-
 const { Router } = require("express");
 const { ObjectId } = require("mongodb");
 const { get, every } = require("lodash");
@@ -23,6 +22,7 @@ const {
   getWireAmount,
 } = require("../../utils/newDirections");
 const { verifyWebhook } = require("../../auth");
+const { SlackService } = require("@allocations/slack-service");
 
 let Bucket =
   process.env.NODE_ENV === "production"
@@ -410,6 +410,13 @@ module.exports = Router()
     }
   })
   .post("/nd-bank-wire-confirmation", async (req, res, next) => {
+    let emailLink;
+    let deal;
+    let referenceNumber;
+    let amount;
+    let investment;
+    const db = await getDB();
+
     try {
       const verified = verifyWebhook(req.headers.authorization);
 
@@ -418,14 +425,15 @@ module.exports = Router()
         throw new Error("Invalid token");
       }
 
-      const db = await getDB();
       const DealService = new Deals(db.collection("deals"));
 
       const { body } = req;
-      const referenceNumber = getReferenceNumber(body.body);
-      const amount = getWireAmount(body.body);
+      const email = body.body;
+      emailLink = body.emailLink;
+      referenceNumber = getReferenceNumber(email);
+      amount = getWireAmount(email);
 
-      const investment = await db.investments.findOne({
+      investment = await db.investments.findOne({
         "wire_instructions.reference_number": referenceNumber,
       });
       if (!investment) throw new Error("No Investment Found.");
@@ -436,7 +444,7 @@ module.exports = Router()
         submissionData: { legalName },
       } = investment;
 
-      const deal = await DealService.getDealById({ deal_id });
+      deal = await DealService.getDealById({ deal_id });
       if (!deal) throw new Error("No Deal Found");
       if (!deal.nd_virtual_account_number)
         throw new Error("No Virtual Account Number");
@@ -462,14 +470,37 @@ module.exports = Router()
         amount,
       });
 
+      const investor = db
+        .collection("users")
+        .findOne({ _id: investment.user_id });
+      await SlackService.postNDSlackIncomingWire({
+        deal,
+        investor,
+        amount,
+        emailLink,
+      });
       res.sendStatus(200);
       next();
     } catch (err) {
       console.log("nd-bank-wire-confirmation :>> ", err);
+      const deal_id = deal ? deal._id : "N/A";
+      const investment_id = investment ? investment._id : "N/A";
+      await SlackService.postNDSlackError({
+        action: "INCOMING WIRE",
+        error: err,
+        details: { referenceNumber, amount, deal_id, investment_id },
+        emailLink,
+      });
+
       next(err);
     }
   })
   .post("/nd-outbound-wire-confirmation", async (req, res, next) => {
+    let deal;
+    let amount;
+    let email;
+    let emailLink;
+
     try {
       const verified = verifyWebhook(req.headers.authorization);
 
@@ -481,14 +512,16 @@ module.exports = Router()
       const db = await getDB();
       const DealService = new Deals(db.collection("deals"));
 
-      const deal = await DealService.getDealById({ deal_id });
+      deal = await DealService.getDealById({ deal_id });
       if (!deal) throw new Error("No Deal Found");
       if (!deal.nd_virtual_account_number)
         throw new Error("No Virtual Account Number");
       const { nd_virtual_account_number } = deal;
 
       const { body } = req;
-      const amount = getWireAmount(body.body);
+      email = body.body;
+      emailLink = body.emailLink;
+      amount = getWireAmount(email);
 
       const account = await findOrCreateBankingTransactionsAccount(
         nd_virtual_account_number
@@ -498,11 +531,19 @@ module.exports = Router()
         account,
       });
 
+      await SlackService.postNDSlackOutgoingWire({ deal, amount, emailLink });
       res.sendStatus(200);
-
       next();
     } catch (err) {
       console.log("nd-outbound-wire-confirmation :>> ", err);
+      const deal_id = deal ? deal._id : "N/A";
+
+      await SlackService.postNDSlackError({
+        error: err.message || "Outbound error",
+        action: "OUTGOING WIRE",
+        details: { amount, deal_id },
+        emailLink,
+      });
       next(err);
     }
   });

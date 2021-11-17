@@ -40,6 +40,7 @@
     "@allocations/deal-service": "^0.1.10",
     "@allocations/investment-agreement-service": "^0.0.2",
     "@allocations/reference-number-service": "^0.1.0",
+    "@allocations/slack-service": "0.0.4",
     "@sendgrid/mail": "^6.5.2",
     "airtable": "^0.11.1",
     "apollo-datasource-mongodb": "^0.5.2",

@@ -87,6 +87,16 @@
     jsonwebtoken "^8.5.1"
     mongodb "^4.1.1"
 
+"@allocations/slack-service@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@allocations/slack-service/-/slack-service-0.0.4.tgz#14c933f614837b026284c89dbdc8af318a2e9270"
+  integrity sha512-cUNhmapHcB/vqoDJsYSk70ZlfRHqdkip9RKNlL0DKTGTz6BsSwv7U2uqeA47bTxTkoOCJHz5TgJjrB21Kk0Wig==
+  dependencies:
+    "@allocations/service-common" "*"
+    node-fetch "^2.6.1"
+    serverless-offline "^8.1.0"
+    serverless-webpack "^5.5.5"
+
 "@apollo/protobufjs@1.2.2":
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/@apollo/protobufjs/-/protobufjs-1.2.2.tgz#4bd92cd7701ccaef6d517cdb75af2755f049f87c"
