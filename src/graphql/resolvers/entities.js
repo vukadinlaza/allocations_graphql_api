@@ -37,12 +37,16 @@ const Mutations = {
     ];
     const data = pick(payload, options);
 
-    const createdEntity = await db.entities.insertOne({
+    const { insertedId } = await db.entities.insertOne({
       ...data,
       accountId: ObjectId(payload.accountId),
       user: ObjectId(user._id),
     });
-    return createdEntity.ops[0];
+
+    const createdEntity = await db.entities.findOne({
+      _id: ObjectId(insertedId),
+    });
+    return createdEntity;
   },
   deleteEntity: async (_, { entityId, accountId }, { db }) => {
     const res = await db.entities.deleteOne({

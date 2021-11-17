@@ -24,7 +24,6 @@ const {
 } = require("../pagHelpers");
 const Users = require("../schema/users");
 const fetch = require("node-fetch");
-const { DealService } = require("@allocations/deal-service");
 
 const Schema = Users;
 
@@ -89,7 +88,7 @@ const User = {
       })
       .toArray();
   },
-  deals: async (user, _, { db, datasources }) => {
+  deals: async (user, _, { datasources }) => {
     const deals = await Promise.all(
       (user.organizations_admin || []).map((org) => {
         return (
@@ -312,10 +311,14 @@ const Mutations = {
   createInvestor: async (_, { user }, ctx) => {
     isAdmin(ctx);
 
-    const res = await ctx.db
+    const { insertedId } = await ctx.db
       .collection("users")
       .insertOne({ ...user, created_at: Date.now() });
-    return res.ops[0];
+
+    const newUser = await ctx.db
+      .collection("users")
+      .findOne({ _id: ObjectId(insertedId) });
+    return newUser;
   },
   /** updates user and handles file uploads **/
   updateUser: async (

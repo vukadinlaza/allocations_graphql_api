@@ -6,6 +6,7 @@ const { AuthenticationError } = require("apollo-server-express");
 const { createUserAccountAndEntity } = require("./utils/createUser");
 const Mailer = require("./mailers/mailer");
 const signUpTemplate = require("./mailers/templates/sign-up-template");
+const { ObjectId } = require("mongodb");
 
 const client = jwksClient({
   cache: true,
@@ -63,8 +64,8 @@ async function authenticate({ req, db, authToken }) {
 
     // else create user
     // else create user
-    const res = await db.users.insertOne({ email: email });
-    const newUser = res.ops[0];
+    const { insertedId } = await db.users.insertOne({ email: email });
+    const newUser = await db.users.findOne({ _id: ObjectId(insertedId) });
     await createUserAccountAndEntity({ db, u: newUser });
     await updateAirtableUsers({ user: newUser });
 

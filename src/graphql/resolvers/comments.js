@@ -27,13 +27,16 @@ const Mutations = {
     { payload: { deal_id, user_id, commentText, commentTargetId } },
     { db }
   ) => {
-    const postedComment = await db.comments.insertOne({
+    const { insertedId } = await db.comments.insertOne({
       user_id: ObjectId(user_id),
       deal_id: ObjectId(deal_id),
       commentText,
       commentTargetId: commentTargetId ? ObjectId(commentTargetId) : "",
     });
-    return postedComment.ops[0];
+    const postedComment = await db.comments.findOne({
+      _id: ObjectId(insertedId),
+    });
+    return postedComment;
   },
 };
 

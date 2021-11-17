@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const { pick } = require("lodash");
 const { getDB } = require("../../mongo/index");
+const { ObjectId } = require("mongodb");
 
 const apiKeys = [{ key: "5fa2d72131ed7b7bc4666fe5", source: "TVC" }];
 module.exports = Router()
@@ -35,14 +36,14 @@ module.exports = Router()
           error: "user already exists",
         });
       }
-      const createdUser = await db.users.insertOne({
+      const { insertedId } = await db.users.insertOne({
         ...payload,
         source: key.source,
         created_at: Date.now(),
       });
-      createdUser.ops[0];
+      const createdUser = await db.users.findOne({ _id: ObjectId(insertedId) });
 
-      return res.status(200).send(createdUser.ops[0]);
+      return res.status(200).send(createdUser);
     } catch (e) {
       throw new Error(e);
     }

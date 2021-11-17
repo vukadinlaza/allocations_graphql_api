@@ -2,9 +2,11 @@ const { ObjectId } = require("mongodb");
 const { pick } = require("lodash");
 
 const createUserAccountAndEntity = async ({ db, u }) => {
-  const res = await db.accounts.insertOne({ rootAdmin: ObjectId(u._id) });
 
-  const createdAcct = res.ops[0];
+  const { insertedId } = await db.accounts.insertOne({
+    rootAdmin: ObjectId(u._id),
+  });
+  const createdAcct = await db.accounts.findOne({ _id: ObjectId(insertedId) });
 
   // Create the primary entity for the USER
   const options = [
