@@ -106,7 +106,8 @@ const Mutations = {
       deal_id: ObjectId(deal_id),
       organization: ObjectId(deal.organization),
     });
-    return res.ops[0];
+
+    return res;
   },
   /** updates investment and tracks the status change **/
   updateInvestment: async (_, { investment: { _id, ...investment } }, ctx) => {
@@ -184,7 +185,6 @@ const Mutations = {
       await datasources.referenceNumber.assignReferenceNumber({
         deal_id: payload.dealId,
       });
-    console.log("reference number", referenceNumber);
 
     // add case for undefined referenceNumber
     if (!payload.investmentId) {
@@ -403,6 +403,15 @@ const Mutations = {
             { _id: ObjectId(deal_id) },
             { $set: { wireReminderSent: new Date() } }
           );
+
+        await db.investments.updateMany(
+          { _id: { $in: oids } },
+          {
+            $set: {
+              wireReminderSent: { availableToSend: false, date: new Date() },
+            },
+          }
+        );
       }
       return true;
     } catch (err) {
