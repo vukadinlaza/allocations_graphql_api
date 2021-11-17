@@ -193,7 +193,7 @@ const Mutations = {
     let investment = null;
 
     //grab reference number object, set to null value if undefined
-    const referenceNumber = await ReferenceNumberService.assignReferenceNumber({
+    const referenceNumber = await ReferenceNumberService.assign({
       deal_id: payload.dealId,
     });
 
