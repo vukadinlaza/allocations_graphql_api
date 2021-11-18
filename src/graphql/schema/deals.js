@@ -57,6 +57,7 @@ type Deal {
   nd_virtual_account_number: String
   master_series: String
   high_volume_partner: Boolean
+  type: String
   accept_crypto: Boolean
 }
 
