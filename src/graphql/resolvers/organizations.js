@@ -145,18 +145,9 @@ const Mutations = {
 };
 
 const Organization = {
-  deals: async (org, { status }, { datasources }) => {
-    let activeStatus =
-      status === "active"
-        ? ["onboarding", "closing"]
-        : ["onboarding", "closing", "closed", "draft"];
-
-    if (status === "closed") {
-      activeStatus = ["closed"];
-    }
+  deals: async (org, _, { datasources }) => {
     const query = {
       organization: org._id,
-      status: { $in: activeStatus },
     };
     // default sort order is descending by created_at
     return datasources.deals.getAllDeals({ query });

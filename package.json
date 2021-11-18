@@ -35,9 +35,9 @@
     "selenium-webdriver": "^4.0.0-alpha.7"
   },
   "dependencies": {
-    "@allocations/crypto-service": "^0.0.4",
     "@allocations/banking-service": "^0.0.4",
-    "@allocations/deal-service": "^0.1.10",
+    "@allocations/crypto-service": "^0.0.4",
+    "@allocations/deal-service": "^0.2.0",
     "@allocations/investment-agreement-service": "^0.0.2",
     "@allocations/reference-number-service": "^0.1.0",
     "@allocations/slack-service": "0.0.5",
