@@ -28,7 +28,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
       signDeadline: moment(serviceDeal.sign_deadline).format(
         "YYYY-MM-DD:HH:MM"
       ),
-      wireDeadline: moment(serviceDeal.sign_deadline).format(
+      wireDeadline: moment(serviceDeal.wire_deadline).format(
         "YYYY-MM-DD:HH:MM"
       ),
       estimatedSetupCostsDollar: "100000",
@@ -37,7 +37,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
     },
   };
 };
-const transformLegacyDeal = ({ legacyDeal, coverImage }) => {
+const transformLegacyDeal = ({ legacyDeal }) => {
   return {
     _id: legacyDeal._id,
     approved: true,
@@ -56,7 +56,7 @@ const transformLegacyDeal = ({ legacyDeal, coverImage }) => {
     offering_type: legacyDeal.dealParams.dealType,
     minimum_subscription_amount: legacyDeal.dealParams.minimumInvestment,
     sign_deadline: legacyDeal.dealParams.signDeadline,
-    sign_deadline: legacyDeal.dealParams.wireDeadline,
+    wire_deadline: legacyDeal.dealParams.wireDeadline,
     estimatedSetupCostsDollar: legacyDeal.dealParams.estimatedSetupCostsDollar,
     "management_fee.value": legacyDeal.dealParams.managementFees,
     management_fee_frequency: legacyDeal.dealParams.managementFeeType,

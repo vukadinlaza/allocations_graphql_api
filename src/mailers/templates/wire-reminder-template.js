@@ -1,7 +1,6 @@
 const { amountFormat, formatCompanyName } = require("../../utils/common");
 
 module.exports = function template({
-  name,
   company_name,
   deal_slug,
   investmentAmount,
