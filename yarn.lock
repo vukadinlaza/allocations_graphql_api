@@ -87,10 +87,10 @@
     jsonwebtoken "^8.5.1"
     mongodb "^4.1.1"
 
-"@allocations/slack-service@0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@allocations/slack-service/-/slack-service-0.0.4.tgz#14c933f614837b026284c89dbdc8af318a2e9270"
-  integrity sha512-cUNhmapHcB/vqoDJsYSk70ZlfRHqdkip9RKNlL0DKTGTz6BsSwv7U2uqeA47bTxTkoOCJHz5TgJjrB21Kk0Wig==
+"@allocations/slack-service@0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@allocations/slack-service/-/slack-service-0.0.5.tgz#6bd2b31bb0de039db9d1e2353c0329b92ae9b9f5"
+  integrity sha512-1nBBT+E5IhJhR7/NKouBQ1xpITNXm4cX5oTmYEKrpnJQ34ZypcsZtWJOdXhGFxMBi1bO2sMY5ViqpR+/PddiOg==
   dependencies:
     "@allocations/service-common" "*"
     node-fetch "^2.6.1"
