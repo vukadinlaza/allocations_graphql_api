@@ -588,7 +588,7 @@ const Mutations = {
       deal_multiple: 0,
       investor_domain_type:
         investorDomainTypeMap[payload.international_investors.status],
-      accept_crypto: payload.accept_crypto === "true",
+      accept_crypto: payload.accept_crypto,
       ...payload,
     };
 
