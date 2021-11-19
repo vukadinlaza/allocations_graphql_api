@@ -474,7 +474,7 @@ module.exports = Router()
       const investor = db
         .collection("users")
         .findOne({ _id: investment.user_id });
-      await SlackService.postNDSlackIncomingWire({
+      await SlackService.ndIncomingWire({
         deal,
         investor,
         amount,
@@ -486,7 +486,7 @@ module.exports = Router()
       console.log("nd-bank-wire-confirmation :>> ", err);
       const deal_id = deal ? deal._id : "N/A";
       const investment_id = investment ? investment._id : "N/A";
-      await SlackService.postNDSlackError({
+      await SlackService.postNDError({
         action: "INCOMING WIRE",
         error: err,
         details: { referenceNumber, amount, deal_id, investment_id },
@@ -512,7 +512,7 @@ module.exports = Router()
 
       const db = await getDB();
       const DealService = new Deals(db.collection("deals"));
-
+      console.log("hello there");
       deal = await DealService.getDealById({ deal_id });
       if (!deal) throw new Error("No Deal Found");
       if (!deal.nd_virtual_account_number)
@@ -534,14 +534,14 @@ module.exports = Router()
         account,
       });
 
-      await SlackService.postNDSlackOutgoingWire({ deal, amount, emailLink });
+      await SlackService.ndOutgoingWire({ deal, amount, emailLink });
       res.sendStatus(200);
       next();
     } catch (err) {
       console.log("nd-outbound-wire-confirmation :>> ", err);
       const deal_id = deal ? deal._id : "N/A";
 
-      await SlackService.postNDSlackError({
+      await SlackService.postNDError({
         error: err.message || "Outbound error",
         action: "OUTGOING WIRE",
         details: { amount, deal_id },
