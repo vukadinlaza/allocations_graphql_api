@@ -537,9 +537,13 @@ const Mutations = {
     );
   },
   createBuild: async (_, { payload }, { user }) => {
-    const { organization_id } = payload;
+    const { organization_id, type } = payload;
 
-    const deal = await DealService.create(user._id, organization_id);
+    const deal = await DealService.create({
+      user_id: user._id,
+      organization_id,
+      type,
+    });
     const dealResponse = await DealService.get(deal._id);
     return dealResponse;
   },
@@ -585,6 +589,7 @@ const Mutations = {
       },
       setup_cost: 20000,
       angels_deal: false,
+      term_of_fund: "10",
       deal_multiple: 0,
       investor_domain_type:
         investorDomainTypeMap[payload.international_investors.status],

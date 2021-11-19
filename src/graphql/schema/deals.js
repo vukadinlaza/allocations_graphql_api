@@ -58,6 +58,10 @@ type Deal {
   master_series: String
   high_volume_partner: Boolean
   type: String
+  gp_entity_name: String
+  number_of_investments: Int
+  general_partner_representative: String
+  type_of_investors: String
   accept_crypto: Boolean
 }
 
