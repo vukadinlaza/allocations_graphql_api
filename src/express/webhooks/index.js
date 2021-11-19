@@ -459,9 +459,10 @@ module.exports = Router()
         user_id,
       });
 
-      const account = await findOrCreateBankingTransactionsAccount(
-        nd_virtual_account_number
-      );
+      const account = await findOrCreateBankingTransactionsAccount({
+        virtualAccountNumber: nd_virtual_account_number,
+        deal_name: deal.company_name,
+      });
 
       await bankTransactionsTransactionsAddRow({
         user_name: legalName,
@@ -523,9 +524,11 @@ module.exports = Router()
       emailLink = body.emailLink;
       amount = getWireAmount(email);
 
-      const account = await findOrCreateBankingTransactionsAccount(
-        nd_virtual_account_number
-      );
+      const account = await findOrCreateBankingTransactionsAccount({
+        virtualAccountNumber: nd_virtual_account_number,
+        deal_name: deal.company_name,
+      });
+
       await bankTransactionsTransactionsTableOutbound({
         amount: amount * -1,
         account,

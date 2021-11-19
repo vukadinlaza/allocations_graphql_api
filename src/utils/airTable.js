@@ -76,11 +76,14 @@ const bankTransactionsTransactionsAddRow = async ({
   }
 };
 
-const findOrCreateBankingTransactionsAccount = async (virtualAccountNumber) => {
+const findOrCreateBankingTransactionsAccount = async ({
+  virtualAccountNumber,
+  deal_name,
+}) => {
   // table: https://airtable.com/appPoxRLndZXMKzi8/tbllrhjQGmz7boL3G/viwAo38G3Xlto3Obd?blocks=hide
   const TABLE_NAME = "Accounts";
   const BASE_ID = process.env.AIR_TABLE_BANK_TRANSACTIONS_BASE_ID;
-  const accountName = `New Directions - ${virtualAccountNumber}`;
+  const accountName = `New Directions - ${virtualAccountNumber} - ${deal_name}`;
   const base = await getBase(BASE_ID);
   try {
     const res = await base(TABLE_NAME)
