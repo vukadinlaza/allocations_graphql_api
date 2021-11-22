@@ -1,8 +1,5 @@
 require("dotenv").config();
 const { Router } = require("express");
-const { getDB } = require("../../mongo/index");
-
-const apiKeys = [{ key: process.env.DEAL_IMG_KEY }];
 
 module.exports = Router().post("/", async (req, res) => {
   try {

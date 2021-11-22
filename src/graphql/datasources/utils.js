@@ -1,4 +1,3 @@
-const { ObjectId } = require("mongodb");
 const moment = require("moment");
 const transformServiceDeal = ({ serviceDeal, coverImage }) => {
   if (!serviceDeal) return {};
