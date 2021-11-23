@@ -488,7 +488,7 @@ module.exports = Router()
       const investment_id = investment ? investment._id : "N/A";
       await SlackService.postNDError({
         action: "INCOMING WIRE",
-        error: err,
+        error: err.message | "Trouble processing inbound wire",
         details: { referenceNumber, amount, deal_id, investment_id },
         emailLink,
       });
