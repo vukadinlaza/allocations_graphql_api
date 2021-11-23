@@ -37,7 +37,7 @@
   "dependencies": {
     "@allocations/banking-service": "^0.0.6",
     "@allocations/crypto-service": "^0.0.4",
-    "@allocations/deal-service": "^0.2.15",
+    "@allocations/deal-service": "^0.2.16",
     "@allocations/investment-agreement-service": "^0.0.2",
     "@allocations/reference-number-service": "^0.1.0",
     "@allocations/slack-service": "0.0.5",
