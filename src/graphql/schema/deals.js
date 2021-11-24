@@ -59,6 +59,7 @@ type Deal {
   high_volume_partner: Boolean
   type: String
   gp_entity_name: String
+  need_gp_entity: String
   number_of_investments: Int
   general_partner_representative: String
   type_of_investors: String
