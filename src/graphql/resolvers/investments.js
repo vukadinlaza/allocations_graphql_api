@@ -443,9 +443,9 @@ const Mutations = {
       effectiveDate: moment(ObjectId(investment._id).getTimestamp()).format(
         "MMM DD, YYYY"
       ),
-      subscriptionAmount: `$${amountFormat(data.subscriptionAmount)}`,
+      subscriptionAmount: `$${amountFormat(data.currentAmountContributed)}`,
       privateFundExpenses: `$${amountFormat(data.privateFundExpenses)}`,
-      managementFee: `$${amountFormat(data.managementFee$)}` || "$0",
+      managementFee: `$${amountFormat(data.managementFees$)}` || "$0",
       carryPercent: `${data.carry * 100 || "0"}%`,
       netInvestmentAmount: `$${amountFormat(data.netInvestment)}`,
       ownershipPercentage: `${data.ownership.toString()}%`,
