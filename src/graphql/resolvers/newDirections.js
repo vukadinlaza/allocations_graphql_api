@@ -50,11 +50,7 @@ Must be at least 18 years of age
 */
 const validateDateOfBirth = (dob) => {
   const errMsg = "Invalid Date of Birth";
-  if (!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(dob))
-    throw new ApolloError(errMsg);
-  var d = new Date(dob);
-  if (d.toISOString() != dob) throw new ApolloError(errMsg);
-
+  if (!moment(dob, "mm/dd/yyyy").isValid()) throw new ApolloError(errMsg);
   if (moment().subtract(18, "years").isBefore(moment(dob)))
     throw new ApolloError("Must be at least 18 years old");
 };

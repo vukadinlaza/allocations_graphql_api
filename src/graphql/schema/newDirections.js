@@ -23,7 +23,7 @@ input AccountInfo {
   city: String!
   state: String!
   zip: String!
-  country: String!
+  countryCode: String!
   contactID: String!
   executorLegalName: String!
   contactName: String!
