@@ -184,7 +184,8 @@ const Mutations = {
     const status = get(deal, "status");
 
     if (deal !== null && deal.isDemo === true) {
-      return { _id: "mockDemoInvestmentID" };
+      // needs to be a 24 character hex
+      return { _id: "000000000000000000000000" };
     } else if (signDeadline) {
       const isClosed = status === "closed";
       if (isClosed) throw new Error("The deal selected is closed.");
@@ -219,7 +220,7 @@ const Mutations = {
       });
 
       investment = await db.investments.findOne({ _id: data.insertedId });
-      
+
       if (referenceNumber) {
         //create wire instructions, and return key for AWS integration
         const wireKey = await createInvestmentWireInstructions({
