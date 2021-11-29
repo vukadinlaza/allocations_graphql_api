@@ -63,6 +63,7 @@ type Deal {
   number_of_investments: Int
   general_partner_representative: String
   type_of_investors: String
+  target_raise_goal: Int
   accept_crypto: Boolean
 }
 
