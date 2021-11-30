@@ -10,14 +10,15 @@
     d "1"
     es5-ext "^0.10.47"
 
-"@allocations/banking-service@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@allocations/banking-service/-/banking-service-0.0.6.tgz#82954dfbd6b5cc5225382a887185cae980287f0d"
-  integrity sha512-9/ziu5JMy4LBn6qKfv21mANRmFJMVBqj7F30+kwIiqbQ/dgOld9P6oXYoHOoFnvoPxd4m4Ds/OxyCzTRcSmsoQ==
+"@allocations/banking-service@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@allocations/banking-service/-/banking-service-0.0.8.tgz#e34d5a49b998ed4feef52be0f6c4921795d270e0"
+  integrity sha512-VqyJ/WdG6TsfkDBRl3zgZSGhngdwYbo+SPz1mMVI0c2Nt9uirel/31iW8APOoftPTBReoP9sXNLXxaftdLtzbQ==
   dependencies:
     "@allocations/service-common" "*"
     "@allocations/slack-service" "^0.0.6"
     airtable "^0.8.1"
+    aws-sdk "^2.1033.0"
     mongodb "^4.1.1"
     node-fetch "^2.6.1"
     serverless-offline "^8.1.0"
@@ -3119,6 +3120,21 @@ aws-sdk@^2.1030.0, aws-sdk@^2.1032.0, aws-sdk@^2.580.0, aws-sdk@^2.994.0, aws-sd
   version "2.1034.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1034.0.tgz#61b0511e712ff765da1e182ac969d5eca38ac5a5"
   integrity sha512-yo0B9nOZAKgsQqIKXqkeOJ2Wrt8zx4wd1JmCP1XZzdz1O4b1TfZA/mTN5cMiszOaEk8EWqvPESrw8MaIHFS3wA==
+  dependencies:
+    buffer "4.9.2"
+    events "1.1.1"
+    ieee754 "1.1.13"
+    jmespath "0.15.0"
+    querystring "0.2.0"
+    sax "1.2.1"
+    url "0.10.3"
+    uuid "3.3.2"
+    xml2js "0.4.19"
+
+aws-sdk@^2.1033.0:
+  version "2.1038.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1038.0.tgz#8b47e4fad5d10df20ccbd9ee9e1787ec86863694"
+  integrity sha512-vDyj4vBYyjCvBVSpq3vsA0XCX5oyQgCpNKPDvwCLaR2aFxrvBTBdwT3ex1rDsFLZPjLK2fzwaT5cvRYxtv50PQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
