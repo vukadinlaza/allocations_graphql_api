@@ -471,7 +471,7 @@ module.exports = Router()
         amount,
       });
 
-      const investor = db
+      const investor = await db
         .collection("users")
         .findOne({ _id: investment.user_id });
       await SlackService.ndIncomingWire({
