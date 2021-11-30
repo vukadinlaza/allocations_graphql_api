@@ -31,6 +31,27 @@ type Organization {
   totalOpen: Int
   totalInvestments: Int
   slackProspects: Int
+  masterEntity: MasterEntity
+}
+
+type MasterEntity {
+  name: String
+  address: String
+  addressLineTwo: String
+  city: String
+  state: String
+  zipCode: String
+  country: String
+}
+
+input MasterEntityInput {
+  name: String
+  address: String
+  addressLineTwo: String
+  city: String
+  state: String
+  zipCode: String
+  country: String
 }
 
 input OrganizationInput {
@@ -39,6 +60,7 @@ input OrganizationInput {
   slug: String
   approved: Boolean
   logo: Upload
+  masterEntity: MasterEntityInput
 }
 
 type OrganizationPagination {
