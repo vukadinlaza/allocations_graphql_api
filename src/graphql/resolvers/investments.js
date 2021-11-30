@@ -206,6 +206,7 @@ const Mutations = {
           provider: "New Directions",
         },
       });
+
       investment = invsRes.ops[0];
       if (referenceNumber) {
         //create wire instructions, and return key for AWS integration
@@ -448,7 +449,7 @@ const Mutations = {
       managementFee: `$${amountFormat(data.managementFees$)}` || "$0",
       carryPercent: `${data.carry * 100 || "0"}%`,
       netInvestmentAmount: `$${amountFormat(data.netInvestment)}`,
-      ownershipPercentage: `${data.ownership.toString()}%`,
+      ownershipPercentage: `${(data.ownership * 100).toString()}%`,
     };
 
     const docspringRes = await createCapitalAccountDoc({ payload });
