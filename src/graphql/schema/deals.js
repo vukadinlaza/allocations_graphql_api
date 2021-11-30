@@ -54,7 +54,7 @@ type Deal {
   name: String
   wire_deadline: String
   phase: String
-  nd_virtual_account_number: String
+  virtual_account_number: String
   master_series: String
   high_volume_partner: Boolean
   type: String
@@ -262,6 +262,6 @@ input DealInput {
   docSpringTemplateId: String
   spvAgreementKey: String
   isPostingComment: Boolean
-  nd_virtual_account_number: String
+  virtual_account_number: String
 }
 `);

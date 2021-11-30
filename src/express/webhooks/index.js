@@ -446,12 +446,12 @@ module.exports = Router()
 
       deal = await DealService.getDealById({ deal_id });
       if (!deal) throw new Error("No Deal Found");
-      if (!deal.nd_virtual_account_number)
+      if (!deal.virtual_account_number)
         throw new Error("No Virtual Account Number");
-      const { nd_virtual_account_number } = deal;
+      const { virtual_account_number } = deal;
 
       await newDirectionTransactionsAddRow({
-        virtualAccountNumber: nd_virtual_account_number,
+        virtualAccountNumber: virtual_account_number,
         amount,
         referenceNumber,
         deal_id,
@@ -460,7 +460,7 @@ module.exports = Router()
       });
 
       const account = await findOrCreateBankingTransactionsAccount({
-        virtualAccountNumber: nd_virtual_account_number,
+        virtualAccountNumber: virtual_account_number,
         deal_name: deal.company_name,
       });
 
@@ -515,9 +515,9 @@ module.exports = Router()
       console.log("hello there");
       deal = await DealService.getDealById({ deal_id });
       if (!deal) throw new Error("No Deal Found");
-      if (!deal.nd_virtual_account_number)
+      if (!deal.virtual_account_number)
         throw new Error("No Virtual Account Number");
-      const { nd_virtual_account_number } = deal;
+      const { virtual_account_number } = deal;
 
       const { body } = req;
       email = body.body;
@@ -525,7 +525,7 @@ module.exports = Router()
       amount = getWireAmount(email);
 
       const account = await findOrCreateBankingTransactionsAccount({
-        virtualAccountNumber: nd_virtual_account_number,
+        virtualAccountNumber: virtual_account_number,
         deal_name: deal.company_name,
       });
 
