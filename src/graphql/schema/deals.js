@@ -65,6 +65,7 @@ type Deal {
   type_of_investors: String
   target_raise_goal: Int
   accept_crypto: Boolean
+  dealDetails: [DealDetail]
 }
 
 type DealParams {
@@ -151,6 +152,7 @@ type Phase {
   tasks: [Task]
 
 }
+
 type Task {
   _id: String
   title: String
@@ -163,6 +165,15 @@ type Task {
   updated_at: String
 }
 
+type DealDetail {
+  title: String
+  content: String
+}
+
+input DealDetailInput {
+  title: String
+  content: String
+}
 
 type dealOnboarding {
   _id: String
@@ -235,7 +246,6 @@ type Subscription {
   dealOnboarding(data: String): Object
 }
 
-
 input DealInput {
   _id: String
   company_name: String
@@ -251,6 +261,7 @@ input DealInput {
   differentPortfolioTerms: Boolean
   wireDoc: Upload
   memo: String
+  dealDetails: [DealDetailInput]
   amount: Int
   target: String
   amount_raised: String
