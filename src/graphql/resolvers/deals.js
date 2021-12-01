@@ -537,11 +537,10 @@ const Mutations = {
     );
   },
   createBuild: async (_, { payload }, { user }) => {
-    const { organization_id, type } = payload;
+    const { type } = payload;
 
     const deal = await DealService.create({
       user_id: user._id,
-      organization_id,
       type,
     });
     const dealResponse = await DealService.get(deal._id);

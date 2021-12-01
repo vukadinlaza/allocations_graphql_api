@@ -55,8 +55,6 @@ type Deal {
   wire_deadline: String
   phase: String
   virtual_account_number: String
-  master_series: String
-  high_volume_partner: Boolean
   type: String
   gp_entity_name: String
   need_gp_entity: String
