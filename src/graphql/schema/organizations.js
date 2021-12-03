@@ -31,6 +31,7 @@ type Organization {
   totalOpen: Int
   totalInvestments: Int
   slackProspects: Int
+  high_volume_partner: Boolean
   masterEntity: MasterEntity
 }
 
@@ -60,6 +61,7 @@ input OrganizationInput {
   slug: String
   approved: Boolean
   logo: Upload
+  high_volume_partner: Boolean
   masterEntity: MasterEntityInput
 }
 
