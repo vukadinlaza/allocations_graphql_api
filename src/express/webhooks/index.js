@@ -23,6 +23,9 @@ const {
 } = require("../../utils/newDirections");
 const { verifyWebhook } = require("../../auth");
 const { SlackService } = require("@allocations/slack-service");
+const { createCapitalAccountDoc } = require("../../docspring/index");
+const Uploader = require("../../uploaders/investor-docs");
+const { amountFormat } = require("../../utils/common");
 
 let Bucket =
   process.env.NODE_ENV === "production"
@@ -547,6 +550,76 @@ module.exports = Router()
         details: { amount, deal_id },
         emailLink,
       });
+      next(err);
+    }
+  })
+  .post("/create-capital-accounts-document", async (req, res, next) => {
+    try {
+      const db = await getDB();
+
+      const { body } = req;
+
+      //find the matching investment with userId and dealId
+      //would like to move away from this by getting the investmentID
+      const matchingInvestment = await db.investments.findOne({
+        user_id: ObjectId(body.userId),
+        deal_id: ObjectId(body.dealId),
+      });
+
+      //check the db to see if investment has cap account doc
+      const hasCapAcctDoc = matchingInvestment.documents.find((doc) =>
+        doc.includes("Capital_Account_Statement")
+      );
+
+      if (hasCapAcctDoc) {
+        return res.send("Already has cap account doc");
+      }
+
+      //append current date to the data to send to docspring
+      const formattedData = {
+        name: body.name,
+        effectiveDate: body.effectiveDate,
+        subscriptionAmount: `$${amountFormat(body.subscriptionAmount)}`,
+        privateFundExpenses: `$${amountFormat(body.privateFundExpenses)}`,
+        managementFee: `$${amountFormat(body.managementFee)}`,
+        //might need to change b/c airtable might send number not string
+        carryPercent: `${Number(body.carryPercent) * 100}%`,
+        //might need to change b/c airtable might send number not string
+        ownershipPercentage: `${Number(body.ownershipPercentage) * 100}%`,
+        netInvestmentAmount: `${amountFormat(body.netInvestmentAmount)}%`,
+        currentDate: moment().format("MMMM DD, YYYY"),
+      };
+
+      // creates a new document
+      const docspringRes = await createCapitalAccountDoc({
+        payload: formattedData,
+      });
+      const downloadURL = await fetch(docspringRes.download_url);
+
+      const timeStamp = Date.now();
+
+      const buffer = await downloadURL.arrayBuffer();
+      const s3Path = await Uploader.putInvestmentCapitalAccount(
+        matchingInvestment._id,
+        buffer,
+        timeStamp,
+        "Capital Account Statement"
+      );
+
+      await db.investments.updateOne(
+        { _id: ObjectId(matchingInvestment._id) },
+        {
+          $push: {
+            documents: `${s3Path}`,
+          },
+        }
+      );
+      const updatedInvestment = await db.investments.findOne({
+        _id: ObjectId(matchingInvestment._id),
+      });
+
+      res.send(updatedInvestment);
+    } catch (err) {
       next(err);
     }
   });
