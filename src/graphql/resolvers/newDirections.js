@@ -106,7 +106,10 @@ const Mutations = {
       const referenceNumbers = await ReferenceNumberService.allocate({
         deal_id: accountInfo.contactID,
       });
-
+      await assignNDasBankingProvider(
+        ctx.datasources.deals,
+        accountInfo.contactID
+      );
       const referenceIDs = getReferenceNumberRange(referenceNumbers);
       const newBankingInfo = { ...accountInfo, referenceIDs };
 
