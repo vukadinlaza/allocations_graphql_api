@@ -23,7 +23,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
     dealCoverImageKey: coverImage?.link || "null",
     dealParams: {
       dealType: serviceDeal.offering_type,
-      minimumInvestment: serviceDeal.minimum_subscription_amount,
+      minimumInvestment: serviceDeal.minimum_investment,
       signDeadline: moment(serviceDeal.sign_deadline).format(
         "YYYY-MM-DD:HH:MM"
       ),
@@ -53,7 +53,7 @@ const transformLegacyDeal = ({ legacyDeal }) => {
     slug: legacyDeal.slug,
     memo: legacyDeal.memo,
     offering_type: legacyDeal.dealParams.dealType,
-    minimum_subscription_amount: legacyDeal.dealParams.minimumInvestment,
+    minimum_investment: legacyDeal.dealParams.minimumInvestment,
     sign_deadline: legacyDeal.dealParams.signDeadline,
     wire_deadline: legacyDeal.dealParams.wireDeadline,
     estimatedSetupCostsDollar: legacyDeal.dealParams.estimatedSetupCostsDollar,

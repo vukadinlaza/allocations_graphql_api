@@ -14,6 +14,7 @@ type Deal {
   company_description: String
   investment_documents: String
   date_closed: String
+  deal_name: Int
   deal_lead: String
   pledge_link: String
   onboarding_link: String
@@ -48,6 +49,8 @@ type Deal {
   slack_deal: Boolean
   sector: String
   allocation_advisor: Boolean
+  allocations_reporting_adviser: Boolean
+  reporting_adviser: String
   phases: [Phase]
   metadata: Object
   manager_name: String
@@ -59,8 +62,9 @@ type Deal {
   gp_entity_name: String
   need_gp_entity: String
   number_of_investments: Int
-  general_partner_representative: String
   type_of_investors: String
+  investor_countries: String
+  representative: String
   target_raise_goal: Int
   accept_crypto: Boolean
   dealDetails: [DealDetail]

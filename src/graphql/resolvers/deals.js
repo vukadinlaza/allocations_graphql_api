@@ -547,21 +547,36 @@ const Mutations = {
     return dealResponse;
   },
   setBuildInfo: async (_, { deal_id, payload }, { user }) => {
-    const investorDomainTypeMap = {
-      true: "International",
-      false: "Domestic",
-      unknown: "Unknown",
+    const internationalInvestors = ({ status, countries }) => {
+      if (status === "true") {
+        return countries;
+      } else {
+        return ["United States"];
+      }
     };
 
     const deal = {
       user_id: user._id,
-      portfolio_deal_name: payload.portfolio_deal_name
-        ? payload.portfolio_deal_name
+      name: payload.name
+        ? payload.name
         : `${payload.manager_name}'s ${payload.portfolio_company_name} Deal`,
       slug: kebabCase(
         payload.portfolio_company_name
           ? `${payload.portfolio_company_name}-${Date.now()}`
           : `${payload.manager_name}-${Date.now()}`
+      ),
+      carry_fee: {
+        type: payload.carry_fee.type,
+        value: payload.carry_fee.value,
+        string_value: `${payload.carry_fee.value} ${payload.carry_fee.type}`,
+        // custom: ,
+      },
+      ica_exemption: {
+        investor_type: "Accredited investors",
+        exemption_type: "301",
+      },
+      investor_countries: internationalInvestors(
+        payload.international_investors
       ),
       manager: {
         name: payload.manager_name,
@@ -570,28 +585,15 @@ const Mutations = {
         title: "",
         entity_name: "",
       },
-      carry_fee: {
-        type: payload.carry_fee.type,
-        value: payload.carry_fee.value,
-        string_value: `${payload.carry_fee.value} ${payload.carry_fee.type}`,
-        // custom: ,
-      },
       management_fee: {
         type: payload.management_fee.type,
         value: payload.management_fee.value,
         string_value: `${payload.management_fee.value} ${payload.management_fee.type}`,
         // custom: ,
       },
-      ica_exemption: {
-        investor_type: "Accredited investors",
-        exemption_type: "301",
-      },
       setup_cost: 20000,
       angels_deal: false,
-      term_of_fund: "10",
       deal_multiple: 0,
-      investor_domain_type:
-        investorDomainTypeMap[payload.international_investors.status],
       accept_crypto: payload.accept_crypto,
       ...payload,
     };
@@ -601,7 +603,7 @@ const Mutations = {
     if (deal.accept_crypto) {
       const response = await CryptoService.createWallet(deal_id);
       if (!response.acknowledged || response.error) {
-        await alertCryptoWalletError(deal.portfolio_deal_name, deal_id);
+        await alertCryptoWalletError(deal.name, deal_id);
       }
     }
 
