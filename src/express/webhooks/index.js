@@ -567,18 +567,17 @@ module.exports = Router()
       });
 
       //check the db to see if investment has cap account doc
-      const hasCapAcctDoc = matchingInvestment.documents.find((doc) =>
+      const hasCapAcctDoc = matchingInvestment?.documents?.find((doc) =>
         doc.includes("Capital_Account_Statement")
       );
 
       if (hasCapAcctDoc) {
         return res.send("Already has cap account doc");
       }
-
       //append current date to the data to send to docspring
       const formattedData = {
         name: body.name,
-        effectiveDate: body.effectiveDate,
+        effectiveDate: moment(body.effectiveDate).format("MMMM DD, YYYY"),
         subscriptionAmount: `$${amountFormat(body.subscriptionAmount)}`,
         privateFundExpenses: `$${amountFormat(body.privateFundExpenses)}`,
         managementFee: `$${amountFormat(body.managementFee)}`,
@@ -586,7 +585,7 @@ module.exports = Router()
         carryPercent: `${Number(body.carryPercent) * 100}%`,
         //might need to change b/c airtable might send number not string
         ownershipPercentage: `${Number(body.ownershipPercentage) * 100}%`,
-        netInvestmentAmount: `${amountFormat(body.netInvestmentAmount)}%`,
+        netInvestmentAmount: `$${amountFormat(body.netInvestmentAmount)}`,
         currentDate: moment().format("MMMM DD, YYYY"),
       };
 
