@@ -218,10 +218,10 @@ const Mutations = {
           referenceNumber: referenceNumber.number,
         });
         //update investment to include s3Key for docuspring integration
-        await db.investments.updateOne(
-          { _id: ObjectId(investment._id) },
-          { $set: { "wire_instructions.s3Key": wireKey } }
-        );
+        // await db.investments.updateOne(
+        //   { _id: ObjectId(investment._id) },
+        //   { $set: { "wire_instructions.s3Key": wireKey } }
+        // );
       }
     } else {
       investment = await db.investments.findOne({
