@@ -7,6 +7,7 @@ const { GraphQLUpload } = require("graphql-upload");
 
 const resolversRaw = [
   "deals",
+  "crypto-payments",
   "investors",
   "superadmin",
   "investments",
