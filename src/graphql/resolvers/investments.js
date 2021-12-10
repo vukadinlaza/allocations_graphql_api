@@ -200,7 +200,7 @@ const Mutations = {
 
     // add case for undefined referenceNumber
     if (!payload.investmentId) {
-      const data = await db.investments.insertOne({
+      const newInvestmentData = {
         status: "invited",
         invited_at: Date.now(),
         created_at: Date.now(),
@@ -209,22 +209,28 @@ const Mutations = {
         deal_id: ObjectId(payload.dealId),
         organization: ObjectId(deal.organization),
         submissionData: payload,
-        wire_instructions: {
+      };
+      // if there is a bankingProvider on the deal AND
+      // a reference number was assigned to the investment
+      // add the wire_instructions to the investment
+      if (deal.bankingProvider && referenceNumber?.number) {
+        newInvestmentData.wire_instructions = {
           // no dynamic data for acc/routing numbers yet
           account_number: null,
           routing_number: null,
           reference_number: referenceNumber?.number || null,
           // no dynamic data for provider yet
-          provider: "New Directions",
-        },
-      });
+          provider: deal.bankingProvider || null,
+        };
+      }
+      const data = await db.investments.insertOne(newInvestmentData);
 
       investment = await db.investments.findOne({ _id: data.insertedId });
-
-      if (referenceNumber) {
+      // If bankingProvider AND referenceNumber create wire instructions PDF
+      if (referenceNumber?.number && deal?.bankingProvider) {
         //create wire instructions, and return key for AWS integration
         const wireKey = await createInvestmentWireInstructions({
-          providerName: "New Directions",
+          providerName: deal?.bankingProvider,
           investmentId: investment._id,
           investorName: investment.submissionData.legalName,
           spvName: deal.company_name,
