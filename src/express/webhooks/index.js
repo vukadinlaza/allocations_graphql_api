@@ -486,70 +486,19 @@ module.exports = Router()
       res.sendStatus(200);
       next();
     } catch (err) {
-      console.log("nd-bank-wire-confirmation :>> ", err);
+      console.log("nd-bank-wire-confirmation error :>> ", err);
+      console.log("err.message ", err.message);
+      console.log("err entries ", Object.entries(err));
+
       const deal_id = deal ? deal._id : "N/A";
       const investment_id = investment ? investment._id : "N/A";
       await SlackService.postNDError({
         action: "INCOMING WIRE",
-        error: err.message | "Trouble processing inbound wire",
+        error: err.message || "Trouble processing inbound wire",
         details: { referenceNumber, amount, deal_id, investment_id },
         emailLink,
       });
 
-      next(err);
-    }
-  })
-  .post("/nd-outbound-wire-confirmation", async (req, res, next) => {
-    let deal;
-    let amount;
-    let email;
-    let emailLink;
-
-    try {
-      const verified = verifyWebhook(req.headers.authorization);
-
-      if (!verified) {
-        res.sendStatus(401);
-        throw new Error("Invalid token");
-      }
-
-      const db = await getDB();
-      const DealService = new Deals(db.collection("deals"));
-      console.log("hello there");
-      deal = await DealService.getDealById({ deal_id });
-      if (!deal) throw new Error("No Deal Found");
-      if (!deal.virtual_account_number)
-        throw new Error("No Virtual Account Number");
-      const { virtual_account_number } = deal;
-
-      const { body } = req;
-      email = body.body;
-      emailLink = body.emailLink;
-      amount = getWireAmount(email);
-
-      const account = await findOrCreateBankingTransactionsAccount({
-        virtualAccountNumber: virtual_account_number,
-        deal_name: deal.company_name,
-      });
-
-      await bankTransactionsTransactionsTableOutbound({
-        amount: amount * -1,
-        account,
-      });
-
-      await SlackService.ndOutgoingWire({ deal, amount, emailLink });
-      res.sendStatus(200);
-      next();
-    } catch (err) {
-      console.log("nd-outbound-wire-confirmation :>> ", err);
-      const deal_id = deal ? deal._id : "N/A";
-
-      await SlackService.postNDError({
-        error: err.message || "Outbound error",
-        action: "OUTGOING WIRE",
-        details: { amount, deal_id },
-        emailLink,
-      });
       next(err);
     }
   })
