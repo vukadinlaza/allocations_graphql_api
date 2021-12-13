@@ -235,7 +235,6 @@ const getTemplateData = (input, user, templateId) => {
       Email: user.email,
       FullName: nameToUse,
       Signature: nameToUse,
-      Title: isTypeIndividual ? "" : title || "",
       "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
     };
   }
