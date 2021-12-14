@@ -38,10 +38,10 @@
     serverless-plugin-monorepo "^0.10.0"
     uuid "^8.3.2"
 
-"@allocations/deal-service@^0.2.24":
-  version "0.2.24"
-  resolved "https://registry.yarnpkg.com/@allocations/deal-service/-/deal-service-0.2.24.tgz#08857ab876124db0ee27761c503521f7c41ff618"
-  integrity sha512-A02UqGX4PQOA13Fz4A+9q+zMpZaxAiYBDTBMzmKYq81Q7xAabwFiystJEu7KcAWvNaXLsOD7Z2uyOO3YaKucdg==
+"@allocations/deal-service@^0.2.25":
+  version "0.2.25"
+  resolved "https://registry.yarnpkg.com/@allocations/deal-service/-/deal-service-0.2.25.tgz#7d027a96e3e62d07e0ce3e8488adde6e9fe8475b"
+  integrity sha512-5ZCgrZmEIjBDfjTGbEENhI7dfMtCWJ0Kc5N0zeXvDKFpeHthXLkFZT+BDPVMYpan1cpD62hw/Agq/xPil9VoLQ==
   dependencies:
     "@allocations/service-common" "*"
     "@aws-sdk/client-s3" "^3.33.0"
