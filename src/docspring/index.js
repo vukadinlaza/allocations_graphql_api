@@ -50,6 +50,7 @@ const getTemplateData = (input, user, templateId) => {
     accredited_investor_status,
     secondInvestor,
     is3c7_options_status,
+    address,
   } = input;
 
   const SIGNATURE_ONLY_TEMPLATE = "tpl_ctrRDXgQdKz5YGg9QK";
@@ -85,7 +86,11 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_9KMF9czg3QRCsYjHTt",
     "tpl_TaFALsk9yKCbKXkqQe",
     "tpl_qHfsr76ZaHLAD5AjZn",
+    "tpl_eM6JXmJ4NQb9adTyKd",
+    "tpl_FCdLsyKMSe3cmZ9NQX",
+    "tpl_NhtdhXPRgq3nd3qHXS",
   ];
+
   const kunalDeals = ["tpl_FbnCe3L7c9Qj32JHTG", "tpl_q42NLbhm5gRT4SKLkf"];
   if (kunalDeals.includes(templateId)) {
     return {
@@ -203,6 +208,22 @@ const getTemplateData = (input, user, templateId) => {
       "Date Signed2": !secondInvestor
         ? ""
         : moment(new Date()).format("MM/DD/YYYY") || " ",
+    };
+  } else if (templateId === "tpl_zbmQNPrkqXnJmFMD7C") {
+    return {
+      InvestorType: capitalize(investor_type),
+      MemberName: legalName,
+      SubAmount: investmentAmount,
+      USStateIndividual: isTypeIndividual ? countryWithState : "",
+      USStateEntity: isTypeEntity ? countryWithState : "",
+      AccredIndiv: isTypeIndividual ? accredited_investor_status : "",
+      AccredEntity: isTypeIndividual ? "" : accredited_investor_status,
+      Email: user.email,
+      FullName: nameToUse,
+      Signature: nameToUse,
+      Address: address,
+      Title: isTypeIndividual ? "" : title || "",
+      "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
     };
   } else {
     return {
@@ -455,7 +476,6 @@ const getTemplate = async ({
     (doc) => !doc.includes(adjTemplateName)
   );
   const newDocsArray = [...oldDocs, key];
-
   const permanentDownloadUrl = await generateDocSpringPDF(
     db,
     deal,

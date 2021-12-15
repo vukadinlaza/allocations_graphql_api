@@ -237,10 +237,10 @@ const Mutations = {
           referenceNumber: referenceNumber.number,
         });
         //update investment to include s3Key for docuspring integration
-        await db.investments.updateOne(
-          { _id: ObjectId(investment._id) },
-          { $set: { "wire_instructions.s3Key": wireKey } }
-        );
+        // await db.investments.updateOne(
+        //   { _id: ObjectId(investment._id) },
+        //   { $set: { "wire_instructions.s3Key": wireKey } }
+        // );
       }
     } else {
       investment = await db.investments.findOne({
@@ -416,16 +416,27 @@ const Mutations = {
         })
       );
 
-      emailItems.forEach(async (email) => {
-        await sendWireReminderEmail({ ...email });
-      });
+      if (process.env.NODE_ENV === "production") {
+        emailItems.forEach(async (email) => {
+          await sendWireReminderEmail({ ...email });
+        });
 
-      await db
-        .collection("deals")
-        .updateOne(
-          { _id: ObjectId(deal_id) },
-          { $set: { wireReminderSent: new Date() } }
+        await db
+          .collection("deals")
+          .updateOne(
+            { _id: ObjectId(deal_id) },
+            { $set: { wireReminderSent: new Date() } }
+          );
+
+        await db.investments.updateMany(
+          { _id: { $in: oids } },
+          {
+            $set: {
+              wireReminderSent: { availableToSend: false, date: new Date() },
+            },
+          }
         );
+      }
       return true;
     } catch (err) {
       return err;
@@ -456,12 +467,12 @@ const Mutations = {
       effectiveDate: moment(ObjectId(investment._id).getTimestamp()).format(
         "MMM DD, YYYY"
       ),
-      subscriptionAmount: `$${amountFormat(data.subscriptionAmount)}`,
+      subscriptionAmount: `$${amountFormat(data.currentAmountContributed)}`,
       privateFundExpenses: `$${amountFormat(data.privateFundExpenses)}`,
-      managementFee: `$${amountFormat(data.managementFee$)}` || "$0",
+      managementFee: `$${amountFormat(data.managementFees$)}` || "$0",
       carryPercent: `${data.carry * 100 || "0"}%`,
       netInvestmentAmount: `$${amountFormat(data.netInvestment)}`,
-      ownershipPercentage: `${data.ownership.toString()}%`,
+      ownershipPercentage: `${(data.ownership * 100).toString()}%`,
     };
 
     const docspringRes = await createCapitalAccountDoc({ payload });

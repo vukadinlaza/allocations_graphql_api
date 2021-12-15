@@ -388,7 +388,7 @@ const Mutations = {
   createOrgAndDeal: async (
     _parent,
     { orgName, deal },
-    { datasources, db, user }
+    { db, user, datasources }
   ) => {
     // no auth required for this (anyone can do it once signed in)
 
