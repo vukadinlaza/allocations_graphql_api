@@ -23,6 +23,7 @@ type Investment {
   previewLink: String
   slack_investment: Boolean
   wire_instructions: Document
+  wired_at: Float
 }
 
 type SubmissionData {
@@ -79,6 +80,7 @@ input InvestmentInput {
   status: String
   documents: [Object]
   capitalWiredAmount: Float
+  wired_at: Float
 }
 
 input PaginationInput {

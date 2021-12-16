@@ -126,7 +126,11 @@ const Mutations = {
     const savedInvestment = await ctx.db.investments.findOne({
       _id: ObjectId(_id),
     });
-    if (savedInvestment.status !== investment.status) {
+
+    if (
+      savedInvestment.status !== investment.status &&
+      investment.status !== "wired"
+    ) {
       investment[`${investment.status}_at`] = Date.now();
     }
 
