@@ -24,6 +24,9 @@ class Deals extends MongoDataSource {
       fund_id,
       deal_slug
     );
+
+    if (!serviceDeal) return null;
+
     const coverImage = await DealService.getDocumentByTaskTitle(
       serviceDeal._id,
       "build",
