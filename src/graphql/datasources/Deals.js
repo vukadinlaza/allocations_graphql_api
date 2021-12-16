@@ -88,9 +88,13 @@ class Deals extends MongoDataSource {
   }
 
   async createDeal({ deal, user_id }) {
-    const newDeal = await DealService.create(user_id);
-    await DealService.setBuildInfo(newDeal._id, transformLegacyDeal(deal));
-    return DealService.get(newDeal._id);
+    const { insertedId: _id } = await this.collection.insertOne({
+      ...deal,
+      user_id,
+    });
+    const newDeal = await this.collection.findOne({ _id });
+
+    return newDeal;
   }
 
   async deleteDealById({ deal_id }) {
