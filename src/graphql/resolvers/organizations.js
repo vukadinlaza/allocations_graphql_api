@@ -228,7 +228,7 @@ const Organization = {
       ])
       .toArray();
 
-    return res[0]?.spvs;
+    return res[0]?.spvs || 0;
   },
   totalFunds: async (org, _, { db }) => {
     const res = await db.deals
@@ -238,7 +238,7 @@ const Organization = {
       ])
       .toArray();
 
-    return res[0]?.funds;
+    return res[0]?.funds || 0;
   },
   totalInvestments: async (org, _, { db }) => {
     const [{ investments }] = await db.deals
