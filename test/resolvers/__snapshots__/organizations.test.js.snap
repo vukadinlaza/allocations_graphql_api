@@ -217,6 +217,23 @@ Object {
 }
 `;
 
+exports[`Organizations GET_ORGANIZATION non fund admin users cannot get an organization 2`] = `
+Object {
+  "data": Object {
+    "organization": null,
+  },
+  "errors": Array [
+    [GraphQLError: org query throw],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
 exports[`Organizations GET_ORGANIZATION_MEMBERS admin users can get all orginization members 1`] = `
 Object {
   "data": Object {

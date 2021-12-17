@@ -29,14 +29,17 @@ const { deallocateReferenceNumbers } = require("./newDirections");
 const Schema = Deals;
 const Deal = {
   // investment denotes the `ctx.user` investment in this deal (can only be one)
-  investment: (deal, _, { db, user }) => {
-    return db.collection("investments").findOne({
+  investment: (deal, _, { user, datasources }) => {
+    return datasources.investments.getOneInvestment({
       deal_id: ObjectId(deal._id),
       user_id: ObjectId(user._id),
     });
   },
-  investments: (deal, _, { db }) => {
-    return db.investments.find({ deal_id: deal._id }).toArray();
+  investments: (deal, _, { datasources }) => {
+    console.log("datasource", datasources);
+    return datasources.investments.getAllInvestments({
+      deal_id: ObjectId(deal._id),
+    });
   },
   wireInstructions: (deal) => {
     return deal.wireInstructions
@@ -300,6 +303,7 @@ const Mutations = {
         deal_id: _id,
       });
 
+      /* TODO how to handle look up of users in legacy*/
       const investments = await ctx.db.investments
         .aggregate([
           { $match: { deal_id: ObjectId(_id) } },
@@ -376,7 +380,7 @@ const Mutations = {
       });
 
       // delete deal and all investments in deal
-      await ctx.db.investments.deleteMany({ deal_id: ObjectId(_id) });
+      await ctx.datasources.investments.deleteMany({ deal_id: ObjectId(_id) });
       return ctx.datasources.deals.deleteDealById({ deal_id: _id });
     } catch (e) {
       // eslint-disable-next-line no-console

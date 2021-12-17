@@ -39,6 +39,7 @@
     "@allocations/crypto-service": "^0.1.3",
     "@allocations/deal-service": "^0.2.25",
     "@allocations/investment-agreement-service": "^0.0.2",
+    "@allocations/investment-service": "^0.0.1",
     "@allocations/reference-number-service": "^0.1.0",
     "@allocations/slack-service": "0.0.5",
     "@sendgrid/mail": "^6.5.2",

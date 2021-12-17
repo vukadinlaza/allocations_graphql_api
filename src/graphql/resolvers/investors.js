@@ -41,12 +41,12 @@ const User = {
     if (deal) return deal;
     throw new AuthenticationError("REDIRECT");
   },
-  investments: (user, _, { db }) => {
-    return db.investments.find({ user_id: user._id }).toArray();
+  investments: (user, _, { ctx }) => {
+    return ctx.datasources.investments.getAllInvestments({ user_id: user._id });
   },
-  dealInvestments: (user, { deal_id }, { db }) => {
-    return db.investments
-      .find({ user_id: user._id, deal_id: ObjectId(deal_id) })
+  dealInvestments: (user, { deal_id }, { ctx }) => {
+    return ctx.datasources.investments
+      .getAllInvestments({ user_id: user._id, deal_id: ObjectId(deal_id) })
       .toArray();
   },
   passport: (user) => {
@@ -100,29 +100,25 @@ const User = {
     return deals.reduce((acc, org) => [...acc, ...org], []);
   },
 
-  accountInvestments: async (user, _, { db }) => {
+  accountInvestments: async (user, _, { db, ctx }) => {
     const account = await db.accounts.findOne({
       $or: [{ rootAdmin: ObjectId(user._id) }, { users: ObjectId(user._id) }],
     });
     if (!account) {
-      return await db.investments
-        .find({
-          user_id: user._id,
-        })
-        .toArray();
+      return await ctx.datasources.investments.getAllInvestments({
+        user_id: user._id,
+      });
     }
-    const investments = await db.investments
-      .find({
-        $or: [
-          {
-            user_id: {
-              $in: [...(account.users || []).map((u) => ObjectId(u))],
-            },
+    const investments = await ctx.datasources.investments.getAllInvestments({
+      $or: [
+        {
+          user_id: {
+            $in: [...(account.users || []).map((u) => ObjectId(u))],
           },
-          { user_id: ObjectId(account.rootAdmin) },
-        ],
-      })
-      .toArray();
+        },
+        { user_id: ObjectId(account.rootAdmin) },
+      ],
+    });
     return investments;
   },
   account: async (user, _, { db }) => {
@@ -130,10 +126,10 @@ const User = {
     return account;
   },
   investorPersonalInfo: async (_, args, ctx) => {
-    const { db, user } = ctx;
-    let userInvesments = await db.investments
-      .find({ user_id: user._id })
-      .toArray();
+    const { user, datasources } = ctx;
+    let userInvesments = await datasources.investments.getAllInvestments({
+      user_id: user._id,
+    });
     let lastInvestment = userInvesments
       .filter((investment) => investment.submissionData)
       .pop();

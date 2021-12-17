@@ -2,7 +2,6 @@ const { ObjectId } = require("mongodb");
 const moment = require("moment");
 const fetch = require("node-fetch");
 const { get } = require("lodash");
-const { isAdmin } = require("../permissions");
 const { UserInputError } = require("apollo-server-express");
 const Cloudfront = require("../../cloudfront");
 const Uploader = require("../../uploaders/investor-docs");
@@ -17,7 +16,6 @@ const Mailer = require("../../mailers/mailer");
 const commitmentTemplate = require("../../mailers/templates/commitment-template");
 const commitmentCancelledTemplate = require("../../mailers/templates/commitment-cancelled-template");
 const { signedSPV } = require("../../zaps/signedDocs");
-const { customInvestmentPagination } = require("../pagHelpers");
 const { DealService } = require("@allocations/deal-service");
 const { sendWireReminderEmail } = require("../../mailers/wire-reminder");
 const { amountFormat } = require("../../utils/common");
@@ -62,28 +60,9 @@ const Investment = {
 
 const Queries = {
   investment: (_, args, ctx) => {
-    return ctx.db.investments.findOne({ _id: ObjectId(args._id) });
-  },
-  investmentsList: async (_, args, ctx) => {
-    isAdmin(ctx);
-    const { pagination, currentPage } = args.pagination;
-    const documentsToSkip = pagination * currentPage;
-    const aggregation = customInvestmentPagination(args.pagination);
-    const countAggregation = [...aggregation, { $count: "count" }];
-
-    const investmentsCount = await ctx.db
-      .collection("investments")
-      .aggregate(countAggregation)
-      .toArray();
-    const count = investmentsCount.length ? investmentsCount[0].count : 0;
-
-    let investments = await ctx.db
-      .collection("investments")
-      .aggregate(aggregation)
-      .skip(documentsToSkip)
-      .limit(pagination)
-      .toArray();
-    return { count, investments };
+    return ctx.datasources.investments.getInvestmentById({
+      investment_id: ObjectId(args._id),
+    });
   },
 };
 
@@ -92,7 +71,7 @@ const Mutations = {
   createInvestment: async (
     _,
     { investment: { user_id, deal_id, ...investment } },
-    { db }
+    { db, datasources }
   ) => {
     let deal = await db.collection("deals").findOne({ _id: ObjectId(deal_id) });
 
@@ -112,7 +91,7 @@ const Mutations = {
     };
 
     try {
-      await db.investments.insertOne(newInvestment);
+      await datasources.investments.createInvestment(newInvestment);
     } catch (error) {
       // throw more descriptive error
       throw new Error(`createInvestment failed: ${error.message}`);
@@ -120,8 +99,10 @@ const Mutations = {
 
     return newInvestment;
   },
+
   /** updates investment and tracks the status change **/
   updateInvestment: async (_, { investment: { _id, ...investment } }, ctx) => {
+    console.log("update", investment);
     // we need to track status changes
     const savedInvestment = await ctx.db.investments.findOne({
       _id: ObjectId(_id),
@@ -134,13 +115,26 @@ const Mutations = {
       investment[`${investment.status}_at`] = Date.now();
     }
 
+    const updatedInvestment = {
+      ...savedInvestment,
+      ...investment,
+    };
+    console.log("updated invest", updatedInvestment);
+    console.log("saved", savedInvestment);
+
+    await ctx.datasources.investments.updateInvestmentById({
+      _id,
+      investment: updatedInvestment,
+    });
     return ctx.db.investments.updateOne(
       { _id: ObjectId(_id) },
+      // { $set: { ...investment, updated_at: new Date() } },
       { $set: { ...investment, updated_at: Date.now() } },
       { new: true }
     );
   },
-  /** delete investment **/
+
+  /** delete investment id**/
   deleteInvestment: async (_, { _id }, ctx) => {
     try {
       const res = await ctx.db.investments.deleteOne({ _id: ObjectId(_id) });
@@ -176,6 +170,7 @@ const Mutations = {
   },
 
   confirmInvestment: async (_, { payload }, { user, db, datasources }) => {
+    console.log("confirm investment");
     const deal = await datasources.deals.getDealById({
       deal_id: ObjectId(payload.dealId),
     });
@@ -202,9 +197,10 @@ const Mutations = {
       deal_id: payload.dealId,
     });
 
+    console.log("working!!!!");
     // add case for undefined referenceNumber
     if (!payload.investmentId) {
-      const newInvestmentData = {
+      const data = await datasources.investments.createInvestment({
         status: "invited",
         invited_at: Date.now(),
         created_at: Date.now(),
@@ -213,7 +209,7 @@ const Mutations = {
         deal_id: ObjectId(payload.dealId),
         organization: ObjectId(deal.organization),
         submissionData: payload,
-      };
+      });
       // if there is a bankingProvider on the deal AND
       // a reference number was assigned to the investment
       // add the wire_instructions to the investment
@@ -247,14 +243,17 @@ const Mutations = {
         // );
       }
     } else {
-      investment = await db.investments.findOne({
-        _id: ObjectId(payload.investmentId),
+      investment = await datasources.investments.getInvestmentById({
+        investment_id: ObjectId(payload.investmentId),
       });
 
       const updatedSubmissionData = {
         ...investment.submissionData,
         ...payload,
       };
+
+      await datasources.investments.createInvestment(investment);
+
       await db.investments.updateOne(
         { _id: ObjectId(investment._id) },
         { $set: { submissionData: updatedSubmissionData } }
@@ -317,8 +316,11 @@ const Mutations = {
 
     await signedSPV(zapData);
 
-    return db.investments.findOne({ _id: ObjectId(investment._id) });
+    return datasources.investments.getInvestmentById({
+      investment_id: ObjectId(investment._id),
+    });
   },
+
   getInvestmentPreview: async (_, { payload }, { user }) => {
     const res = await getInvestmentPreview({
       input: payload,
@@ -328,15 +330,19 @@ const Mutations = {
     return { ...user, previewLink: res.download_url };
   },
 
-  cancelCommitment: async (_, { _id, reason }, { user, db }) => {
+  cancelCommitment: async (_, { _id, reason }, { user, db, ctx }) => {
     try {
-      const investment = await db.investments.findOne({ _id: ObjectId(_id) });
+      const investment = await ctx.datasources.investments.getInvestmentById({
+        investment_id: ObjectId(_id),
+      });
       if (!investment) return false;
 
       const deal = await db.deals.findOne({
         _id: ObjectId(investment.deal_id),
       });
-      let res = await db.investments.deleteOne({ _id: ObjectId(_id) });
+      let res = await db.investments.deleteOne.deleteOne({
+        _id: ObjectId(_id),
+      });
 
       const emailData = {
         mainData: {
@@ -446,11 +452,11 @@ const Mutations = {
       return err;
     }
   },
-  createCapPDF: async (_, { data }, { db }) => {
+  createCapPDF: async (_, { data }, { db, ctx }) => {
     const timeStamp = Date.now();
 
-    const investment = await db.investments.findOne({
-      _id: ObjectId(data.investmentId),
+    const investment = await ctx.datasources.investments.getInvestmentById({
+      investment_id: ObjectId(data.investmentId),
     });
     if (!investment) {
       return null;
@@ -498,7 +504,9 @@ const Mutations = {
         },
       }
     );
-    return db.investments.findOne({ _id: ObjectId(investment._id) });
+    return ctx.datasources.investments.getInvestmentById({
+      investment_id: ObjectId(investment._id),
+    });
   },
 };
 

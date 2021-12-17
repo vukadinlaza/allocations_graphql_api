@@ -3,6 +3,7 @@ const { authenticate } = require("../auth");
 const logger = require("../utils/logger");
 const { typeDefs, resolvers } = require("../graphql/resolvers");
 const Deals = require("./datasources/Deals");
+const Investments = require("./datasources/Investments");
 const pubsub = new PubSub();
 
 function authedServer(db) {
@@ -16,6 +17,7 @@ function authedServer(db) {
     context: async (payload) => {
       const datasources = {
         deals: new Deals(db.collection("deals")),
+        investments: new Investments(db.collection("investments")),
       };
       // public deal endpoint skips authentication
       if (

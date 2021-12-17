@@ -176,16 +176,16 @@ const Organization = {
       return db.users.find({ organizations: org._id }).toArray();
     }
   },
-  investments: async (org, _, { db }) => {
+  investments: async (org, _, { db, ctx }) => {
     const dealQuery =
       org.slug === "allocations"
         ? { organization: { $in: [org._id, null] } }
         : { organization: org._id };
 
     const deals = await db.collection("deals").find(dealQuery).toArray();
-    return db.investments
-      .find({ deal_id: { $in: deals.map((d) => d._id) } })
-      .toArray();
+    return ctx.datasources.investments.getAllInvestments({
+      deal_id: { $in: deals.map((d) => d._id) },
+    });
   },
   adminInvites: (org) => {
     return org.adminInvites || [];
