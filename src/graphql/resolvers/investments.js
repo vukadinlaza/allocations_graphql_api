@@ -52,7 +52,7 @@ const Investment = {
     return value;
   },
   wire_instructions: (investment) => {
-    if (!investment.wire_instructions.s3Key) return null;
+    if (!investment?.wire_instructions?.s3Key) return null;
     return {
       link: Cloudfront.getSignedUrl(investment.wire_instructions?.s3Key),
       path: investment.wire_instructions?.s3Key,
