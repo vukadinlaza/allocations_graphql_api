@@ -200,7 +200,7 @@ const Mutations = {
     console.log("working!!!!");
     // add case for undefined referenceNumber
     if (!payload.investmentId) {
-      const data = await datasources.investments.createInvestment({
+      const newInvestmentData = {
         status: "invited",
         invited_at: Date.now(),
         created_at: Date.now(),
@@ -209,7 +209,7 @@ const Mutations = {
         deal_id: ObjectId(payload.dealId),
         organization: ObjectId(deal.organization),
         submissionData: payload,
-      });
+      };
       // if there is a bankingProvider on the deal AND
       // a reference number was assigned to the investment
       // add the wire_instructions to the investment
@@ -223,7 +223,9 @@ const Mutations = {
           provider: deal.bankingProvider || null,
         };
       }
-      const data = await db.investments.insertOne(newInvestmentData);
+      const data = await datasources.investments.createInvestment(
+        newInvestmentData
+      );
 
       investment = await db.investments.findOne({ _id: data.insertedId });
       // If bankingProvider AND referenceNumber create wire instructions PDF
