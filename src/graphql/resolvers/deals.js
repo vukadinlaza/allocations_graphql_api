@@ -537,16 +537,15 @@ const Mutations = {
     );
   },
   createBuild: async (_, { payload }, { user }) => {
-    const { type } = payload;
-
     const deal = await DealService.create({
-      user_id: user._id,
-      type,
+      user_id: user?._id,
+      ...payload,
     });
+
     const dealResponse = await DealService.get(deal._id);
     return dealResponse;
   },
-  setBuildInfo: async (_, { deal_id, payload }, { user }) => {
+  createNewDeal: async (_, { payload }, { user }) => {
     const internationalInvestors = ({ status, countries }) => {
       if (status === "true") {
         return countries;
@@ -598,18 +597,33 @@ const Mutations = {
       ...payload,
     };
 
-    const res = await DealService.setBuildInfo(deal_id, deal);
+    const res = await fetch(`${process.env.BUILD_API_URL}/create`, {
+      method: "POST",
+      headers: {
+        "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        deal,
+        organization: {
+          ...payload.organization,
+          master_series:
+            payload.organization?.masterEntity?.name || "Atomizer LLC",
+        },
+        new_hvp: payload.isNewHVP,
+      }),
+    });
 
-    if (deal.accept_crypto) {
-      const response = await CryptoService.createWallet(deal_id);
+    const dealResponse = await res.json();
+
+    if (dealResponse.deal.accept_crypto) {
+      const response = await CryptoService.createWallet(dealResponse.deal._id);
       if (!response.acknowledged || response.error) {
-        await alertCryptoWalletError(deal.name, deal_id);
+        await alertCryptoWalletError(deal.name, dealResponse.deal._id);
       }
     }
 
-    if (res.acknowledged) {
-      return await DealService.get(res._id);
-    }
+    return dealResponse;
   },
 
   deleteDealDocument: async (

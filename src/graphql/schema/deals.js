@@ -241,7 +241,20 @@ type Mutation {
   deleteUserAsViewed(deal_id: String!, user_id: String!): Deal 
   createBuild(payload: Object): Deal
   deleteDealDocument(document_id: String!, phase_id: String!, task_id: String!): Object
-  setBuildInfo(deal_id: String, payload: Object): Deal
+  createNewDeal(payload: Object): CreateDealResponse
+}
+
+type DataRequestToken {
+  id: String
+  token_id: String
+  token_secret: String
+  data_request_url: String  
+}
+
+type CreateDealResponse {
+  deal: Deal
+  documents: [DataRequestToken]
+  phases: [Phase]
 }
 
 type Subscription {
