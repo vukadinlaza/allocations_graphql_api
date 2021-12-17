@@ -232,8 +232,12 @@ const getTemplateData = (input, user, templateId) => {
       SubAmount: investmentAmount,
       USStateIndividual: isTypeIndividual ? countryWithState : "",
       USStateEntity: isTypeEntity ? countryWithState : "",
-      AccredIndiv: isTypeIndividual ? accredited_investor_status : "",
-      AccredEntity: isTypeIndividual ? "" : accredited_investor_status,
+      AccredIndiv: isTypeIndividual
+        ? accredited_investor_status || is3c7_options_status
+        : "",
+      AccredEntity: isTypeIndividual
+        ? ""
+        : accredited_investor_status || is3c7_options_status,
       Email: user.email,
       FullName: nameToUse,
       Signature: nameToUse,
