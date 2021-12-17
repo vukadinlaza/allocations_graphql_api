@@ -41,11 +41,11 @@ const User = {
     if (deal) return deal;
     throw new AuthenticationError("REDIRECT");
   },
-  investments: (user, _, { ctx }) => {
-    return ctx.datasources.investments.getAllInvestments({ user_id: user._id });
+  investments: (user, _, { datasources }) => {
+    return datasources.investments.getAllInvestments({ user_id: user._id });
   },
-  dealInvestments: (user, { deal_id }, { ctx }) => {
-    return ctx.datasources.investments
+  dealInvestments: (user, { deal_id }, { datasources }) => {
+    return datasources.investments
       .getAllInvestments({ user_id: user._id, deal_id: ObjectId(deal_id) })
       .toArray();
   },
