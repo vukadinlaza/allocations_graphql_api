@@ -248,7 +248,8 @@ type DataRequestToken {
   id: String
   token_id: String
   token_secret: String
-  data_request_url: String  
+  data_request_url: String
+  task: Task  
 }
 
 type CreateDealResponse {

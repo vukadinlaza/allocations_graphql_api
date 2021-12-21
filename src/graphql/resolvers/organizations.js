@@ -195,6 +195,10 @@ const Organization = {
     return org.approved !== false;
   },
   totalAUM: async (org, _, { db }) => {
+    if ("totalPrivateFunds" in org) {
+      //If organization comes from server paginated aggregation, we won't recalculate the totalAUM
+      return parseFloat(org.totalAUM);
+    }
     const [{ aum }] = await db.deals
       .aggregate([
         { $match: { organization: org._id } },
