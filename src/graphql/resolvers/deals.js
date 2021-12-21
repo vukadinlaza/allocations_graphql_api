@@ -36,7 +36,6 @@ const Deal = {
     });
   },
   investments: (deal, _, { datasources }) => {
-    console.log("datasource", datasources);
     return datasources.investments.getAllInvestments({
       deal_id: ObjectId(deal._id),
     });

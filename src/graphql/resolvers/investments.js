@@ -102,7 +102,6 @@ const Mutations = {
 
   /** updates investment and tracks the status change **/
   updateInvestment: async (_, { investment: { _id, ...investment } }, ctx) => {
-    console.log("update", investment);
     // we need to track status changes
     const savedInvestment = await ctx.db.investments.findOne({
       _id: ObjectId(_id),
@@ -119,8 +118,6 @@ const Mutations = {
       ...savedInvestment,
       ...investment,
     };
-    console.log("updated invest", updatedInvestment);
-    console.log("saved", savedInvestment);
 
     await ctx.datasources.investments.updateInvestmentById({
       _id,
@@ -197,7 +194,6 @@ const Mutations = {
       deal_id: payload.dealId,
     });
 
-    console.log("working!!!!");
     // add case for undefined referenceNumber
     if (!payload.investmentId) {
       const newInvestmentData = {

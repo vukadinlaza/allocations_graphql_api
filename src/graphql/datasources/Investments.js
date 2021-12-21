@@ -15,22 +15,25 @@ class Investments extends MongoDataSource {
   }
 
   async getAllInvestments(query) {
-    console.log("query==>", query);
     return this.collection.find(query).toArray();
   }
 
   async updateInvestmentById({ _id, investment }) {
-    console.log("onUpdate", investment);
-    const serviceInvestment = transformLegacyInvestment(investment);
-    const i = await InvestmentService.update(_id, serviceInvestment);
-    console.log("i==>", i);
-    return i;
+    const serviceInvestment = transformLegacyInvestment({
+      _id: investment._id,
+      legacyInvestment: investment,
+    });
+    return InvestmentService.update(_id, serviceInvestment);
   }
 
   async createInvestment(investment) {
-    const newServiceInvestment = transformLegacyInvestment(investment);
-    await InvestmentService.create(newServiceInvestment);
-    return this.collection.insertOne({ ...investment });
+    const createdInvestment = await this.collection.insertOne(investment);
+    const serviceInvestment = transformLegacyInvestment({
+      _id: createdInvestment.insertedId,
+      legacyInvestment: investment,
+    });
+    await InvestmentService.create(serviceInvestment);
+    return createdInvestment;
   }
 }
 
