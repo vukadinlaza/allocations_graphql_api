@@ -15,6 +15,7 @@ const DealDocUploader = require("../../uploaders/deal-docs");
 const Deals = require("../schema/deals");
 const Mailer = require("../../mailers/mailer");
 const txConfirmationTemplate = require("../../mailers/templates/tx-confirmation-template");
+const dealInvitationTemplate = require("../../mailers/templates/deal-invitation-template");
 const { nWithCommas } = require("../../utils/common.js");
 const { customDealPagination } = require("../pagHelpers");
 const { getHighlights } = require("../mongoHelpers.js");
@@ -648,6 +649,42 @@ const Mutations = {
       });
     }
     return res;
+  },
+
+  sendInvitations: async (_, { dealId, emails }, { user, datasources, db }) => {
+    const deal = await datasources.deals.getDealById({
+      deal_id: ObjectId(dealId),
+    });
+
+    // if (!isFundAdmin(deal.organization, user)) throw Error(`This user cannot send invitations for this deal`)
+
+    const organization = await db
+      .collection("organizations")
+      .findOne({ _id: deal.organization });
+    const emailData = {
+      mainData: {
+        to: emails,
+        from: "support@allocations.com",
+        subject: `${deal.company_name}: Invitation to invest`,
+      },
+      template: dealInvitationTemplate,
+      templateData: {
+        fundManager: user.first_name
+          ? `${user.first_name} ${user.last_name}`
+          : user.email,
+        dealName: deal.company_name,
+        dealUrl: `https://dashboard.allocations.com/deals/${organization.slug}/${deal.slug}`,
+        signDate: `${moment(deal.dealParams.signDeadline).format(
+          "dddd"
+        )}, ${moment(deal.dealParams.signDeadline).format("MMM DD, YYYY")}`,
+        wireDate: `${moment(deal.dealParams.wireDeadline).format(
+          "dddd"
+        )}, ${moment(deal.dealParams.wireDeadline).format("MMM DD, YYYY")}`,
+      },
+    };
+
+    const { status } = await Mailer.sendEmail(emailData);
+    return { emailsSent: status === "sent" ? true : false };
   },
 };
 // deleteUserAsViewed: async (_, { user_id, deal_id }, ctx) => {

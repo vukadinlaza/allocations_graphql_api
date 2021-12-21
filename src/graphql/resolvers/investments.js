@@ -167,7 +167,6 @@ const Mutations = {
   },
 
   confirmInvestment: async (_, { payload }, { user, db, datasources }) => {
-    console.log("confirm investment");
     const deal = await datasources.deals.getDealById({
       deal_id: ObjectId(payload.dealId),
     });

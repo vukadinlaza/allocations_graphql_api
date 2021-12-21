@@ -242,6 +242,7 @@ type Mutation {
   createBuild(payload: Object): Deal
   deleteDealDocument(document_id: String!, phase_id: String!, task_id: String!): Object
   createNewDeal(payload: Object): CreateDealResponse
+  sendInvitations(dealId: String, emails: [String]): Object
 }
 
 type DataRequestToken {
