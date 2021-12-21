@@ -42,12 +42,16 @@ const User = {
     throw new AuthenticationError("REDIRECT");
   },
   investments: (user, _, { datasources }) => {
-    return datasources.investments.getAllInvestments({ user_id: user._id });
+    return datasources.investments.getAllInvestments({
+      user_id: ObjectId(user._id),
+    });
   },
   dealInvestments: (user, { deal_id }, { datasources }) => {
-    return datasources.investments
-      .getAllInvestments({ user_id: user._id, deal_id: ObjectId(deal_id) })
-      .toArray();
+    console.log("deal_id====>", deal_id);
+    return datasources.investments.getAllInvestments({
+      user_id: ObjectId(user._id),
+      deal_id: ObjectId(deal_id),
+    });
   },
   passport: (user) => {
     return user.passport
