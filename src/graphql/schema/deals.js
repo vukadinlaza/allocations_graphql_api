@@ -68,6 +68,8 @@ type Deal {
   target_raise_goal: Int
   accept_crypto: Boolean
   dealDetails: [DealDetail]
+  portfolio_company_securities: String
+  sectors: [String]
 }
 
 type DealParams {
