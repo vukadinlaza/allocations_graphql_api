@@ -68,6 +68,8 @@ type Deal {
   target_raise_goal: Int
   accept_crypto: Boolean
   dealDetails: [DealDetail]
+  portfolio_company_securities: String
+  sectors: [String]
 }
 
 type DealParams {
@@ -218,6 +220,7 @@ type Query {
   fundAdminHighlights: Object
   fundAdminTables(filter: Object, pagination: PaginationInput!): DealPagination
   getDealWithTasks(deal_id: String): Deal
+  getDealByIdWithTasks(deal_id: String): Deal
   getDealDocService (task_id: String): ServiceDocument
   getServiceAgreementLink(deal_id: String): DataRequest
   getInvestmentAgreementLink(deal_id: String): DataRequest

@@ -2,8 +2,8 @@ const {
   transformLegacyInvestment,
 } = require("../../src/graphql/datasources/investment-utils");
 
-describe("transorm legacy investment test", () => {
-  it("transforms a legacy investment", () => {
+describe("transorm legacy investment test", async () => {
+  it("transforms a legacy investment", async () => {
     const legacyInvestment = {
       _id: "61c0c7ad99264e7d50e9186f",
       status: "signed",
@@ -54,9 +54,9 @@ describe("transorm legacy investment test", () => {
         "Each equity owner of my entity is an accredited investor",
     };
 
-    const transformedInvestment = transformLegacyInvestment({
+    const transformedInvestment = await transformLegacyInvestment({
       _id: legacyInvestment._id,
-      legacyInvestment: legacyInvestment,
+      legacyInvestment,
     });
 
     expect(transformedInvestment).toStrictEqual(serviceInvestment);

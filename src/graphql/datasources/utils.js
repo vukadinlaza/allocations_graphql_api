@@ -21,6 +21,10 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
     slug: serviceDeal.slug,
     memo: serviceDeal.memo,
     dealCoverImageKey: coverImage?.link || "null",
+    target_raise_goal: serviceDeal.target_raise_goal,
+    accept_crypto: serviceDeal.accept_crypto,
+    portfolio_company_securities: serviceDeal.portfolio_company_securities,
+    sectors: serviceDeal.sectors,
     dealParams: {
       dealType: serviceDeal.offering_type,
       minimumInvestment: serviceDeal.minimum_investment,
@@ -33,7 +37,9 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
       estimatedSetupCostsDollar: "100000",
       managementFees: serviceDeal?.management_fee?.value,
       managementFeeType: serviceDeal.management_fee_frequency,
+      totalCarry: serviceDeal?.carry_fee?.value,
     },
+    phases: serviceDeal.phases,
   };
 };
 const transformLegacyDeal = ({ legacyDeal }) => {

@@ -207,6 +207,9 @@ const Queries = {
     const deal = await DealService.get(deal_id);
     return deal;
   },
+  getDealByIdWithTasks: async (_, { deal_id }, ctx) => {
+    return ctx.datasources.deals.getDealById({ deal_id: ObjectId(deal_id) });
+  },
   getDealDocService: async (_, { task_id }, ctx) => {
     isAdmin(ctx);
     const doc = await DealService.getDocumentByTaskId(task_id);
@@ -560,6 +563,7 @@ const Mutations = {
 
     const deal = {
       user_id: user._id,
+      user_email: user.email,
       name: payload.name
         ? payload.name
         : `${payload.manager_name}'s ${payload.portfolio_company_name} Deal`,
@@ -601,7 +605,7 @@ const Mutations = {
       ...payload,
     };
 
-    const res = await fetch(`${process.env.BUILD_API_URL}/create`, {
+    const res = await fetch(`${process.env.BUILD_API_URL}/api/v1/deals`, {
       method: "POST",
       headers: {
         "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,

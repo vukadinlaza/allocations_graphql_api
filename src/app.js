@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-
 require("dotenv").config();
 
+const getSettings = require("./settings");
 const compression = require("compression");
 const cors = require("cors");
 const express = require("express");
@@ -9,10 +9,8 @@ const helmet = require("helmet");
 const xmlparser = require("express-xml-bodyparser");
 const { authedServer } = require("./graphql/server");
 const { getDB, endDBConnection } = require("./mongo");
-const getSettings = require("./settings");
 const { graphqlUploadExpress } = require("graphql-upload");
 const http = require("http");
-
 const { NODE_ENV } = process.env;
 
 /**
@@ -36,9 +34,9 @@ function corsWhitelist(whitelist) {
 }
 
 async function run() {
+  const settings = await getSettings(NODE_ENV);
   const app = express();
   const port = process.env.PORT || 4000;
-  const settings = await getSettings(NODE_ENV);
   const httpServer = http.createServer(app);
 
   // only prevent CORS if in production
@@ -99,4 +97,4 @@ process.on("unhandledRejection", (error) => {
 });
 process.on("SIGTERM", endDBConnection);
 
-run().then();
+module.exports = run;

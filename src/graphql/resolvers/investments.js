@@ -43,7 +43,7 @@ const Investment = {
   },
   value: async (investment, _, { datasources }) => {
     const deal = await datasources.deals.getDealById({
-      deal_id: investment.deal_id,
+      deal_id: ObjectId(investment.deal_id),
     });
     const multiple = parseInt(deal?.dealParams?.dealMultiple || 1);
     const value = investment.amount * multiple;
@@ -91,7 +91,7 @@ const Mutations = {
     };
 
     try {
-      await datasources.investments.createInvestment(newInvestment);
+      await datasources.investments.createInvestment(newInvestment, db);
     } catch (error) {
       // throw more descriptive error
       throw new Error(`createInvestment failed: ${error.message}`);
@@ -101,9 +101,13 @@ const Mutations = {
   },
 
   /** updates investment and tracks the status change **/
-  updateInvestment: async (_, { investment: { _id, ...investment } }, ctx) => {
+  updateInvestment: async (
+    _,
+    { investment: { _id, ...investment } },
+    { db, datasources }
+  ) => {
     // we need to track status changes
-    const savedInvestment = await ctx.db.investments.findOne({
+    const savedInvestment = await db.investments.findOne({
       _id: ObjectId(_id),
     });
 
@@ -119,11 +123,8 @@ const Mutations = {
       ...investment,
     };
 
-    await ctx.datasources.investments.updateInvestmentById({
-      _id,
-      investment: updatedInvestment,
-    });
-    return ctx.db.investments.updateOne(
+    await datasources.investments.updateInvestmentById(_id, updatedInvestment);
+    return db.investments.updateOne(
       { _id: ObjectId(_id) },
       // { $set: { ...investment, updated_at: new Date() } },
       { $set: { ...investment, updated_at: Date.now() } },
@@ -218,11 +219,12 @@ const Mutations = {
           provider: deal.bankingProvider || null,
         };
       }
-      const data = await datasources.investments.createInvestment(
-        newInvestmentData
+      const { insertedId } = await datasources.investments.createInvestment(
+        newInvestmentData,
+        db
       );
 
-      investment = await db.investments.findOne({ _id: data.insertedId });
+      investment = await db.investments.findOne({ _id: ObjectId(insertedId) });
       // If bankingProvider AND referenceNumber create wire instructions PDF
       if (referenceNumber?.number && deal?.bankingProvider) {
         //create wire instructions, and return key for AWS integration
@@ -249,7 +251,10 @@ const Mutations = {
         ...payload,
       };
 
-      await datasources.investments.createInvestment(investment);
+      await datasources.investments.updateInvestmentById(
+        investment._id,
+        updatedSubmissionData
+      );
 
       await db.investments.updateOne(
         { _id: ObjectId(investment._id) },
@@ -258,6 +263,7 @@ const Mutations = {
     }
 
     const permanentDownloadUrl = await getTemplate({
+      datasources,
       db,
       deal,
       payload: { ...payload, investmentId: investment._id },
