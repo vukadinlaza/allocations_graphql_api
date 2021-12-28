@@ -30,9 +30,7 @@ const Schema = Users;
 const User = {
   /** invited deal show deal info based on ctx (if invited) **/
   invitedDeal: async (user, { deal_slug, fund_slug }, ctx) => {
-    console.log("fund_slug", fund_slug);
     const fund = await ctx.db.organizations.findOne({ slug: fund_slug });
-    console.log("fund", fund);
     const deal = await ctx.datasources.deals.getDealByOrgIdAndDealslug({
       deal_slug: deal_slug,
       fund_id: ObjectId(fund._id),
@@ -47,7 +45,6 @@ const User = {
     });
   },
   dealInvestments: (user, { deal_id }, { datasources }) => {
-    console.log("deal_id====>", deal_id);
     return datasources.investments.getAllInvestments({
       user_id: ObjectId(user._id),
       deal_id: ObjectId(deal_id),
@@ -438,7 +435,6 @@ const Mutations = {
       { _id: ObjectId(foundUser._id) },
       { $set: { profileImageKey: key } }
     );
-    console.log("KEY", key);
     return foundUser;
   },
 
@@ -459,7 +455,6 @@ const Mutations = {
       { _id: ObjectId(foundUser._id) },
       { $set: { profileImageKey: key } }
     );
-    console.log("KEY", key);
     return { ...foundUser, profileImageKey: key };
   },
 

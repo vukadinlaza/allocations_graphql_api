@@ -264,6 +264,7 @@ const getTemplateData = (input, user, templateId) => {
 };
 
 const updateInvestment = async (
+  datasources,
   db,
   investmentStatus,
   payload,
@@ -274,6 +275,11 @@ const updateInvestment = async (
     amount: parseFloat(payload.investmentAmount.replace(/,/g, "")),
     documents: newDocsArray,
   };
+  await datasources.investments.updateInvestmentById(payload.investmentId, {
+    status: updatedInvestmentData.status,
+    amount: updatedInvestmentData.amount,
+  });
+
   await db.investments.updateOne(
     { _id: ObjectId(payload.investmentId) },
     { $set: updatedInvestmentData }
@@ -457,6 +463,7 @@ const getInvestmentPreview = ({ input, user }) => {
 };
 
 const getTemplate = async ({
+  datasources,
   db,
   deal,
   payload,
@@ -489,7 +496,7 @@ const getTemplate = async ({
     timeStamp,
     templateId
   );
-  updateInvestment(db, investmentStatus, payload, newDocsArray);
+  updateInvestment(datasources, db, investmentStatus, payload, newDocsArray);
   addPacket(db, user, payload);
 
   return permanentDownloadUrl;

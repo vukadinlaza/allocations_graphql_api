@@ -28,8 +28,6 @@ const sendWireReminderEmail = async ({
     },
   };
 
-  console.log("email data", emailData);
-
   try {
     await Mailer.sendEmail(emailData);
     return { status: "Email Sent", sent_at: Date.now(), to: email };
