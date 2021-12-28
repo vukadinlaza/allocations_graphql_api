@@ -207,6 +207,9 @@ const Queries = {
     const deal = await DealService.get(deal_id);
     return deal;
   },
+  getDealByIdWithTasks: async (_, { deal_id }, ctx) => {
+    return ctx.datasources.deals.getDealById({ deal_id: ObjectId(deal_id) });
+  },
   getDealDocService: async (_, { task_id }, ctx) => {
     isAdmin(ctx);
     const doc = await DealService.getDocumentByTaskId(task_id);

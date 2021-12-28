@@ -39,6 +39,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
       managementFeeType: serviceDeal.management_fee_frequency,
       totalCarry: serviceDeal?.carry_fee?.value,
     },
+    phases: serviceDeal.phases,
   };
 };
 const transformLegacyDeal = ({ legacyDeal }) => {
