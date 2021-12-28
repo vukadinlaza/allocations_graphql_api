@@ -65,12 +65,12 @@
     pdfjs-dist "^2.9.359"
     serverless-offline "^8.1.0"
 
-"@allocations/investment-service@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@allocations/investment-service/-/investment-service-0.0.1.tgz#ef58ade66ef744c16b5aab8cb076a08b49268dd2"
-  integrity sha512-zQEzIgmXrAsyQYog1LKWrS81pVHId7z9bH0SW+P4SE2Nt7copstnOlPySRkJhf2oUu05ffjhvqjyBegTXs41WQ==
+"@allocations/investment-service@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@allocations/investment-service/-/investment-service-0.1.1.tgz#c556ebf35218e461a9a813f1ea8e6b0010ba0520"
+  integrity sha512-8/v34lw4pD+gMFl5grx0WtaUoFucHtG2+nzYwTbMh8GyvoW2Vr1XbkyKnJZIpItL/rs7Qfhw3e0FoT0gQjG6Uw==
   dependencies:
-    "@allocations/service-common" "*"
+    "@allocations/service-common" "^0.1.0"
     airtable "^0.11.1"
     mongodb "^4.1.1"
     node-fetch "^2.6.1"
@@ -97,6 +97,15 @@
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/@allocations/service-common/-/service-common-0.0.5.tgz#beda49234dcda28281fd7cb8585a61b41af9dab4"
   integrity sha512-63R0AsVuy9ERW22Sud22GvmSK6Q3AYTYe0QEUtd+QpDMt6hlb/N9Ppb0uhWCHfrx2rn8e68XM1XCBW9sG5yuTw==
+  dependencies:
+    jsonwebtoken "^8.5.1"
+    mongodb "^4.1.1"
+    mongoose "^6.0.6"
+
+"@allocations/service-common@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@allocations/service-common/-/service-common-0.1.0.tgz#86c37813e8a469e99ef7d4a3b8b452e330eed836"
+  integrity sha512-aewuCsVihpUt+sbhp2dboK6mbPGAHglkxq0QWeE72hY4Cy4ubqCxKE83Z+L3dx//YZPNoMj1BUrOdiQqvY0Fiw==
   dependencies:
     jsonwebtoken "^8.5.1"
     mongodb "^4.1.1"
