@@ -54,6 +54,7 @@ type Deal {
   phases: [Phase]
   metadata: Object
   manager_name: String
+  manager: Manager
   name: String
   wire_deadline: String
   phase: String
@@ -70,6 +71,10 @@ type Deal {
   dealDetails: [DealDetail]
   portfolio_company_securities: String
   sectors: [String]
+  closing_date: String
+  portfolio_company_name: String
+  master_series: String
+  hubspot_deal_id: Int
 }
 
 type DealParams {
@@ -167,6 +172,14 @@ type Task {
   metadata: Object
   created_at: String
   updated_at: String
+}
+
+type Manager {
+  type: String
+  name: String
+  email: String
+  title: String
+  entity_name: String
 }
 
 type DealDetail {
