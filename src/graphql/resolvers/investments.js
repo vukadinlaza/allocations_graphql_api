@@ -71,7 +71,7 @@ const Mutations = {
   createInvestment: async (
     _,
     { investment: { user_id, deal_id, ...investment } },
-    { db, datasources }
+    { db, datasources, user }
   ) => {
     let deal = await db.collection("deals").findOne({ _id: ObjectId(deal_id) });
 
@@ -91,7 +91,11 @@ const Mutations = {
     };
 
     try {
-      await datasources.investments.createInvestment(newInvestment, db);
+      await datasources.investments.createInvestment({
+        deal,
+        user,
+        investment: newInvestment,
+      });
     } catch (error) {
       // throw more descriptive error
       throw new Error(`createInvestment failed: ${error.message}`);
@@ -219,10 +223,11 @@ const Mutations = {
           provider: deal.bankingProvider || null,
         };
       }
-      const { insertedId } = await datasources.investments.createInvestment(
-        newInvestmentData,
-        db
-      );
+      const { insertedId } = await datasources.investments.createInvestment({
+        deal,
+        user,
+        investment: newInvestmentData,
+      });
 
       investment = await db.investments.findOne({ _id: ObjectId(insertedId) });
       // If bankingProvider AND referenceNumber create wire instructions PDF

@@ -22,29 +22,28 @@ class Investments extends MongoDataSource {
     this.#updateServiceInvestment(_id, legacyInvestment);
   }
 
-  async createInvestment(legacyInvestment, db) {
-    const user = await db.users.findOne({
-      _id: ObjectId(legacyInvestment.user_id),
+  async createInvestment({ deal, user, investment }) {
+    const createdLegacyInvestment = await this.collection.insertOne(investment);
+
+    await this.#createServiceInvestment({
+      investment_id: createdLegacyInvestment.insertedId,
+      deal,
+      user,
+      legacyInvestment: investment,
     });
-
-    const createdLegacyInvestment = await this.collection.insertOne(
-      legacyInvestment
-    );
-
-    await this.#createServiceInvestment(
-      createdLegacyInvestment.insertedId,
-      legacyInvestment,
-      user
-    );
 
     return createdLegacyInvestment;
   }
 
-  async #createServiceInvestment(_id, legacyInvestment, user) {
+  async #createServiceInvestment({
+    investment_id,
+    deal,
+    user,
+    legacyInvestment,
+  }) {
     try {
       const serviceInvestment = {
-        _id,
-        deal_id: legacyInvestment.deal_id,
+        _id: investment_id,
         user_id: user._id,
         phase: legacyInvestment.status,
         investor_email: user.email,
@@ -64,6 +63,12 @@ class Investments extends MongoDataSource {
         investor_state: legacyInvestment.submissionData?.state,
         accredited_investor_type:
           legacyInvestment.submissionData?.accredited_investor_status,
+        carry_fee_percent: parseInt(deal.dealParams.totalCarry) / 100 || 0,
+        management_fee_percent:
+          parseInt(deal.dealParams.managementFees) / 100 || 0,
+        metadata: {
+          deal_id: legacyInvestment.deal_id,
+        },
       };
 
       const res = await fetch(
