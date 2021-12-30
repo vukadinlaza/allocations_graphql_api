@@ -1,5 +1,4 @@
 // Find your API tokens here: https://app.docspring.com/api_tokens
-require("dotenv").config();
 const moment = require("moment");
 const DocSpring = require("docspring");
 const { capitalize, omit } = require("lodash");

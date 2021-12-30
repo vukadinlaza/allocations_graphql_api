@@ -1,4 +1,3 @@
-require("dotenv").config();
 const { SecretsManager } = require("aws-sdk");
 
 const secretsManager = new SecretsManager({ region: "us-east-1" });

@@ -6,7 +6,7 @@
   "scripts": {
     "prepare": "husky install",
     "start": "node src/server.js",
-    "start:watch": "nodemon src/server.js",
+    "start:watch": "nodemon -r dotenv/config src/server.js",
     "deploy-prod": "yarn run test && git push heroku-prod",
     "deploy-staging": "yarn run test && git push heroku-staging",
     "test": "jest --forceExit",
