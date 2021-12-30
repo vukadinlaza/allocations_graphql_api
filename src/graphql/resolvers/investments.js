@@ -251,11 +251,6 @@ const Mutations = {
         ...payload,
       };
 
-      await datasources.investments.updateInvestmentById(
-        investment._id,
-        updatedSubmissionData
-      );
-
       await db.investments.updateOne(
         { _id: ObjectId(investment._id) },
         { $set: { submissionData: updatedSubmissionData } }

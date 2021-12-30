@@ -274,10 +274,6 @@ const updateInvestment = async (
     amount: parseFloat(payload.investmentAmount.replace(/,/g, "")),
     documents: newDocsArray,
   };
-  await datasources.investments.updateInvestmentById(payload.investmentId, {
-    status: updatedInvestmentData.status,
-    amount: updatedInvestmentData.amount,
-  });
 
   await db.investments.updateOne(
     { _id: ObjectId(payload.investmentId) },
