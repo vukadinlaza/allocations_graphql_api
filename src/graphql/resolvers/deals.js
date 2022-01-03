@@ -668,14 +668,11 @@ const Mutations = {
     const emailData = {
       mainData: {
         to: emails,
-        from: "support@allocations.com",
+        from: user.email,
         subject: `${deal.company_name}: Invitation to invest`,
       },
       template: dealInvitationTemplate,
       templateData: {
-        fundManager: user.first_name
-          ? `${user.first_name} ${user.last_name}`
-          : user.email,
         dealName: deal.company_name,
         dealUrl: `https://dashboard.allocations.com/deals/${organization.slug}/${deal.slug}`,
         signDate: `${moment(deal.dealParams.signDeadline).format(
@@ -684,6 +681,8 @@ const Mutations = {
         wireDate: `${moment(deal.dealParams.wireDeadline).format(
           "dddd"
         )}, ${moment(deal.dealParams.wireDeadline).format("MMM DD, YYYY")}`,
+        organizationName: organization.name,
+        dealType: deal.type === "spv" ? "SPV" : "Fund",
       },
     };
 
