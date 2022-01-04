@@ -576,7 +576,10 @@ const Mutations = {
         type: payload.carry_fee.type,
         value: payload.carry_fee.value,
         string_value: `${payload.carry_fee.value} ${payload.carry_fee.type}`,
-        // custom: ,
+      },
+      gp_entity: {
+        gp_entity_name: payload.gp_entity_name,
+        need_gp_entity: payload.need_gp_entity,
       },
       ica_exemption: {
         investor_type: "Accredited investors",
@@ -596,7 +599,6 @@ const Mutations = {
         type: payload.management_fee.type,
         value: payload.management_fee.value,
         string_value: `${payload.management_fee.value} ${payload.management_fee.type}`,
-        // custom: ,
       },
       setup_cost: 20000,
       angels_deal: false,
