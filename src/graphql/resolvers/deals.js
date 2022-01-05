@@ -16,7 +16,7 @@ const Deals = require("../schema/deals");
 const Mailer = require("../../mailers/mailer");
 const txConfirmationTemplate = require("../../mailers/templates/tx-confirmation-template");
 const dealInvitationTemplate = require("../../mailers/templates/deal-invitation-template");
-const { nWithCommas } = require("../../utils/common.js");
+const { nWithCommas, throwApolloError } = require("../../utils/common.js");
 const { customDealPagination } = require("../pagHelpers");
 const { getHighlights } = require("../mongoHelpers.js");
 const { DealService } = require("@allocations/deal-service");
@@ -553,87 +553,96 @@ const Mutations = {
     return dealResponse;
   },
   createNewDeal: async (_, { payload }, { user }) => {
-    const internationalInvestors = ({ status, countries }) => {
-      if (status === "true") {
-        return countries;
-      } else {
-        return ["United States"];
-      }
-    };
+    try {
+      const internationalInvestors = ({ status, countries }) => {
+        if (status === "true") {
+          return countries;
+        } else {
+          return ["United States"];
+        }
+      };
 
-    const deal = {
-      user_id: user._id,
-      user_email: user.email,
-      name: payload.name
-        ? payload.name
-        : `${payload.manager_name}'s ${payload.portfolio_company_name} Deal`,
-      slug: kebabCase(
-        payload.portfolio_company_name
-          ? `${payload.portfolio_company_name}-${Date.now()}`
-          : `${payload.manager_name}-${Date.now()}`
-      ),
-      carry_fee: {
-        type: payload.carry_fee.type,
-        value: payload.carry_fee.value,
-        string_value: `${payload.carry_fee.value} ${payload.carry_fee.type}`,
-      },
-      gp_entity: {
-        gp_entity_name: payload.gp_entity_name,
-        need_gp_entity: payload.need_gp_entity,
-      },
-      ica_exemption: {
-        investor_type: "Accredited investors",
-        exemption_type: "301",
-      },
-      investor_countries: internationalInvestors(
-        payload.international_investors
-      ),
-      manager: {
-        name: payload.manager_name,
-        type: "individual",
-        email: user.email,
-        title: "",
-        entity_name: "",
-      },
-      management_fee: {
-        type: payload.management_fee.type,
-        value: payload.management_fee.value,
-        string_value: `${payload.management_fee.value} ${payload.management_fee.type}`,
-      },
-      setup_cost: 20000,
-      angels_deal: false,
-      deal_multiple: 0,
-      accept_crypto: payload.accept_crypto,
-      ...payload,
-    };
-
-    const res = await fetch(`${process.env.BUILD_API_URL}/api/v1/deals`, {
-      method: "POST",
-      headers: {
-        "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        deal,
-        organization: {
-          ...payload.organization,
-          master_series:
-            payload.organization?.masterEntity?.name || "Atomizer LLC",
+      const deal = {
+        user_id: user._id,
+        user_email: user.email,
+        name: payload.name
+          ? payload.name
+          : `${payload.manager_name}'s ${payload.portfolio_company_name} Deal`,
+        slug: kebabCase(
+          payload.portfolio_company_name
+            ? `${payload.portfolio_company_name}-${Date.now()}`
+            : `${payload.manager_name}-${Date.now()}`
+        ),
+        carry_fee: {
+          type: payload.carry_fee.type,
+          value: payload.carry_fee.value,
+          string_value: `${payload.carry_fee.value} ${payload.carry_fee.type}`,
         },
-        new_hvp: payload.isNewHVP,
-      }),
-    });
+        gp_entity: {
+          gp_entity_name: payload.gp_entity_name,
+          need_gp_entity: payload.need_gp_entity,
+        },
+        ica_exemption: {
+          investor_type: "Accredited investors",
+          exemption_type: "301",
+        },
+        investor_countries: internationalInvestors(
+          payload.international_investors
+        ),
+        manager: {
+          name: payload.manager_name,
+          type: "individual",
+          email: user.email,
+          title: "",
+          entity_name: "",
+        },
+        management_fee: {
+          type: payload.management_fee.type,
+          value: payload.management_fee.value,
+          string_value: `${payload.management_fee.value} ${payload.management_fee.type}`,
+        },
+        setup_cost: 20000,
+        angels_deal: false,
+        deal_multiple: 0,
+        accept_crypto: payload.accept_crypto,
+        ...payload,
+      };
 
-    const dealResponse = await res.json();
+      const res = await fetch(`${process.env.BUILD_API_URL}/api/v1/deals`, {
+        method: "POST",
+        headers: {
+          "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          deal,
+          organization: {
+            ...payload.organization,
+            master_series:
+              payload.organization?.masterEntity?.name || "Atomizer LLC",
+          },
+          new_hvp: payload.isNewHVP,
+        }),
+      });
 
-    if (dealResponse.deal.accept_crypto) {
-      const response = await CryptoService.createWallet(dealResponse.deal._id);
-      if (!response.acknowledged || response.error) {
-        await alertCryptoWalletError(deal.name, dealResponse.deal._id);
+      const [ok, dealResponse] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw dealResponse;
       }
-    }
 
-    return dealResponse;
+      if (dealResponse.deal.accept_crypto) {
+        const response = await CryptoService.createWallet(
+          dealResponse.deal._id
+        );
+        if (!response.acknowledged || response.error) {
+          await alertCryptoWalletError(deal.name, dealResponse.deal._id);
+        }
+      }
+
+      return dealResponse;
+    } catch (err) {
+      throwApolloError(err, "createNewDeal");
+    }
   },
 
   deleteDealDocument: async (

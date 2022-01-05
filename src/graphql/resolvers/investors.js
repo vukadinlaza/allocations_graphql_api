@@ -24,6 +24,7 @@ const {
 } = require("../pagHelpers");
 const Users = require("../schema/users");
 const fetch = require("node-fetch");
+const { throwApolloError } = require("../../utils/common");
 
 const Schema = Users;
 
@@ -323,67 +324,71 @@ const Mutations = {
     { input: { _id, passport, accredidation_doc, kycDoc, ...user } },
     ctx
   ) => {
-    isAdminOrSameUser({ _id }, ctx);
+    try {
+      isAdminOrSameUser({ _id }, ctx);
 
-    // upload passport if passed
-    if (passport && !passport.link) {
-      const file = await passport;
-      const s3Path = await Uploader.putInvestorDoc(_id, file, "passport");
-      return ctx.db.users.updateOne(
-        { _id: ObjectId(_id) },
-        { $set: { ...user, passport: s3Path } }
-      );
+      // upload passport if passed
+      if (passport && !passport.link) {
+        const file = await passport;
+        const s3Path = await Uploader.putInvestorDoc(_id, file, "passport");
+        return ctx.db.users.updateOne(
+          { _id: ObjectId(_id) },
+          { $set: { ...user, passport: s3Path } }
+        );
+      }
+
+      if (kycDoc) {
+        return ctx.db.users.updateOne(
+          { _id: ObjectId(_id) },
+          { $addToSet: { documents: kycDoc } }
+        );
+      }
+
+      // upload accredidation_doc if passed
+      if (accredidation_doc && !accredidation_doc.link) {
+        const file = await accredidation_doc;
+        const s3Path = await Uploader.putInvestorDoc(
+          _id,
+          file,
+          "accredidation_doc"
+        );
+
+        return ctx.db.users.updateOne(
+          { _id: ObjectId(_id) },
+          { $set: { ...user, accredidation_doc: s3Path } }
+        );
+      }
+      const options = [
+        "investor_type",
+        "country",
+        "state",
+        "first_name",
+        "last_name",
+        "entity_name",
+        "signer_full_name",
+        "accredited_investor_status",
+        "email",
+        "accountId",
+        "accredidation_status",
+        "display_username",
+        "linkedinUrl",
+        "username",
+        "city",
+        "profileBio",
+      ];
+      const data = pick({ ...user }, options);
+      if (!isEmpty(data)) {
+        await ctx.db.entities.updateOne(
+          { user: ObjectId(_id), isPrimaryEntity: true },
+          { $set: data }
+        );
+      }
+      await ctx.db.users.updateOne({ _id: ObjectId(_id) }, { $set: user });
+
+      return await ctx.db.users.findOne({ _id: ObjectId(_id) });
+    } catch (err) {
+      throwApolloError(err, "updateUser");
     }
-
-    if (kycDoc) {
-      return ctx.db.users.updateOne(
-        { _id: ObjectId(_id) },
-        { $addToSet: { documents: kycDoc } }
-      );
-    }
-
-    // upload accredidation_doc if passed
-    if (accredidation_doc && !accredidation_doc.link) {
-      const file = await accredidation_doc;
-      const s3Path = await Uploader.putInvestorDoc(
-        _id,
-        file,
-        "accredidation_doc"
-      );
-
-      return ctx.db.users.updateOne(
-        { _id: ObjectId(_id) },
-        { $set: { ...user, accredidation_doc: s3Path } }
-      );
-    }
-    const options = [
-      "investor_type",
-      "country",
-      "state",
-      "first_name",
-      "last_name",
-      "entity_name",
-      "signer_full_name",
-      "accredited_investor_status",
-      "email",
-      "accountId",
-      "accredidation_status",
-      "display_username",
-      "linkedinUrl",
-      "username",
-      "city",
-      "profileBio",
-    ];
-    const data = pick({ ...user }, options);
-    if (!isEmpty(data)) {
-      await ctx.db.entities.updateOne(
-        { user: ObjectId(_id), isPrimaryEntity: true },
-        { $set: data }
-      );
-    }
-    await ctx.db.users.updateOne({ _id: ObjectId(_id) }, { $set: user });
-
-    return await ctx.db.users.findOne({ _id: ObjectId(_id) });
   },
   /** deletes investor -> TODO delete their investment as well **/
   deleteInvestor: async (_, { _id }, ctx) => {
@@ -397,26 +402,30 @@ const Mutations = {
     }
   },
   submitTaxDocument: async (_, { payload }, { db, user }) => {
-    if (payload.isDemo) {
+    try {
+      if (payload.isDemo) {
+        return db.users.findOne({ _id: ObjectId(user._id) });
+      }
+
+      const { kycTemplateId, kycTemplateName } = payload;
+      const isAllocationsUser = user.email.includes("@allocations.com;");
+
+      if (process.env.NODE_ENV === "production" && !isAllocationsUser) {
+        // TODO: move to zaps
+        fetch("https://hooks.zapier.com/hooks/catch/7904699/byt3rnq/", {
+          method: "POST",
+          body: JSON.stringify({ ...payload, kycTemplateId, kycTemplateName }),
+        });
+      }
+
+      const taxDocument = await createTaxDocument({ payload, user, db });
+      if (!taxDocument)
+        throw new UserInputError("There was an error with Docspring");
+
       return db.users.findOne({ _id: ObjectId(user._id) });
+    } catch (err) {
+      throwApolloError(err, "submitTaxDocument");
     }
-
-    const { kycTemplateId, kycTemplateName } = payload;
-    const isAllocationsUser = user.email.includes("@allocations.com;");
-
-    if (process.env.NODE_ENV === "production" && !isAllocationsUser) {
-      // TODO: move to zaps
-      fetch("https://hooks.zapier.com/hooks/catch/7904699/byt3rnq/", {
-        method: "POST",
-        body: JSON.stringify({ ...payload, kycTemplateId, kycTemplateName }),
-      });
-    }
-
-    const taxDocument = await createTaxDocument({ payload, user, db });
-    if (!taxDocument)
-      throw new UserInputError("There was an error with Docspring");
-
-    return db.users.findOne({ _id: ObjectId(user._id) });
   },
 
   addProfileImage: async (_, { email, image }, { db }) => {
@@ -439,23 +448,27 @@ const Mutations = {
   },
 
   updateProfileImage: async (_, { email, image }, { db }) => {
-    const foundUser = await db.users.findOne({ email });
-    if (!foundUser || foundUser === null) {
-      throw new Error("no user found!");
-    }
+    try {
+      const foundUser = await db.users.findOne({ email });
+      if (!foundUser || foundUser === null) {
+        throw new Error("no user found!");
+      }
 
-    const imgKey = `${Date.now()}-profileImage`;
-    const file = await image;
-    const key = await Uploader.putInvestorProfileImage(
-      foundUser._id,
-      file,
-      imgKey
-    );
-    await db.users.updateOne(
-      { _id: ObjectId(foundUser._id) },
-      { $set: { profileImageKey: key } }
-    );
-    return { ...foundUser, profileImageKey: key };
+      const imgKey = `${Date.now()}-profileImage`;
+      const file = await image;
+      const key = await Uploader.putInvestorProfileImage(
+        foundUser._id,
+        file,
+        imgKey
+      );
+      await db.users.updateOne(
+        { _id: ObjectId(foundUser._id) },
+        { $set: { profileImageKey: key } }
+      );
+      return { ...foundUser, profileImageKey: key };
+    } catch (err) {
+      throwApolloError(err, "updateProfileImage");
+    }
   },
 
   addSectors: async (_, { email, sector }, { db }) => {
@@ -511,16 +524,20 @@ const Mutations = {
   },
 
   deleteProfileImage: async (_, { email, profileImageKey }, { db }) => {
-    const foundUser = await db.users.findOne({ email });
-    if (!foundUser || foundUser === null) {
-      throw new Error("no user found!");
-    }
-    await db.users.updateOne(
-      { _id: ObjectId(foundUser._id) },
-      { $unset: { profileImageKey: profileImageKey } }
-    );
+    try {
+      const foundUser = await db.users.findOne({ email });
+      if (!foundUser || foundUser === null) {
+        throw new Error("no user found!");
+      }
+      await db.users.updateOne(
+        { _id: ObjectId(foundUser._id) },
+        { $unset: { profileImageKey: profileImageKey } }
+      );
 
-    return db.users.findOne({ email });
+      return db.users.findOne({ email });
+    } catch (err) {
+      throwApolloError(err, "deleteProfileImage");
+    }
   },
 
   displayUsernameStatus: async (_, { email, display_username }, { db }) => {

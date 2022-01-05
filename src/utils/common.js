@@ -1,3 +1,8 @@
+const { createLogger } = require("@allocations/logger");
+const { ApolloError } = require("apollo-server-errors");
+
+const applogger = createLogger("graphql-api");
+
 function nWithCommas(x) {
   if (!x) return 0;
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -20,4 +25,15 @@ const formatCompanyName = (companyName) => {
   return companyName;
 };
 
-module.exports = { nWithCommas, amountFormat, formatCompanyName };
+function throwApolloError(err, resolverName) {
+  const errorLogger = applogger.extend(resolverName);
+  errorLogger.error(err); //logs error to console
+  throw new ApolloError(err.error || err.message, err.status, err);
+}
+
+module.exports = {
+  nWithCommas,
+  amountFormat,
+  formatCompanyName,
+  throwApolloError,
+};

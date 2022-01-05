@@ -48,6 +48,9 @@ function authedServer(db) {
         },
       },
     ],
+    formatError: (err) => {
+      return { message: err.message, status: err.extensions.status };
+    },
   });
 }
 module.exports = { authedServer, pubsub };
