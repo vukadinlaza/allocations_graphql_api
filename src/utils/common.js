@@ -28,6 +28,10 @@ const formatCompanyName = (companyName) => {
 function throwApolloError(err, resolverName) {
   const errorLogger = applogger.extend(resolverName);
   errorLogger.error(err); //logs error to console
+
+  if (err.error?.includes("{") || err.message?.includes("{")) {
+    throw new ApolloError("External error");
+  }
   throw new ApolloError(err.error || err.message, err.status, err);
 }
 
