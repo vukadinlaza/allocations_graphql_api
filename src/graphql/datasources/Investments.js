@@ -59,7 +59,7 @@ class Investments extends MongoDataSource {
           legacyInvestment.submissionData?.investor_type
         ),
         investor_name:
-          legacyInvestment.submissionData?.fullName || user.signer_full_name,
+          legacyInvestment.submissionData?.fullName || legacyInvestment.submissionData?.legalName || user.signer_full_name,
         investor_entity_name: legacyInvestment.submissionData?.legalName,
         investor_country: legacyInvestment.submissionData?.country,
         investor_state: legacyInvestment.submissionData?.state,
