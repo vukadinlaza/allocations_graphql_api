@@ -1,6 +1,6 @@
 const { ApolloServer, PubSub } = require("apollo-server-express");
 const { authenticate } = require("../auth");
-const logger = require("../utils/logger");
+const { logger } = require("../utils/logger");
 const { typeDefs, resolvers } = require("../graphql/resolvers");
 const Deals = require("./datasources/Deals");
 const Investments = require("./datasources/Investments");

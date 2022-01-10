@@ -1,6 +1,6 @@
 const { mailer } = require("./mailer");
 const request = require("request");
-const logger = require("../utils/logger");
+const { logger } = require("../utils/logger");
 const spvDocTemplate = require("./spv-doc-template");
 
 const sendSPVDoc = async (spvDocData) => {

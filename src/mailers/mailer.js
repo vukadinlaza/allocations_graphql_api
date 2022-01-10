@@ -1,5 +1,5 @@
 const mailer = require("@sendgrid/mail");
-const logger = require("../utils/logger");
+const { logger } = require("../utils/logger");
 
 // configure with API key
 mailer.setApiKey(process.env.SENDGRID_API_KEY);

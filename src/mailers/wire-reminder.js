@@ -1,5 +1,5 @@
 const Mailer = require("./mailer");
-const logger = require("../utils/logger");
+const { logger } = require("../utils/logger");
 const wireReminderTemplate = require("./templates/wire-reminder-template");
 
 const sendWireReminderEmail = async ({
