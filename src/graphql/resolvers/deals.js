@@ -215,8 +215,8 @@ const Queries = {
     const doc = await DealService.getDocumentByTaskId(task_id);
     return doc;
   },
-  getServiceAgreementLink: async (_, { deal_id }) => {
-    return DealService.getServiceAgreementLink(deal_id);
+  getServicesAgreementLink: async (_, { deal_id }) => {
+    return DealService.getServicesAgreementLink(deal_id);
   },
   getInvestmentAgreementLink: async (_, { deal_id }) => {
     return InvestmentAgreementService.getFmSignatureLink(deal_id);
