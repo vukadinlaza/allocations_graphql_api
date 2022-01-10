@@ -274,10 +274,10 @@ const Mutations = {
           ...payload,
         };
 
-        await db.investments.updateOne(
-          { _id: ObjectId(investment._id) },
-          { $set: { submissionData: updatedSubmissionData } }
-        );
+        await datasources.investments.resignInvestment({
+          investment_id: payload.investmentId,
+          submissionData: updatedSubmissionData,
+        });
       }
 
       const permanentDownloadUrl = await getTemplate({

@@ -35,6 +35,15 @@ class Investments extends MongoDataSource {
     return createdLegacyInvestment;
   }
 
+  async resignInvestment({ investment_id, submissionData }) {
+    await this.collection.updateOne(
+      { _id: ObjectId(investment_id) },
+      { $set: { submissionData } }
+    );
+
+    this.#resignServiceInvestment({ investment_id, submissionData });
+  }
+
   async #createServiceInvestment({
     investment_id,
     deal,
@@ -59,7 +68,9 @@ class Investments extends MongoDataSource {
           legacyInvestment.submissionData?.investor_type
         ),
         investor_name:
-          legacyInvestment.submissionData?.fullName || legacyInvestment.submissionData?.legalName || user.signer_full_name,
+          legacyInvestment.submissionData?.fullName ||
+          legacyInvestment.submissionData?.legalName ||
+          user.signer_full_name,
         investor_entity_name: legacyInvestment.submissionData?.legalName,
         investor_country: legacyInvestment.submissionData?.country,
         investor_state: legacyInvestment.submissionData?.state,
@@ -86,6 +97,45 @@ class Investments extends MongoDataSource {
       );
 
       if (!res.ok) throw new Error("Unable to create service investment");
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async #resignServiceInvestment({ investment_id, submissionData }) {
+    try {
+      const amount = parseInt(
+        submissionData.investmentAmount?.replace(/,/g, "")
+      );
+      const serviceInvestment = {
+        _id: investment_id,
+        total_committed_amount: amount,
+        transactions: [
+          {
+            committed_amount: amount,
+          },
+        ],
+        investor_type: capitalize(submissionData.investor_type),
+        investor_name: submissionData.fullName || submissionData.legalName,
+        investor_entity_name: submissionData.legalName,
+        investor_country: submissionData.country,
+        investor_state: submissionData.state,
+        accredited_investor_type: submissionData.accredited_investor_status,
+      };
+
+      const res = await fetch(
+        `${process.env.INVEST_API_URL}/api/v1/investments/${investment_id}/resign`,
+        {
+          method: "POST",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(serviceInvestment),
+        }
+      );
+
+      if (!res.ok) throw new Error("Unable to resign service investment");
     } catch (e) {
       console.error(e);
     }
