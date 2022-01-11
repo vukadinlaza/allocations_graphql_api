@@ -435,10 +435,13 @@ module.exports = Router()
       emailLink = body.emailLink;
       referenceNumber = getReferenceNumber(email);
       amount = getWireAmount(email);
-
+      console.log("REF NUM", referenceNumber);
+      console.log("TYPE OF REF NUM", typeof referenceNumber);
       investment = await db.investments.findOne({
         "wire_instructions.reference_number": referenceNumber,
       });
+
+      console.log("INVESTMENT", investment);
       if (!investment) throw new Error("No Investment Found.");
       const {
         _id: investmentId,
