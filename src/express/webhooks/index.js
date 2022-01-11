@@ -442,7 +442,11 @@ module.exports = Router()
       });
 
       console.log("INVESTMENT", investment);
-      if (!investment) throw new Error("No Investment Found.");
+      if (!investment) {
+        console.log("INVESTMENT FROM INSIDE IF", investment);
+        throw new Error("No Investment Found.");
+      }
+
       const {
         _id: investmentId,
         deal_id,
@@ -451,11 +455,13 @@ module.exports = Router()
       } = investment;
 
       deal = await DealService.getDealById({ deal_id });
+
+      console.log("AFTER DEAL");
       if (!deal) throw new Error("No Deal Found");
       if (!deal.virtual_account_number)
         throw new Error("No Virtual Account Number");
       const { virtual_account_number } = deal;
-
+      console.log("AFTER DEAL AND VA ERRORS");
       await newDirectionTransactionsAddRow({
         virtualAccountNumber: virtual_account_number,
         amount,
