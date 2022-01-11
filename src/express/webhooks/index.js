@@ -446,6 +446,7 @@ module.exports = Router()
         console.log("INVESTMENT FROM INSIDE IF", investment);
         throw new Error("No Investment Found.");
       }
+
       const {
         _id: investmentId,
         deal_id,
