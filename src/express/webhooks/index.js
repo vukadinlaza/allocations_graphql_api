@@ -435,15 +435,12 @@ module.exports = Router()
       emailLink = body.emailLink;
       referenceNumber = getReferenceNumber(email);
       amount = getWireAmount(email);
-      console.log("REF NUM", referenceNumber);
-      console.log("TYPE OF REF NUM", typeof referenceNumber);
       investment = await db.investments.findOne({
         "wire_instructions.reference_number": referenceNumber,
       });
 
       console.log("INVESTMENT", investment);
       if (!investment) {
-        console.log("INVESTMENT FROM INSIDE IF", investment);
         throw new Error("No Investment Found.");
       }
 
@@ -456,12 +453,13 @@ module.exports = Router()
 
       deal = await DealService.getDealById({ deal_id });
 
-      console.log("AFTER DEAL");
       if (!deal) throw new Error("No Deal Found");
       if (!deal.virtual_account_number)
         throw new Error("No Virtual Account Number");
       const { virtual_account_number } = deal;
-      console.log("AFTER DEAL AND VA ERRORS");
+
+      console.log("AMOUNT", amount);
+
       await newDirectionTransactionsAddRow({
         virtualAccountNumber: virtual_account_number,
         amount,
