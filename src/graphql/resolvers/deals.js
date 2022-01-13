@@ -644,6 +644,29 @@ const Mutations = {
       throwApolloError(err, "createNewDeal");
     }
   },
+  updateBuildDeal: async (_, { payload }) => {
+    try {
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/user-acknowledged-complete/${payload.deal_id}`,
+        {
+          method: "POST",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const [ok, dealResponse] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw dealResponse;
+      }
+
+      return dealResponse;
+    } catch (err) {
+      throwApolloError(err, "updateBuildDeal");
+    }
+  },
 
   deleteDealDocument: async (
     _,
