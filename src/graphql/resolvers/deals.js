@@ -218,6 +218,26 @@ const Queries = {
   getServicesAgreementLink: async (_, { deal_id }) => {
     return DealService.getServicesAgreementLink(deal_id);
   },
+  getFmSignatureLink: async (_, { deal_id }) => {
+    try {
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/investment-agreement/${deal_id}`,
+        {
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const [ok, dealResponse] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw dealResponse;
+      }
+      return dealResponse;
+    } catch (e) {
+      throwApolloError(e, "getServiceAgreementLink");
+    }
+  },
   getInvestmentAgreementLink: async (_, { deal_id }) => {
     return InvestmentAgreementService.getFmSignatureLink(deal_id);
   },

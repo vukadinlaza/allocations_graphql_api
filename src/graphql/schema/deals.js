@@ -237,6 +237,7 @@ type Query {
   getDealDocService (task_id: String): ServiceDocument
   getServicesAgreementLink(deal_id: String): DataRequest
   getInvestmentAgreementLink(deal_id: String): DataRequest
+  getFmSignatureLink(deal_id: String): DataRequest
   getCryptoWalletAddress(deal_id: String): String
 }
 
