@@ -475,29 +475,57 @@ const Mutations = {
     return ctx.db.deals.findOne({ _id: ObjectId(params.deal_id) });
   },
   addDealDocService: async (_, { deal_id, task_id, doc, phase }, ctx) => {
-    isAdmin(ctx);
-    const { user } = ctx;
-    const document = await doc;
-    function stream2buffer(stream) {
-      return new Promise((resolve, reject) => {
-        const _buf = [];
-        stream.on("data", (chunk) => _buf.push(chunk));
-        stream.on("end", () => resolve(Buffer.concat(_buf)));
-        stream.on("error", (err) => reject(err));
+    try {
+      isAdmin(ctx);
+      const { user } = ctx;
+
+      const document = await doc;
+      function stream2buffer(stream) {
+        return new Promise((resolve, reject) => {
+          const _buf = [];
+          stream.on("data", (chunk) => _buf.push(chunk));
+          stream.on("end", () => resolve(Buffer.concat(_buf)));
+          stream.on("error", (err) => reject(err));
+        });
+      }
+      const buffer = await stream2buffer(document.createReadStream());
+
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/upload-document`,
+        {
+          method: "POST",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            deal_id,
+            task_id,
+            user_id: user._id,
+            phase,
+            content_type: document.mimetype,
+            title: document.filename,
+          }),
+        }
+      );
+
+      const [ok, response] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw response;
+      }
+
+      await fetch(response.link, {
+        method: "PUT",
+        headers: {
+          "Content-Length": buffer.length.toString(),
+        },
+        body: buffer,
       });
+
+      return { success: true, _id: response._id };
+    } catch (err) {
+      throwApolloError(err, "addDealDocService");
     }
-    const buffer = await stream2buffer(document.createReadStream());
-
-    const { _id: documentId } = await DealService.uploadDocument(buffer, {
-      deal_id,
-      task_id,
-      user_id: user._id,
-      phase,
-      content_type: document.mimetype,
-      title: document.filename,
-    });
-
-    return { success: true, _id: documentId };
   },
 
   addDealLogo: async (_, params, ctx) => {
@@ -693,20 +721,27 @@ const Mutations = {
     { document_id, phase_id, task_id },
     { user }
   ) => {
-    const res = await DealService.deleteDocument({
-      id: document_id,
-      phase: phase_id,
-      user_id: user._id,
-      task_id: task_id,
-    });
+    try {
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/delete-document/${document_id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ phase_id, task_id }),
+        }
+      );
 
-    if (!res.acknowledged) {
-      throw new Error({
-        status: res.status,
-        message: res.error || res.message,
-      });
+      const [ok, response] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw response;
+      }
+      return response;
+    } catch (err) {
+      throwApolloError(err, "deleteDealDocument");
     }
-    return res;
   },
 
   sendInvitations: async (_, { dealId, emails }, { user, datasources, db }) => {
