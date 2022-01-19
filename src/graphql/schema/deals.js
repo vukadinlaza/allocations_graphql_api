@@ -261,6 +261,7 @@ type Mutation {
   createNewDeal(payload: Object): CreateDealResponse
   updateBuildDeal(payload: Object): Object
   sendInvitations(dealId: String, emails: [String]): Object
+  updateInviteInvestorsTask(dealId: String): Object
 }
 
 type DataRequestToken {

@@ -778,6 +778,30 @@ const Mutations = {
     const { status } = await Mailer.sendEmail(emailData);
     return { emailsSent: status === "sent" ? true : false };
   },
+
+  updateInviteInvestorsTask: async (_, { dealId }) => {
+    try {
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/invite-investors-task-complete/${dealId}`,
+        {
+          method: "POST",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const [ok, dealResponse] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw dealResponse;
+      }
+
+      return dealResponse;
+    } catch (err) {
+      throwApolloError(err, "updateInviteInvestorsTask");
+    }
+  },
 };
 // deleteUserAsViewed: async (_, { user_id, deal_id }, ctx) => {
 //   return ctx.db.deals.updateOne(
