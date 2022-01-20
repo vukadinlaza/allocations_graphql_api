@@ -42,6 +42,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
     pledge_link: "",
     portfolio_company_name: serviceDeal.portfolio_company_name,
     portfolio_company_securities: serviceDeal.portfolio_company_securities,
+    public_pitch_deck: serviceDeal.public_pitch_deck,
     status: serviceDeal.phase || "onboarding",
     sectors: serviceDeal.sectors,
     slug: serviceDeal.slug,

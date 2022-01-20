@@ -70,6 +70,7 @@ type Deal {
   accept_crypto: Boolean
   dealDetails: [DealDetail]
   portfolio_company_securities: String
+  public_pitch_deck: Boolean
   sectors: [String]
   closing_date: String
   portfolio_company_name: String
@@ -260,6 +261,7 @@ type Mutation {
   deleteDealDocument(document_id: String!, phase_id: String!, task_id: String!): Object
   createNewDeal(payload: Object): CreateDealResponse
   updateBuildDeal(payload: Object): Object
+  updateDealBuildApi(payload: Object): Deal
   sendInvitations(dealId: String, emails: [String]): Object
   updateInviteInvestorsTask(dealId: String): Object
 }
