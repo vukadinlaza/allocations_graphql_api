@@ -22,7 +22,7 @@ const options = {
 
 function getKey(header, cb) {
   client.getSigningKey(header.kid, function (err, key) {
-    var signingKey = key.publicKey || key.rsaPublicKey;
+    var signingKey = key?.publicKey || key?.rsaPublicKey;
     cb(null, signingKey);
   });
 }

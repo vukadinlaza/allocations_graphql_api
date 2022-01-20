@@ -1,5 +1,5 @@
 const { mailer } = require("./mailer");
-const logger = require("../utils/logger");
+const { logger } = require("../utils/logger");
 
 async function sendInvite(inviteDetails) {
   try {

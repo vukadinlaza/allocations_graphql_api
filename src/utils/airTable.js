@@ -54,6 +54,10 @@ const bankTransactionsTransactionsAddRow = async ({
   // table: https://airtable.com/appPoxRLndZXMKzi8/tbl66sSPTRCGRFMiS/viwxpMFlyWSJzaQlH?blocks=hide
   const TABLE_NAME = "Transactions";
   const BASE_ID = process.env.AIR_TABLE_BANK_TRANSACTIONS_BASE_ID;
+  console.log("AMOUNT FROM FUNCTION", amount);
+  console.log("AMOUNT FROM FUNCTION SENT TO AT", Number(amount));
+  console.log("AMOUNT FROM FUNCTION SENT TO AT TYPE OF", typeof Number(amount));
+
   try {
     const base = await getBase(BASE_ID);
     await base(TABLE_NAME).create(

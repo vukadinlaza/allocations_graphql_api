@@ -1,9 +1,10 @@
 module.exports = function template({
-  fundManager,
   dealName,
   dealUrl,
   signDate,
   wireDate,
+  organizationName,
+  dealType,
 }) {
   return `
 
@@ -231,7 +232,7 @@ module.exports = function template({
                                               <div>
                                                 <div style="font-family: inherit; text-align: start">
                                                   <span style="font-family: helvetica, sans-serif;">
-                                                    Great news!
+                                                    Hi ${dealName} Investor,
                                                   </span>
                                                 </div>
                                                 <div>
@@ -245,23 +246,8 @@ module.exports = function template({
                                               <div>
                                                 <div style="font-family: inherit; text-align: start">
                                                   <span style="font-family: helvetica, sans-serif;">
-                                                    ${fundManager} invited you to invest into ${dealName} SPV and
-                                                    we’re ready to onboard you!
-                                                  </span>
-                                                </div>
-                                                <div>
-                                                </div>
-                                              </div>
-                                            </td>
-                                          </tr>
-                                          <tr>
-                                            <td class="paragraph" height="100%" valign="top" bgcolor=""
-                                              role="module-content" colspan="2">
-                                              <div>
-                                                <div style="font-family: inherit; text-align: start">
-                                                  <span style="font-family: helvetica, sans-serif;">
-                                                    Here is the onboarding link:
-                                                    <a href=${dealUrl}>${dealName} Deal Page</a>
+                                                    Great news, we are ready to onboard your investment into ${dealName}
+                                                    ${dealType} of ${organizationName}.
                                                   </span>
                                                 </div>
                                                 <div>
@@ -327,6 +313,21 @@ module.exports = function template({
                                       <div>
                                         <div style="font-family: inherit; text-align: start">
                                           <span style="font-family: helvetica, sans-serif;">
+                                            Please follow the onboarding link to make your investment:
+                                            <a href=${dealUrl}>${dealName} Deal Page</a>
+                                          </span>
+                                        </div>
+                                        <div>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="paragraph" height="100%" valign="top" bgcolor="" role="module-content"
+                                      colspan="2">
+                                      <div>
+                                        <div style="font-family: inherit; text-align: start">
+                                          <span style="font-family: helvetica, sans-serif;">
                                             Notes
                                           </span>
                                         </div>
@@ -342,16 +343,15 @@ module.exports = function template({
                                         <div style="font-family: inherit; text-align: start">
                                           <span style="font-family: helvetica, sans-serif;">
                                             <ul>
-                                              <li>Beneficiary address: 8 The Green, Suite A, Dover, Delaware
-                                                19901;</li>
-                                              <li>Bank wire details are available to view/download in the deal
-                                                documents section, or on the following page under next steps.
-                                                Please check the details before wiring as </li>we use a new bank
-                                              account for each Fund/SPV;
-                                              <li>Please ensure that the name on the wire matches the name used
-                                                to sign the documents; and</li>
-                                              <li>Please note that your financial institution may charge a wire
-                                                fees that might reduce your net investment.</li>
+                                              <li>Deal specific bank wire details are available to view/download in the
+                                                deal documents section;</li>
+                                              <li>Beneficiary address: please see bank wire details; </li>
+                                              <li>Please ensure that the name on the wire matches the name used to sign
+                                                the documents;</li>
+                                              <li>A reference memo indicated in the wire instructions must be included
+                                                in the wire transfer; and</li>
+                                              <li>Please note that your financial institution may charge wire fees
+                                                that might reduce your net investment.</li>
                                             </ul>
                                           </span>
                                         </div>
@@ -367,10 +367,28 @@ module.exports = function template({
                                       <div>
                                         <div style="font-family: inherit; text-align: start">
                                           <span style="font-family: helvetica, sans-serif;">
-                                            Please contact our team at
-                                            <a href="mailto: support@allocations.com">support@allocations.com
-                                            </a>
-                                            if you have any questions.
+                                            Disclaimer
+                                          </span>
+                                        </div>
+                                        <div>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                  <tr>
+                                    <td class="paragraph" height="100%" valign="top" bgcolor="" role="module-content"
+                                      colspan="2">
+                                      <div>
+                                        <div style="font-family: inherit; text-align: start">
+                                          <span style="font-family: helvetica, sans-serif;">
+                                            Please note that the ${dealName} deal is administered by Allocations Inc.
+                                            and/or its affiliate entity; should you have any issues with using their
+                                            platform <a
+                                              href="https://dashboard.allocations.com">dashboard.allocations.com</a> or
+                                            if you have any questions in respect to the platform, please contact their
+                                            team at
+                                            <a href="mailto: support@allocations.com">support@allocations.com</a>.
                                           </span>
                                         </div>
                                         <div>

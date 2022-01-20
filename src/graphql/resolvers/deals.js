@@ -16,7 +16,7 @@ const Deals = require("../schema/deals");
 const Mailer = require("../../mailers/mailer");
 const txConfirmationTemplate = require("../../mailers/templates/tx-confirmation-template");
 const dealInvitationTemplate = require("../../mailers/templates/deal-invitation-template");
-const { nWithCommas } = require("../../utils/common.js");
+const { nWithCommas, throwApolloError } = require("../../utils/common.js");
 const { customDealPagination } = require("../pagHelpers");
 const { getHighlights } = require("../mongoHelpers.js");
 const { DealService } = require("@allocations/deal-service");
@@ -215,8 +215,28 @@ const Queries = {
     const doc = await DealService.getDocumentByTaskId(task_id);
     return doc;
   },
-  getServiceAgreementLink: async (_, { deal_id }) => {
-    return DealService.getServiceAgreementLink(deal_id);
+  getServicesAgreementLink: async (_, { deal_id }) => {
+    return DealService.getServicesAgreementLink(deal_id);
+  },
+  getFmSignatureLink: async (_, { deal_id }) => {
+    try {
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/investment-agreement/${deal_id}`,
+        {
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const [ok, dealResponse] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw dealResponse;
+      }
+      return dealResponse;
+    } catch (e) {
+      throwApolloError(e, "getServiceAgreementLink");
+    }
   },
   getInvestmentAgreementLink: async (_, { deal_id }) => {
     return InvestmentAgreementService.getFmSignatureLink(deal_id);
@@ -455,29 +475,57 @@ const Mutations = {
     return ctx.db.deals.findOne({ _id: ObjectId(params.deal_id) });
   },
   addDealDocService: async (_, { deal_id, task_id, doc, phase }, ctx) => {
-    isAdmin(ctx);
-    const { user } = ctx;
-    const document = await doc;
-    function stream2buffer(stream) {
-      return new Promise((resolve, reject) => {
-        const _buf = [];
-        stream.on("data", (chunk) => _buf.push(chunk));
-        stream.on("end", () => resolve(Buffer.concat(_buf)));
-        stream.on("error", (err) => reject(err));
+    try {
+      isAdmin(ctx);
+      const { user } = ctx;
+
+      const document = await doc;
+      function stream2buffer(stream) {
+        return new Promise((resolve, reject) => {
+          const _buf = [];
+          stream.on("data", (chunk) => _buf.push(chunk));
+          stream.on("end", () => resolve(Buffer.concat(_buf)));
+          stream.on("error", (err) => reject(err));
+        });
+      }
+      const buffer = await stream2buffer(document.createReadStream());
+
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/upload-document`,
+        {
+          method: "POST",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            deal_id,
+            task_id,
+            user_id: user._id,
+            phase,
+            content_type: document.mimetype,
+            title: document.filename,
+          }),
+        }
+      );
+
+      const [ok, response] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw response;
+      }
+
+      await fetch(response.link, {
+        method: "PUT",
+        headers: {
+          "Content-Length": buffer.length.toString(),
+        },
+        body: buffer,
       });
+
+      return { success: true, _id: response._id };
+    } catch (err) {
+      throwApolloError(err, "addDealDocService");
     }
-    const buffer = await stream2buffer(document.createReadStream());
-
-    const { _id: documentId } = await DealService.uploadDocument(buffer, {
-      deal_id,
-      task_id,
-      user_id: user._id,
-      phase,
-      content_type: document.mimetype,
-      title: document.filename,
-    });
-
-    return { success: true, _id: documentId };
   },
 
   addDealLogo: async (_, params, ctx) => {
@@ -553,85 +601,143 @@ const Mutations = {
     return dealResponse;
   },
   createNewDeal: async (_, { payload }, { user }) => {
-    const internationalInvestors = ({ status, countries }) => {
-      if (status === "true") {
-        return countries;
-      } else {
-        return ["United States"];
-      }
-    };
+    try {
+      const internationalInvestors = ({ status, countries }) => {
+        if (status === "true") {
+          return countries;
+        } else {
+          return ["United States"];
+        }
+      };
 
-    const deal = {
-      user_id: user._id,
-      user_email: user.email,
-      name: payload.name
-        ? payload.name
-        : `${payload.manager_name}'s ${payload.portfolio_company_name} Deal`,
-      slug: kebabCase(
-        payload.portfolio_company_name
-          ? `${payload.portfolio_company_name}-${Date.now()}`
-          : `${payload.manager_name}-${Date.now()}`
-      ),
-      carry_fee: {
-        type: payload.carry_fee.type,
-        value: payload.carry_fee.value,
-        string_value: `${payload.carry_fee.value} ${payload.carry_fee.type}`,
-        // custom: ,
-      },
-      ica_exemption: {
-        investor_type: "Accredited investors",
-        exemption_type: "301",
-      },
-      investor_countries: internationalInvestors(
-        payload.international_investors
-      ),
-      manager: {
-        name: payload.manager_name,
-        type: "individual",
-        email: user.email,
-        title: "",
-        entity_name: "",
-      },
-      management_fee: {
-        type: payload.management_fee.type,
-        value: payload.management_fee.value,
-        string_value: `${payload.management_fee.value} ${payload.management_fee.type}`,
-        // custom: ,
-      },
-      setup_cost: 20000,
-      angels_deal: false,
-      deal_multiple: 0,
-      accept_crypto: payload.accept_crypto,
-      ...payload,
-    };
-
-    const res = await fetch(`${process.env.BUILD_API_URL}/api/v1/deals`, {
-      method: "POST",
-      headers: {
-        "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        deal,
-        organization: {
-          ...payload.organization,
-          master_series:
-            payload.organization?.masterEntity?.name || "Atomizer LLC",
+      const deal = {
+        user_id: user._id,
+        user_email: user.email,
+        name: payload.name
+          ? payload.name
+          : `${payload.manager_name}'s ${payload.portfolio_company_name} Deal`,
+        slug: kebabCase(
+          payload.portfolio_company_name
+            ? `${payload.portfolio_company_name}-${Date.now()}`
+            : `${payload.manager_name}-${Date.now()}`
+        ),
+        carry_fee: {
+          type: payload.carry_fee.type,
+          value: payload.carry_fee.value,
+          string_value: `${payload.carry_fee.value} ${payload.carry_fee.type}`,
         },
-        new_hvp: payload.isNewHVP,
-      }),
-    });
+        gp_entity: {
+          gp_entity_name: payload.gp_entity_name,
+          need_gp_entity: payload.need_gp_entity,
+        },
+        ica_exemption: {
+          investor_type: "Accredited investors",
+          exemption_type: "301",
+        },
+        investor_countries: internationalInvestors(
+          payload.international_investors
+        ),
+        manager: {
+          name: payload.manager_name,
+          type: "individual",
+          email: user.email,
+          title: "",
+          entity_name: "",
+        },
+        management_fee: {
+          type: payload.management_fee.type,
+          value: payload.management_fee.value,
+          string_value: `${payload.management_fee.value} ${payload.management_fee.type}`,
+        },
+        setup_cost: 20000,
+        angels_deal: false,
+        deal_multiple: 0,
+        accept_crypto: payload.accept_crypto,
+        ...payload,
+      };
 
-    const dealResponse = await res.json();
+      const res = await fetch(`${process.env.BUILD_API_URL}/api/v1/deals`, {
+        method: "POST",
+        headers: {
+          "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          deal,
+          organization: {
+            ...payload.organization,
+            master_series:
+              payload.organization?.masterEntity?.name || "Atomizer LLC",
+          },
+          new_hvp: payload.isNewHVP,
+        }),
+      });
 
-    if (dealResponse.deal.accept_crypto) {
-      const response = await CryptoService.createWallet(dealResponse.deal._id);
-      if (!response.acknowledged || response.error) {
-        await alertCryptoWalletError(deal.name, dealResponse.deal._id);
+      const [ok, dealResponse] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw dealResponse;
       }
-    }
 
-    return dealResponse;
+      if (dealResponse.deal.accept_crypto) {
+        const response = await CryptoService.createWallet(
+          dealResponse.deal._id
+        );
+        if (!response.acknowledged || response.error) {
+          await alertCryptoWalletError(deal.name, dealResponse.deal._id);
+        }
+      }
+
+      return dealResponse;
+    } catch (err) {
+      throwApolloError(err, "createNewDeal");
+    }
+  },
+  updateDealBuildApi: async (_, { payload }) => {
+    try {
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/${payload.deal_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const [ok, response] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw response;
+      }
+
+      return response;
+    } catch (err) {
+      throwApolloError(err, "updateDealBuildApi");
+    }
+  },
+  updateBuildDeal: async (_, { payload }) => {
+    try {
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/user-acknowledged-complete/${payload.deal_id}`,
+        {
+          method: "POST",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const [ok, dealResponse] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw dealResponse;
+      }
+
+      return dealResponse;
+    } catch (err) {
+      throwApolloError(err, "updateBuildDeal");
+    }
   },
 
   deleteDealDocument: async (
@@ -639,20 +745,27 @@ const Mutations = {
     { document_id, phase_id, task_id },
     { user }
   ) => {
-    const res = await DealService.deleteDocument({
-      id: document_id,
-      phase: phase_id,
-      user_id: user._id,
-      task_id: task_id,
-    });
+    try {
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/delete-document/${document_id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ phase_id, task_id }),
+        }
+      );
 
-    if (!res.acknowledged) {
-      throw new Error({
-        status: res.status,
-        message: res.error || res.message,
-      });
+      const [ok, response] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw response;
+      }
+      return response;
+    } catch (err) {
+      throwApolloError(err, "deleteDealDocument");
     }
-    return res;
   },
 
   sendInvitations: async (_, { dealId, emails }, { user, datasources, db }) => {
@@ -668,14 +781,11 @@ const Mutations = {
     const emailData = {
       mainData: {
         to: emails,
-        from: "support@allocations.com",
+        from: user.email,
         subject: `${deal.company_name}: Invitation to invest`,
       },
       template: dealInvitationTemplate,
       templateData: {
-        fundManager: user.first_name
-          ? `${user.first_name} ${user.last_name}`
-          : user.email,
         dealName: deal.company_name,
         dealUrl: `https://dashboard.allocations.com/deals/${organization.slug}/${deal.slug}`,
         signDate: `${moment(deal.dealParams.signDeadline).format(
@@ -684,11 +794,37 @@ const Mutations = {
         wireDate: `${moment(deal.dealParams.wireDeadline).format(
           "dddd"
         )}, ${moment(deal.dealParams.wireDeadline).format("MMM DD, YYYY")}`,
+        organizationName: organization.name,
+        dealType: deal.type === "spv" ? "SPV" : "Fund",
       },
     };
 
     const { status } = await Mailer.sendEmail(emailData);
     return { emailsSent: status === "sent" ? true : false };
+  },
+
+  updateInviteInvestorsTask: async (_, { dealId }) => {
+    try {
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/invite-investors-task-complete/${dealId}`,
+        {
+          method: "POST",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const [ok, dealResponse] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw dealResponse;
+      }
+
+      return dealResponse;
+    } catch (err) {
+      throwApolloError(err, "updateInviteInvestorsTask");
+    }
   },
 };
 // deleteUserAsViewed: async (_, { user_id, deal_id }, ctx) => {

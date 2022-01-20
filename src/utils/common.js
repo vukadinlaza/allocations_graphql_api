@@ -1,3 +1,6 @@
+const { appLogger, shouldSendLogs } = require("../utils/logger");
+const { ApolloError } = require("apollo-server-errors");
+
 function nWithCommas(x) {
   if (!x) return 0;
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -20,4 +23,24 @@ const formatCompanyName = (companyName) => {
   return companyName;
 };
 
-module.exports = { nWithCommas, amountFormat, formatCompanyName };
+function throwApolloError(err, resolverName) {
+  const errorLogger = appLogger("allocations-graphql-api", {
+    name: resolverName,
+    shouldSendLogs,
+  });
+
+  // log error to console & send to logDNA if in production
+  errorLogger(err);
+
+  if (err.error?.includes("{") || err.message?.includes("{")) {
+    throw new ApolloError("External error");
+  }
+  throw new ApolloError(err.error || err.message, err.status, err);
+}
+
+module.exports = {
+  nWithCommas,
+  amountFormat,
+  formatCompanyName,
+  throwApolloError,
+};

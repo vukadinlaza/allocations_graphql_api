@@ -435,11 +435,15 @@ module.exports = Router()
       emailLink = body.emailLink;
       referenceNumber = getReferenceNumber(email);
       amount = getWireAmount(email);
-
       investment = await db.investments.findOne({
         "wire_instructions.reference_number": referenceNumber,
       });
-      if (!investment) throw new Error("No Investment Found.");
+
+      console.log("INVESTMENT", investment);
+      if (!investment) {
+        throw new Error("No Investment Found.");
+      }
+
       const {
         _id: investmentId,
         deal_id,
@@ -448,10 +452,13 @@ module.exports = Router()
       } = investment;
 
       deal = await DealService.getDealById({ deal_id });
+
       if (!deal) throw new Error("No Deal Found");
       if (!deal.virtual_account_number)
         throw new Error("No Virtual Account Number");
       const { virtual_account_number } = deal;
+
+      console.log("AMOUNT", amount);
 
       await newDirectionTransactionsAddRow({
         virtualAccountNumber: virtual_account_number,

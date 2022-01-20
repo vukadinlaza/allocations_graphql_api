@@ -54,6 +54,7 @@ type Deal {
   phases: [Phase]
   metadata: Object
   manager_name: String
+  manager: Manager
   name: String
   wire_deadline: String
   phase: String
@@ -69,7 +70,12 @@ type Deal {
   accept_crypto: Boolean
   dealDetails: [DealDetail]
   portfolio_company_securities: String
+  public_pitch_deck: Boolean
   sectors: [String]
+  closing_date: String
+  portfolio_company_name: String
+  master_series: String
+  hubspot_deal_id: Int
 }
 
 type DealParams {
@@ -169,6 +175,14 @@ type Task {
   updated_at: String
 }
 
+type Manager {
+  type: String
+  name: String
+  email: String
+  title: String
+  entity_name: String
+}
+
 type DealDetail {
   title: String
   content: String
@@ -222,8 +236,9 @@ type Query {
   getDealWithTasks(deal_id: String): Deal
   getDealByIdWithTasks(deal_id: String): Deal
   getDealDocService (task_id: String): ServiceDocument
-  getServiceAgreementLink(deal_id: String): DataRequest
+  getServicesAgreementLink(deal_id: String): DataRequest
   getInvestmentAgreementLink(deal_id: String): DataRequest
+  getFmSignatureLink(deal_id: String): DataRequest
   getCryptoWalletAddress(deal_id: String): String
 }
 
@@ -245,7 +260,10 @@ type Mutation {
   createBuild(payload: Object): Deal
   deleteDealDocument(document_id: String!, phase_id: String!, task_id: String!): Object
   createNewDeal(payload: Object): CreateDealResponse
+  updateBuildDeal(payload: Object): Object
+  updateDealBuildApi(payload: Object): Deal
   sendInvitations(dealId: String, emails: [String]): Object
+  updateInviteInvestorsTask(dealId: String): Object
 }
 
 type DataRequestToken {

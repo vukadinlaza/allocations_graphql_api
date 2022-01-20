@@ -6,6 +6,7 @@ const { AuthenticationError } = require("apollo-server-express");
 const Organizations = require("../schema/organizations");
 const { customOrgPagination } = require("../pagHelpers");
 const { getOrgOverviewData } = require("../mongoHelpers.js");
+const { throwApolloError } = require("../../utils/common");
 
 const Schema = Organizations;
 
@@ -74,31 +75,35 @@ const Mutations = {
     { organization: { logo, ...organization } },
     ctx
   ) => {
-    isAdmin(ctx);
+    try {
+      isAdmin(ctx);
 
-    // upload logo
-    if (logo) {
-      await PublicUploader.upload({
-        doc: logo,
-        path: `organizations/${organization.slug}.png`,
+      // upload logo
+      if (logo) {
+        await PublicUploader.upload({
+          doc: logo,
+          path: `organizations/${organization.slug}.png`,
+        });
+      }
+
+      // make slug unique from any other organization
+      const slug = `${organization.name.split(" ").join("-")}-${Date.now()}`;
+
+      const { insertedId: _id } = await ctx.db.organizations.insertOne({
+        ...organization,
+        slug,
+        created_at: Date.now(),
       });
+
+      // add user to org admin
+      await ctx.db.users.updateOne(
+        { _id: ctx.user._id },
+        { $push: { organizations_admin: _id } }
+      );
+      return { ...organization, slug, _id };
+    } catch (err) {
+      throwApolloError(err, "createOrganization");
     }
-
-    // make slug unique from any other organization
-    const slug = `${organization.name.split(" ").join("-")}-${Date.now()}`;
-
-    const { insertedId: _id } = await ctx.db.organizations.insertOne({
-      ...organization,
-      slug,
-      created_at: Date.now(),
-    });
-
-    // add user to org admin
-    await ctx.db.users.updateOne(
-      { _id: ctx.user._id },
-      { $push: { organizations_admin: _id } }
-    );
-    return { ...organization, slug, _id };
   },
   /** simple update **/
   updateOrganization: async (

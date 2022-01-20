@@ -1,4 +1,3 @@
-require("dotenv").config();
 const { SecretsManager } = require("aws-sdk");
 
 const secretsManager = new SecretsManager({ region: "us-east-1" });
@@ -15,7 +14,7 @@ const getAwsSecrets = async () => {
   const secrets = JSON.parse(SecretString);
 
   Object.entries(secrets).forEach(([key, envKey]) => {
-    process.env[key] = envKey;
+    if (!process.env[key]) process.env[key] = envKey;
   });
 };
 

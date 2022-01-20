@@ -18,7 +18,7 @@ const commitmentCancelledTemplate = require("../../mailers/templates/commitment-
 const { signedSPV } = require("../../zaps/signedDocs");
 const { DealService } = require("@allocations/deal-service");
 const { sendWireReminderEmail } = require("../../mailers/wire-reminder");
-const { amountFormat } = require("../../utils/common");
+const { amountFormat, throwApolloError } = require("../../utils/common");
 const {
   ReferenceNumberService,
 } = require("@allocations/reference-number-service");
@@ -71,7 +71,7 @@ const Mutations = {
   createInvestment: async (
     _,
     { investment: { user_id, deal_id, ...investment } },
-    { db, datasources }
+    { db, datasources, user }
   ) => {
     let deal = await db.collection("deals").findOne({ _id: ObjectId(deal_id) });
 
@@ -91,7 +91,11 @@ const Mutations = {
     };
 
     try {
-      await datasources.investments.createInvestment(newInvestment, db);
+      await datasources.investments.createInvestment({
+        deal,
+        user,
+        investment: newInvestment,
+      });
     } catch (error) {
       // throw more descriptive error
       throw new Error(`createInvestment failed: ${error.message}`);
@@ -106,30 +110,37 @@ const Mutations = {
     { investment: { _id, ...investment } },
     { db, datasources }
   ) => {
-    // we need to track status changes
-    const savedInvestment = await db.investments.findOne({
-      _id: ObjectId(_id),
-    });
+    try {
+      // we need to track status changes
+      const savedInvestment = await db.investments.findOne({
+        _id: ObjectId(_id),
+      });
 
-    if (
-      savedInvestment.status !== investment.status &&
-      investment.status !== "wired"
-    ) {
-      investment[`${investment.status}_at`] = Date.now();
+      if (
+        savedInvestment.status !== investment.status &&
+        investment.status !== "wired"
+      ) {
+        investment[`${investment.status}_at`] = Date.now();
+      }
+
+      const updatedInvestment = {
+        ...savedInvestment,
+        ...investment,
+      };
+
+      await datasources.investments.updateInvestmentById(
+        _id,
+        updatedInvestment
+      );
+      return db.investments.updateOne(
+        { _id: ObjectId(_id) },
+        // { $set: { ...investment, updated_at: new Date() } },
+        { $set: { ...investment, updated_at: Date.now() } },
+        { new: true }
+      );
+    } catch (err) {
+      throwApolloError(err, "updateInvestment");
     }
-
-    const updatedInvestment = {
-      ...savedInvestment,
-      ...investment,
-    };
-
-    await datasources.investments.updateInvestmentById(_id, updatedInvestment);
-    return db.investments.updateOne(
-      { _id: ObjectId(_id) },
-      // { $set: { ...investment, updated_at: new Date() } },
-      { $set: { ...investment, updated_at: Date.now() } },
-      { new: true }
-    );
   },
 
   /** delete investment id**/
@@ -137,8 +148,8 @@ const Mutations = {
     try {
       const res = await ctx.db.investments.deleteOne({ _id: ObjectId(_id) });
       return res.deletedCount === 1;
-    } catch (e) {
-      return false;
+    } catch (err) {
+      throwApolloError(err, "deleteInvestment");
     }
   },
 
@@ -146,182 +157,192 @@ const Mutations = {
 
   /** uploads investment document, S3 & db path **/
   addInvestmentDoc: async (_, { investment_id, doc, isK1 }, ctx) => {
-    const file = await doc;
-    const s3Path = await Uploader.putInvestmentDoc(investment_id, file, isK1);
+    try {
+      const file = await doc;
+      const s3Path = await Uploader.putInvestmentDoc(investment_id, file, isK1);
 
-    await ctx.db.investments.updateOne(
-      { _id: ObjectId(investment_id) },
-      { $addToSet: { documents: s3Path } }
-    );
+      await ctx.db.investments.updateOne(
+        { _id: ObjectId(investment_id) },
+        { $addToSet: { documents: s3Path } }
+      );
 
-    return Cloudfront.getSignedUrl(s3Path);
+      return Cloudfront.getSignedUrl(s3Path);
+    } catch (err) {
+      throwApolloError(err, "addInvestmentDoc");
+    }
   },
   /** deletes investment document, S3 & db path **/
   rmInvestmentDoc: async (_, { investment_id, file }, ctx) => {
-    await Uploader.rmInvestmentDoc(investment_id, file);
-    await ctx.db.investments.updateOne(
-      { _id: ObjectId(investment_id) },
-      { $pull: { documents: `investments/${investment_id}/${file}` } }
-    );
+    try {
+      await Uploader.rmInvestmentDoc(investment_id, file);
+      await ctx.db.investments.updateOne(
+        { _id: ObjectId(investment_id) },
+        { $pull: { documents: `investments/${investment_id}/${file}` } }
+      );
 
-    return true;
+      return true;
+    } catch (err) {
+      throwApolloError(err, "rmInvestmentDoc");
+    }
   },
 
   confirmInvestment: async (_, { payload }, { user, db, datasources }) => {
-    const deal = await datasources.deals.getDealById({
-      deal_id: ObjectId(payload.dealId),
-    });
-
-    const organization = await db.organizations.findOne({
-      _id: ObjectId(deal.organization),
-    });
-
-    const signDeadline = get(deal, "dealParams.signDeadline");
-    const status = get(deal, "status");
-
-    if (deal !== null && deal.isDemo === true) {
-      // needs to be a 24 character hex
-      return { _id: "000000000000000000000000" };
-    } else if (signDeadline) {
-      const isClosed = status === "closed";
-      if (isClosed) throw new Error("The deal selected is closed.");
-    }
-
-    let investment = null;
-
-    //grab reference number object, set to null value if undefined
-    const referenceNumber = await ReferenceNumberService.assign({
-      deal_id: payload.dealId,
-    });
-
-    // add case for undefined referenceNumber
-    if (!payload.investmentId) {
-      const newInvestmentData = {
-        status: "invited",
-        invited_at: Date.now(),
-        created_at: Date.now(),
-        amount: parseFloat(payload.investmentAmount.replace(/,/g, "")),
-        user_id: ObjectId(user._id),
+    try {
+      const deal = await datasources.deals.getDealById({
         deal_id: ObjectId(payload.dealId),
-        organization: ObjectId(deal.organization),
-        submissionData: payload,
-      };
-      // if there is a bankingProvider on the deal AND
-      // a reference number was assigned to the investment
-      // add the wire_instructions to the investment
-      if (deal.bankingProvider && referenceNumber?.number) {
-        newInvestmentData.wire_instructions = {
-          // no dynamic data for acc/routing numbers yet
-          account_number: null,
-          routing_number: null,
-          reference_number: referenceNumber?.number || null,
-          // no dynamic data for provider yet
-          provider: deal.bankingProvider || null,
-        };
-      }
-      const { insertedId } = await datasources.investments.createInvestment(
-        newInvestmentData,
-        db
-      );
-
-      investment = await db.investments.findOne({ _id: ObjectId(insertedId) });
-      // If bankingProvider AND referenceNumber create wire instructions PDF
-      if (referenceNumber?.number && deal?.bankingProvider) {
-        //create wire instructions, and return key for AWS integration
-        const wireKey = await createInvestmentWireInstructions({
-          providerName: deal?.bankingProvider,
-          investmentId: investment._id,
-          investorName: investment.submissionData.legalName,
-          spvName: deal.company_name,
-          referenceNumber: referenceNumber.number,
-        });
-        //update investment to include s3Key for docuspring integration
-        await db.investments.updateOne(
-          { _id: ObjectId(investment._id) },
-          { $set: { "wire_instructions.s3Key": wireKey } }
-        );
-      }
-    } else {
-      investment = await datasources.investments.getInvestmentById({
-        investment_id: ObjectId(payload.investmentId),
       });
 
-      const updatedSubmissionData = {
-        ...investment.submissionData,
-        ...payload,
-      };
+      const organization = await db.organizations.findOne({
+        _id: ObjectId(deal.organization),
+      });
 
-      await datasources.investments.updateInvestmentById(
-        investment._id,
-        updatedSubmissionData
-      );
+      const signDeadline = get(deal, "dealParams.signDeadline");
+      const status = get(deal, "status");
 
-      await db.investments.updateOne(
-        { _id: ObjectId(investment._id) },
-        { $set: { submissionData: updatedSubmissionData } }
-      );
-    }
-
-    const permanentDownloadUrl = await getTemplate({
-      datasources,
-      db,
-      deal,
-      payload: { ...payload, investmentId: investment._id },
-      user,
-      templateId: payload.docSpringTemplateId,
-      investmentDocs: investment.documents,
-      investmentStatus: investment.status,
-    });
-
-    await db.deals.updateOne(
-      { _id: ObjectId(deal._id) },
-      {
-        $pull: { usersViewed: ObjectId(user._id) },
+      if (deal !== null && deal.isDemo === true) {
+        // needs to be a 24 character hex
+        return { _id: "000000000000000000000000" };
+      } else if (signDeadline) {
+        const isClosed = status === "closed";
+        if (isClosed) throw new Error("The deal selected is closed.");
       }
-    );
 
-    if (deal && deal.slug === "luna-mega") {
-      const emailData = {
-        mainData: {
-          to: user.email,
-          from: "support@allocations.com",
-          subject: `Commitment to invest`,
-        },
-        template: commitmentTemplate,
-        templateData: {
-          username: user.first_name ? `${user.first_name}` : user.email,
-          issuer: deal.company_name || "",
-          price: "$59",
-          totalAmount: `$${payload.investmentAmount}`,
-          deadline: moment(deal.dealParams.signDeadline)
-            .subtract(2, "days")
-            .format("MMM DD, YYYY"),
-        },
+      let investment = null;
+
+      //grab reference number object, set to null value if undefined
+      const referenceNumber = await ReferenceNumberService.assign({
+        deal_id: payload.dealId,
+      });
+
+      // add case for undefined referenceNumber
+      if (!payload.investmentId) {
+        const newInvestmentData = {
+          status: "invited",
+          invited_at: Date.now(),
+          created_at: Date.now(),
+          amount: parseFloat(payload.investmentAmount.replace(/,/g, "")),
+          user_id: ObjectId(user._id),
+          deal_id: ObjectId(payload.dealId),
+          organization: ObjectId(deal.organization),
+          submissionData: payload,
+        };
+        // if there is a bankingProvider on the deal AND
+        // a reference number was assigned to the investment
+        // add the wire_instructions to the investment
+        if (deal.bankingProvider && referenceNumber?.number) {
+          newInvestmentData.wire_instructions = {
+            // no dynamic data for acc/routing numbers yet
+            account_number: null,
+            routing_number: null,
+            reference_number: referenceNumber?.number || null,
+            // no dynamic data for provider yet
+            provider: deal.bankingProvider || null,
+          };
+        }
+        const { insertedId } = await datasources.investments.createInvestment({
+          deal,
+          user,
+          investment: newInvestmentData,
+        });
+
+        investment = await db.investments.findOne({
+          _id: ObjectId(insertedId),
+        });
+        // If bankingProvider AND referenceNumber create wire instructions PDF
+        if (referenceNumber?.number && deal?.bankingProvider) {
+          //create wire instructions, and return key for AWS integration
+          const wireKey = await createInvestmentWireInstructions({
+            providerName: deal?.bankingProvider,
+            investmentId: investment._id,
+            investorName: investment.submissionData.legalName,
+            spvName: deal.company_name,
+            referenceNumber: referenceNumber.number,
+          });
+          //update investment to include s3Key for docuspring integration
+          await db.investments.updateOne(
+            { _id: ObjectId(investment._id) },
+            { $set: { "wire_instructions.s3Key": wireKey } }
+          );
+        }
+      } else {
+        investment = await datasources.investments.getInvestmentById({
+          investment_id: ObjectId(payload.investmentId),
+        });
+
+        const updatedSubmissionData = {
+          ...investment.submissionData,
+          ...payload,
+        };
+
+        await datasources.investments.resignInvestment({
+          investment_id: payload.investmentId,
+          submissionData: updatedSubmissionData,
+        });
+      }
+
+      const permanentDownloadUrl = await getTemplate({
+        datasources,
+        db,
+        deal,
+        payload: { ...payload, investmentId: investment._id },
+        user,
+        templateId: payload.docSpringTemplateId,
+        investmentDocs: investment.documents,
+        investmentStatus: investment.status,
+      });
+
+      await db.deals.updateOne(
+        { _id: ObjectId(deal._id) },
+        {
+          $pull: { usersViewed: ObjectId(user._id) },
+        }
+      );
+
+      if (deal && deal.slug === "luna-mega") {
+        const emailData = {
+          mainData: {
+            to: user.email,
+            from: "support@allocations.com",
+            subject: `Commitment to invest`,
+          },
+          template: commitmentTemplate,
+          templateData: {
+            username: user.first_name ? `${user.first_name}` : user.email,
+            issuer: deal.company_name || "",
+            price: "$59",
+            totalAmount: `$${payload.investmentAmount}`,
+            deadline: moment(deal.dealParams.signDeadline)
+              .subtract(2, "days")
+              .format("MMM DD, YYYY"),
+          },
+        };
+        await Mailer.sendEmail(emailData);
+      }
+
+      if (!permanentDownloadUrl)
+        throw new UserInputError("There was an error with Docspring");
+
+      let location = payload.country;
+      if (payload.country === "United States")
+        location = `${payload.country}, ${payload.state}`;
+
+      const zapData = {
+        ...investment,
+        dealName: deal.company_name,
+        permanentDownloadUrl,
+        ...organization,
+        email: user.email,
+        location,
       };
-      await Mailer.sendEmail(emailData);
+
+      await signedSPV(zapData);
+
+      return datasources.investments.getInvestmentById({
+        investment_id: ObjectId(investment._id),
+      });
+    } catch (err) {
+      throwApolloError(err, "confirmInvestment");
     }
-
-    if (!permanentDownloadUrl)
-      throw new UserInputError("There was an error with Docspring");
-
-    let location = payload.country;
-    if (payload.country === "United States")
-      location = `${payload.country}, ${payload.state}`;
-
-    const zapData = {
-      ...investment,
-      dealName: deal.company_name,
-      permanentDownloadUrl,
-      ...organization,
-      email: user.email,
-      location,
-    };
-
-    await signedSPV(zapData);
-
-    return datasources.investments.getInvestmentById({
-      investment_id: ObjectId(investment._id),
-    });
   },
 
   getInvestmentPreview: async (_, { payload }, { user }) => {
@@ -452,7 +473,10 @@ const Mutations = {
       }
       return true;
     } catch (err) {
-      return err;
+      throwApolloError(
+        { error: err.error || err.message, status: err.status },
+        "sendWireReminders"
+      );
     }
   },
   createCapPDF: async (_, { data }, { db, ctx }) => {
