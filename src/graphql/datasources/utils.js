@@ -6,6 +6,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
     name: serviceDeal.name,
     organization: serviceDeal.organization_id,
     accept_crypto: serviceDeal.accept_crypto,
+    accept_ach: serviceDeal?.accept_ach,
     appLink: `deals/${serviceDeal.org_slug || "allocations"}/${
       serviceDeal.slug
     }`,
@@ -55,6 +56,7 @@ const transformLegacyDeal = ({ legacyDeal }) => {
     _id: legacyDeal._id,
     approved: true,
     organization_id: legacyDeal.organization,
+    accept_ach: legacyDeal?.accept_ach,
     createdAt: legacyDeal.created_at,
     portfolio_company_name: legacyDeal.company_name,
     description: legacyDeal.company_description,
