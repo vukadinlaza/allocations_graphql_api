@@ -218,6 +218,7 @@ const Queries = {
   getServicesAgreementLink: async (_, { deal_id }) => {
     return DealService.getServicesAgreementLink(deal_id);
   },
+  // Gets investment agreement link via build api using the LegalDocumentsService
   getFmSignatureLink: async (_, { deal_id }) => {
     try {
       const res = await fetch(
@@ -767,7 +768,30 @@ const Mutations = {
       throwApolloError(err, "deleteDealDocument");
     }
   },
+  // Completes the Sign Investment Agreement Task in Build
+  signInvestmentAgreement: async (_, { payload }) => {
+    try {
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/sign-investment-agreement/${payload.deal_id}`,
+        {
+          method: "POST",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
+      const [ok, dealResponse] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw dealResponse;
+      }
+
+      return dealResponse;
+    } catch (e) {
+      throwApolloError(e, "signInvestmentAgreement");
+    }
+  },
   sendInvitations: async (_, { dealId, emails }, { user, datasources, db }) => {
     const deal = await datasources.deals.getDealById({
       deal_id: ObjectId(dealId),

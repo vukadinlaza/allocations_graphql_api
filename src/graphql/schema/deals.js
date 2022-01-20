@@ -225,6 +225,10 @@ type DataRequest {
   link: String
 }
 
+type Message {
+  message: String
+}
+
 type Query {
   deal(_id: String, deal_slug: String, fund_slug: String): Deal
   allDeals: [Deal]
@@ -263,6 +267,7 @@ type Mutation {
   updateBuildDeal(payload: Object): Object
   updateDealBuildApi(payload: Object): Deal
   sendInvitations(dealId: String, emails: [String]): Object
+  signInvestmentAgreement(payload: Object): Message
   updateInviteInvestorsTask(dealId: String): Object
 }
 
