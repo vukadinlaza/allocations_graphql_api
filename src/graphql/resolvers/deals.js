@@ -601,6 +601,25 @@ const Mutations = {
     const dealResponse = await DealService.get(deal._id);
     return dealResponse;
   },
+  wakeUpBuildApi: async (_, { payload }, { user }) => {
+    try {
+      const res = await fetch(`${process.env.BUILD_API_URL}/api/v1/deals`, {
+        method: "POST",
+        headers: {
+          "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ wakeUp: true }),
+      });
+
+      const [ok, response] = await Promise.all([res.ok, res.json()]);
+      if (!ok) throw response;
+
+      return response;
+    } catch (err) {
+      throwApolloError(err, "wakeUpBuildApi");
+    }
+  },
   createNewDeal: async (_, { payload }, { user }) => {
     try {
       const internationalInvestors = ({ status, countries }) => {

@@ -270,6 +270,7 @@ type Mutation {
   setDocumentTasksComplete(payload: Object): Object
   signInvestmentAgreement(payload: Object): Message
   updateInviteInvestorsTask(dealId: String): Object
+  wakeUpBuildApi(payload: Object): Message
 }
 
 type DataRequestToken {
