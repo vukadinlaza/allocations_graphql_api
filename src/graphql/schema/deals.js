@@ -267,6 +267,7 @@ type Mutation {
   updateBuildDeal(payload: Object): Object
   updateDealBuildApi(payload: Object): Deal
   sendInvitations(dealId: String, emails: [String]): Object
+  setDocumentTasksComplete(payload: Object): Object
   signInvestmentAgreement(payload: Object): Message
   updateInviteInvestorsTask(dealId: String): Object
 }

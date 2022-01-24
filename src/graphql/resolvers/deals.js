@@ -740,7 +740,31 @@ const Mutations = {
       throwApolloError(err, "updateBuildDeal");
     }
   },
+  setDocumentTasksComplete: async (_, { payload }) => {
+    try {
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/update-document-tasks/${payload.deal_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+          // The body requires an taskData property which is an array of objects with at minimum a task_id property, and an optional document_id
+          // eg. body = { taskData: [ { task_id: '1', document_id: '1' }, { task_id: '2', document_id: null } ] }
+          body: JSON.stringify(payload),
+        }
+      );
 
+      const [ok, response] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw response;
+      }
+      return response;
+    } catch (err) {
+      throwApolloError(err, "setTasksComplete");
+    }
+  },
   deleteDealDocument: async (
     _,
     { document_id, phase_id, task_id },
