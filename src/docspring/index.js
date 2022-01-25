@@ -210,7 +210,13 @@ const getTemplateData = (input, user, templateId) => {
         ? ""
         : moment(new Date()).format("MM/DD/YYYY") || " ",
     };
-  } else if (templateId === "tpl_zbmQNPrkqXnJmFMD7C") {
+  } else if (
+    [
+      "tpl_y3GEaLkZMDqhHT6SqE",
+      "tpl_zbmQNPrkqXnJmFMD7C",
+      "tpl_sCjzLb53RKfSd7ZErJ",
+    ].includes(templateId)
+  ) {
     return {
       InvestorType: capitalize(investor_type),
       MemberName: legalName,
@@ -232,6 +238,7 @@ const getTemplateData = (input, user, templateId) => {
       MemberName: legalName,
       SubAmount: investmentAmount,
       USStateIndividual: isTypeIndividual ? countryWithState : "",
+      Title: isTypeIndividual ? "" : title || "",
       USStateEntity: isTypeEntity ? countryWithState : "",
       AccredIndiv: isTypeIndividual
         ? accredited_investor_status || is3c7_options_status
