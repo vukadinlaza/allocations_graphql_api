@@ -23,7 +23,6 @@ const { DealService } = require("@allocations/deal-service");
 const {
   InvestmentAgreementService,
 } = require("@allocations/investment-agreement-service");
-const { CryptoService } = require("@allocations/crypto-service");
 const { alertCryptoWalletError } = require("../../zaps");
 const { deallocateReferenceNumbers } = require("./newDirections");
 
@@ -672,7 +671,6 @@ const Mutations = {
         setup_cost: 20000,
         angels_deal: false,
         deal_multiple: 0,
-        accept_crypto: payload.accept_crypto,
         ...payload,
       };
 
@@ -696,15 +694,6 @@ const Mutations = {
       const [ok, dealResponse] = await Promise.all([res.ok, res.json()]);
       if (!ok) {
         throw dealResponse;
-      }
-
-      if (dealResponse.deal.accept_crypto) {
-        const response = await CryptoService.createWallet(
-          dealResponse.deal._id
-        );
-        if (!response.acknowledged || response.error) {
-          await alertCryptoWalletError(deal.name, dealResponse.deal._id);
-        }
       }
 
       return dealResponse;
