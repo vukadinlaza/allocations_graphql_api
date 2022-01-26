@@ -660,8 +660,8 @@ const Mutations = {
           name: payload.manager_name,
           type: "individual",
           email: user.email,
-          title: "",
-          entity_name: "",
+          title: payload.representative,
+          // entity_name: "",
         },
         management_fee: {
           type: payload.management_fee.type,
