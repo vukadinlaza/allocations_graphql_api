@@ -16,7 +16,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
     created_at: serviceDeal.created_at,
     date_closed: serviceDeal.closing_date,
     deal_lead: serviceDeal.manager_name,
-    dealCoverImageKey: coverImage?.link || "null",
+    dealCoverImageKey: coverImage?.link || null,
     dealParams: {
       dealType: serviceDeal.offering_type,
       minimumInvestment: serviceDeal.minimum_investment,
