@@ -2,6 +2,7 @@ const { ObjectId } = require("mongodb");
 const moment = require("moment");
 const fetch = require("node-fetch");
 const { get } = require("lodash");
+const { isAdmin } = require("../permissions");
 const { UserInputError } = require("apollo-server-express");
 const Cloudfront = require("../../cloudfront");
 const Uploader = require("../../uploaders/investor-docs");
@@ -16,6 +17,7 @@ const Mailer = require("../../mailers/mailer");
 const commitmentTemplate = require("../../mailers/templates/commitment-template");
 const commitmentCancelledTemplate = require("../../mailers/templates/commitment-cancelled-template");
 const { signedSPV } = require("../../zaps/signedDocs");
+const { customInvestmentPagination } = require("../pagHelpers");
 const { DealService } = require("@allocations/deal-service");
 const { sendWireReminderEmail } = require("../../mailers/wire-reminder");
 const { amountFormat, throwApolloError } = require("../../utils/common");
@@ -63,6 +65,27 @@ const Queries = {
     return ctx.datasources.investments.getInvestmentById({
       investment_id: ObjectId(args._id),
     });
+  },
+  investmentsList: async (_, args, ctx) => {
+    isAdmin(ctx);
+    const { pagination, currentPage } = args.pagination;
+    const documentsToSkip = pagination * currentPage;
+    const aggregation = customInvestmentPagination(args.pagination);
+    const countAggregation = [...aggregation, { $count: "count" }];
+
+    const investmentsCount = await ctx.db
+      .collection("investments")
+      .aggregate(countAggregation)
+      .toArray();
+    const count = investmentsCount.length ? investmentsCount[0].count : 0;
+
+    let investments = await ctx.db
+      .collection("investments")
+      .aggregate(aggregation)
+      .skip(documentsToSkip)
+      .limit(pagination)
+      .toArray();
+    return { count, investments };
   },
 };
 
