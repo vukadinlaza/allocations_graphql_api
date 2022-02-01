@@ -68,6 +68,7 @@ type Deal {
   representative: String
   target_raise_goal: Int
   accept_crypto: Boolean
+  accept_ach: Boolean
   dealDetails: [DealDetail]
   portfolio_company_securities: String
   public_pitch_deck: Boolean

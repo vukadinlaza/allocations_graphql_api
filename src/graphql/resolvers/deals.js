@@ -403,7 +403,7 @@ const Mutations = {
       });
 
       // delete deal and all investments in deal
-      await ctx.datasources.investments.deleteMany({ deal_id: ObjectId(_id) });
+      await ctx.db.investments.deleteMany({ deal_id: ObjectId(_id) });
       return ctx.datasources.deals.deleteDealById({ deal_id: _id });
     } catch (e) {
       // eslint-disable-next-line no-console

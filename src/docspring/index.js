@@ -88,6 +88,8 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_eM6JXmJ4NQb9adTyKd",
     "tpl_FCdLsyKMSe3cmZ9NQX",
     "tpl_NhtdhXPRgq3nd3qHXS",
+    "tpl_Z3aePF3GnHKE2Z2gDt",
+    "tpl_QXdMeT3D4dedsTfkTx",
   ];
 
   const kunalDeals = ["tpl_FbnCe3L7c9Qj32JHTG", "tpl_q42NLbhm5gRT4SKLkf"];
@@ -208,7 +210,13 @@ const getTemplateData = (input, user, templateId) => {
         ? ""
         : moment(new Date()).format("MM/DD/YYYY") || " ",
     };
-  } else if (templateId === "tpl_zbmQNPrkqXnJmFMD7C") {
+  } else if (
+    [
+      "tpl_y3GEaLkZMDqhHT6SqE",
+      "tpl_zbmQNPrkqXnJmFMD7C",
+      "tpl_sCjzLb53RKfSd7ZErJ",
+    ].includes(templateId)
+  ) {
     return {
       InvestorType: capitalize(investor_type),
       MemberName: legalName,
@@ -230,6 +238,7 @@ const getTemplateData = (input, user, templateId) => {
       MemberName: legalName,
       SubAmount: investmentAmount,
       USStateIndividual: isTypeIndividual ? countryWithState : "",
+      Title: isTypeIndividual ? "" : title || "",
       USStateEntity: isTypeEntity ? countryWithState : "",
       AccredIndiv: isTypeIndividual
         ? accredited_investor_status || is3c7_options_status
