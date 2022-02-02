@@ -502,10 +502,10 @@ const Mutations = {
       );
     }
   },
-  createCapPDF: async (_, { data }, { db, ctx }) => {
+  createCapPDF: async (_, { data }, { db, datasources }) => {
     const timeStamp = Date.now();
 
-    const investment = await ctx.datasources.investments.getInvestmentById({
+    const investment = await datasources.investments.getInvestmentById({
       investment_id: ObjectId(data.investmentId),
     });
     if (!investment) {
@@ -554,7 +554,7 @@ const Mutations = {
         },
       }
     );
-    return ctx.datasources.investments.getInvestmentById({
+    return datasources.investments.getInvestmentById({
       investment_id: ObjectId(investment._id),
     });
   },
