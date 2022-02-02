@@ -38,27 +38,11 @@ class Deals extends MongoDataSource {
 
   async getAllDeals({ query }) {
     const legacyDeals = await this.collection.find(query).toArray();
-    const serviceDeals = await DealService.getAllDeals({
-      ...query,
-      organization: undefined,
-      organization_id: query?.organization,
-    });
-
-    return [
-      ...legacyDeals,
-      ...(serviceDeals || []).map((d) =>
-        transformServiceDeal({ serviceDeal: d })
-      ),
-    ];
+    return legacyDeals;
   }
   async findDealsByFields({ query }) {
     const legacyDeals = await this.collection.find({ ...query }).toArray();
-    const serviceDeals = await DealService.getAllDeals(query);
-
-    return [
-      ...legacyDeals,
-      ...serviceDeals.map((d) => transformServiceDeal({ serviceDeal: d })),
-    ];
+    return legacyDeals;
   }
 
   async updateDealById({ deal_id, deal }) {
