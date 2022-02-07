@@ -87,6 +87,12 @@ async function authenticate({ req, db, authToken }) {
 
     return newUser;
   } catch (e) {
+    const errorLogger = appLogger("allocations-graphql-api", {
+      name: "Auth",
+      shouldSendLogs,
+    });
+    // log error to console & send to logDNA if in production
+    errorLogger(err);
     throw new AuthenticationError("authenicate function catch statement");
   }
 }
