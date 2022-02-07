@@ -7,7 +7,7 @@ const { createUserAccountAndEntity } = require("./utils/createUser");
 const Mailer = require("./mailers/mailer");
 const signUpTemplate = require("./mailers/templates/sign-up-template");
 const { ObjectId } = require("mongodb");
-const { appLogger } = require("./utils/logger");
+const { appLogger, shouldSendLogs } = require("./utils/logger");
 
 const client = jwksClient({
   cache: true,
@@ -93,8 +93,8 @@ async function authenticate({ req, db, authToken }) {
       shouldSendLogs,
     });
     // log error to console & send to logDNA if in production
-    errorLogger(err);
-    throw new AuthenticationError("authenicate function catch statement");
+    errorLogger(e);
+    throw new AuthenticationError("authenticate function catch statement");
   }
 }
 
