@@ -7,6 +7,7 @@ const { createUserAccountAndEntity } = require("./utils/createUser");
 const Mailer = require("./mailers/mailer");
 const signUpTemplate = require("./mailers/templates/sign-up-template");
 const { ObjectId } = require("mongodb");
+const { appLogger } = require("./utils/logger");
 
 const client = jwksClient({
   cache: true,
