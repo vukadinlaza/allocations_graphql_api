@@ -7,6 +7,7 @@ const { createUserAccountAndEntity } = require("./utils/createUser");
 const Mailer = require("./mailers/mailer");
 const signUpTemplate = require("./mailers/templates/sign-up-template");
 const { ObjectId } = require("mongodb");
+const { appLogger, shouldSendLogs } = require("./utils/logger");
 
 const client = jwksClient({
   cache: true,
@@ -87,7 +88,13 @@ async function authenticate({ req, db, authToken }) {
 
     return newUser;
   } catch (e) {
-    throw new AuthenticationError("authenicate function catch statement");
+    const errorLogger = appLogger("allocations-graphql-api", {
+      name: "Auth",
+      shouldSendLogs,
+    });
+    // log error to console & send to logDNA if in production
+    errorLogger(e);
+    throw new AuthenticationError("authenticate function catch statement");
   }
 }
 
