@@ -66,6 +66,25 @@ const Queries = {
     const data = await db.deals.aggregate(aggregation).toArray();
     return data[0];
   },
+  orgLastDeals: async (_, { slug, lastNDeals }, ctx) => {
+    isAdmin(ctx);
+    const org = await ctx.db.organizations.findOne({ slug });
+    const orgDeals = await ctx.datasources.deals.getDealsByOrg(org._id);
+    const orderedDeals = orgDeals.sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+    const spvs = orderedDeals.filter((deal) => deal.type !== "fund");
+    const funds = orderedDeals.filter((deal) => deal.type === "fund");
+    const slicedSpvs = spvs.length ? spvs.slice(-lastNDeals) : [];
+    const slicedFunds = funds.length ? funds.slice(-lastNDeals) : [];
+    console.log(
+      [...slicedSpvs, ...slicedFunds].map((d) => d.name || d.company_name)
+    );
+    return {
+      slug,
+      deals: [...slicedSpvs, ...slicedFunds],
+    };
+  },
 };
 
 const Mutations = {
@@ -155,6 +174,7 @@ const Mutations = {
 
 const Organization = {
   deals: async (org, _, { datasources }) => {
+    if (org.deals) return org.deals;
     const query = {
       organization: org._id,
     };
@@ -204,7 +224,8 @@ const Organization = {
       //If organization comes from server paginated aggregation, we won't recalculate the totalAUM
       return parseFloat(org.totalAUM);
     }
-    const [{ aum }] = await db.deals
+
+    const data = await db.deals
       .aggregate([
         { $match: { organization: org._id } },
         {
@@ -227,7 +248,7 @@ const Organization = {
       ])
       .toArray();
 
-    return aum;
+    return data && data.length ? data[0].aum : 0;
   },
   totalSPVs: async (org, _, { db }) => {
     const res = await db.deals
