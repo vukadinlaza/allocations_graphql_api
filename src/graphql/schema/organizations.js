@@ -80,6 +80,7 @@ type EmailInvite {
 
 extend type Query {
   organization(slug: String!, offset: Int, limit: Int): Organization
+  organizationById(_id: String): Organization
   organizationMembers(slug: String!): [User]
   pagOrganizations(pagination: PaginationInput!): OrganizationPagination
   overviewData(slug: String!): Object

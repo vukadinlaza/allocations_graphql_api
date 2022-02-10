@@ -31,6 +31,24 @@ const Queries = {
     }
     throw new AuthenticationError("org query throw");
   },
+  organizationById: async (_, { _id }, { user, db }) => {
+    const org = await db.organizations.findOne({ _id: ObjectId(_id) });
+    // short circuit with fund if superadmin
+    if (user.admin) {
+      return org;
+    }
+
+    if (
+      org &&
+      user &&
+      (user.organizations_admin || [])
+        .map((id) => id.toString())
+        .includes(org._id.toString())
+    ) {
+      return org;
+    }
+    throw new AuthenticationError("org query throw");
+  },
   /** members must have the org id on their .organizations_admin key **/
   organizationMembers: async (_, { slug }, { user, db }) => {
     isAdmin({ user, db });
