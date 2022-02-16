@@ -50,6 +50,7 @@ const getTemplateData = (input, user, templateId) => {
     secondInvestor,
     is3c7_options_status,
     address,
+    cifusStatus,
   } = input;
 
   const SIGNATURE_ONLY_TEMPLATE = "tpl_ctrRDXgQdKz5YGg9QK";
@@ -98,6 +99,9 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_q42NLbhm5gRT4SKLkf",
     "tpl_yALgSxJfJHpXnXZKcc",
   ];
+
+  const techstarDeals = ["tpl_sCh9nKL4gtEe4mKCGY"];
+
   if (kunalDeals.includes(templateId)) {
     return {
       InvestorType: capitalize(investor_type),
@@ -111,6 +115,44 @@ const getTemplateData = (input, user, templateId) => {
       FullName: nameToUse,
       Signature: nameToUse,
       "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
+    };
+  }
+  if (techstarDeals.includes(templateId)) {
+    return {
+      InvestorType: capitalize(investor_type),
+      MemberName: legalName,
+      SubAmount: investmentAmount,
+      USStateIndividual: isTypeIndividual ? countryWithState : "",
+      Title: isTypeIndividual ? "" : title || "",
+      USStateEntity: isTypeEntity ? countryWithState : "",
+      AccredIndiv: isTypeIndividual
+        ? accredited_investor_status || is3c7_options_status
+        : "",
+      AccredEntity: isTypeIndividual
+        ? ""
+        : accredited_investor_status || is3c7_options_status,
+      Email: user.email,
+      FullName: nameToUse,
+      Signature: nameToUse,
+      "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
+      MemberName2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : " ",
+      FullName2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : "",
+      Signature2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : " ",
+      Email2:
+        isTypeIndividual && secondInvestor ? secondInvestor.secondEmail : " ",
+
+      CIFUSDefinition: cifusStatus
+        ? `${cifusStatus} as defined under the CFIUS Regulations`
+        : " ",
     };
   }
 
