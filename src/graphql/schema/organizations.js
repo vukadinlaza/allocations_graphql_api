@@ -84,7 +84,6 @@ extend type Query {
   organizationMembers(slug: String!): [User]
   pagOrganizations(pagination: PaginationInput!): OrganizationPagination
   overviewData(slug: String!): Object
-  orgLastDeals(slug: String!, lastNDeals: Int!): Organization
 }
 
 extend type Mutation {
