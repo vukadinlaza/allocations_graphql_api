@@ -68,6 +68,7 @@ type Deal {
   representative: String
   target_raise_goal: Int
   accept_crypto: Boolean
+  accept_ach: Boolean
   dealDetails: [DealDetail]
   portfolio_company_securities: String
   public_pitch_deck: Boolean
@@ -225,6 +226,10 @@ type DataRequest {
   link: String
 }
 
+type Message {
+  message: String
+}
+
 type Query {
   deal(_id: String, deal_slug: String, fund_slug: String): Deal
   allDeals: [Deal]
@@ -263,7 +268,10 @@ type Mutation {
   updateBuildDeal(payload: Object): Object
   updateDealBuildApi(payload: Object): Deal
   sendInvitations(dealId: String, emails: [String]): Object
+  setDocumentTasksComplete(payload: Object): Object
+  signInvestmentAgreement(payload: Object): Message
   updateInviteInvestorsTask(dealId: String): Object
+  wakeUpBuildApi(payload: Object): Message
 }
 
 type DataRequestToken {

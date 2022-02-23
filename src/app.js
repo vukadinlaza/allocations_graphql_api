@@ -1,4 +1,8 @@
 /* eslint-disable no-console */
+
+// Datadog tracing
+require("dd-trace").init({});
+
 const getSettings = require("./settings");
 const compression = require("compression");
 const cors = require("cors");

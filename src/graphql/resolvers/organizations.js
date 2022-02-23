@@ -31,6 +31,24 @@ const Queries = {
     }
     throw new AuthenticationError("org query throw");
   },
+  organizationById: async (_, { _id }, { user, db }) => {
+    const org = await db.organizations.findOne({ _id: ObjectId(_id) });
+    // short circuit with fund if superadmin
+    if (user.admin) {
+      return org;
+    }
+
+    if (
+      org &&
+      user &&
+      (user.organizations_admin || [])
+        .map((id) => id.toString())
+        .includes(org._id.toString())
+    ) {
+      return org;
+    }
+    throw new AuthenticationError("org query throw");
+  },
   /** members must have the org id on their .organizations_admin key **/
   organizationMembers: async (_, { slug }, { user, db }) => {
     isAdmin({ user, db });
@@ -155,6 +173,7 @@ const Mutations = {
 
 const Organization = {
   deals: async (org, _, { datasources }) => {
+    if (org.deals) return org.deals;
     const query = {
       organization: org._id,
     };
@@ -204,7 +223,8 @@ const Organization = {
       //If organization comes from server paginated aggregation, we won't recalculate the totalAUM
       return parseFloat(org.totalAUM);
     }
-    const [{ aum }] = await db.deals
+
+    const data = await db.deals
       .aggregate([
         { $match: { organization: org._id } },
         {
@@ -227,7 +247,7 @@ const Organization = {
       ])
       .toArray();
 
-    return aum;
+    return data && data.length ? data[0].aum : 0;
   },
   totalSPVs: async (org, _, { db }) => {
     const res = await db.deals

@@ -38,27 +38,11 @@ class Deals extends MongoDataSource {
 
   async getAllDeals({ query }) {
     const legacyDeals = await this.collection.find(query).toArray();
-    const serviceDeals = await DealService.getAllDeals({
-      ...query,
-      organization: undefined,
-      organization_id: query?.organization,
-    });
-
-    return [
-      ...legacyDeals,
-      ...(serviceDeals || []).map((d) =>
-        transformServiceDeal({ serviceDeal: d })
-      ),
-    ];
+    return legacyDeals;
   }
   async findDealsByFields({ query }) {
     const legacyDeals = await this.collection.find({ ...query }).toArray();
-    const serviceDeals = await DealService.getAllDeals(query);
-
-    return [
-      ...legacyDeals,
-      ...serviceDeals.map((d) => transformServiceDeal({ serviceDeal: d })),
-    ];
+    return legacyDeals;
   }
 
   async updateDealById({ deal_id, deal }) {
@@ -110,6 +94,24 @@ class Deals extends MongoDataSource {
 
     const deletedServiceDeal = await DealService.deleteDealById(deal_id);
     return deletedServiceDeal.acknowledged;
+  }
+
+  async getDealsByOrg(_id) {
+    const legacyDeals = await this.collection
+      .find({
+        organization: ObjectId(_id),
+      })
+      .toArray();
+    const legacyDealsIds = legacyDeals.map((d) => JSON.stringify(d._id));
+    const newDeals = await DealService.getAllDeals({
+      organization_id: ObjectId(_id),
+    });
+    const transformedDeals = newDeals
+      .filter((deal) => {
+        return !legacyDealsIds.includes(JSON.stringify(deal._id));
+      })
+      .map((deal) => transformServiceDeal({ serviceDeal: deal }));
+    return [...legacyDeals, ...transformedDeals];
   }
 }
 

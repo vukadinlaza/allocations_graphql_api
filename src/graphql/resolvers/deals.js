@@ -23,7 +23,6 @@ const { DealService } = require("@allocations/deal-service");
 const {
   InvestmentAgreementService,
 } = require("@allocations/investment-agreement-service");
-const { CryptoService } = require("@allocations/crypto-service");
 const { alertCryptoWalletError } = require("../../zaps");
 const { deallocateReferenceNumbers } = require("./newDirections");
 
@@ -113,7 +112,7 @@ const Deal = {
       .toArray();
     const aum = wiredInvestments.length
       ? wiredInvestments
-          .map((inv) => inv.amount)
+          .map((inv) => inv.amount ?? 0)
           .reduce((acc, n) => Number(acc) + Number(n))
       : 0;
     return aum;
@@ -218,6 +217,7 @@ const Queries = {
   getServicesAgreementLink: async (_, { deal_id }) => {
     return DealService.getServicesAgreementLink(deal_id);
   },
+  // Gets investment agreement link via build api using the LegalDocumentsService
   getFmSignatureLink: async (_, { deal_id }) => {
     try {
       const res = await fetch(
@@ -403,7 +403,7 @@ const Mutations = {
       });
 
       // delete deal and all investments in deal
-      await ctx.datasources.investments.deleteMany({ deal_id: ObjectId(_id) });
+      await ctx.db.investments.deleteMany({ deal_id: ObjectId(_id) });
       return ctx.datasources.deals.deleteDealById({ deal_id: _id });
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -600,6 +600,25 @@ const Mutations = {
     const dealResponse = await DealService.get(deal._id);
     return dealResponse;
   },
+  wakeUpBuildApi: async (_, { payload }, { user }) => {
+    try {
+      const res = await fetch(`${process.env.BUILD_API_URL}/api/v1/deals`, {
+        method: "POST",
+        headers: {
+          "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ wakeUp: true }),
+      });
+
+      const [ok, response] = await Promise.all([res.ok, res.json()]);
+      if (!ok) throw response;
+
+      return response;
+    } catch (err) {
+      throwApolloError(err, "wakeUpBuildApi");
+    }
+  },
   createNewDeal: async (_, { payload }, { user }) => {
     try {
       const internationalInvestors = ({ status, countries }) => {
@@ -641,8 +660,8 @@ const Mutations = {
           name: payload.manager_name,
           type: "individual",
           email: user.email,
-          title: "",
-          entity_name: "",
+          title: payload.representative,
+          // entity_name: "",
         },
         management_fee: {
           type: payload.management_fee.type,
@@ -652,7 +671,6 @@ const Mutations = {
         setup_cost: 20000,
         angels_deal: false,
         deal_multiple: 0,
-        accept_crypto: payload.accept_crypto,
         ...payload,
       };
 
@@ -676,15 +694,6 @@ const Mutations = {
       const [ok, dealResponse] = await Promise.all([res.ok, res.json()]);
       if (!ok) {
         throw dealResponse;
-      }
-
-      if (dealResponse.deal.accept_crypto) {
-        const response = await CryptoService.createWallet(
-          dealResponse.deal._id
-        );
-        if (!response.acknowledged || response.error) {
-          await alertCryptoWalletError(deal.name, dealResponse.deal._id);
-        }
       }
 
       return dealResponse;
@@ -739,7 +748,31 @@ const Mutations = {
       throwApolloError(err, "updateBuildDeal");
     }
   },
+  setDocumentTasksComplete: async (_, { payload }) => {
+    try {
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/update-document-tasks/${payload.deal_id}`,
+        {
+          method: "PUT",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+          // The body requires an taskData property which is an array of objects with at minimum a task_id property, and an optional document_id
+          // eg. body = { taskData: [ { task_id: '1', document_id: '1' }, { task_id: '2', document_id: null } ] }
+          body: JSON.stringify(payload),
+        }
+      );
 
+      const [ok, response] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw response;
+      }
+      return response;
+    } catch (err) {
+      throwApolloError(err, "setTasksComplete");
+    }
+  },
   deleteDealDocument: async (
     _,
     { document_id, phase_id, task_id },
@@ -767,7 +800,30 @@ const Mutations = {
       throwApolloError(err, "deleteDealDocument");
     }
   },
+  // Completes the Sign Investment Agreement Task in Build
+  signInvestmentAgreement: async (_, { payload }) => {
+    try {
+      const res = await fetch(
+        `${process.env.BUILD_API_URL}/api/v1/deals/sign-investment-agreement/${payload.deal_id}`,
+        {
+          method: "POST",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
+      const [ok, dealResponse] = await Promise.all([res.ok, res.json()]);
+      if (!ok) {
+        throw dealResponse;
+      }
+
+      return dealResponse;
+    } catch (e) {
+      throwApolloError(e, "signInvestmentAgreement");
+    }
+  },
   sendInvitations: async (_, { dealId, emails }, { user, datasources, db }) => {
     const deal = await datasources.deals.getDealById({
       deal_id: ObjectId(dealId),

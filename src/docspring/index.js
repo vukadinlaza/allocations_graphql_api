@@ -50,6 +50,7 @@ const getTemplateData = (input, user, templateId) => {
     secondInvestor,
     is3c7_options_status,
     address,
+    cifusStatus,
   } = input;
 
   const SIGNATURE_ONLY_TEMPLATE = "tpl_ctrRDXgQdKz5YGg9QK";
@@ -88,9 +89,24 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_eM6JXmJ4NQb9adTyKd",
     "tpl_FCdLsyKMSe3cmZ9NQX",
     "tpl_NhtdhXPRgq3nd3qHXS",
+    "tpl_Z3aePF3GnHKE2Z2gDt",
+    "tpl_QXdMeT3D4dedsTfkTx",
+    "tpl_GGQxKF9RdXfGbsaxEK",
   ];
 
-  const kunalDeals = ["tpl_FbnCe3L7c9Qj32JHTG", "tpl_q42NLbhm5gRT4SKLkf"];
+  const kunalDeals = [
+    "tpl_FbnCe3L7c9Qj32JHTG",
+    "tpl_q42NLbhm5gRT4SKLkf",
+    "tpl_yALgSxJfJHpXnXZKcc",
+    "tpl_H7DMZHRSTKPGM5ZyLX",
+  ];
+
+  const techstarDeals = [
+    "tpl_sCh9nKL4gtEe4mKCGY",
+    "tpl_fSkjPHkrrNSZTb6YnJ",
+    "tpl_G2yTY3qtZs3RLMC2fe",
+  ];
+
   if (kunalDeals.includes(templateId)) {
     return {
       InvestorType: capitalize(investor_type),
@@ -104,6 +120,44 @@ const getTemplateData = (input, user, templateId) => {
       FullName: nameToUse,
       Signature: nameToUse,
       "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
+    };
+  }
+  if (techstarDeals.includes(templateId)) {
+    return {
+      InvestorType: capitalize(investor_type),
+      MemberName: legalName,
+      SubAmount: investmentAmount,
+      USStateIndividual: isTypeIndividual ? countryWithState : "",
+      Title: isTypeIndividual ? "" : title || "",
+      USStateEntity: isTypeEntity ? countryWithState : "",
+      AccredIndiv: isTypeIndividual
+        ? accredited_investor_status || is3c7_options_status
+        : "",
+      AccredEntity: isTypeIndividual
+        ? ""
+        : accredited_investor_status || is3c7_options_status,
+      Email: user.email,
+      FullName: nameToUse,
+      Signature: nameToUse,
+      "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
+      MemberName2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : " ",
+      FullName2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : "",
+      Signature2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : " ",
+      Email2:
+        isTypeIndividual && secondInvestor ? secondInvestor.secondEmail : " ",
+
+      CIFUSDefinition: cifusStatus
+        ? `${cifusStatus} as defined under the CFIUS Regulations`
+        : " ",
     };
   }
 
@@ -208,7 +262,13 @@ const getTemplateData = (input, user, templateId) => {
         ? ""
         : moment(new Date()).format("MM/DD/YYYY") || " ",
     };
-  } else if (templateId === "tpl_zbmQNPrkqXnJmFMD7C") {
+  } else if (
+    [
+      "tpl_y3GEaLkZMDqhHT6SqE",
+      "tpl_zbmQNPrkqXnJmFMD7C",
+      "tpl_sCjzLb53RKfSd7ZErJ",
+    ].includes(templateId)
+  ) {
     return {
       InvestorType: capitalize(investor_type),
       MemberName: legalName,
@@ -230,6 +290,7 @@ const getTemplateData = (input, user, templateId) => {
       MemberName: legalName,
       SubAmount: investmentAmount,
       USStateIndividual: isTypeIndividual ? countryWithState : "",
+      Title: isTypeIndividual ? "" : title || "",
       USStateEntity: isTypeEntity ? countryWithState : "",
       AccredIndiv: isTypeIndividual
         ? accredited_investor_status || is3c7_options_status
