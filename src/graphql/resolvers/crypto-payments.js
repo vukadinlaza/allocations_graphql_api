@@ -1,23 +1,41 @@
-const { CryptoService } = require("@allocations/crypto-service");
-const Schema = require("../schema/crypto-payments");
-
-const Mutations = {
-  createInvestmentTransaction: async (_parent, { transactionInfo }) => {
-    const result = await CryptoService.createInvestmentTransaction(
-      transactionInfo
-    );
-    return result;
-  },
-};
+const fetch = require("node-fetch");
+const { throwApolloError } = require("../../utils/common.js");
+const cryptoSchema = require("../schema/crypto-payments");
+const Schema = cryptoSchema;
 
 const Queries = {
-  walletBalance: async (_, { deal_id }, { db }) => {
-    return CryptoService.getBalance(deal_id);
+  cryptoOptions: async (_, { deal_id }) => {
+    try {
+      const res = await fetch(
+        `${process.env.ALLOCATIONS_CRYPTO_API_URL}/v1/crypto-options/${deal_id}`,
+        {
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const cryptoResponse = res.json();
+      if (!res.ok) {
+        // don't error here on failed response, some deals won't have options set
+        // We expect a 4xx upstream, but want to return as if no options exist
+        return {};
+      }
+      return cryptoResponse;
+    } catch (e) {
+      throwApolloError(e, "cryptoOptions");
+    }
   },
 };
 
+const Mutations = {};
+const Subscriptions = {};
+const subResolvers = {};
+
 module.exports = {
-  Queries,
   Schema,
+  Queries,
   Mutations,
+  Subscriptions,
+  subResolvers,
 };

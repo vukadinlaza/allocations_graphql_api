@@ -2,36 +2,17 @@ const { gql } = require("apollo-server-express");
 
 module.exports = gql(`
 
-input TransactionInfo {
-    deal_id: String!
-    transaction_hash : String!
-    user_id: String!
-    deal_name: String!
-    user_name: String!
-    user_email: String!
-}
-
-type SuccessResponse {
-    acknowledged: Boolean
+type CryptoOptionsResponse {
     _id: String
-}
-
-extend type Mutation {
-    createInvestmentTransaction(transactionInfo: TransactionInfo!): SuccessResponse
+    crypto_payments: Boolean
+    deal_id: String,
+    deal_name: String,
+    activated_user: String,
 }
 
 extend type Query {
-    walletBalance(deal_id: String!): WalletBalanceResponse
+    cryptoOptions(deal_id: String!): CryptoOptionsResponse
 }
 
-type Balance {
-    amount: String
-    currency: String
- }
- 
- type WalletBalanceResponse {
-    acknowledged: Boolean
-    balances: [Balance]
- }
 
 `);
