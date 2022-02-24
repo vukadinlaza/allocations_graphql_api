@@ -53,6 +53,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
   };
 };
 const transformLegacyDeal = ({ legacyDeal }) => {
+  if (!legacyDeal._id) return {};
   return {
     _id: legacyDeal._id,
     approved: true,
