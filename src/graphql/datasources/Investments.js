@@ -76,8 +76,9 @@ class Investments extends MongoDataSource {
         investor_state: legacyInvestment.submissionData?.state,
         accredited_investor_type:
           legacyInvestment.submissionData?.accredited_investor_status,
-        carry_fee_percent: parseInt(deal.dealParams.totalCarry) / 100,
-        management_fee_percent: parseInt(deal.dealParams.managementFees) / 100,
+        carry_fee_percent: parseInt(deal.dealParams.totalCarry || 0) / 100,
+        management_fee_percent:
+          parseInt(deal.dealParams.managementFees || 0) / 100,
         metadata: {
           deal_id: legacyInvestment.deal_id,
         },
