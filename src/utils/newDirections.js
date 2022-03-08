@@ -13,7 +13,7 @@ const getReferenceNumber = (body) => {
 };
 const getWireAmount = (body) => {
   const regexAmount = new RegExp(
-    /in(\D+)the(\D+)amount(\D+)of(\D+)(?<amount>\d+.\d+)/
+    /in(\D+)the(\D+)amount(\D+)of(\D+)(?<amount>[\d,]+.\d+)/
   );
   const amountNamed = regexAmount.exec(body);
   if (!amountNamed || !amountNamed.groups || !amountNamed.groups.amount)
