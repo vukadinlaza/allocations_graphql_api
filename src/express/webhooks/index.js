@@ -597,7 +597,6 @@ module.exports = Router()
         Amount: ${amount}
         Email Link: ${emailLink}
         `;
-      res.sendStatus(200);
       res.send({ slackMessage });
     } catch (err) {
       console.log("nd-bank-wire-confirmation error :>> ", err);
@@ -631,7 +630,6 @@ module.exports = Router()
       Email Link: ${emailLink}
       `;
 
-      res.sendStatus(500);
       res.send({ slackMessage });
     }
   })
