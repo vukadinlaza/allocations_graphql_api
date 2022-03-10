@@ -50,21 +50,19 @@ class Investments extends MongoDataSource {
     user,
     legacyInvestment,
   }) {
-    const mgmtFeeIsNumber = isNumber(
-      parseInt(deal.dealParams.managementFees || 0)
-    );
-    const carryFeeIsNumber = isNumber(
-      parseInt(deal.dealParams.totalCarry || 0)
-    );
+    const mgmtFeeIsNumber = isNumber(parseInt(deal.dealParams.managementFees));
+    const carryFeeIsNumber = isNumber(parseInt(deal.dealParams.totalCarry));
     console.log("mgmt", mgmtFeeIsNumber);
     console.log("carrys", carryFeeIsNumber);
     console.log(
       "value",
-      mgmtFeeIsNumber ? parseInt(deal.dealParams.managementFees || 0) / 100 : 0
+      parseInt(deal.dealParams.managementFees),
+      mgmtFeeIsNumber ? parseInt(deal.dealParams.managementFees) / 100 : 0
     );
     console.log(
       "carryFeeIsNumber",
-      carryFeeIsNumber ? parseInt(deal.dealParams.totalCarry || 0) / 100 : 0
+      parseInt(deal.dealParams.managementFees),
+      carryFeeIsNumber ? parseInt(deal.dealParams.managementFees) / 100 : 0
     );
 
     try {
