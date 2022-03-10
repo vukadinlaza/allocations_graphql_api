@@ -53,6 +53,20 @@ class Investments extends MongoDataSource {
     const mgmtFeeIsNumber = isNumber(
       parseInt(deal.dealParams.managementFees || 0)
     );
+    const carryFeeIsNumber = isNumber(
+      parseInt(deal.dealParams.totalCarry || 0)
+    );
+    console.log("mgmt", mgmtFeeIsNumber);
+    console.log("carrys", carryFeeIsNumber);
+    console.log(
+      "value",
+      mgmtFeeIsNumber ? parseInt(deal.dealParams.managementFees || 0) / 100 : 0
+    );
+    console.log(
+      "carryFeeIsNumber",
+      carryFeeIsNumber ? parseInt(deal.dealParams.totalCarry || 0) / 100 : 0
+    );
+
     try {
       const serviceInvestment = {
         _id: investment_id,
