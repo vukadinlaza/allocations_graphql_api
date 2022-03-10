@@ -1,5 +1,5 @@
 const { MongoDataSource } = require("apollo-datasource-mongodb");
-const { capitalize } = require("lodash");
+const { capitalize, isNumber } = require("lodash");
 const { ObjectId } = require("mongodb");
 const fetch = require("node-fetch");
 
@@ -50,6 +50,9 @@ class Investments extends MongoDataSource {
     user,
     legacyInvestment,
   }) {
+    const mgmtFeeIsNumber = isNumber(
+      parseInt(deal.dealParams.managementFees || 0)
+    );
     try {
       const serviceInvestment = {
         _id: investment_id,
@@ -77,8 +80,9 @@ class Investments extends MongoDataSource {
         accredited_investor_type:
           legacyInvestment.submissionData?.accredited_investor_status,
         carry_fee_percent: parseInt(deal.dealParams.totalCarry || 0) / 100,
-        management_fee_percent:
-          parseInt(deal.dealParams.managementFees || 0) / 100,
+        management_fee_percent: mgmtFeeIsNumber
+          ? parseInt(deal.dealParams.managementFees || 0) / 100
+          : 0,
         metadata: {
           deal_id: legacyInvestment.deal_id,
         },
