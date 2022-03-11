@@ -509,6 +509,130 @@ module.exports = Router()
       next(err);
     }
   })
+  // clone of /nd-bank-wire-confirmation with modified returns to be used in zapier for slack messaging
+  .post("/nd-bank-incoming-wire", async (req, res) => {
+    let emailLink;
+    let deal;
+    let referenceNumber;
+    let amount;
+    let investment;
+    const db = await getDB();
+
+    try {
+      const verified = verifyWebhook(req.headers.authorization);
+
+      if (!verified) {
+        res.sendStatus(401);
+        throw new Error("Invalid token");
+      }
+
+      const DealService = new Deals(db.collection("deals"));
+
+      const { body } = req;
+      const email = body.body;
+      emailLink = body.emailLink;
+
+      referenceNumber = getReferenceNumber(email);
+      amount = getWireAmount(email);
+
+      investment = await db.investments.findOne({
+        "wire_instructions.reference_number": referenceNumber,
+      });
+      console.log("INVESTMENT", investment);
+      if (!investment) throw new Error("No Investment Found.");
+
+      const {
+        _id: investmentId,
+        deal_id,
+        user_id,
+        submissionData: { legalName },
+      } = investment;
+
+      deal = await DealService.getDealById({ deal_id });
+
+      if (!deal) throw new Error("No Deal Found");
+      if (!deal.virtual_account_number)
+        throw new Error("No Virtual Account Number");
+      const { virtual_account_number } = deal;
+
+      console.log("AMOUNT", amount);
+
+      await newDirectionTransactionsAddRow({
+        virtualAccountNumber: virtual_account_number,
+        amount,
+        referenceNumber,
+        deal_id,
+        investmentId,
+        user_id,
+      });
+
+      const account = await findOrCreateBankingTransactionsAccount({
+        virtualAccountNumber: virtual_account_number,
+        deal_name: deal.company_name,
+      });
+
+      await bankTransactionsTransactionsAddRow({
+        user_name: legalName,
+        referenceNumber,
+        account,
+        amount,
+      });
+
+      const investor = await db
+        .collection("users")
+        .findOne({ _id: investment.user_id });
+
+      let investorName;
+      if (investor.signer_full_name) investorName = investor.signer_full_name;
+      else if (investor.first_name && investor.last_name)
+        investorName = `${investor.first_name} ${investor.last_name}`;
+      else investorName = "N/A";
+
+      const slackMessage = `New Incoming Wire
+        Deal Company Name: ${deal.company_name}
+        Deal ID: ${deal._id}
+        Investor Name: ${investorName}
+        Entity: ${investor.entity || "N/A"}
+        Email: ${investor.email || "N/A"}
+        Amount: ${amount}
+        Email Link: ${emailLink}
+        `;
+      res.send({ slackMessage });
+    } catch (err) {
+      console.log("nd-bank-wire-confirmation error :>> ", err);
+      console.log("err.message ", err.message);
+      console.log("err entries ", Object.entries(err));
+
+      const deal_id = deal ? deal._id : "N/A";
+      const investment_id = investment ? investment._id : "N/A";
+
+      const formatErrorDetails = (details) => {
+        if (!details) return "N/A";
+        // For all properties within the details obj, create a new line of the key and value with spacing
+        // ex details = { name: 'jim' } => '               name: jim
+        return Object.keys(details).reduce((acc, val) => {
+          const key = val;
+          const value = details[val];
+          const newLine = `\n         ${key}: ${value}`;
+          return acc.concat(newLine);
+        }, "");
+      };
+
+      const error =
+        err && err.message ? err.message : "Error in ND Incoming wire.";
+
+      const slackMessage = `Error @here
+      Action: "ND Incoming Wire Err"
+      Error: ${error}
+      Details: ${formatErrorDetails(
+        { referenceNumber, amount, deal_id, investment_id } || {}
+      )}
+      Email Link: ${emailLink}
+      `;
+
+      res.send({ slackMessage });
+    }
+  })
   .post("/create-capital-accounts-document", async (req, res, next) => {
     try {
       const db = await getDB();
