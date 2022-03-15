@@ -50,8 +50,12 @@ class Investments extends MongoDataSource {
     user,
     legacyInvestment,
   }) {
-    const mgmtFeeIsNumber = isNumber(parseInt(deal.dealParams.managementFees));
-    const carryFeeIsNumber = isNumber(parseInt(deal.dealParams.totalCarry));
+    const mgmtFeeIsNumber = !Number.isNaN(
+      parseInt(deal.dealParams.managementFees)
+    );
+    const carryFeeIsNumber = !Number.isNaN(
+      parseInt(deal.dealParams.totalCarry)
+    );
     console.log("mgmt", mgmtFeeIsNumber);
     console.log("carrys", carryFeeIsNumber);
     console.log(
@@ -91,9 +95,11 @@ class Investments extends MongoDataSource {
         investor_state: legacyInvestment.submissionData?.state,
         accredited_investor_type:
           legacyInvestment.submissionData?.accredited_investor_status,
-        carry_fee_percent: parseInt(deal.dealParams.totalCarry || 0) / 100,
+        carry_fee_percent: carryFeeIsNumber
+          ? parseInt(deal.dealParams.totalCarry) / 100
+          : 0,
         management_fee_percent: mgmtFeeIsNumber
-          ? parseInt(deal.dealParams.managementFees || 0) / 100
+          ? parseInt(deal.dealParams.managementFees) / 100
           : 0,
         metadata: {
           deal_id: legacyInvestment.deal_id,
