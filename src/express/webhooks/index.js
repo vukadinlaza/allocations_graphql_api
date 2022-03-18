@@ -327,12 +327,14 @@ module.exports = Router()
         );
       }
 
-      const updatedLegacyInvestment = await db.investments.updateOne(
-
+     await db.investments.updateOne(
         { _id: ObjectId(body.investmentId) },
-        { $set: { status: body.status } },
-        { new: true }
+        { $set: { status: body.status } }
       );
+      
+      const updatedLegacyInvestment = await db.investments.findOne({
+        _id: ObjectId(body.investmentId),
+      });
 
       await res.send(updatedLegacyInvestment);
 
