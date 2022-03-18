@@ -330,7 +330,8 @@ module.exports = Router()
         );
       }
 
-      const res = await fetch(
+      const response = await fetch(
+
         `${process.env.INVEST_API_URL}/api/v1/investments/${body.investmentId}`,
         {
           method: "PATCH",
@@ -344,7 +345,8 @@ module.exports = Router()
         }
       );
 
-      if (!res.ok)
+
+      if (!response.ok)
         console.warn(
           `Unable to update service investment with _id:${body.investmentId}`
         );
