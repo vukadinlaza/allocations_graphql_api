@@ -26,7 +26,6 @@ const { SlackService } = require("@allocations/slack-service");
 const { createCapitalAccountDoc } = require("../../docspring/index");
 const Uploader = require("../../uploaders/investor-docs");
 const { amountFormat } = require("../../utils/common");
-const { InvestmentService } = require("@allocations/investment-service");
 
 let Bucket =
   process.env.NODE_ENV === "production"
@@ -317,20 +316,26 @@ module.exports = Router()
       const { body } = req;
 
       const db = await getDB();
-      const legacyInvestment = await db.investments.findOneAndUpdate(
-        { _id: body.investmentId },
-        { $set: { status: "wired" } },
-        { new: true }
-      );
+      const legacyInvestment = await db.investments.findOne({
+        _id: ObjectId(body.investmentId),
+      });
 
       if (!legacyInvestment) {
         res.sendStatus(404);
         throw new Error(
-          `Unable to update legacy investment with _id:${body.investmentId}`
+          `Unable to update legacy investment with _id:${body.investmentId}: Not Found.`
         );
       }
 
-      const response = await fetch(
+      const updatedLegacyInvestment = await db.updateOne(
+        { _id: ObjectId(body.investmentId) },
+        { $set: { status: body.status } },
+        { new: true }
+      );
+
+      await res.send(updatedLegacyInvestment);
+
+      const serviceResponse = await fetch(
         `${process.env.INVEST_API_URL}/api/v1/investments/${body.investmentId}`,
         {
           method: "PATCH",
@@ -344,14 +349,10 @@ module.exports = Router()
         }
       );
 
-      if (!response.ok)
+      if (!serviceResponse.ok)
         console.warn(
           `Unable to update service investment with _id:${body.investmentId}`
         );
-
-      res.send(legacyInvestment.status);
-
-      next();
     } catch (err) {
       console.log("wire-status-update :>> ", err);
       next(err);
