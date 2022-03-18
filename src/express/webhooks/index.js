@@ -327,7 +327,8 @@ module.exports = Router()
         );
       }
 
-      const updatedLegacyInvestment = await db.updateOne(
+      const updatedLegacyInvestment = await db.investments.updateOne(
+
         { _id: ObjectId(body.investmentId) },
         { $set: { status: body.status } },
         { new: true }
