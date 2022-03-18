@@ -330,12 +330,21 @@ module.exports = Router()
         );
       }
 
-      const serviceInvestment = await InvestmentService.update(
-        body.investmentId,
-        legacyInvestment
+      const res = await fetch(
+        `${process.env.INVEST_API_URL}/api/v1/investments/${body.investmentId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "content-type": "application/json",
+            "x-api-token": process.env.ALLOCATIONS_TOKEN,
+          },
+          body: {
+            phase: "wired",
+          },
+        }
       );
 
-      if (!serviceInvestment)
+      if (!res.ok)
         console.warn(
           `Unable to update service investment with _id:${body.investmentId}`
         );
