@@ -12,7 +12,7 @@ const s3 = new S3({ apiVersion: "2006-03-01" });
 const { pubsub } = require("../../graphql/server");
 const {
   newDirectionTransactionsAddRow,
-  bankTransactionsTransactionsTableOutbound,
+  // bankTransactionsTransactionsTableOutbound,
   bankTransactionsTransactionsAddRow,
   findOrCreateBankingTransactionsAccount,
 } = require("../../utils/airTable");
@@ -26,6 +26,7 @@ const { SlackService } = require("@allocations/slack-service");
 const { createCapitalAccountDoc } = require("../../docspring/index");
 const Uploader = require("../../uploaders/investor-docs");
 const { amountFormat } = require("../../utils/common");
+const { InvestmentService } = require("@allocations/investment-service");
 
 let Bucket =
   process.env.NODE_ENV === "production"
@@ -302,6 +303,47 @@ module.exports = Router()
       next();
     } catch (err) {
       console.log("bankwire-notifications :>> ", err);
+      next(err);
+    }
+  })
+  .post("/wire-status-update", async (req, res, next) => {
+    try {
+      const verified = verifyWebhook(req.headers.authorization);
+
+      if (!verified) {
+        res.sendStatus(401);
+        throw new Error("Invalid token");
+      }
+      const { body } = req;
+
+      const db = await getDB();
+      const legacyInvestment = await db.investments.findOneAndUpdate(
+        { _id: body.investmentId },
+        { $set: { status: "wired" } },
+        { new: true }
+      );
+
+      if (!legacyInvestment) {
+        res.sendStatus(404);
+        throw new Error(
+          `Unable to update legacy investment with _id:${body.investmentId}`
+        );
+      }
+
+      const serviceInvestment = await InvestmentService.update(
+        body.investmentId,
+        legacyInvestment
+      );
+
+      if (!serviceInvestment)
+        console.warn(
+          `Unable to update service investment with _id:${body.investmentId}`
+        );
+
+      res.sendStatus(200).send(legacyInvestment);
+      next();
+    } catch (err) {
+      console.log("wire-status-update :>> ", err);
       next(err);
     }
   })
