@@ -302,10 +302,11 @@ const Queries = {
     }
     return { redirectUrl: view.redirectUrl, formName: templateData.formType };
   },
-  investorsLookup: (_, { query }, ctx) => {
+  investorsLookupById: (_, { userIds }, ctx) => {
     isAdmin(ctx);
-    console.log({ query });
-    return ctx.db.collection("users").find(query).toArray();
+    console.log({ userIds });
+    const objectIds = userIds.map((id) => ObjectId(id));
+    return ctx.db.collection("users").find(objectIds).toArray();
   },
 };
 

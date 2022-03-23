@@ -102,7 +102,7 @@ extend type Query {
   searchUsers(org: String!, q: String!, limit: Int): [User]
   getLink(input: Object): Object
   allUsersWithInvestmentsCount(pagination: PaginationInput!, additionalFilter: Object): UserPagination
-  investorsLookup(query: Object): [User]
+  investorsLookupById(query: Object): [User]
 }
 
 extend type Mutation {
@@ -110,7 +110,7 @@ extend type Mutation {
   deleteInvestor(_id: String!): Boolean
   updateUser(input: UserInput): User
   updateInvestor(investment: InvestmentInput): User
-  submitTaxDocument(payload: Object): User
+  submitTaxDocument(payload: [String]): User
   addProfileImage(email: String!, image: Upload): User
   updateProfileImage(email: String!, image: Upload): User
   addSectors(email: String!, sector: String!): User
