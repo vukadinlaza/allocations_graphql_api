@@ -333,8 +333,6 @@ module.exports = Router()
 
       const serviceInvestment = await serviceResponse.json();
 
-      console.log("serviceInvestment ===>", serviceInvestment);
-
       if (!legacyInvestment && !serviceInvestment) {
         throw new Error(
           `Unable to update wire status for investment _id: ${investmentId}. Not found.`
@@ -377,8 +375,8 @@ module.exports = Router()
             body: JSON.stringify(investmentData),
           }
         );
-        console.log("serviceResponse ====>", serviceResponse);
-        await res.send(serviceResponse);
+        const serviceInvestment = await serviceResponse.json();
+        await res.send(serviceInvestment);
       }
     } catch (err) {
       console.log("wire-status-update :>> ", err);
