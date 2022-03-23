@@ -321,49 +321,66 @@ module.exports = Router()
         _id: ObjectId(investmentId),
       });
 
-      if (!legacyInvestment) {
-        res.sendStatus(404);
-        throw new Error(
-          `Unable to update legacy investment with _id:${investmentId}: Not Found.`
-        );
-      }
-
-      await db.investments.updateOne(
-        { _id: ObjectId(investmentId) },
-        { $set: { status: status, capitalWiredAmount: wiredAmount } }
-      );
-
-      const updatedLegacyInvestment = await db.investments.findOne({
-        _id: ObjectId(investmentId),
-      });
-
-      if (!updatedLegacyInvestment.status === status)
-        throw new Error(
-          `Unable to update wire status for investment with _id:${investmentId}.`
-        );
-
-      await res.send(updatedLegacyInvestment);
-
-      const serviceResponse = await fetch(
-        `${process.env.INVEST_API_URL}/api/v1/investments/${investmentId}`,
+      const serviceInvestment = await fetch(
+        `${process.env.INVEST_API_URL}/api/v1/investments/investment-by-id/${investmentId}`,
         {
-          method: "PATCH",
+          method: "GET",
           headers: {
-            "content-type": "application/json",
             "x-api-token": process.env.ALLOCATIONS_TOKEN,
-          },
-          body: {
-            phase: "wired",
-            wired_amount: wiredAmount,
-            wired_date: wiredDate,
           },
         }
       );
 
-      if (!serviceResponse.ok)
-        console.warn(
-          `Unable to update service investment with _id:${body.investmentId}`
+      if (!legacyInvestment && !serviceInvestment) {
+        throw new Error(
+          `Unable to update wire status for investment _id: ${investmentId}. Not found.`
         );
+      }
+
+      if (legacyInvestment) {
+        await db.investments.updateOne(
+          { _id: ObjectId(investmentId) },
+          { $set: { status: status, capitalWiredAmount: wiredAmount } }
+        );
+
+        const updatedLegacyInvestment = await db.investments.findOne({
+          _id: ObjectId(investmentId),
+        });
+
+        if (!updatedLegacyInvestment.status === status)
+          console.warn(
+            `Failed to update wire status for legacy investment with _id:${investmentId}.`
+          );
+
+        await res.send(updatedLegacyInvestment);
+      } else {
+        console.warn(
+          `No legacy investment found with _id:${investmentId}. Attempting to update service investment.`
+        );
+      }
+
+      if (serviceInvestment) {
+        const serviceResponse = await fetch(
+          `${process.env.INVEST_API_URL}/api/v1/investments/${investmentId}`,
+          {
+            method: "PATCH",
+            headers: {
+              "content-type": "application/json",
+              "x-api-token": process.env.ALLOCATIONS_TOKEN,
+            },
+            body: {
+              phase: "wired",
+              wired_amount: wiredAmount,
+              wired_date: wiredDate,
+            },
+          }
+        );
+        await res.send(serviceResponse);
+      } else {
+        console.warn(
+          `Unable to update service investment with _id:${body.investmentId}. Not found.`
+        );
+      }
     } catch (err) {
       console.log("wire-status-update :>> ", err);
       next(err);
