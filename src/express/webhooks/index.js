@@ -357,9 +357,6 @@ module.exports = Router()
         console.warn(
           `No legacy investment found with _id:${investmentId}. Attempting to update service investment.`
         );
-      }
-
-      if (serviceInvestment) {
         const serviceResponse = await fetch(
           `${process.env.INVEST_API_URL}/api/v1/investments/${investmentId}`,
           {
@@ -375,11 +372,12 @@ module.exports = Router()
             },
           }
         );
+        if (!serviceResponse.ok) {
+          throw new Error(
+            `Unable to update service investment with _id:${body.investmentId}. Not found.`
+          );
+        }
         await res.send(serviceResponse);
-      } else {
-        console.warn(
-          `Unable to update service investment with _id:${body.investmentId}. Not found.`
-        );
       }
     } catch (err) {
       console.log("wire-status-update :>> ", err);
