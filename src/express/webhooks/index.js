@@ -321,7 +321,7 @@ module.exports = Router()
         _id: ObjectId(investmentId),
       });
 
-      const serviceInvestment = await fetch(
+      const serviceResponse = await fetch(
         `${process.env.INVEST_API_URL}/api/v1/investments/investment-by-id/${investmentId}`,
         {
           method: "GET",
@@ -330,6 +330,8 @@ module.exports = Router()
           },
         }
       );
+
+      const serviceInvestment = serviceResponse.json();
 
       console.log("serviceInvestment ===>", serviceInvestment);
 
