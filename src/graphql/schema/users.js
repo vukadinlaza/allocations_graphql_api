@@ -102,7 +102,7 @@ extend type Query {
   searchUsers(org: String!, q: String!, limit: Int): [User]
   getLink(input: Object): Object
   allUsersWithInvestmentsCount(pagination: PaginationInput!, additionalFilter: Object): UserPagination
-  investorsLookup(userIds: [String]): [User]
+  investorsLookupById(userIds: [String]): [User]
 }
 
 extend type Mutation {
