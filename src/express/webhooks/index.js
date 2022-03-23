@@ -372,11 +372,6 @@ module.exports = Router()
             },
           }
         );
-        if (!serviceResponse.ok) {
-          throw new Error(
-            `Unable to update service investment with _id:${body.investmentId}. Not found.`
-          );
-        }
         await res.send(serviceResponse);
       }
     } catch (err) {
