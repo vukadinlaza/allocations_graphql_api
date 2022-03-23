@@ -331,7 +331,7 @@ module.exports = Router()
         }
       );
 
-      const serviceInvestment = serviceResponse.json();
+      const serviceInvestment = await serviceResponse.json();
 
       console.log("serviceInvestment ===>", serviceInvestment);
 
