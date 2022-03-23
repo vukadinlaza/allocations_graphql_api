@@ -359,11 +359,13 @@ module.exports = Router()
         console.warn(
           `No legacy investment found with _id:${investmentId}. Attempting to update service investment.`
         );
+
         const investmentData = {
           phase: "wired",
           wired_amount: wiredAmount,
           wired_date: wiredDate,
         };
+
         const serviceResponse = await fetch(
           `${process.env.INVEST_API_URL}/api/v1/investments/${investmentId}`,
           {
