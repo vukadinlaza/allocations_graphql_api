@@ -304,6 +304,7 @@ const Queries = {
   },
   investorsLookup: (_, { query }, ctx) => {
     isAdmin(ctx);
+    console.log({ query });
     return ctx.db.collection("users").find(query).toArray();
   },
 };
