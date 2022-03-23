@@ -304,7 +304,7 @@ const Queries = {
   },
   investorsLookupById: (_, { userIds }, ctx) => {
     isAdmin(ctx);
-    console.log({ userIds });
+
     const objectIds = userIds.map((id) => ObjectId(id));
     return ctx.db
       .collection("users")
