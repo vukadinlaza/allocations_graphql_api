@@ -12,7 +12,7 @@ const s3 = new S3({ apiVersion: "2006-03-01" });
 const { pubsub } = require("../../graphql/server");
 const {
   newDirectionTransactionsAddRow,
-  bankTransactionsTransactionsTableOutbound,
+  // bankTransactionsTransactionsTableOutbound,
   bankTransactionsTransactionsAddRow,
   findOrCreateBankingTransactionsAccount,
 } = require("../../utils/airTable");
@@ -302,6 +302,70 @@ module.exports = Router()
       next();
     } catch (err) {
       console.log("bankwire-notifications :>> ", err);
+      next(err);
+    }
+  })
+  .post("/wire-status-update", async (req, res, next) => {
+    try {
+      const verified = verifyWebhook(req.headers.authorization);
+
+      if (!verified) {
+        res.sendStatus(401);
+        throw new Error("Invalid token");
+      }
+      const { body } = req;
+      const { investmentId, status, wiredAmount, wiredDate } = body;
+
+      const db = await getDB();
+      const legacyInvestment = await db.investments.findOne({
+        _id: ObjectId(investmentId),
+      });
+
+      if (!legacyInvestment) {
+        res.sendStatus(404);
+        throw new Error(
+          `Unable to update legacy investment with _id:${investmentId}: Not Found.`
+        );
+      }
+
+      await db.investments.updateOne(
+        { _id: ObjectId(investmentId) },
+        { $set: { status: status, capitalWiredAmount: wiredAmount } }
+      );
+
+      const updatedLegacyInvestment = await db.investments.findOne({
+        _id: ObjectId(investmentId),
+      });
+
+      if (!updatedLegacyInvestment.status === status)
+        throw new Error(
+          `Unable to update wire status for investment with _id:${investmentId}.`
+        );
+
+      await res.send(updatedLegacyInvestment);
+
+      const serviceResponse = await fetch(
+        `${process.env.INVEST_API_URL}/api/v1/investments/${investmentId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "content-type": "application/json",
+            "x-api-token": process.env.ALLOCATIONS_TOKEN,
+          },
+          body: {
+            phase: "wired",
+            wired_amount: wiredAmount,
+            wired_date: wiredDate,
+          },
+        }
+      );
+
+      if (!serviceResponse.ok)
+        console.warn(
+          `Unable to update service investment with _id:${body.investmentId}`
+        );
+    } catch (err) {
+      console.log("wire-status-update :>> ", err);
       next(err);
     }
   })

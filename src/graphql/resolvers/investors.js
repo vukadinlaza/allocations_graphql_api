@@ -302,6 +302,10 @@ const Queries = {
     }
     return { redirectUrl: view.redirectUrl, formName: templateData.formType };
   },
+  investorsLookup: (_, { query }, ctx) => {
+    isAdmin(ctx);
+    return ctx.db.collection("users").find(query).toArray();
+  },
 };
 
 const Mutations = {
