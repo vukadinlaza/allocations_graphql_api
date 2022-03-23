@@ -365,11 +365,11 @@ module.exports = Router()
               "content-type": "application/json",
               "x-api-token": process.env.ALLOCATIONS_TOKEN,
             },
-            body: {
+            body: JSON.stringify({
               phase: "wired",
               wired_amount: wiredAmount,
               wired_date: wiredDate,
-            },
+            }),
           }
         );
         await res.send(serviceResponse);
