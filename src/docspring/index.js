@@ -93,6 +93,7 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_QXdMeT3D4dedsTfkTx",
     "tpl_GGQxKF9RdXfGbsaxEK",
     "tpl_4RacsKmEam7LmYqnEC",
+    "tpl_hT3PfeKe3SxENM2Zxt",
   ];
 
   const kunalDeals = [
@@ -101,6 +102,8 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_yALgSxJfJHpXnXZKcc",
     "tpl_H7DMZHRSTKPGM5ZyLX",
     "tpl_7KMf3AH9y3zZs5GCE9",
+    "tpl_pP5F9Z77MJAEqkPf22",
+    "tpl_sh7zatD4HjxmKYNNAP",
   ];
 
   const techstarDeals = [
@@ -409,6 +412,7 @@ const generateDocSpringPDF = async (
   templateId
 ) => {
   let data = getTemplateData(input, user, templateId);
+  console.log("REAL SUBMISSION DATA", data);
 
   var submission_data = {
     editable: false,
@@ -494,6 +498,7 @@ const getInvestmentPreview = ({ input, user }) => {
   const timeStamp = Date.now();
   const { docSpringTemplateId } = input;
   let data = getTemplateData(input, user, docSpringTemplateId);
+  console.log("PREVIEW DATA", data);
   var submission_data = {
     editable: false,
     data: data,

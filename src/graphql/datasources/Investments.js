@@ -1,5 +1,5 @@
 const { MongoDataSource } = require("apollo-datasource-mongodb");
-const { capitalize } = require("lodash");
+const { capitalize, isNumber } = require("lodash");
 const { ObjectId } = require("mongodb");
 const fetch = require("node-fetch");
 
@@ -50,6 +50,25 @@ class Investments extends MongoDataSource {
     user,
     legacyInvestment,
   }) {
+    const mgmtFeeIsNumber = !Number.isNaN(
+      parseInt(deal.dealParams.managementFees)
+    );
+    const carryFeeIsNumber = !Number.isNaN(
+      parseInt(deal.dealParams.totalCarry)
+    );
+    console.log("mgmt", mgmtFeeIsNumber);
+    console.log("carrys", carryFeeIsNumber);
+    console.log(
+      "value",
+      parseInt(deal.dealParams.managementFees),
+      mgmtFeeIsNumber ? parseInt(deal.dealParams.managementFees) / 100 : 0
+    );
+    console.log(
+      "carryFeeIsNumber",
+      parseInt(deal.dealParams.managementFees),
+      carryFeeIsNumber ? parseInt(deal.dealParams.managementFees) / 100 : 0
+    );
+
     try {
       const serviceInvestment = {
         _id: investment_id,
@@ -76,9 +95,12 @@ class Investments extends MongoDataSource {
         investor_state: legacyInvestment.submissionData?.state,
         accredited_investor_type:
           legacyInvestment.submissionData?.accredited_investor_status,
-        carry_fee_percent: parseInt(deal.dealParams.totalCarry || 0) / 100,
-        management_fee_percent:
-          parseInt(deal.dealParams.managementFees || 0) / 100,
+        carry_fee_percent: carryFeeIsNumber
+          ? parseInt(deal.dealParams.totalCarry) / 100
+          : 0,
+        management_fee_percent: mgmtFeeIsNumber
+          ? parseInt(deal.dealParams.managementFees) / 100
+          : 0,
         metadata: {
           deal_id: legacyInvestment.deal_id,
         },
