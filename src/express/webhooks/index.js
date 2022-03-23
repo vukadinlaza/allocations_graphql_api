@@ -321,7 +321,7 @@ module.exports = Router()
         _id: ObjectId(investmentId),
       });
 
-      const serviceInvestment = await fetch(
+      const serviceResponse = await fetch(
         `${process.env.INVEST_API_URL}/api/v1/investments/investment-by-id/${investmentId}`,
         {
           method: "GET",
@@ -330,6 +330,8 @@ module.exports = Router()
           },
         }
       );
+
+      const serviceInvestment = await serviceResponse.json();
 
       if (!legacyInvestment && !serviceInvestment) {
         throw new Error(
@@ -357,9 +359,13 @@ module.exports = Router()
         console.warn(
           `No legacy investment found with _id:${investmentId}. Attempting to update service investment.`
         );
-      }
 
-      if (serviceInvestment) {
+        const investmentData = {
+          phase: "wired",
+          wired_amount: wiredAmount,
+          wired_date: wiredDate,
+        };
+
         const serviceResponse = await fetch(
           `${process.env.INVEST_API_URL}/api/v1/investments/${investmentId}`,
           {
@@ -368,18 +374,11 @@ module.exports = Router()
               "content-type": "application/json",
               "x-api-token": process.env.ALLOCATIONS_TOKEN,
             },
-            body: {
-              phase: "wired",
-              wired_amount: wiredAmount,
-              wired_date: wiredDate,
-            },
+            body: JSON.stringify(investmentData),
           }
         );
-        await res.send(serviceResponse);
-      } else {
-        console.warn(
-          `Unable to update service investment with _id:${body.investmentId}. Not found.`
-        );
+        const serviceInvestment = await serviceResponse.json();
+        await res.send(serviceInvestment);
       }
     } catch (err) {
       console.log("wire-status-update :>> ", err);
