@@ -340,9 +340,16 @@ module.exports = Router()
       }
 
       if (legacyInvestment) {
+        const epochWireDate = new Date(wiredDate).getTime();
         await db.investments.updateOne(
           { _id: ObjectId(investmentId) },
-          { $set: { status: status, capitalWiredAmount: wiredAmount } }
+          {
+            $set: {
+              status: status,
+              capitalWiredAmount: wiredAmount,
+              wired_at: epochWireDate,
+            },
+          }
         );
 
         const updatedLegacyInvestment = await db.investments.findOne({
