@@ -625,7 +625,7 @@ module.exports = Router()
       investment = await db.investments.findOne({
         "wire_instructions.reference_number": referenceNumber,
       });
-      console.log("INVESTMENT", investment);
+
       if (!investment) throw new Error("No Investment Found.");
 
       const {
