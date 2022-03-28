@@ -312,8 +312,8 @@ const Queries = {
       .find({ _id: { $in: objectIds } })
       .toArray();
   },
-  
-   searchUsersByEmail: async (_, { q }, ctx) => {
+
+  searchUsersByEmail: async (_, { q }, ctx) => {
     const userOne = q[0];
     const userTwo = q[1];
 
@@ -324,12 +324,11 @@ const Queries = {
       ],
     };
     const orgCheck = ctx.user.admin;
-    return ctx.db
-      .collection("users")
-      .find({
-        ...orgCheck,
-        ...searchQ,
-      })
+    return ctx.db.collection("users").find({
+      ...orgCheck,
+      ...searchQ,
+    });
+  },
 };
 
 const Mutations = {
