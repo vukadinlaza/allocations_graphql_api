@@ -305,6 +305,32 @@ module.exports = Router()
       next(err);
     }
   })
+  .post("/wire-lookup", async (req, res, next) => {
+    try {
+      const verified = verifyWebhook(req.headers.authorization);
+
+      if (!verified) {
+        res.sendStatus(401);
+        throw new Error("Invalid token");
+      }
+      const { body } = req;
+      const { user_id } = body;
+
+      const db = await getDB();
+      const user = await db.users.findOne({
+        _id: ObjectId(user_id),
+      });
+
+      if (!user) {
+        throw new Error(`Unable to find user with _id: ${user_id}.`);
+      }
+
+      await res.send(user);
+    } catch (err) {
+      console.log("wire-lookup :>> ", err);
+      next(err);
+    }
+  })
   .post("/wire-status-update", async (req, res, next) => {
     try {
       const verified = verifyWebhook(req.headers.authorization);
