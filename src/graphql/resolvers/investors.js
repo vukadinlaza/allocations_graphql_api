@@ -302,6 +302,15 @@ const Queries = {
     }
     return { redirectUrl: view.redirectUrl, formName: templateData.formType };
   },
+  investorsLookupById: (_, { userIds }, ctx) => {
+    isAdmin(ctx);
+
+    const objectIds = userIds.map((id) => ObjectId(id));
+    return ctx.db
+      .collection("users")
+      .find({ _id: { $in: objectIds } })
+      .toArray();
+  },
 };
 
 const Mutations = {
