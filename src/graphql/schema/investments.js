@@ -55,6 +55,7 @@ type InvestmentPagination {
 extend type Query {
   investment(_id: String): Investment
   investmentsList(pagination: PaginationInput!): InvestmentPagination
+  allInvestmentsByUserId(q: String!, limit: Int): [Investment]
 }
 
 extend type Mutation {
@@ -68,6 +69,7 @@ extend type Mutation {
   rmInvestmentDoc(investment_id: String!, file: String!): Boolean
   createCapPDF(data: Object): Investment
   sendWireReminders(investment_ids: [String], deal_id: String): Boolean
+  updateInvestmentUserId(investment_user_id: Object, new_user_id: Object): Object 
 }
 
 scalar Object

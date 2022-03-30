@@ -87,6 +87,10 @@ const Queries = {
       .toArray();
     return { count, investments };
   },
+
+  allInvestmentsByUserId: async (_, { q }, ctx) => {
+    return ctx.db.collection("users").find({ q }).toArray();
+  },
 };
 
 const Mutations = {
@@ -557,6 +561,22 @@ const Mutations = {
     return datasources.investments.getInvestmentById({
       investment_id: ObjectId(investment._id),
     });
+  },
+
+  /** updates investments that correspond to a user_id **/
+  updateInvestmentUserId: async (
+    _,
+    { investment_user_id, new_user_id },
+    ctx
+  ) => {
+    try {
+      await ctx.db.investments.updateMany(
+        { user_id: ObjectId(investment_user_id) },
+        { $set: { user_id: ObjectId(new_user_id) } }
+      );
+    } catch (err) {
+      throwApolloError(err, "updateInvestmentUserId");
+    }
   },
 };
 

@@ -302,6 +302,7 @@ const Queries = {
     }
     return { redirectUrl: view.redirectUrl, formName: templateData.formType };
   },
+
   investorsLookupById: (_, { userIds }, ctx) => {
     isAdmin(ctx);
 
@@ -310,6 +311,29 @@ const Queries = {
       .collection("users")
       .find({ _id: { $in: objectIds } })
       .toArray();
+  },
+
+  searchUsersByEmail: async (_, { q }, ctx) => {
+    const userOne = q[0];
+    const userTwo = q[1];
+
+    const searchQ = {
+      $or: [
+        { email: { $regex: userOne, $options: "i" } },
+        { email: { $regex: userTwo, $options: "i" } },
+      ],
+    };
+
+    const orgCheck = ctx.user.admin;
+    const users = await ctx.db
+      .collection("users")
+      .find({
+        ...orgCheck,
+        ...searchQ,
+      })
+      .toArray();
+
+    return users;
   },
 };
 

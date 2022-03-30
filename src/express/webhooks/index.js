@@ -305,6 +305,32 @@ module.exports = Router()
       next(err);
     }
   })
+  .post("/wire-lookup", async (req, res, next) => {
+    try {
+      const verified = verifyWebhook(req.headers.authorization);
+
+      if (!verified) {
+        res.sendStatus(401);
+        throw new Error("Invalid token");
+      }
+      const { body } = req;
+      const { user_id } = body;
+
+      const db = await getDB();
+      const user = await db.users.findOne({
+        _id: ObjectId(user_id),
+      });
+
+      if (!user) {
+        throw new Error(`Unable to find user with _id: ${user_id}.`);
+      }
+
+      await res.send(user);
+    } catch (err) {
+      console.log("wire-lookup :>> ", err);
+      next(err);
+    }
+  })
   .post("/wire-status-update", async (req, res, next) => {
     try {
       const verified = verifyWebhook(req.headers.authorization);
@@ -340,9 +366,16 @@ module.exports = Router()
       }
 
       if (legacyInvestment) {
+        const epochWireDate = new Date(wiredDate).getTime();
         await db.investments.updateOne(
           { _id: ObjectId(investmentId) },
-          { $set: { status: status, capitalWiredAmount: wiredAmount } }
+          {
+            $set: {
+              status: status,
+              capitalWiredAmount: wiredAmount,
+              wired_at: epochWireDate,
+            },
+          }
         );
 
         const updatedLegacyInvestment = await db.investments.findOne({
@@ -618,7 +651,7 @@ module.exports = Router()
       investment = await db.investments.findOne({
         "wire_instructions.reference_number": referenceNumber,
       });
-      console.log("INVESTMENT", investment);
+
       if (!investment) throw new Error("No Investment Found.");
 
       const {
