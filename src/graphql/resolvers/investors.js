@@ -323,11 +323,17 @@ const Queries = {
         { email: { $regex: userTwo, $options: "i" } },
       ],
     };
+
     const orgCheck = ctx.user.admin;
-    return ctx.db.collection("users").find({
-      ...orgCheck,
-      ...searchQ,
-    });
+    const users = await ctx.db
+      .collection("users")
+      .find({
+        ...orgCheck,
+        ...searchQ,
+      })
+      .toArray();
+
+    return users;
   },
 };
 
