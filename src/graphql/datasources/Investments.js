@@ -199,13 +199,6 @@ class Investments extends MongoDataSource {
       console.error(e);
     }
   }
-
-  async updateInvestmentUserId({ investment_user_id, user_id }) {
-    await this.collection.updateOne(
-      { user_id: ObjectId(investment_user_id) },
-      { $set: { user_id } }
-    );
-  }
 }
 
 module.exports = Investments;
