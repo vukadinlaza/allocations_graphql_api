@@ -103,6 +103,7 @@ extend type Query {
   getLink(input: Object): Object
   allUsersWithInvestmentsCount(pagination: PaginationInput!, additionalFilter: Object): UserPagination
   investorsLookupById(userIds: [String]): [User]
+  searchUsersByEmail(q: [String!]): [User]
 }
 
 extend type Mutation {
@@ -121,5 +122,6 @@ extend type Mutation {
   displayUsernameStatus(email: String!, display_username: Boolean): User
   updateInvestorLinkedin(email: String!, linkedinUrl: String): User
   addFirstAndLastName(email: String!, first_name: String, last_name: String): User
+  mergeAccounts(payload: Object!): Object 
 }
 `);

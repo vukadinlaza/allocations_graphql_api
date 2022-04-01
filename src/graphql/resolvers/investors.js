@@ -302,6 +302,7 @@ const Queries = {
     }
     return { redirectUrl: view.redirectUrl, formName: templateData.formType };
   },
+
   investorsLookupById: (_, { userIds }, ctx) => {
     isAdmin(ctx);
 
@@ -310,6 +311,27 @@ const Queries = {
       .collection("users")
       .find({ _id: { $in: objectIds } })
       .toArray();
+  },
+
+  searchUsersByEmail: async (_, { q }, ctx) => {
+    const userOne = q[0];
+    const userTwo = q[1];
+
+    const searchQ = {
+      $or: [
+        { email: { $regex: userOne, $options: "i" } },
+        { email: { $regex: userTwo, $options: "i" } },
+      ],
+    };
+
+    const users = await ctx.db
+      .collection("users")
+      .find({
+        ...searchQ,
+      })
+      .toArray();
+
+    return users;
   },
 };
 
@@ -584,6 +606,56 @@ const Mutations = {
     );
 
     return db.users.findOne({ email });
+  },
+
+  /** updates accounts that want to be merged **/
+  mergeAccounts: async (_, { payload }, { db }) => {
+    try {
+      const { updatedOrganizations, updatedInvestments } = payload;
+      if (updatedOrganizations) {
+        const user = await db.users.findOne({
+          _id: ObjectId(updatedOrganizations.user_id),
+        });
+        const newUserOrgs = [
+          ...new Set([
+            ...(user.organizations_admin.map((o) => o.toString()) || []),
+            ...updatedOrganizations.organizations,
+          ]),
+        ].map((o) => ObjectId(o));
+
+        await db.users.update(
+          { _id: ObjectId(updatedOrganizations.user_id) },
+          {
+            $set: {
+              organizations_admin: newUserOrgs,
+            },
+          }
+        );
+        await db.users.update(
+          { _id: ObjectId(updatedOrganizations.previous_user_id) },
+          {
+            $set: {
+              organizations_admin: [],
+            },
+          }
+        );
+      }
+
+      if (updatedInvestments) {
+        await db.investments.updateMany(
+          {
+            _id: {
+              $in: updatedInvestments.investments.map((inv) => ObjectId(inv)),
+            },
+          },
+          { $set: { user_id: ObjectId(updatedInvestments.user_id) } }
+        );
+      }
+
+      return { updated: true };
+    } catch (err) {
+      throwApolloError(err, "mergeAccounts");
+    }
   },
 };
 
