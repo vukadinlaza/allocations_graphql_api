@@ -106,6 +106,7 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_7KMf3AH9y3zZs5GCE9",
     "tpl_pP5F9Z77MJAEqkPf22",
     "tpl_sh7zatD4HjxmKYNNAP",
+    "tpl_KhPJ3DeqTYyKRYRqmY",
   ];
 
   const techstarDeals = [
