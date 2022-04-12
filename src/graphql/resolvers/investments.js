@@ -231,7 +231,6 @@ const Mutations = {
         return { _id: "000000000000000000000000" };
       } else if (signDeadline) {
         const isClosed = status === "closed";
-        if (isClosed) throw new Error("The deal selected is closed.");
       }
 
       let investment = null;
