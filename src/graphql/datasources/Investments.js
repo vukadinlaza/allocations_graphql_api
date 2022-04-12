@@ -137,7 +137,9 @@ class Investments extends MongoDataSource {
             committed_amount: amount,
           },
         ],
-        investor_type: capitalize(submissionData.investor_type || "Individual"),
+        investor_type: capitalize(
+          submissionData?.investor_type || "Individual"
+        ),
         investor_name: submissionData.fullName || submissionData.legalName,
         investor_entity_name: submissionData.legalName,
         investor_country: submissionData.country,
