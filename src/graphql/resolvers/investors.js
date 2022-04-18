@@ -618,7 +618,7 @@ const Mutations = {
         });
         const newUserOrgs = [
           ...new Set([
-            ...(user.organizations_admin.map((o) => o.toString()) || []),
+            ...(user.organizations_admin?.map((o) => o.toString()) || []),
             ...updatedOrganizations.organizations,
           ]),
         ].map((o) => ObjectId(o));
@@ -645,7 +645,7 @@ const Mutations = {
         await db.investments.updateMany(
           {
             _id: {
-              $in: updatedInvestments.investments.map((inv) => ObjectId(inv)),
+              $in: updatedInvestments.investments?.map((inv) => ObjectId(inv)),
             },
           },
           { $set: { user_id: ObjectId(updatedInvestments.user_id) } }
