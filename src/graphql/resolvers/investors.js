@@ -25,6 +25,7 @@ const {
 const Users = require("../schema/users");
 const fetch = require("node-fetch");
 const { throwApolloError } = require("../../utils/common");
+const { fetchInvest } = require("../../utils/invest");
 
 const Schema = Users;
 
@@ -332,6 +333,16 @@ const Queries = {
       .toArray();
 
     return users;
+  },
+  newUserInvestments: async (_, args) => {
+    try {
+      const investments = await fetchInvest(
+        `/api/v1/investments/investments-by-user/${args._id}`
+      );
+      return investments;
+    } catch (e) {
+      throwApolloError(e, "investor-investments");
+    }
   },
 };
 
