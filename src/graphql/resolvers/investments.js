@@ -24,6 +24,7 @@ const { amountFormat, throwApolloError } = require("../../utils/common");
 const {
   ReferenceNumberService,
 } = require("@allocations/reference-number-service");
+const { fetchInvest } = require("../../utils/invest");
 
 const Schema = Investments;
 
@@ -90,6 +91,15 @@ const Queries = {
 
   allInvestmentsByUserId: async (_, { q }, ctx) => {
     return ctx.db.collection("users").find({ q }).toArray();
+  },
+  newInvestment: async (_, args, ctx) => {
+    try {
+      isAdmin(ctx);
+      const investment = await fetchInvest(`/api/v1/investments/${args._id}`);
+      return investment;
+    } catch (e) {
+      throwApolloError(e, "newInvestment");
+    }
   },
 };
 
@@ -417,14 +427,16 @@ const Mutations = {
     }
   },
 
-  sendWireReminders: async (_, { investment_ids, deal_id }, { db }) => {
+  sendWireReminders: async (
+    _,
+    { investment_ids, deal_id },
+    { db, datasources }
+  ) => {
     try {
-      const deal = await db
-        .collection("deals")
-        .findOne({ _id: ObjectId(deal_id) });
+      const deal = await datasources.deals.getDealById({ deal_id });
       const org = await db
         .collection("organizations")
-        .findOne({ _id: ObjectId(deal.organization) });
+        .findOne({ _id: ObjectId(deal.organization || deal.organization_id) });
 
       const currentTime = Math.round(new Date().getTime() / 1000);
       const yesterday = currentTime - 24 * 3600;
@@ -575,6 +587,48 @@ const Mutations = {
       );
     } catch (err) {
       throwApolloError(err, "updateInvestmentUserId");
+    }
+  },
+  newUpdateInvestment: async (_, { investment }, ctx) => {
+    try {
+      isAdmin(ctx);
+      const updatedInvestment = await fetchInvest(
+        `/api/v1/investments/${investment._id}`,
+        "PATCH",
+        investment
+      );
+      return updatedInvestment;
+    } catch (e) {
+      throwApolloError(e, "newUpdateInvestment");
+    }
+  },
+  newDeleteInvestment: async (_, { _id }, ctx) => {
+    try {
+      isAdmin(ctx);
+
+      const deletedInvestment = await fetchInvest(
+        `/api/v1/investments/${_id}`,
+        "DELETE"
+      );
+
+      return deletedInvestment;
+    } catch (e) {
+      throwApolloError(e, "newDeleteinvestment");
+    }
+  },
+  newCreateInvestment: async (_, { investment }, ctx) => {
+    try {
+      isAdmin(ctx);
+
+      const createdInvestment = await fetchInvest(
+        `/api/v1/investments`,
+        "POST",
+        investment
+      );
+
+      return createdInvestment;
+    } catch (e) {
+      throwApolloError(e, "newDeleteinvestment");
     }
   },
 };

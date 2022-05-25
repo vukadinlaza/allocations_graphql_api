@@ -334,14 +334,15 @@ const Queries = {
 
     return users;
   },
-  newUserInvestments: async (_, args) => {
+  newUserInvestments: async (_, args, ctx) => {
     try {
+      isAdmin(ctx);
       const investments = await fetchInvest(
-        `/api/v1/investments/investments-by-user/${args._id}`
+        `/api/v1/investments/investments-by-user/${args._id || ctx.user._id}`
       );
       return investments;
     } catch (e) {
-      throwApolloError(e, "investor-investments");
+      throwApolloError(e, "newUserInvestments");
     }
   },
 };

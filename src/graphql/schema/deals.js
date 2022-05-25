@@ -245,6 +245,7 @@ type Query {
   getInvestmentAgreementLink(deal_id: String): DataRequest
   getFmSignatureLink(deal_id: String): DataRequest
   getCryptoWalletAddress(deal_id: String): String
+  newDealInvestments(deal_id: String): Object
 }
 
 type Mutation {

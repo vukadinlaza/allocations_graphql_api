@@ -104,7 +104,7 @@ extend type Query {
   allUsersWithInvestmentsCount(pagination: PaginationInput!, additionalFilter: Object): UserPagination
   investorsLookupById(userIds: [String]): [User]
   searchUsersByEmail(q: [String!]): [User]
-  newUserInvestments(_id: String!): [Object]
+  newUserInvestments(_id: String): [Object]
 }
 
 extend type Mutation {
