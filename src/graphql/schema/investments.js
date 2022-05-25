@@ -74,6 +74,8 @@ extend type Mutation {
   newUpdateInvestment(investment: Object): Object
   newDeleteInvestment(_id: String): Object
   newCreateInvestment(investment: Object!): Object
+  newAddInvestmentDoc(investment_id: String!, doc: Upload!): Object
+  newDeleteDocument(document_id: String!): Object
 }
 
 scalar Object
