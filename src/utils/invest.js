@@ -8,8 +8,9 @@ const fetchInvest = async (api, method = "GET", body = {}) => {
     },
     method,
   };
+  if (["POST", "PUT", "PATCH"].includes(method))
+    headers.body = JSON.stringify(body);
 
-  if (["POST", "PUT", "PATCH"].includes(method)) headers.body = body;
   const res = await fetch(`${process.env.INVEST_API_URL}${api}`, headers);
   const [ok, data] = await Promise.all([res.ok, res.json()]);
   if (!ok) {

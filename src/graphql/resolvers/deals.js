@@ -25,6 +25,7 @@ const {
 } = require("@allocations/investment-agreement-service");
 const { alertCryptoWalletError } = require("../../zaps");
 const { deallocateReferenceNumbers } = require("./newDirections");
+const { fetchInvest } = require("../../utils/invest");
 
 const Schema = Deals;
 const Deal = {
@@ -247,6 +248,26 @@ const Queries = {
       return res.wallet.deposit_address;
     }
     throw new Error(res.error);
+  },
+  newDealInvestments: async (_, args, ctx) => {
+    try {
+      isAdmin(ctx);
+      const dealInvestments = await fetchInvest(
+        `/api/v1/deals/${args.deal_id}/investments`
+      );
+
+      dealInvestments.raised = dealInvestments?.investments
+        ?.map((i) =>
+          i.transactions
+            ?.map((t) => t.wired_amount)
+            .reduce((acc, wired) => acc + wired, 0)
+        )
+        .reduce((acc, amount) => acc + amount, 0);
+
+      return dealInvestments;
+    } catch (e) {
+      throwApolloError(e, "newDealInvestments");
+    }
   },
 };
 
