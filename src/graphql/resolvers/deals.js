@@ -253,7 +253,7 @@ const Queries = {
     try {
       isAdmin(ctx);
       const dealInvestments = await fetchInvest(
-        `/api/v1/deals/${args.deal_id}/investments`
+        `/api/v1/deals/${args.deal_id}/with-investments`
       );
 
       dealInvestments.raised = dealInvestments?.investments
