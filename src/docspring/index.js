@@ -283,6 +283,7 @@ const getTemplateData = (input, user, templateId) => {
       "tpl_y3GEaLkZMDqhHT6SqE",
       "tpl_zbmQNPrkqXnJmFMD7C",
       "tpl_sCjzLb53RKfSd7ZErJ",
+      "tpl_ZAZ2ppLSMkjbRGzzT5",
     ].includes(templateId)
   ) {
     return {
