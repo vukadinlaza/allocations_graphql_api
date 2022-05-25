@@ -24,7 +24,8 @@ const { amountFormat, throwApolloError } = require("../../utils/common");
 const {
   ReferenceNumberService,
 } = require("@allocations/reference-number-service");
-const { fetchInvest } = require("../../utils/invest");
+const { fetchInvest, uploadInvestFile } = require("../../utils/invest");
+const FormData = require("form-data");
 
 const Schema = Investments;
 
@@ -629,6 +630,37 @@ const Mutations = {
       return createdInvestment;
     } catch (e) {
       throwApolloError(e, "newDeleteinvestment");
+    }
+  },
+  newAddInvestmentDoc: async (_, { investment_id, doc }, ctx) => {
+    try {
+      const file = await doc;
+      isAdmin(ctx);
+
+      const form = new FormData();
+      form.append("file", file.createReadStream(), {
+        filename: file.filename,
+      });
+
+      const docUploaded = await uploadInvestFile(investment_id, form);
+
+      return docUploaded;
+    } catch (e) {
+      throwApolloError(e, "newAddInvestmentDoc");
+    }
+  },
+  newDeleteDocument: async (_, { document_id }, ctx) => {
+    try {
+      isAdmin(ctx);
+
+      const documentDeleted = await fetchInvest(
+        `/api/v1/documents/${document_id}`,
+        "DELETE"
+      );
+
+      return documentDeleted;
+    } catch (e) {
+      throwApolloError(e, "newDeleteDocument");
     }
   },
 };
