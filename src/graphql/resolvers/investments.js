@@ -526,6 +526,7 @@ const Mutations = {
 
     const payload = {
       name: data.investorNameEntity ? data.investorNameEntity : data.name,
+      dealName: data.dealNameWebapp,
       currentDate: moment(new Date()).format("MMM DD, YYYY"),
       effectiveDate: moment(ObjectId(investment._id).getTimestamp()).format(
         "MMM DD, YYYY"
