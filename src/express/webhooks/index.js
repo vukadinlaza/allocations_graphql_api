@@ -832,7 +832,7 @@ module.exports = Router()
         { $set: { status: req.body.status } }
       );
 
-      res.end({});
+      res.end("");
     } catch (e) {
       next(e);
     }
