@@ -829,7 +829,7 @@ module.exports = Router()
       const db = await getDB();
       await db.deals.updateOne(
         { _id: ObjectId(req.body._id) },
-        { status: req.body.status }
+        { $set: { status: req.body.status } }
       );
 
       res.end({});
