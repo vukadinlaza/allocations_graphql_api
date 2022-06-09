@@ -816,4 +816,24 @@ module.exports = Router()
     } catch (err) {
       next(err);
     }
+  })
+
+  .post("/deal-status-update", async (req, res, next) => {
+    try {
+      const verified = verifyWebhook(req.headers.authorization);
+      if (!verified) {
+        res.sendStatus(401);
+        throw new Error("Invalid token");
+      }
+
+      const db = await getDB();
+      await db.deals.updateOne(
+        { _id: ObjectId(req.body._id) },
+        { status: req.body.status }
+      );
+
+      res.end({});
+    } catch (e) {
+      next(e);
+    }
   });
