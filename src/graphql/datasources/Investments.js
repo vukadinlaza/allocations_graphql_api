@@ -50,6 +50,7 @@ class Investments extends MongoDataSource {
     user,
     legacyInvestment,
   }) {
+    if (legacyInvestment.status === "invited") return;
     const mgmtFeeIsNumber = !Number.isNaN(
       parseInt(deal.dealParams.managementFees)
     );
