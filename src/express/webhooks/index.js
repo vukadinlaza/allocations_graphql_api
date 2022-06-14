@@ -59,7 +59,7 @@ module.exports = Router()
         docusignData,
         "DocuSignEnvelopeInformation.EnvelopeStatus.EnvelopeID._text"
       );
-      const documentName = get(
+      const name = get(
         docusignData,
         "DocuSignEnvelopeInformation.EnvelopeStatus.DocumentStatuses.DocumentStatus.Name._text"
       );
@@ -67,6 +67,8 @@ module.exports = Router()
         docusignData,
         "DocuSignEnvelopeInformation.EnvelopeStatus.DocumentStatuses.DocumentStatus.ID._text"
       );
+
+      const documentName = encodeURI(name);
 
       let fieldData = get(lpRecipientStatus, "FormData.xfdf.fields.field", []);
       if (!Array.isArray(fieldData)) {
