@@ -117,15 +117,17 @@ const Mutations = {
       organization: ObjectId(deal.organization),
     };
 
-    try {
-      await datasources.investments.createInvestment({
-        deal,
-        user,
-        investment: newInvestment,
-      });
-    } catch (error) {
-      // throw more descriptive error
-      throw new Error(`createInvestment failed: ${error.message}`);
+    if (newInvestment.status !== "invited") {
+      try {
+        await datasources.investments.createInvestment({
+          deal,
+          user,
+          investment: newInvestment,
+        });
+      } catch (error) {
+        // throw more descriptive error
+        throw new Error(`createInvestment failed: ${error.message}`);
+      }
     }
 
     return newInvestment;
