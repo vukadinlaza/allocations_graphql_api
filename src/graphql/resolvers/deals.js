@@ -9,7 +9,7 @@ const {
   AuthenticationError,
   UserInputError,
 } = require("apollo-server-express");
-const { isAdmin, ensureFundAdmin } = require("../permissions");
+const { isAdmin, ensureFundAdmin, isOrgAdmin } = require("../permissions");
 const Cloudfront = require("../../cloudfront");
 const DealDocUploader = require("../../uploaders/deal-docs");
 const Deals = require("../schema/deals");
@@ -163,6 +163,7 @@ const Queries = {
   /** Public Deal fetches the deal info WITHOUT auth **/
   publicDeal: async (_, { deal_slug, fund_slug }, { db, datasources }) => {
     const fund = await db.organizations.findOne({ slug: fund_slug });
+    console.log({ fund });
 
     const deal = await datasources.deals.getDealByOrgIdAndDealslug({
       deal_slug: deal_slug,
@@ -251,7 +252,6 @@ const Queries = {
   },
   newDealInvestments: async (_, args, ctx) => {
     try {
-      isAdmin(ctx);
       const dealInvestments = await fetchInvest(
         `/api/v1/deals/${args.deal_id}/with-investments`
       );
@@ -263,6 +263,8 @@ const Queries = {
             .reduce((acc, wired) => acc + wired, 0)
         )
         .reduce((acc, amount) => acc + amount, 0);
+
+      isOrgAdmin(dealInvestments.organization_id, ctx);
 
       return dealInvestments;
     } catch (e) {
