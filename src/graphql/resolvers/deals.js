@@ -163,8 +163,6 @@ const Queries = {
   /** Public Deal fetches the deal info WITHOUT auth **/
   publicDeal: async (_, { deal_slug, fund_slug }, { db, datasources }) => {
     const fund = await db.organizations.findOne({ slug: fund_slug });
-    console.log({ fund });
-
     const deal = await datasources.deals.getDealByOrgIdAndDealslug({
       deal_slug: deal_slug,
       fund_id: fund._id,

@@ -77,6 +77,7 @@ type Deal {
   portfolio_company_name: String
   master_series: String
   hubspot_deal_id: Int
+  subscription_agreement: SubscriptionAgreement
 }
 
 type DealParams {
@@ -293,6 +294,14 @@ type Subscription {
   dealOnboarding(data: String): Object
 }
 
+type SubscriptionAgreement { 
+  investor_docspring_template_id: String
+}
+
+input SubscriptionAgreementInput { 
+  investor_docspring_template_id: String
+}
+
 input DealInput {
   _id: String
   company_name: String
@@ -321,5 +330,6 @@ input DealInput {
   spvAgreementKey: String
   isPostingComment: Boolean
   virtual_account_number: String
+  subscription_agreement: SubscriptionAgreementInput
 }
 `);
