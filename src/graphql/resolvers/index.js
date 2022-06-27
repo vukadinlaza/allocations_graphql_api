@@ -11,7 +11,7 @@ const resolversRaw = [
   "investors",
   "superadmin",
   "investments",
-  "organizations",
+  "organizations/index.js",
   "documents",
   "accounts",
   "entities",
