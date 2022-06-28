@@ -37,7 +37,7 @@ type Deal {
   dealParams: DealParams
   last_valuation: String
   no_exchange: Boolean
-  raised: Int
+  raised: Float
   airtableId: String
   docSpringTemplateId: String
   spvAgreementKey: String

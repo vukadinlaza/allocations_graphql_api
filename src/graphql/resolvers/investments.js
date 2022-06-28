@@ -128,15 +128,17 @@ const Mutations = {
       organization: ObjectId(deal.organization),
     };
 
-    try {
-      await datasources.investments.createInvestment({
-        deal,
-        user,
-        investment: newInvestment,
-      });
-    } catch (error) {
-      // throw more descriptive error
-      throw new Error(`createInvestment failed: ${error.message}`);
+    if (newInvestment.status !== "invited") {
+      try {
+        await datasources.investments.createInvestment({
+          deal,
+          user,
+          investment: newInvestment,
+        });
+      } catch (error) {
+        // throw more descriptive error
+        throw new Error(`createInvestment failed: ${error.message}`);
+      }
     }
 
     return newInvestment;
@@ -539,7 +541,8 @@ const Mutations = {
 
     const payload = {
       name: data.investorNameEntity ? data.investorNameEntity : data.name,
-      dealName: data.dealNameWebapp?.[0],
+      dealName: data.legalName?.[0],
+      notes: data.notes,
       currentDate: moment(new Date()).format("MMM DD, YYYY"),
       effectiveDate: moment(ObjectId(investment._id).getTimestamp()).format(
         "MMM DD, YYYY"

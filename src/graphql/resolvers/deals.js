@@ -289,9 +289,10 @@ const Mutations = {
       user_id: ctx.user._id,
       deal: {
         ...deal,
+        _id: ObjectId(deal._id) || undefined,
         organization: org._id,
-        status: "onboarding",
-        dealParams: {},
+        status: deal.status || "onboarding",
+        dealParams: deal.dealParams || {},
         slug,
         created_at: Date.now(),
         inviteKey: uuid(),
