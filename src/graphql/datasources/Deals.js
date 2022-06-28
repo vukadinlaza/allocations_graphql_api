@@ -5,38 +5,18 @@ const { transformServiceDeal, transformLegacyDeal } = require("./utils");
 
 class Deals extends MongoDataSource {
   async getDealById({ deal_id }) {
-    let deal = await this.collection.findOne({ _id: ObjectId(deal_id) });
-    if (deal) return deal;
-
-    const serviceDeal = await DealService.get(deal_id);
-
-    return transformServiceDeal({ serviceDeal });
+    return this.collection.findOne({ _id: ObjectId(deal_id) });
   }
 
   async getDealByOrgIdAndDealslug({ fund_id, deal_slug }) {
-    let deal = await this.collection.findOne({
+    return this.collection.findOne({
       slug: deal_slug,
       organization: fund_id,
     });
-    if (deal) return deal;
-
-    const serviceDeal = await DealService.getDealByFundIDAndDealSlug(
-      fund_id,
-      deal_slug
-    );
-
-    if (!serviceDeal) return null;
-
-    const coverImage = await DealService.getDocumentByTaskTitle(
-      serviceDeal._id,
-      "build",
-      "Upload Company Logo"
-    );
-
-    return transformServiceDeal({ serviceDeal, coverImage });
   }
 
   async getAllDeals({ query }) {
+    console.log(query);
     const legacyDeals = await this.collection.find(query).toArray();
     return legacyDeals;
   }
@@ -80,6 +60,8 @@ class Deals extends MongoDataSource {
       user_id,
     });
     const newDeal = await this.collection.findOne({ _id });
+
+    console.log(newDeal);
 
     return newDeal;
   }

@@ -59,7 +59,7 @@ module.exports = Router()
         docusignData,
         "DocuSignEnvelopeInformation.EnvelopeStatus.EnvelopeID._text"
       );
-      const documentName = get(
+      const name = get(
         docusignData,
         "DocuSignEnvelopeInformation.EnvelopeStatus.DocumentStatuses.DocumentStatus.Name._text"
       );
@@ -67,6 +67,8 @@ module.exports = Router()
         docusignData,
         "DocuSignEnvelopeInformation.EnvelopeStatus.DocumentStatuses.DocumentStatus.ID._text"
       );
+
+      const documentName = encodeURI(name);
 
       let fieldData = get(lpRecipientStatus, "FormData.xfdf.fields.field", []);
       if (!Array.isArray(fieldData)) {
@@ -813,5 +815,25 @@ module.exports = Router()
       res.send(updatedInvestment);
     } catch (err) {
       next(err);
+    }
+  })
+
+  .post("/deal-status-update", async (req, res, next) => {
+    try {
+      const verified = verifyWebhook(req.headers.authorization);
+      if (!verified) {
+        res.sendStatus(401);
+        throw new Error("Invalid token");
+      }
+
+      const db = await getDB();
+      await db.deals.updateOne(
+        { _id: ObjectId(req.body._id) },
+        { $set: { status: req.body.status } }
+      );
+
+      res.end("");
+    } catch (e) {
+      next(e);
     }
   });

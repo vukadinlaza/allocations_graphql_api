@@ -98,6 +98,8 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_gxRgP6ax2m6sb9PGjT",
     "tpl_9ereb3zJYd2kY7RkLM",
     "tpl_QfPJCm237trkjEPsay",
+    "tpl_c53jCSxbZEq9mdDkCA",
+    "tpl_QG3aK6LCEhAzzr63Sb",
   ];
 
   const kunalDeals = [
@@ -114,6 +116,7 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_YJzL65StACfR29Q2Tc",
     "tpl_RPkFTESPMpYPhMJ6eY",
     "tpl_JyxfDpAA3h6f2aqhxh",
+    "tpl_qrZ9GtmZCNJZhG5NYX",
   ];
 
   const techstarDeals = [
