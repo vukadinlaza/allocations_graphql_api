@@ -24,8 +24,7 @@ async function rmDoc({ title, deal_id }) {
   return Key;
 }
 
-async function rmImage({ deal_id }) {
-  const Key = `${path}/${deal_id}/dealCoverImage.png`;
+async function rmImage(Key) {
   await s3.deleteObject({ Bucket: "allocations-public", Key }).promise();
   return Key;
 }

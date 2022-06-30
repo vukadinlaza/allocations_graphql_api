@@ -561,7 +561,8 @@ const Mutations = {
   },
   rmDealLogo: async (_, params, ctx) => {
     isAdmin(ctx);
-    await DealDocUploader.rmImage(params);
+    const deal = await ctx.db.deals.findOne({ _id: ObjectId(params.deal_id) });
+    await DealDocUploader.rmImage(deal.dealCoverImageKey);
     await ctx.db.deals.updateOne(
       { _id: ObjectId(params.deal_id) },
       { $unset: { dealCoverImageKey: "" } }
