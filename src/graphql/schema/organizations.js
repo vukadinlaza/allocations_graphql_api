@@ -84,6 +84,7 @@ extend type Query {
   organizationMembers(slug: String!): [User]
   pagOrganizations(pagination: PaginationInput!): OrganizationPagination
   overviewData(slug: String!): Object
+  getSyncedOrgs: Object
 }
 
 extend type Mutation {
@@ -94,5 +95,6 @@ extend type Mutation {
   addOrganizationMembership(slug: String!, user_id: String!): User
   revokeOrganizationMembership(slug: String!, user_id: String!): User
   sendAdminInvite(slug: String!, user_id: String!): EmailInvite
+  updateServiceOrg(organization: Object, _id: String): Object
 }
 `);
