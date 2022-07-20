@@ -248,11 +248,6 @@ const Mutations = {
 
       let investment = null;
 
-      //grab reference number object, set to null value if undefined
-      const referenceNumber = await ReferenceNumberService.assign({
-        deal_id: payload.dealId,
-      });
-
       // add case for undefined referenceNumber
       if (!payload.investmentId) {
         const newInvestmentData = {
@@ -265,19 +260,6 @@ const Mutations = {
           organization: ObjectId(deal.organization),
           submissionData: payload,
         };
-        // if there is a bankingProvider on the deal AND
-        // a reference number was assigned to the investment
-        // add the wire_instructions to the investment
-        if (deal.bankingProvider && referenceNumber?.number) {
-          newInvestmentData.wire_instructions = {
-            // no dynamic data for acc/routing numbers yet
-            account_number: null,
-            routing_number: null,
-            reference_number: referenceNumber?.number || null,
-            // no dynamic data for provider yet
-            provider: deal.bankingProvider || null,
-          };
-        }
         const { insertedId } = await datasources.investments.createInvestment({
           deal,
           user,
@@ -287,22 +269,6 @@ const Mutations = {
         investment = await db.investments.findOne({
           _id: ObjectId(insertedId),
         });
-        // If bankingProvider AND referenceNumber create wire instructions PDF
-        if (referenceNumber?.number && deal?.bankingProvider) {
-          //create wire instructions, and return key for AWS integration
-          const wireKey = await createInvestmentWireInstructions({
-            providerName: deal?.bankingProvider,
-            investmentId: investment._id,
-            investorName: investment.submissionData.legalName,
-            spvName: deal.company_name,
-            referenceNumber: referenceNumber.number,
-          });
-          //update investment to include s3Key for docuspring integration
-          await db.investments.updateOne(
-            { _id: ObjectId(investment._id) },
-            { $set: { "wire_instructions.s3Key": wireKey } }
-          );
-        }
       } else {
         investment = await datasources.investments.getInvestmentById({
           investment_id: ObjectId(payload.investmentId),
