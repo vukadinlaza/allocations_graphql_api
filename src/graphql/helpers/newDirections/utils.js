@@ -1,11 +1,8 @@
 const phoneUtil =
   require("google-libphonenumber").PhoneNumberUtil.getInstance();
-const { isAdmin } = require("../permissions");
 const {
   ReferenceNumberService,
 } = require("@allocations/reference-number-service");
-const { BankingService } = require("@allocations/banking-service");
-const ReferenceNumberSchema = require("../schema/newDirections");
 const { ApolloError } = require("apollo-server-errors");
 const moment = require("moment");
 
@@ -29,10 +26,6 @@ const deallocateReferenceNumbers = async ({ dealDataSource, deal_id }) => {
   if (deal.bankingProvider == ND_BANKING_PROVIDER)
     await ReferenceNumberService.releaseByDealId({ deal_id });
 };
-
-const Schema = ReferenceNumberSchema;
-
-const ReferenceNumber = {};
 
 const getReferenceNumberRange = (referenceNumbers) => {
   const refNums = referenceNumbers.sort(
@@ -87,51 +80,10 @@ const validateNewAccountInfo = (accountInfo) => {
   validatePhoneNumber(accountInfo.phone);
 };
 
-const Queries = {
-  referenceNumbersByDealId: async (_, { deal_id }) => {
-    return ReferenceNumberService.numbersByDealId({ deal_id });
-  },
-};
-
-const Mutations = {
-  referenceNumbersAllocate: async (_parent, { deal_id }, ctx) => {
-    isAdmin(ctx);
-    await assignNDasBankingProvider(ctx.datasources.deals, deal_id);
-    return ReferenceNumberService.allocate({ deal_id });
-  },
-  createNDBankAccount: async (_parent, { accountInfo }, ctx) => {
-    try {
-      isAdmin(ctx);
-      validateNewAccountInfo(accountInfo);
-      const referenceNumbers = await ReferenceNumberService.allocate({
-        deal_id: accountInfo.contactID,
-      });
-      await assignNDasBankingProvider(
-        ctx.datasources.deals,
-        accountInfo.contactID
-      );
-      const referenceIDs = getReferenceNumberRange(referenceNumbers);
-      const newBankingInfo = { ...accountInfo, referenceIDs };
-
-      const uploadRes = await BankingService.uploadNDVirtualAccount(
-        newBankingInfo
-      );
-
-      return uploadRes;
-    } catch (e) {
-      throw new ApolloError(e);
-    }
-  },
-};
-
-const Subscriptions = {};
-
 module.exports = {
-  Schema,
-  Queries,
-  Mutations,
-  Subscriptions,
-  subResolvers: { ReferenceNumber },
+  assignNDasBankingProvider,
+  getReferenceNumberRange,
+  validateNewAccountInfo,
   validatePhoneNumber,
   validateEmail,
   validateDateOfBirth,

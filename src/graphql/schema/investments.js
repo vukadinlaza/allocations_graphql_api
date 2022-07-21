@@ -1,6 +1,8 @@
 const { gql } = require("apollo-server-express");
 
 module.exports = gql(`
+scalar Object
+
 type Investment {
   _id: String
   value: Float
@@ -38,6 +40,11 @@ type SubmissionData {
   submissionId: String
 }
 
+type InvestmentPagination {
+  count: Int
+  investments: [Investment]
+}
+
 enum InvestmentStatus {
   invited
   onboarded
@@ -46,39 +53,6 @@ enum InvestmentStatus {
   wired
   pledged
 }
-
-type InvestmentPagination {
-  count: Int
-  investments: [Investment]
-}
-
-extend type Query {
-  investment(_id: String): Investment
-  investmentsList(pagination: PaginationInput!): InvestmentPagination
-  allInvestmentsByUserId(q: String!, limit: Int): [Investment]
-  newInvestment(_id: String): Object
-}
-
-extend type Mutation {
-  createInvestment(investment: InvestmentInput!): Investment!
-  updateInvestment(investment: InvestmentInput!): Investment!
-  getInvestmentPreview(payload: Object): Investment!
-  confirmInvestment(payload: Object): Investment!
-  deleteInvestment(_id: String!): Boolean
-  cancelCommitment(_id: String!, reason: String!): Boolean
-  addInvestmentDoc(investment_id: String!, doc: Upload!, isK1: Boolean): String
-  rmInvestmentDoc(investment_id: String!, file: String!): Boolean
-  createCapPDF(data: Object): Investment
-  sendWireReminders(investment_ids: [String], deal_id: String): Boolean
-  updateInvestmentUserId(investment_user_id: Object, new_user_id: Object): Object 
-  newUpdateInvestment(investment: Object): Object
-  newDeleteInvestment(_id: String): Object
-  newCreateInvestment(investment: Object!): Object
-  newAddInvestmentDoc(investment_id: String!, doc: Upload!): Object
-  newDeleteDocument(document_id: String!): Object
-}
-
-scalar Object
 
 input InvestmentInput {
   _id: String
@@ -105,4 +79,25 @@ input PaginationInput {
   sortNestedCollection: String
   sortLocalFieldKey: String
 }
+
+extend type Query {
+  investment(_id: String): Investment
+  investments(query: Object): [Investment]
+  investmentsList(pagination: PaginationInput!): InvestmentPagination
+  newInvestment(_id: String): Object
+}
+
+extend type Mutation {
+  createInvestment(investment: InvestmentInput!): Investment!
+  updateInvestment(investment: InvestmentInput!): Investment!
+  getInvestmentPreview(payload: Object): Investment!
+  confirmInvestment(payload: Object): Investment!
+  deleteInvestment(_id: String!): Boolean
+  addInvestmentDoc(investment_id: String!, doc: Upload!, isK1: Boolean): String
+  rmInvestmentDoc(investment_id: String!, file: String!): Boolean
+  createCapPDF(data: Object): Investment
+  sendWireReminders(investment_ids: [String], deal_id: String): Boolean
+  updateInvestmentUserId(investment_user_id: Object, new_user_id: Object): Object 
+}
+
 `);

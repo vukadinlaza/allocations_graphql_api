@@ -164,8 +164,8 @@ class DocSpringApi {
         status: "success",
       };
     } else {
-      const response = await response.json();
-      return { status: response.status || response.error };
+      const res = await response.json();
+      return { status: res.status || res.error };
     }
   }
 }

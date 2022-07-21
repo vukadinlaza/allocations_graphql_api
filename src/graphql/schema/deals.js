@@ -78,6 +78,7 @@ type Deal {
   master_series: String
   hubspot_deal_id: Int
   subscription_agreement: SubscriptionAgreement
+  crypto_wallet_address: String
 }
 
 type DealParams {
@@ -121,42 +122,6 @@ type DealParams {
   customCurrency: String
 }
 
-input DealParamsInput {
-  coinvestors: [String]
-  risks: [String]
-  dealType: String
-  dealMultiple: String
-  totalRoundSize: String
-  allocation: String
-  totalCarry: String
-  totalManagementFee: String
-  minimumInvestment: String
-  signDeadline: String
-  wireDeadline: String
-  estimatedSetupCosts: String
-  estimatedSetupCostsDollar: String
-  estimatedTerm: String
-  managementFees: String
-  managementFeesDollar: String
-  managementFeeType: String
-  portfolioTotalCarry: String
-  portfolioEstimatedSetupCosts: String
-  portfolioEstimatedSetupCostsDollar: String
-  portfolioManagementFees: String
-  portfolioManagementFeesDollar: String
-  portfolioManagementFeeType: String
-  fundTotalCarry: String
-  fundEstimatedSetupCosts: String
-  fundEstimatedSetupCostsDollar: String
-  fundManagementFees: String
-  fundManagementFeesDollar: String
-  fundManagementFeeType: String
-  fundGeneralPartner: String
-  fundEstimatedTerm: String
-  dealLogo: String
-  is3c7: Boolean
-}
-
 type Phase {
   _id: String
   name: String
@@ -186,11 +151,6 @@ type Manager {
 }
 
 type DealDetail {
-  title: String
-  content: String
-}
-
-input DealDetailInput {
   title: String
   content: String
 }
@@ -231,51 +191,6 @@ type Message {
   message: String
 }
 
-type Query {
-  deal(_id: String, deal_slug: String, fund_slug: String): Deal
-  allDeals: [Deal]
-  publicDeal(deal_slug: String!, fund_slug: String!, invite_code: String): Deal
-  searchDeals(q: String!, limit: Int): [Deal]
-  searchDealsByOrg(q: String!, org: String!, limit: Int): [Deal]
-  fundAdminHighlights: Object
-  fundAdminTables(filter: Object, pagination: PaginationInput!): DealPagination
-  getDealWithTasks(deal_id: String): Deal
-  getDealByIdWithTasks(deal_id: String): Deal
-  getDealDocService (task_id: String): ServiceDocument
-  getServicesAgreementLink(deal_id: String): DataRequest
-  getInvestmentAgreementLink(deal_id: String): DataRequest
-  getFmSignatureLink(deal_id: String): DataRequest
-  getCryptoWalletAddress(deal_id: String): String
-  newDealInvestments(deal_id: String): Object
-}
-
-type Mutation {
-  updateDeal(org: String!, deal: DealInput!): Deal
-  updateDealService(task_id: String!, deal_id: String! phase: String!, payload: Object!): Deal
-  updateDealTask(task_id: String!, deal_id: String! phase: String!): Deal
-  createDeal(org: String!, deal: DealInput!): Deal
-  deleteDeal(_id: String!): Boolean
-  createOrgAndDeal(orgName: String!, deal: DealInput!): Deal
-  addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
-  addDealDocService(doc: Upload!, task_id: String, deal_id: String, phase: String): Object
-  addDealLogo(deal_id: String!, title: String!, logo: Upload!): Deal
-  rmDealLogo(deal_id: String!): Deal
-  rmDealDoc(deal_id: String!, title: String!): Deal
-  addDealDocs(deal_id: String!, docs: Upload): Deal
-  addUserAsViewed(deal_id: String!, user_id: String!): Deal 
-  deleteUserAsViewed(deal_id: String!, user_id: String!): Deal 
-  createBuild(payload: Object): Deal
-  deleteDealDocument(document_id: String!, phase_id: String!, task_id: String!): Object
-  createNewDeal(payload: Object): CreateDealResponse
-  updateBuildDeal(payload: Object): Object
-  updateDealBuildApi(payload: Object): Deal
-  sendInvitations(dealId: String, emails: [String]): Object
-  setDocumentTasksComplete(payload: Object): Object
-  signInvestmentAgreement(payload: Object): Message
-  updateInviteInvestorsTask(dealId: String): Object
-  wakeUpBuildApi(payload: Object): Message
-}
-
 type DataRequestToken {
   id: String
   token_id: String
@@ -290,12 +205,49 @@ type CreateDealResponse {
   phases: [Phase]
 }
 
-type Subscription {
-  dealOnboarding(data: String): Object
-}
-
 type SubscriptionAgreement { 
   investor_docspring_template_id: String
+}
+
+input DealParamsInput {
+  coinvestors: [String]
+  risks: [String]
+  dealType: String
+  dealMultiple: String
+  totalRoundSize: String
+  allocation: String
+  totalCarry: String
+  totalManagementFee: String
+  minimumInvestment: String
+  signDeadline: String
+  wireDeadline: String
+  estimatedSetupCosts: String
+  estimatedSetupCostsDollar: String
+  estimatedTerm: String
+  managementFees: String
+  managementFeesDollar: String
+  managementFeeType: String
+  portfolioTotalCarry: String
+  portfolioEstimatedSetupCosts: String
+  portfolioEstimatedSetupCostsDollar: String
+  portfolioManagementFees: String
+  portfolioManagementFeesDollar: String
+  portfolioManagementFeeType: String
+  fundTotalCarry: String
+  fundEstimatedSetupCosts: String
+  fundEstimatedSetupCostsDollar: String
+  fundManagementFees: String
+  fundManagementFeesDollar: String
+  fundManagementFeeType: String
+  fundGeneralPartner: String
+  fundEstimatedTerm: String
+  dealLogo: String
+  is3c7: Boolean
+}
+
+input DealDetailInput {
+  title: String
+  content: String
 }
 
 input SubscriptionAgreementInput { 
@@ -331,5 +283,29 @@ input DealInput {
   isPostingComment: Boolean
   virtual_account_number: String
   subscription_agreement: SubscriptionAgreementInput
+}
+
+type Query {
+  deal(_id: String, deal_slug: String, fund_slug: String): Deal
+  deals(query: Object, org_id: String): [Deal]
+  dealsById(dealIds: [String]): [Deal]
+  searchDeals(fields: [String]!, searchTerm: String): [Deal]
+  publicDeal(deal_slug: String!, fund_slug: String!, invite_code: String): Deal
+  fundAdminHighlights: Object
+  fundAdminTables(filter: Object, pagination: PaginationInput!): DealPagination
+
+  getCryptoWalletAddress(deal_id: String): String
+}
+
+type Mutation {
+  createDeal(org: String!, deal: DealInput!): Deal
+  updateDeal(org: String!, deal: DealInput!): Deal
+  deleteDeal(_id: String!): Boolean
+  addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
+  addDealLogo(deal_id: String!, title: String!, logo: Upload!): Deal
+  rmDealLogo(deal_id: String!): Deal
+  rmDealDoc(deal_id: String!, title: String!): Deal
+  addUserAsViewed(deal_id: String!, user_id: String!): Deal 
+  deleteUserAsViewed(deal_id: String!, user_id: String!): Deal 
 }
 `);
