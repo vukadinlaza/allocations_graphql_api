@@ -514,7 +514,7 @@ const getInvestmentPreview = ({ input, user }) => {
   const timeStamp = Date.now();
   const { docSpringTemplateId } = input;
   let data = getTemplateData(input, user, docSpringTemplateId);
-  console.log("PREVIEW DATA", data);
+
   var submission_data = {
     editable: false,
     data: data,

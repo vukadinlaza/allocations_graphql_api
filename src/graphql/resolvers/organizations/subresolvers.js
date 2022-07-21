@@ -1,5 +1,4 @@
-// const { isAdmin } = require("../permissions");
-// const { getOrgOverviewData } = require("../mongoHelpers.js");
+const { isAdmin } = require("../../permissions");
 
 const Organization = {
   deals: async (org, _, { datasources }) => {
@@ -100,7 +99,7 @@ const Organization = {
     return res[0]?.funds || 0;
   },
   totalInvestments: async (org, _, { db }) => {
-    const [{ investments }] = await db.deals
+    const [{ investments } = {}] = await db.deals
       .aggregate([
         { $match: { organization: org._id } },
         {
@@ -121,23 +120,15 @@ const Organization = {
       ])
       .toArray();
 
-    return investments;
+    return investments || 0;
   },
-  // overviewData: async (_, { slug }, { db }) => {
-  //   const aggregation = getOrgOverviewData(slug);
-  //   const data = await db.deals.aggregate(aggregation).toArray();
-  //   return data[0];
-  // },
-  // /** members must have the org id on their .organizations_admin key **/
-  // organizationMembers: async (_, { slug }, { user, db }) => {
-  //   isAdmin({ user, db });
-  //   const org = await db.organizations.findOne({ slug });
-
-  //   return db.users.find({ organizations_admin: org._id }).toArray();
-  // },
+  /** members must have the org id on their .organizations_admin key **/
+  members: async (organization, _, { user, db }) => {
+    isAdmin({ user, db });
+    return db.users.find({ organizations_admin: organization._id }).toArray();
+  },
 };
 
 module.exports = {
   Organization,
-  subResolvers: { Organization },
 };

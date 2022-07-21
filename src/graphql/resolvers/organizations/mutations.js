@@ -173,6 +173,4 @@ const Mutations = {
   },
 };
 
-module.exports = {
-  Mutations,
-};
+module.exports = Mutations;

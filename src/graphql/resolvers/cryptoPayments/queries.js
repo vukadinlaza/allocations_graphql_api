@@ -1,7 +1,5 @@
 const fetch = require("node-fetch");
-const { throwApolloError } = require("../../utils/common.js");
-const cryptoSchema = require("../schema/crypto-payments");
-const Schema = cryptoSchema;
+const { throwApolloError } = require("../../../utils/common.js");
 
 const Queries = {
   cryptoOptions: async (_, { deal_id }) => {
@@ -28,14 +26,4 @@ const Queries = {
   },
 };
 
-const Mutations = {};
-const Subscriptions = {};
-const subResolvers = {};
-
-module.exports = {
-  Schema,
-  Queries,
-  Mutations,
-  Subscriptions,
-  subResolvers,
-};
+module.exports = Queries;
