@@ -3,6 +3,7 @@ const { customOrgPagination } = require("../../pagHelpers");
 const { getOrgOverviewData } = require("../../mongoHelpers.js");
 const { ObjectId } = require("mongodb");
 const { default: fetch } = require("node-fetch");
+const { requestBuild } = require("../../../utils/build-api");
 
 const Queries = {
   organization: async (_, { slug, _id }, { user, db }) => {
@@ -42,7 +43,7 @@ const Queries = {
     const data = await db.deals.aggregate(aggregation).toArray();
     return data[0];
   },
-   getSyncedOrgs: async (_, args, ctx) => {
+  getSyncedOrgs: async (_, args, ctx) => {
     isAdmin(ctx);
 
     const res = await fetch(
@@ -70,17 +71,9 @@ const Queries = {
     const lastTen = missmatches.slice(0, 10);
 
     for (let serviceOrg of lastTen) {
-      const dealsRes = await fetch(
-        `${process.env.BUILD_API_URL}/api/v1/organizations/deals?_id=${serviceOrg._id}`,
-        {
-          method: "GET",
-          headers: {
-            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
-            "Content-Type": "application/json",
-          },
-        }
+      const dealsResponse = await requestBuild(
+        `/api/v1/organizations/deals?_id=${serviceOrg._id}`
       );
-      const dealsResponse = await dealsRes.json();
       serviceOrg.deals = dealsResponse.deals;
 
       const orgByName = await ctx.db.organizations
@@ -122,7 +115,7 @@ const Queries = {
       lastTen,
     };
   },
-  
+
   //TO BE DELETED
   organizationMembers: async (_, { slug }, { user, db }) => {
     isAdmin({ user, db });
