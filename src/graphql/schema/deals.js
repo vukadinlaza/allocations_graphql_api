@@ -79,6 +79,7 @@ type Deal {
   hubspot_deal_id: Int
   subscription_agreement: SubscriptionAgreement
   crypto_wallet_address: String
+  version: String!
 }
 
 type DealParams {

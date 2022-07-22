@@ -1,6 +1,7 @@
 const { CryptoService } = require("@allocations/crypto-service");
 const { ObjectId } = require("mongodb");
 const Cloudfront = require("../../../cloudfront");
+const { requestBuild } = require("../../../utils/build-api");
 
 const Deal = {
   // investment denotes the `ctx.user` investment in this deal (can only be one)
@@ -101,6 +102,18 @@ const Deal = {
       return res.wallet.deposit_address;
     }
     throw new Error(res.error);
+  },
+  version: async (deal, _, { db }) => {
+    // const v2Deal = Promise.resolve();
+    const serviceDeal = requestBuild(`/api/v1/deals/${deal._id}`);
+    const legacyDeal = db.deals.findOne({ _id: ObjectId(deal._id) });
+
+    return Promise.all([serviceDeal, legacyDeal]).then((values) => {
+      // if (values[0]) return "v2-deal";
+      if (values[0]) return "service-deal";
+      if (values[1]) return "legacy-deal";
+      return "no deal found";
+    });
   },
 };
 
