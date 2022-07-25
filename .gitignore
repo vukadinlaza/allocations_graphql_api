@@ -145,3 +145,5 @@ src/priv/*
 
 # https://github.com/shelfio/jest-mongodb/blob/master/.gitignore
 globalConfig.json
+
+src/scripts/migrationDocs
