@@ -24,7 +24,7 @@ const isOrgAdmin = (orgId, { user }) => {
   const org = (user.orgs || []).find(
     (o) => o._id.toString() === orgId.toString()
   );
-  if (org || user.admin) return org;
+  if (org || user.admin) return;
 
   throw new AuthenticationError("permission denied");
 };

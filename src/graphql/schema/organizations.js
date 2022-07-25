@@ -1,7 +1,5 @@
 const { gql } = require("apollo-server-express");
 
-// TODO remove offset and limit from organization query
-
 module.exports = gql(`
 type Organization {
   _id: String
@@ -33,6 +31,7 @@ type Organization {
   slackProspects: Int
   high_volume_partner: Boolean
   masterEntity: MasterEntity
+  members: [User]
 }
 
 type MasterEntity {
@@ -43,6 +42,20 @@ type MasterEntity {
   state: String
   zipCode: String
   country: String
+}
+
+
+type OrganizationPagination {
+  count: Float
+  organizations: [Organization]
+}
+
+type EmailInvite {
+  status: String
+  sent_at: Float
+  to: String
+  opened: Boolean
+  opened_at: Float
 }
 
 input MasterEntityInput {
@@ -65,34 +78,21 @@ input OrganizationInput {
   masterEntity: MasterEntityInput
 }
 
-type OrganizationPagination {
-  count: Float
-  organizations: [Organization]
-}
-
-type EmailInvite {
-  status: String
-  sent_at: Float
-  to: String
-  opened: Boolean
-  opened_at: Float
-}
-
 extend type Query {
-  organization(slug: String!, offset: Int, limit: Int): Organization
-  organizationById(_id: String): Organization
-  organizationMembers(slug: String!): [User]
+  organization(slug: String, _id: String, offset: Int, limit: Int): Organization
   pagOrganizations(pagination: PaginationInput!): OrganizationPagination
   overviewData(slug: String!): Object
+  getSyncedOrgs: Object
+  
+  organizationMembers(slug: String!): [User]
 }
 
 extend type Mutation {
   createOrganization(organization: OrganizationInput!): Organization
   updateOrganization(organization: OrganizationInput!): Organization
-  deleteOrganization(_id: String!): Boolean
-
   addOrganizationMembership(slug: String!, user_id: String!): User
   revokeOrganizationMembership(slug: String!, user_id: String!): User
   sendAdminInvite(slug: String!, user_id: String!): EmailInvite
+  updateServiceOrg(organization: Object, _id: String): Object
 }
 `);

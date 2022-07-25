@@ -2,96 +2,20 @@ const { ObjectId } = require("mongodb");
 const moment = require("moment");
 const fetch = require("node-fetch");
 const { get } = require("lodash");
-const { isAdmin } = require("../permissions");
 const { UserInputError } = require("apollo-server-express");
-const Cloudfront = require("../../cloudfront");
-const Uploader = require("../../uploaders/investor-docs");
-const Investments = require("../schema/investments");
+const Cloudfront = require("../../../cloudfront");
+const Uploader = require("../../../uploaders/investor-docs");
 const {
   getInvestmentPreview,
   getTemplate,
   createCapitalAccountDoc,
-  createInvestmentWireInstructions,
-} = require("../../docspring");
-const Mailer = require("../../mailers/mailer");
-const commitmentTemplate = require("../../mailers/templates/commitment-template");
-const commitmentCancelledTemplate = require("../../mailers/templates/commitment-cancelled-template");
-const { signedSPV } = require("../../zaps/signedDocs");
-const { customInvestmentPagination } = require("../pagHelpers");
+} = require("../../../docspring");
+const Mailer = require("../../../mailers/mailer");
+const commitmentTemplate = require("../../../mailers/templates/commitment-template");
+const { signedSPV } = require("../../../zaps/signedDocs");
 const { DealService } = require("@allocations/deal-service");
-const { sendWireReminderEmail } = require("../../mailers/wire-reminder");
-const { amountFormat, throwApolloError } = require("../../utils/common");
-const {
-  ReferenceNumberService,
-} = require("@allocations/reference-number-service");
-
-const Schema = Investments;
-
-const Investment = {
-  deal: (investment, _, { datasources }) => {
-    return datasources.deals.getDealById({ deal_id: investment.deal_id });
-  },
-  investor: (investment, _, { db }) => {
-    return db.collection("users").findOne({ _id: investment.user_id });
-  },
-  documents: (investment) => {
-    if (Array.isArray(investment.documents)) {
-      return investment.documents.map((path) => {
-        return { link: Cloudfront.getSignedUrl(path), path };
-      });
-    } else {
-      return [];
-    }
-  },
-  value: async (investment, _, { datasources }) => {
-    const deal = await datasources.deals.getDealById({
-      deal_id: ObjectId(investment.deal_id),
-    });
-    const multiple = parseInt(deal?.dealParams?.dealMultiple || 1);
-    const value = investment.amount * multiple;
-    return value;
-  },
-  wire_instructions: (investment) => {
-    if (!investment?.wire_instructions?.s3Key) return null;
-    return {
-      link: Cloudfront.getSignedUrl(investment.wire_instructions?.s3Key),
-      path: investment.wire_instructions?.s3Key,
-    };
-  },
-};
-
-const Queries = {
-  investment: (_, args, ctx) => {
-    return ctx.datasources.investments.getInvestmentById({
-      investment_id: ObjectId(args._id),
-    });
-  },
-  investmentsList: async (_, args, ctx) => {
-    isAdmin(ctx);
-    const { pagination, currentPage } = args.pagination;
-    const documentsToSkip = pagination * currentPage;
-    const aggregation = customInvestmentPagination(args.pagination);
-    const countAggregation = [...aggregation, { $count: "count" }];
-
-    const investmentsCount = await ctx.db
-      .collection("investments")
-      .aggregate(countAggregation)
-      .toArray();
-    const count = investmentsCount.length ? investmentsCount[0].count : 0;
-
-    let investments = await ctx.db
-      .collection("investments")
-      .aggregate(aggregation)
-      .skip(documentsToSkip)
-      .limit(pagination)
-      .toArray();
-    return { count, investments };
-  },
-
-  allInvestmentsByUserId: async (_, { q }, ctx) => {
-    return ctx.db.collection("users").find({ q }).toArray();
-  },
-};
+const { sendWireReminderEmail } = require("../../../mailers/wire-reminder");
+const { amountFormat, throwApolloError } = require("../../../utils/common");
 
 const Mutations = {
   /** inits investment with appropriate status **/
@@ -225,22 +149,12 @@ const Mutations = {
         _id: ObjectId(deal.organization),
       });
 
-      const signDeadline = get(deal, "dealParams.signDeadline");
-      const status = get(deal, "status");
-
       if (deal !== null && deal.isDemo === true) {
         // needs to be a 24 character hex
         return { _id: "000000000000000000000000" };
-      } else if (signDeadline) {
-        const isClosed = status === "closed";
       }
 
       let investment = null;
-
-      //grab reference number object, set to null value if undefined
-      const referenceNumber = await ReferenceNumberService.assign({
-        deal_id: payload.dealId,
-      });
 
       // add case for undefined referenceNumber
       if (!payload.investmentId) {
@@ -254,19 +168,7 @@ const Mutations = {
           organization: ObjectId(deal.organization),
           submissionData: payload,
         };
-        // if there is a bankingProvider on the deal AND
-        // a reference number was assigned to the investment
-        // add the wire_instructions to the investment
-        if (deal.bankingProvider && referenceNumber?.number) {
-          newInvestmentData.wire_instructions = {
-            // no dynamic data for acc/routing numbers yet
-            account_number: null,
-            routing_number: null,
-            reference_number: referenceNumber?.number || null,
-            // no dynamic data for provider yet
-            provider: deal.bankingProvider || null,
-          };
-        }
+
         const { insertedId } = await datasources.investments.createInvestment({
           deal,
           user,
@@ -276,22 +178,6 @@ const Mutations = {
         investment = await db.investments.findOne({
           _id: ObjectId(insertedId),
         });
-        // If bankingProvider AND referenceNumber create wire instructions PDF
-        if (referenceNumber?.number && deal?.bankingProvider) {
-          //create wire instructions, and return key for AWS integration
-          const wireKey = await createInvestmentWireInstructions({
-            providerName: deal?.bankingProvider,
-            investmentId: investment._id,
-            investorName: investment.submissionData.legalName,
-            spvName: deal.company_name,
-            referenceNumber: referenceNumber.number,
-          });
-          //update investment to include s3Key for docuspring integration
-          await db.investments.updateOne(
-            { _id: ObjectId(investment._id) },
-            { $set: { "wire_instructions.s3Key": wireKey } }
-          );
-        }
       } else {
         investment = await datasources.investments.getInvestmentById({
           investment_id: ObjectId(payload.investmentId),
@@ -382,51 +268,16 @@ const Mutations = {
     return { ...user, previewLink: res.download_url };
   },
 
-  cancelCommitment: async (_, { _id, reason }, { user, db, ctx }) => {
+  sendWireReminders: async (
+    _,
+    { investment_ids, deal_id },
+    { db, datasources }
+  ) => {
     try {
-      const investment = await ctx.datasources.investments.getInvestmentById({
-        investment_id: ObjectId(_id),
-      });
-      if (!investment) return false;
-
-      const deal = await db.deals.findOne({
-        _id: ObjectId(investment.deal_id),
-      });
-      let res = await db.investments.deleteOne.deleteOne({
-        _id: ObjectId(_id),
-      });
-
-      const emailData = {
-        mainData: {
-          to: user.email,
-          from: "support@allocations.com",
-          subject: `Commitment Cancelled`,
-        },
-        template: commitmentCancelledTemplate,
-        templateData: {
-          username: user.first_name ? `${user.first_name}` : user.email,
-          issuer: deal.company_name || "",
-          reason,
-          refundAmount: `$${investment.amount}`,
-          refundDate: moment(new Date()).add(2, "days").format("MMM DD, YYYY"),
-        },
-      };
-
-      await Mailer.sendEmail(emailData);
-      return res.deletedCount === 1;
-    } catch (e) {
-      return false;
-    }
-  },
-
-  sendWireReminders: async (_, { investment_ids, deal_id }, { db }) => {
-    try {
-      const deal = await db
-        .collection("deals")
-        .findOne({ _id: ObjectId(deal_id) });
+      const deal = await datasources.deals.getDealById({ deal_id });
       const org = await db
         .collection("organizations")
-        .findOne({ _id: ObjectId(deal.organization) });
+        .findOne({ _id: ObjectId(deal.organization || deal.organization_id) });
 
       const currentTime = Math.round(new Date().getTime() / 1000);
       const yesterday = currentTime - 24 * 3600;
@@ -583,9 +434,4 @@ const Mutations = {
   },
 };
 
-module.exports = {
-  Schema,
-  Queries,
-  Mutations,
-  subResolvers: { Investment },
-};
+module.exports = Mutations;

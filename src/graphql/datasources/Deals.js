@@ -57,6 +57,7 @@ class Deals extends MongoDataSource {
   async createDeal({ deal, user_id }) {
     const { insertedId: _id } = await this.collection.insertOne({
       ...deal,
+      _id: new ObjectId(deal._id),
       user_id,
     });
     const newDeal = await this.collection.findOne({ _id });

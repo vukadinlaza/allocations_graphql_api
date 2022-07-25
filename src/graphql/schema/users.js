@@ -22,7 +22,7 @@ type User {
   accredidation_doc: Document
   accredidation_status: Boolean
   investments: [Investment]
-  dealInvestments(deal_id: String!): [Investment]
+  dealInvestments(deal_id: String): [Investment]
   invitedDeals: [Deal]
   invitedDeal(deal_slug: String!, fund_slug: String!): Deal
   dob: String
@@ -42,7 +42,6 @@ type User {
   deals: [Deal]
   investingAs: String
   accountInvestments: [Investment]
-  account: Account,
   termsOfServiceCF: Boolean
   profileImageKey: String,
   investorPersonalInfo: Investment
@@ -54,12 +53,18 @@ type User {
   portfolioValue: Float
   allocations_angel: Boolean
   linkedinUrl: String
-  sectors: [Object]
-  stages: [Object]
+  sectors: [String]
+  stages: [String]
   slackAmount: Int
   username: String
   display_username: Boolean
   profileBio: String
+  serviceInvestments: [Object]
+}
+
+type UserPagination {
+  count: Int
+  users: [User]
 }
 
 input UserInput {
@@ -88,40 +93,38 @@ input UserInput {
   display_username: Boolean
   city: String
   profileBio: String
-}
-
-type UserPagination {
-  count: Int
-  users: [User]
+  sectors: [String],
+  stages: [String]
 }
 
 extend type Query {
-  investor(email: String, _id: String, deal_id: String): User
-  allInvestors: [User]
+  user(email: String, _id: String, deal_id: String): User
+  users(query: Object, org_id: String): [User]
+  usersById(userIds: [String]): [User]
+  searchUsers(fields: [String]!, searchTerm: String): [User]
   allUsers(pagination: PaginationInput!, additionalFilter: Object): UserPagination
-  searchUsers(org: String!, q: String!, limit: Int): [User]
-  getLink(input: Object): Object
-  allUsersWithInvestmentsCount(pagination: PaginationInput!, additionalFilter: Object): UserPagination
+  
+  investor(email: String, _id: String, deal_id: String): User
   investorsLookupById(userIds: [String]): [User]
   searchUsersByEmail(q: [String!]): [User]
 }
 
 extend type Mutation {
-  createInvestor(user: UserInput): User
-  deleteInvestor(_id: String!): Boolean
+  createUser(user: UserInput): User
+  deleteUser(_id: String!): Boolean
   updateUser(input: UserInput): User
-  updateInvestor(investment: InvestmentInput): User
   submitTaxDocument(payload: Object): User
-  addProfileImage(email: String!, image: Upload): User
   updateProfileImage(email: String!, image: Upload): User
+  deleteProfileImage(email: String!, profileImageKey: String!): User
+  mergeAccounts(payload: Object!): Object 
+
   addSectors(email: String!, sector: String!): User
   deleteSectors(email: String!, sector: String!): User
   addStages(email: String!, stage: String!): User
   deleteStages(email: String!, stage: String!): User
-  deleteProfileImage(email: String!, profileImageKey: String!): User
   displayUsernameStatus(email: String!, display_username: Boolean): User
+  createInvestor(user: UserInput): User
   updateInvestorLinkedin(email: String!, linkedinUrl: String): User
   addFirstAndLastName(email: String!, first_name: String, last_name: String): User
-  mergeAccounts(payload: Object!): Object 
 }
 `);
