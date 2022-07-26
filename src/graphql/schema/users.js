@@ -104,6 +104,7 @@ extend type Query {
   searchUsers(fields: [String]!, searchTerm: String): [User]
   allUsers(pagination: PaginationInput!, additionalFilter: Object): UserPagination
   
+  #TO BE DELETED AUG 4th 2022
   investor(email: String, _id: String, deal_id: String): User
   investorsLookupById(userIds: [String]): [User]
   searchUsersByEmail(q: [String!]): [User]
@@ -118,6 +119,7 @@ extend type Mutation {
   deleteProfileImage(email: String!, profileImageKey: String!): User
   mergeAccounts(payload: Object!): Object 
 
+  #TO BE DELETED AUG 4th 2022
   addSectors(email: String!, sector: String!): User
   deleteSectors(email: String!, sector: String!): User
   addStages(email: String!, stage: String!): User

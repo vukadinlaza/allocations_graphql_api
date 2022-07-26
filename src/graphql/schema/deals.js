@@ -18,33 +18,18 @@ type Deal {
   deal_lead: String
   pledge_link: String
   onboarding_link: String
-  wireInstructions: String
   embed_code: String
   status: String
   amount: Int
   target: String
   amount_raised: String
   investment: Investment
-  investmentType: String
-  differentPortfolioTerms: Boolean
   investments: [Investment]
-  allInvited: Boolean
-  inviteKey: String
   memo: String
   documents: [Document]
-  appLink: String
-  publicLink: String
-  dealParams: DealParams
   last_valuation: String
   no_exchange: Boolean
   raised: Float
-  airtableId: String
-  docSpringTemplateId: String
-  spvAgreementKey: String
-  dealCoverImageKey: String
-  isDemo: Boolean
-  viewedUsers: [User]
-  dealOnboarding: dealOnboarding
   AUM: Float
   slack_deal: Boolean
   sector: String
@@ -69,7 +54,6 @@ type Deal {
   target_raise_goal: Int
   accept_crypto: Boolean
   accept_ach: Boolean
-  dealDetails: [DealDetail]
   portfolio_company_securities: String
   public_pitch_deck: Boolean
   sectors: [String]
@@ -81,7 +65,25 @@ type Deal {
   crypto_wallet_address: String
   version: String!
   
+  #TO BE DELETED AUG 9th 2022
+  wireInstructions: String
+  investmentType: String
+  differentPortfolioTerms: Boolean
+  allInvited: Boolean
+  inviteKey: String
+  appLink: String
+  publicLink: String
+  dealParams: DealParams
+  airtableId: String
+  docSpringTemplateId: String
+  spvAgreementKey: String
+  dealCoverImageKey: String
+  isDemo: Boolean
+  viewedUsers: [User]
+  dealOnboarding: dealOnboarding
+  dealDetails: [DealDetail]
 
+  #SNAKE-CASED
   wire_instructions: String
   investment_type: String
   different_portfolio_terms: Boolean
@@ -103,14 +105,18 @@ type Deal {
 type DealParams {
   coinvestors: [String]
   risks: [String]
+  valuation: String
+  allocation: String
+  is3c7: Boolean
+
+
+  #TO BE DELETED AUG 9th 2022
   keyHighlights: [String]
   termsAndConditions: [String]
-  valuation: String
   runRate: String
   dealType: String
   dealMultiple: String
   totalRoundSize: String
-  allocation: String
   totalCarry: String
   totalManagementFee: String
   maximumInvestment: String
@@ -137,10 +143,9 @@ type DealParams {
   fundManagementFeeType: String
   fundGeneralPartner: String
   fundEstimatedTerm: String
-  is3c7: Boolean
   customCurrency: String
 
-
+  #SNAKE-CASED
   key_highlights: [String]
   terms_and_conditions: [String]
   run_rate: String
@@ -210,6 +215,8 @@ type DealDetail {
 
 type dealOnboarding {
   _id: String
+
+  #TO BE DELETED AUG 9th 2022
   psDealId: String
   dealName: String
   dealCreatedDate: String
@@ -218,6 +225,7 @@ type dealOnboarding {
   psTemplate: String
   dealTasks: [dealTask]
 
+#SNAKE-CASED
   ps_deal_id: String
   deal_name: String
   deal_created_date: String
@@ -280,10 +288,13 @@ type SubscriptionAgreement {
 input DealParamsInput {
   coinvestors: [String]
   risks: [String]
+  allocation: String
+  is3c7: Boolean
+
+  #TO BE DELETED AUG 9th 2022
   dealType: String
   dealMultiple: String
   totalRoundSize: String
-  allocation: String
   totalCarry: String
   totalManagementFee: String
   minimumInvestment: String
@@ -310,9 +321,8 @@ input DealParamsInput {
   fundGeneralPartner: String
   fundEstimatedTerm: String
   dealLogo: String
-  is3c7: Boolean
 
-
+#SNAKE-CASED
   deal_type: String
   deal_multiple: String
   total_round_size: String
@@ -364,26 +374,28 @@ input DealInput {
   embed_code: String
   status: String
   closed: Boolean
-  allInvited: Boolean
-  differentPortfolioTerms: Boolean
-  wireDoc: Upload
   memo: String
-  dealDetails: [DealDetailInput]
   amount: Int
   target: String
   amount_raised: String
-  investmentType: String
-  dealParams: DealParamsInput
   last_valuation: String
   no_exchange: Boolean
+  virtual_account_number: String
+  subscription_agreement: SubscriptionAgreementInput
+
+  #TO BE DELETED AUG 9th 2022
+  allInvited: Boolean
+  differentPortfolioTerms: Boolean
+  wireDoc: Upload
+  dealDetails: [DealDetailInput]
+  investmentType: String
+  dealParams: DealParamsInput
   airtableId: String
   docSpringTemplateId: String
   spvAgreementKey: String
   isPostingComment: Boolean
-  virtual_account_number: String
-  subscription_agreement: SubscriptionAgreementInput
 
-
+  #SNAKE-CASED
   all_invited: Boolean
   different_portfolio_terms: Boolean
   wire_doc: Upload
@@ -405,6 +417,7 @@ type Query {
   fundAdminHighlights: Object
   fundAdminTables(filter: Object, pagination: PaginationInput!): DealPagination
 
+  #TO BE DELETED AUG 4th 2022
   getCryptoWalletAddress(deal_id: String): String
 }
 

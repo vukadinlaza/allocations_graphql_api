@@ -84,6 +84,7 @@ extend type Query {
   overviewData(slug: String!): Object
   getSyncedOrgs: Object
   
+  #TO BE DELETED AUG 4th 2022
   organizationMembers(slug: String!): [User]
 }
 
