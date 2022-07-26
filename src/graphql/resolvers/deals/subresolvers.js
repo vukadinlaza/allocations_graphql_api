@@ -16,7 +16,7 @@ const Deal = {
       deal_id: ObjectId(deal._id),
     });
   },
-  wireInstructions: (deal) => {
+  wire_instructions: (deal) => {
     return deal.wireInstructions
       ? Cloudfront.getSignedUrl(deal.wireInstructions)
       : null;
@@ -38,7 +38,7 @@ const Deal = {
     });
     return org.approved !== false;
   },
-  dealParams: (deal) => {
+  deal_params: (deal) => {
     let m = 1;
     if (deal.dealParams && deal.dealParams !== null) {
       m = parseFloat(deal.dealParams.dealMultiple || "1");
@@ -46,7 +46,7 @@ const Deal = {
     }
     return deal.dealParams || {};
   },
-  appLink: async (deal, _, { db }) => {
+  app_link: async (deal, _, { db }) => {
     const res = await db.organizations.findOne({
       _id: ObjectId(deal.organization),
     });
@@ -55,7 +55,7 @@ const Deal = {
       ? `/deals/${slug}/${deal.slug}`
       : `/deals/${deal.slug}`;
   },
-  publicLink: async (deal, _, { db }) => {
+  public_link: async (deal, _, { db }) => {
     const { slug } = await db.organizations.findOne({
       _id: ObjectId(deal.organization),
     });
@@ -71,10 +71,10 @@ const Deal = {
     }, 0);
     return amount;
   },
-  viewedUsers: async (deal, _, { db }) => {
+  viewed_users: async (deal, _, { db }) => {
     return db.users.find({ _id: { $in: deal.usersViewed || [] } }).toArray();
   },
-  dealOnboarding: async (deal, _, { db }) => {
+  deal_onboarding: async (deal, _, { db }) => {
     const dealOnboarding = await db.dealOnboarding.findOne({
       dealName: deal.company_name,
     });
@@ -114,6 +114,46 @@ const Deal = {
       if (values[1]) return "legacy-deal";
       return "no deal found";
     });
+  },
+
+  //TO BE DELETED
+  wireInstructions: (deal) => {
+    return deal.wireInstructions
+      ? Cloudfront.getSignedUrl(deal.wireInstructions)
+      : null;
+  },
+  dealParams: (deal) => {
+    let m = 1;
+    if (deal.dealParams && deal.dealParams !== null) {
+      m = parseFloat(deal.dealParams.dealMultiple || "1");
+      deal.dealParams.dealMultiple = m;
+    }
+    return deal.dealParams || {};
+  },
+  appLink: async (deal, _, { db }) => {
+    const res = await db.organizations.findOne({
+      _id: ObjectId(deal.organization),
+    });
+    const { slug } = res;
+    return slug && slug !== "allocations"
+      ? `/deals/${slug}/${deal.slug}`
+      : `/deals/${deal.slug}`;
+  },
+  publicLink: async (deal, _, { db }) => {
+    const { slug } = await db.organizations.findOne({
+      _id: ObjectId(deal.organization),
+    });
+    return `/public/${slug}/deals/${deal.slug}?invite_code=${deal.inviteKey}`;
+  },
+  viewedUsers: async (deal, _, { db }) => {
+    return db.users.find({ _id: { $in: deal.usersViewed || [] } }).toArray();
+  },
+  dealOnboarding: async (deal, _, { db }) => {
+    const dealOnboarding = await db.dealOnboarding.findOne({
+      dealName: deal.company_name,
+    });
+
+    return dealOnboarding;
   },
 };
 

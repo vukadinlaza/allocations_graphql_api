@@ -89,7 +89,7 @@ const Queries = {
 
     return { count, deals };
   },
-  //TO BE DELETED
+  //TO BE DELETED AUG 4th 2022
   getCryptoWalletAddress: async (_, { deal_id }) => {
     const res = await CryptoService.getWallet(deal_id);
     if (res.acknowledged) {

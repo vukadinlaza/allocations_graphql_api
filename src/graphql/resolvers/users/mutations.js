@@ -223,7 +223,8 @@ const Mutations = {
       throwApolloError(err, "mergeAccounts");
     }
   },
-  //TO BE DELETED
+
+  //TO BE DELETED AUG 4th 2022
   addSectors: async (_, { email, sector }, { db }) => {
     const foundUser = await db.users.findOne({ email });
     if (!foundUser || foundUser === null) {

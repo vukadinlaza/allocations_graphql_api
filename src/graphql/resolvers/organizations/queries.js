@@ -116,7 +116,7 @@ const Queries = {
     };
   },
 
-  //TO BE DELETED
+  //TO BE DELETED AUG 4th 2022
   organizationMembers: async (_, { slug }, { user, db }) => {
     isAdmin({ user, db });
     const org = await db.organizations.findOne({ slug });

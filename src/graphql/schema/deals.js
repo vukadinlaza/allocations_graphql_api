@@ -80,6 +80,24 @@ type Deal {
   subscription_agreement: SubscriptionAgreement
   crypto_wallet_address: String
   version: String!
+  
+
+  wire_instructions: String
+  investment_type: String
+  different_portfolio_terms: Boolean
+  all_invited: Boolean
+  invite_key: String
+  app_link: String
+  public_link: String
+  deal_params: DealParams
+  airtable_id: String
+  docspring_template_id: String
+  spv_agreement_key: String
+  deal_cover_image_key: String
+  is_demo: Boolean
+  viewed_users: [User]
+  deal_onboarding: dealOnboarding
+  deal_details: [DealDetail]
 }
 
 type DealParams {
@@ -121,6 +139,41 @@ type DealParams {
   fundEstimatedTerm: String
   is3c7: Boolean
   customCurrency: String
+
+
+  key_highlights: [String]
+  terms_and_conditions: [String]
+  run_rate: String
+  deal_type: String
+  deal_multiple: String
+  total_round_size: String
+  total_carry: String
+  total_management_fee: String
+  maximum_investment: String
+  minimum_investment: String
+  sign_deadline: String
+  wire_deadline: String
+  estimated_setup_costs: String
+  estimated_setup_costs_dollar: String
+  estimated_term: String
+  management_fees: Object
+  management_fees_dollar: String
+  management_fee_type: String
+  portfolio_total_carry: String
+  portfolio_estimated_setup_costs: String
+  portfolio_estimated_setup_costs_dollar: String
+  portfolio_management_fees: String
+  portfolio_management_fees_dollar: String
+  portfolio_management_fee_type: String
+  fund_total_carry: String
+  fund_estimated_setup_costs: String
+  fund_estimated_setup_costs_dollar: String
+  fund_management_fees: String
+  fund_management_fees_dollar: String
+  fund_management_fee_type: String
+  fund_general_partner: String
+  fund_estimated_term: String
+  custom_currency: String
 }
 
 type Phase {
@@ -128,7 +181,6 @@ type Phase {
   name: String
   deal_id: String
   tasks: [Task]
-
 }
 
 type Task {
@@ -165,6 +217,14 @@ type dealOnboarding {
   dealUpdatedBy: String
   psTemplate: String
   dealTasks: [dealTask]
+
+  ps_deal_id: String
+  deal_name: String
+  deal_created_date: String
+  deal_updated_date: String
+  deal_updated_by: String
+  ps_template: String
+  deal_tasks: [dealTask]
 }
 
 type dealTask {
@@ -174,6 +234,13 @@ type dealTask {
   taskStatus: String
   taskUpdatedBy: String
   taskUpdatedDate: String
+
+  task_id: String
+  task_name: String
+  form_fields: Object
+  task_status: String
+  task_updated_by: String
+  task_updated_date: String
 }
 
 type DealPagination {
@@ -244,6 +311,37 @@ input DealParamsInput {
   fundEstimatedTerm: String
   dealLogo: String
   is3c7: Boolean
+
+
+  deal_type: String
+  deal_multiple: String
+  total_round_size: String
+  total_carry: String
+  total_management_fee: String
+  minimum_investment: String
+  sign_deadline: String
+  wire_deadline: String
+  estimated_setup_costs: String
+  estimated_setup_costs_dollar: String
+  estimated_term: String
+  management_fees: String
+  management_fees_dollar: String
+  management_fee_type: String
+  portfolio_total_carry: String
+  portfolio_estimated_setup_costs: String
+  portfolio_estimated_setup_costs_dollar: String
+  portfolio_management_fees: String
+  portfolio_management_fees_dollar: String
+  portfolio_management_fee_type: String
+  fund_total_carry: String
+  fund_estimated_setup_costs: String
+  fund_estimated_setup_costs_dollar: String
+  fund_management_fees: String
+  fund_management_fees_dollar: String
+  fund_management_fee_type: String
+  fund_general_partner: String
+  fund_estimated_term: String
+  deal_logo: String
 }
 
 input DealDetailInput {
@@ -284,6 +382,18 @@ input DealInput {
   isPostingComment: Boolean
   virtual_account_number: String
   subscription_agreement: SubscriptionAgreementInput
+
+
+  all_invited: Boolean
+  different_portfolio_terms: Boolean
+  wire_doc: Upload
+  deal_details: [DealDetailInput]
+  investment_type: String
+  deal_params: DealParamsInput
+  airtable_id: String
+  docspring_template_id: String
+  spv_agreement_key: String
+  is_posting_comment: Boolean
 }
 
 type Query {

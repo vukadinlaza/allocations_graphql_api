@@ -67,7 +67,7 @@ const Queries = {
     users = users.map((item) => item.user);
     return { count, users };
   },
-  //TO BE DELETED
+  //TO BE DELETED AUG 4th 2022
   investor: async (_, args, ctx) => {
     const query = args._id
       ? { _id: ObjectId(args._id) }
