@@ -51,6 +51,7 @@ const getTemplateData = (input, user, templateId) => {
     is3c7_options_status,
     address,
     cifusStatus,
+    realEstateUseage,
   } = input;
 
   const SIGNATURE_ONLY_TEMPLATE = "tpl_ctrRDXgQdKz5YGg9QK";
@@ -117,6 +118,7 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_RPkFTESPMpYPhMJ6eY",
     "tpl_JyxfDpAA3h6f2aqhxh",
     "tpl_qrZ9GtmZCNJZhG5NYX",
+    "tpl_fXGt9aAd5XAAcHcMFR",
     "tpl_fSf2fzNfKPjscCafEg",
   ];
 
@@ -126,6 +128,45 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_G2yTY3qtZs3RLMC2fe",
     "tpl_EdhpFQgJGdbnLMCq2j",
   ];
+
+  if (templateId === "tpl_qbHh2KPqMkXaTyZbr7") {
+    return {
+      InvestorType: capitalize(investor_type),
+      MemberName: legalName,
+      SubAmount: investmentAmount,
+      real_estate_useage: realEstateUseage || "N/A",
+      USStateIndividual: isTypeIndividual ? countryWithState : "",
+      Title: isTypeIndividual ? "" : title || "",
+      USStateEntity: isTypeEntity ? countryWithState : "",
+      AccredIndiv: isTypeIndividual
+        ? accredited_investor_status || is3c7_options_status
+        : "",
+      AccredEntity: isTypeIndividual
+        ? ""
+        : accredited_investor_status || is3c7_options_status,
+      Email: user.email,
+      FullName: nameToUse,
+      Signature: nameToUse,
+      "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
+      MemberName2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : " ",
+      FullName2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : "",
+      Signature2:
+        isTypeIndividual && secondInvestor
+          ? secondInvestor.secondLegalName
+          : " ",
+      Email2:
+        isTypeIndividual && secondInvestor ? secondInvestor.secondEmail : " ",
+      // "Date Signed2": !secondInvestor
+      //   ? ""
+      //   : moment(new Date()).format("MM/DD/YYYY") || " ",
+    };
+  }
 
   if (kunalDeals.includes(templateId)) {
     return {
@@ -514,7 +555,6 @@ const getInvestmentPreview = ({ input, user }) => {
   const timeStamp = Date.now();
   const { docSpringTemplateId } = input;
   let data = getTemplateData(input, user, docSpringTemplateId);
-
   var submission_data = {
     editable: false,
     data: data,

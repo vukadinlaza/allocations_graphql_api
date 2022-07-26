@@ -3,7 +3,7 @@ const { isAdmin, isOrgAdmin } = require("../../permissions");
 const PublicUploader = require("../../../uploaders/public-docs");
 const AdminMailer = require("../../../mailers/admin-mailer");
 const { throwApolloError } = require("../../../utils/common");
-const { default: fetch } = require("node-fetch");
+const { requestBuild } = require("../../../utils/build-api");
 
 const Mutations = {
   /** creates org and adds the creator to the fund automatically  **/
@@ -90,82 +90,54 @@ const Mutations = {
   },
   updateServiceOrg: async (_, { organization, _id }, ctx) => {
     isAdmin(ctx);
-    const headers = {
-      "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
-      "Content-Type": "application/json",
-    };
     try {
-      console.log("UPDATINGGG");
-      const res = await fetch(
-        `${process.env.BUILD_API_URL}/api/v1/organizations/${_id}`,
+      const response = await requestBuild(
+        `/api/v1/organizations/${_id}`,
+        "PUT",
         {
-          method: "PUT",
-          headers,
-          body: JSON.stringify({
-            name: organization.name,
-            slug: organization.slug,
-          }),
+          name: organization.name,
+          slug: organization.slug,
         }
       );
 
-      const response = await res.json();
-      console.log({ response });
-
-      if (!res.ok)
+      if (response.error)
         throw new Error(`Organization wasnt updated: ${response.error}`);
 
-      const entitiesRes = await fetch(
-        `${process.env.BUILD_API_URL}/api/v1/entities?organization_ids=${_id}`,
-        {
-          method: "GET",
-          headers,
-        }
+      const entitiesResponse = await requestBuild(
+        `/api/v1/entities?organization_ids=${_id}`
       );
-      const entitiesResponse = await entitiesRes.json();
 
       if (entitiesResponse.length && organization._id) {
         const { organization_ids } = entitiesResponse[0];
         const oldIdIndex = organization_ids.indexOf(_id);
         organization_ids.splice(oldIdIndex, 1, organization._id);
-        const updatedEntitiesRes = await fetch(
-          `${process.env.BUILD_API_URL}/api/v1/entities/${entitiesResponse[0]._id}`,
-          {
-            method: "PUT",
-            headers,
-            body: JSON.stringify({ organization_ids }),
-          }
+        const updatedEntitiesRes = await requestBuild(
+          `/api/v1/entities/${entitiesResponse[0]._id}`,
+          "PUT",
+          { organization_ids }
         );
-        if (!updatedEntitiesRes.ok) throw new Error("Entities wasnt updated");
+        if (updatedEntitiesRes.error) throw new Error("Entities wasnt updated");
       }
 
-      const dealRes = await fetch(
-        `${process.env.BUILD_API_URL}/api/v1/deals?organization_id=${_id}`,
-        {
-          method: "GET",
-          headers,
-        }
+      const dealResponse = await requestBuild(
+        `/api/v1/deals?organization_id=${_id}`
       );
-      const dealResponse = await dealRes.json();
 
       if (dealResponse.length) {
         dealResponse.forEach(async (deal) => {
-          const updatedDealRes = await fetch(
-            `${process.env.BUILD_API_URL}/api/v1/deals/${deal._id}`,
+          const updatedDealRes = await requestBuild(
+            `/api/v1/deals/${deal._id}`,
+            "PUT",
             {
-              method: "PUT",
-              headers,
-              body: JSON.stringify({
-                organization_id: organization._id,
-                organization_name: organization.name,
-              }),
+              organization_id: organization._id,
+              organization_name: organization.name,
             }
           );
-          if (!updatedDealRes.ok)
+          if (updatedDealRes.error)
             throw new Error(`Deal ${deal._id} wasnt updated`);
         });
       }
 
-      console.log({ response });
       return response;
     } catch (err) {
       return err;
