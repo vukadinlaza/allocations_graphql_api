@@ -595,14 +595,14 @@ const createTaxDocument = async ({ payload, user, db }) => {
 
 const getInvestmentPreview = ({ input, user }) => {
   const timeStamp = Date.now();
-  const { docspring_template_id } = input;
-  let data = getTemplateData(input, user, docspring_template_id);
+  const { docSpringTemplateId } = input;
+  let data = getTemplateData(input, user, docSpringTemplateId);
   var submission_data = {
     editable: false,
     data: data,
     metadata: {
       user_id: user._id,
-      templateName: docspring_template_id,
+      templateName: docSpringTemplateId,
       timeStamp: timeStamp,
       preview: true,
     },
@@ -613,7 +613,7 @@ const getInvestmentPreview = ({ input, user }) => {
 
   return new Promise((resolve, reject) => {
     docspring.generatePDF(
-      docspring_template_id,
+      docSpringTemplateId,
       submission_data,
       (error, response) => {
         if (error) reject(error);
