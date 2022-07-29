@@ -52,6 +52,7 @@ const getTemplateData = (input, user, templateId) => {
     address,
     cifusStatus,
     realEstateUseage,
+    tax_identification_number,
   } = input;
 
   const SIGNATURE_ONLY_TEMPLATE = "tpl_ctrRDXgQdKz5YGg9QK";
@@ -342,9 +343,26 @@ const getTemplateData = (input, user, templateId) => {
       Email: user.email,
       FullName: nameToUse,
       Signature: nameToUse,
-      Address: address,
+      HomeAddress: address,
       Title: isTypeIndividual ? "" : title || "",
       "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
+    };
+  } else if (templateId === "tpl_eg24nTFZrC2Kqs3FMf") {
+    return {
+      InvestorType: capitalize(investor_type),
+      MemberName: legalName,
+      SubAmount: investmentAmount,
+      USStateIndividual: isTypeIndividual ? countryWithState : "",
+      USStateEntity: isTypeEntity ? countryWithState : "",
+      AccredIndiv: isTypeIndividual ? accredited_investor_status : "",
+      AccredEntity: isTypeIndividual ? "" : accredited_investor_status,
+      Email: user.email,
+      FullName: nameToUse,
+      Signature: nameToUse,
+      HomeAddress: address,
+      Title: isTypeIndividual ? "" : title || "",
+      "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
+      SocialSecurityNumber: tax_identification_number,
     };
   } else {
     return {
