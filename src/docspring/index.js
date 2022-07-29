@@ -71,6 +71,7 @@ const getTemplateData = (input, user, templateId) => {
     country + (country === "United States" ? `, ${state}` : "");
   const nameToUse = isTypeIndividual ? legalName : fullName;
   const communeDeals = ["tpl_hK65xPJdKpgTPyks9H", "tpl_Y6hNCEc6CqzNkqpyPp"];
+  const communeDealsLong = ["tpl_h3J77pz5RxMPbtRJD4"];
 
   const irishAngelsDeals = [
     "tpl_ratHTKYeHh9qcd2eYx",
@@ -256,6 +257,29 @@ const getTemplateData = (input, user, templateId) => {
       Signature: nameToUse,
       "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
       Title: title,
+    };
+  } else if (communeDealsLong.includes(templateId)) {
+    return {
+      InvestorType: capitalize(investor_type),
+      MemberName: legalName,
+      SubAmount: investmentAmount,
+      USStateIndividual: isTypeIndividual ? countryWithState : "",
+      USStateEntity: isTypeEntity ? countryWithState : "",
+      AccredIndiv: isTypeIndividual ? accredited_investor_status : "",
+      AccredEntity: isTypeIndividual ? "" : accredited_investor_status,
+      Email: user.email,
+      FullName: nameToUse,
+      Signature: isTypeEntity ? "" : nameToUse,
+      "Date Signed": isTypeEntity
+        ? ""
+        : moment(new Date()).format("MM/DD/YYYY"),
+      Title: title,
+      EntitySignature: isTypeEntity ? nameToUse : "",
+      EntityMemberName: isTypeEntity ? legalName : "",
+      IndividualMemberName: isTypeEntity ? "" : legalName,
+      "Entity Date Signed": isTypeEntity
+        ? moment(new Date()).format("MM/DD/YYYY")
+        : "",
     };
   } else if (irishAngelsDeals.includes(templateId)) {
     return {
@@ -539,7 +563,7 @@ const createTaxDocument = async ({ payload, user, db }) => {
     "kycTemplateId",
     "kycTemplateName",
     "tax_classification",
-    "isDemo",
+    "is_demo",
   ];
   const data = omit({ ...payload, signature: sig }, keysToOmit);
 
@@ -571,14 +595,14 @@ const createTaxDocument = async ({ payload, user, db }) => {
 
 const getInvestmentPreview = ({ input, user }) => {
   const timeStamp = Date.now();
-  const { docSpringTemplateId } = input;
-  let data = getTemplateData(input, user, docSpringTemplateId);
+  const { docspring_template_id } = input;
+  let data = getTemplateData(input, user, docspring_template_id);
   var submission_data = {
     editable: false,
     data: data,
     metadata: {
       user_id: user._id,
-      templateName: docSpringTemplateId,
+      templateName: docspring_template_id,
       timeStamp: timeStamp,
       preview: true,
     },
@@ -589,7 +613,7 @@ const getInvestmentPreview = ({ input, user }) => {
 
   return new Promise((resolve, reject) => {
     docspring.generatePDF(
-      docSpringTemplateId,
+      docspring_template_id,
       submission_data,
       (error, response) => {
         if (error) reject(error);
