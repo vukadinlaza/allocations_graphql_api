@@ -33,7 +33,7 @@ const transformServiceDeal = ({ serviceDeal, coverImage }) => {
       totalCarry: serviceDeal?.carry_fee?.value,
     },
     docSpringTemplateId:
-      serviceDeal.docspring_template_id || "tpl_RrmjKbpFRr7qhKY3dD",
+      serviceDeal.docSpringTemplateId || "tpl_RrmjKbpFRr7qhKY3dD",
     hubspot_deal_id: serviceDeal.hubspot_deal_id,
     manager: serviceDeal.manager,
     master_series: serviceDeal.master_series,
@@ -66,7 +66,7 @@ const transformLegacyDeal = ({ legacyDeal }) => {
     manager_name: legacyDeal.deal_lead,
     pledge_link: legacyDeal.pledge_link,
     status: legacyDeal.status,
-    docspring_template_id:
+    docSpringTemplateId:
       legacyDeal.docSpringTemplateId || "tpl_RrmjKbpFRr7qhKY3dD",
     slug: legacyDeal.slug,
     memo: legacyDeal.memo,

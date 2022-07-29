@@ -71,6 +71,7 @@ const getTemplateData = (input, user, templateId) => {
     country + (country === "United States" ? `, ${state}` : "");
   const nameToUse = isTypeIndividual ? legalName : fullName;
   const communeDeals = ["tpl_hK65xPJdKpgTPyks9H", "tpl_Y6hNCEc6CqzNkqpyPp"];
+  const communeDealsLong = ["tpl_h3J77pz5RxMPbtRJD4"];
 
   const irishAngelsDeals = [
     "tpl_ratHTKYeHh9qcd2eYx",
@@ -256,6 +257,29 @@ const getTemplateData = (input, user, templateId) => {
       Signature: nameToUse,
       "Date Signed": moment(new Date()).format("MM/DD/YYYY"),
       Title: title,
+    };
+  } else if (communeDealsLong.includes(templateId)) {
+    return {
+      InvestorType: capitalize(investor_type),
+      MemberName: legalName,
+      SubAmount: investmentAmount,
+      USStateIndividual: isTypeIndividual ? countryWithState : "",
+      USStateEntity: isTypeEntity ? countryWithState : "",
+      AccredIndiv: isTypeIndividual ? accredited_investor_status : "",
+      AccredEntity: isTypeIndividual ? "" : accredited_investor_status,
+      Email: user.email,
+      FullName: nameToUse,
+      Signature: isTypeEntity ? "" : nameToUse,
+      "Date Signed": isTypeEntity
+        ? ""
+        : moment(new Date()).format("MM/DD/YYYY"),
+      Title: title,
+      EntitySignature: isTypeEntity ? nameToUse : "",
+      EntityMemberName: isTypeEntity ? legalName : "",
+      IndividualMemberName: isTypeEntity ? "" : legalName,
+      "Entity Date Signed": isTypeEntity
+        ? moment(new Date()).format("MM/DD/YYYY")
+        : "",
     };
   } else if (irishAngelsDeals.includes(templateId)) {
     return {
