@@ -563,7 +563,7 @@ const createTaxDocument = async ({ payload, user, db }) => {
     "kycTemplateId",
     "kycTemplateName",
     "tax_classification",
-    "is_demo",
+    "isDemo",
   ];
   const data = omit({ ...payload, signature: sig }, keysToOmit);
 
