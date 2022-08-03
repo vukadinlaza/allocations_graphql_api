@@ -383,7 +383,6 @@ input DealInput {
   virtual_account_number: String
   subscription_agreement: SubscriptionAgreementInput
   slug: String
-  investment_type: String
   
   #TO BE DELETED AUG 9th 2022
   allInvited: Boolean
