@@ -1,5 +1,4 @@
 const { ObjectId } = require("mongodb");
-const _ = require("lodash");
 const fetch = require("node-fetch");
 const moment = require("moment");
 const { v4: uuid } = require("uuid");
@@ -16,15 +15,6 @@ const Mutations = {
   /** create deal ensures there isn't already a deal form org with same name **/
   createDeal: async (_parent, { deal, org: orgSlug }, ctx) => {
     const org = await ensureFundAdmin(orgSlug, ctx);
-    const slug = _.kebabCase(deal.company_name);
-    // ensure that deal name with org doesn't exist
-    const collision = await ctx.datasources.deals.getDealByOrgIdAndDealslug({
-      deal_slug: slug,
-      fund_id: org._id,
-    });
-    if (collision) {
-      throw new Error("Deal with same name already exists");
-    }
 
     const res = await ctx.datasources.deals.createDeal({
       user_id: ctx.user._id,
@@ -34,7 +24,6 @@ const Mutations = {
         organization: org._id,
         status: deal.status || "onboarding",
         dealParams: deal.dealParams || {},
-        slug,
         created_at: Date.now(),
         inviteKey: uuid(),
       },
