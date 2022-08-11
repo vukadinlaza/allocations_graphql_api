@@ -20,7 +20,9 @@ const Queries = {
       const res = await fetch(
         `https://${
           process.env.AUTH0_DOMAIN
-        }/api/v2/users-by-email?email=${encodeURI(email)}`,
+        }/api/v2/users-by-email?email=${encodeURIComponent(
+          email.toLowerCase()
+        )}`,
         {
           headers: {
             Authorization: `Bearer ${access_token}`,
