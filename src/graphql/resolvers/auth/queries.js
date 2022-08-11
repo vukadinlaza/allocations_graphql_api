@@ -25,8 +25,11 @@ const Queries = {
         }
       );
       const data = await res.json();
+      console.log("DATA BEFORE", data);
       if (!data) return { message: "No Data" };
-      const identities = (data || []).map((u) => u.identities).flat();
+      console.log("DATA AFTER", data);
+      const x = data.length && data.length > 0 ? data : [];
+      const identities = x.map((u) => u.identities).flat();
       const hasEmailConnection = identities.find(
         (i) => i?.connection === "email"
       );
