@@ -3,6 +3,7 @@ const { throwApolloError } = require("../../../utils/common.js");
 
 const Queries = {
   search_auth0_users: async (_, { email }) => {
+    console.log("email", email);
     try {
       const response = await fetch(
         `https://${process.env.AUTH0_DOMAIN}/oauth/token`,
@@ -24,13 +25,11 @@ const Queries = {
           },
         }
       );
+
+      if (!res.ok) return { message: "the request failed" };
+
       const data = await res.json();
-      console.log("DATA BEFORE", data);
-      if (!data) return { message: "No Data" };
-      console.log("DATA AFTER", data);
-      const x = data.length && data.length > 0 ? data : [];
-      console.log("XXX", x);
-      const identities = x.map((u) => u.identities).flat();
+      const identities = data.map((u) => u.identities).flat();
       const hasEmailConnection = identities.find(
         (i) => i?.connection === "email"
       );
