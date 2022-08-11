@@ -7,7 +7,7 @@ const Investments = require("./datasources/Investments");
 const pubsub = new PubSub();
 
 function authedServer(db) {
-  const publicEndpoints = ["PublicDeal"];
+  const publicEndpoints = ["PublicDeal", "Search_Auth_users"];
 
   return new ApolloServer({
     introspection: true,
@@ -19,7 +19,9 @@ function authedServer(db) {
         deals: new Deals(db.collection("deals")),
         investments: new Investments(db.collection("investments")),
       };
+
       // public deal endpoint skips authentication
+
       if (
         payload.req &&
         payload.req.body &&
