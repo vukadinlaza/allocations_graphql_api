@@ -18,7 +18,9 @@ const Queries = {
       const { access_token } = await response.json();
 
       const res = await fetch(
-        `https://${process.env.AUTH0_DOMAIN}/api/v2/users-by-email?email=${email}`,
+        `https://${
+          process.env.AUTH0_DOMAIN
+        }/api/v2/users-by-email?email=${encodeURI(email)}`,
         {
           headers: {
             Authorization: `Bearer ${access_token}`,
