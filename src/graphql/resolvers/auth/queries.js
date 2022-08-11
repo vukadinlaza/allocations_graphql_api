@@ -29,6 +29,7 @@ const Queries = {
       if (!data) return { message: "No Data" };
       console.log("DATA AFTER", data);
       const x = data.length && data.length > 0 ? data : [];
+      console.log("XXX", x);
       const identities = x.map((u) => u.identities).flat();
       const hasEmailConnection = identities.find(
         (i) => i?.connection === "email"
