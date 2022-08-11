@@ -26,7 +26,10 @@ const Queries = {
         }
       );
 
-      if (!res.ok) return { message: "the request failed" };
+      if (!res.ok) {
+        console.log(await res.json());
+        return { message: "the request failed" };
+      }
 
       const data = await res.json();
       const identities = data.map((u) => u.identities).flat();
