@@ -21,7 +21,7 @@ function authedServer(db) {
       };
 
       // public deal endpoint skips authentication
-      console.log("(payload.req.body", payload.req.body);
+      console.log("(payload.req.body", payload.req.body.operationName);
 
       if (
         payload.req &&
