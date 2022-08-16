@@ -44,7 +44,8 @@ function authedServer(db) {
       } = payload?.req?.body;
       if (operationName && operationName !== "IntrospectionQuery")
         logger.info({
-          user,
+          user: user.email,
+          user_id: user._id,
           operationName,
           type: query?.split(" ")?.shift() || "N/A",
           variables: JSON.stringify(variables),
