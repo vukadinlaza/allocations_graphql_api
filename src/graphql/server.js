@@ -47,7 +47,7 @@ function authedServer(db) {
           user: user.email,
           user_id: user._id,
           operationName,
-          type: query?.split(" ")?.shift() || "N/A",
+          type: query.match(/[a-z]+\b/)?.[0] || "N/A",
           variables: JSON.stringify(variables),
         });
 
