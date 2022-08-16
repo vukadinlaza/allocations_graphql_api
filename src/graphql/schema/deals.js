@@ -382,13 +382,14 @@ input DealInput {
   no_exchange: Boolean
   virtual_account_number: String
   subscription_agreement: SubscriptionAgreementInput
-
+  slug: String
+  
   #TO BE DELETED AUG 9th 2022
   allInvited: Boolean
   differentPortfolioTerms: Boolean
   wireDoc: Upload
-  dealDetails: [DealDetailInput]
   investmentType: String
+  dealDetails: [DealDetailInput]
   dealParams: DealParamsInput
   airtableId: String
   docSpringTemplateId: String
