@@ -23,7 +23,6 @@ const { NODE_ENV } = process.env;
 
 function corsWhitelist(whitelist) {
   const origin = (origin, cb) => {
-    console.log("ORIGIN", origin);
     if (origin && origin.includes("vercel.app")) {
       return cb(null, true);
     }
