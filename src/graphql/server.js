@@ -1,6 +1,6 @@
+const { logger } = require("@allocations/api-common");
 const { ApolloServer, PubSub } = require("apollo-server-express");
 const { authenticate } = require("../auth");
-const { logger } = require("../utils/logger");
 const { typeDefs, resolvers } = require("../graphql/resolvers");
 const Deals = require("./datasources/Deals");
 const Investments = require("./datasources/Investments");
@@ -36,6 +36,20 @@ function authedServer(db) {
         payload.connection.context &&
         payload.connection.context.authToken;
       const user = await authenticate({ req: payload.req, db, authToken });
+
+      //Log for Datadog
+      const {
+        operationName = "N/A",
+        variables = {},
+        query = "",
+      } = payload?.req?.body;
+      if (operationName && operationName !== "IntrospectionQuery")
+        logger.info({
+          user,
+          operationName,
+          type: query?.split(" ")?.shift() || "N/A",
+          variables: JSON.stringify(variables),
+        });
 
       return { user, db, pubsub, datasources };
     },
