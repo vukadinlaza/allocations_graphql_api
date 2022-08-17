@@ -70,13 +70,14 @@ const Queries = {
         },
       }
     );
+    const data = await response.json();
+
     if (!response.ok) {
       const { error, errorCode, message } = data;
       throw new ApolloError(error, errorCode || "INTERNAL_SERVER_ERROR", {
         message: message || "Auth0 request failed",
       });
     }
-    const data = await response.json();
 
     return { success: data.status === 200 };
   },
