@@ -12,7 +12,7 @@ const Queries = {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: `grant_type=client_credentials&client_id=${process.env.AUTH0_RWA_CLIENT_ID}&client_secret=${process.env.AUTH0_RWA_CLIENT_SECRET}`,
+          body: `grant_type=client_credentials&client_id=${process.env.AUTH0_RWA_CLIENT_ID}&client_secret=${process.env.AUTH0_RWA_CLIENT_SECRET}&audience=https://${process.env.AUTH0_DOMAIN}/api/v2/`,
         }
       );
       const { access_token } = await response.json();
