@@ -61,25 +61,24 @@ const Queries = {
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/json",
         },
-        body: {
+        body: JSON.stringify({
           client_id: process.env.AUTH0_RWA_CLIENT_ID,
           email: email,
           connection: "Username-Password-Authentication",
-        },
+        }),
       }
     );
-    const data = await response.json();
 
-    if (!response.ok) {
-      const { error, errorCode, message } = data;
+    if (response.status !== 200) {
+      const { error, errorCode, message } = response;
       throw new ApolloError(error, errorCode || "INTERNAL_SERVER_ERROR", {
         message: message || "Auth0 request failed",
       });
     }
 
-    return { success: data.status === 200 };
+    return { success: true };
   },
 };
 
