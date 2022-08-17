@@ -63,7 +63,7 @@ const Queries = {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        data: {
+        body: {
           client_id: process.env.AUTH0_RWA_CLIENT_ID,
           email: email,
           connection: "Username-Password-Authentication",
