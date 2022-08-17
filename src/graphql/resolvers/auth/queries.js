@@ -55,6 +55,31 @@ const Queries = {
       throwApolloError(e, "auth0 user search query");
     }
   },
+  reset_password: async (_, { email }) => {
+    const response = await fetch(
+      `https://${process.env.AUTH0_DOMAIN}/dbconnections/change_password`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        data: {
+          client_id: process.env.AUTH0_RWA_CLIENT_ID,
+          email: email,
+          connection: "Username-Password-Authentication",
+        },
+      }
+    );
+    if (!response.ok) {
+      const { error, errorCode, message } = data;
+      throw new ApolloError(error, errorCode || "INTERNAL_SERVER_ERROR", {
+        message: message || "Auth0 request failed",
+      });
+    }
+    const data = await response.json();
+
+    return { success: data.status === 200 };
+  },
 };
 
 module.exports = Queries;
