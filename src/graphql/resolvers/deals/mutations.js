@@ -19,6 +19,7 @@ const Mutations = {
     const res = await ctx.datasources.deals.createDeal({
       user_id: ctx.user._id,
       deal: {
+        slug,
         ...deal,
         _id: ObjectId(deal._id) || undefined,
         organization: org._id,
