@@ -24,6 +24,7 @@ const Mutations = {
         _id: ObjectId(deal._id) || undefined,
         organization: org._id,
         status: deal.status || "onboarding",
+        slug: deal.slug,
         dealParams: deal.dealParams || {},
         created_at: Date.now(),
         inviteKey: uuid(),
