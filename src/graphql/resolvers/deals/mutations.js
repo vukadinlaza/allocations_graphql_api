@@ -17,14 +17,6 @@ const Mutations = {
   createDeal: async (_parent, { deal, org: orgSlug }, ctx) => {
     const org = await ensureFundAdmin(orgSlug, ctx);
     const slug = _.kebabCase(deal.company_name);
-    // ensure that deal name with org doesn't exist
-    const collision = await ctx.datasources.deals.getDealByOrgIdAndDealslug({
-      deal_slug: slug,
-      fund_id: org._id,
-    });
-    if (collision) {
-      throw new Error("Deal with same name already exists");
-    }
 
     const res = await ctx.datasources.deals.createDeal({
       user_id: ctx.user._id,

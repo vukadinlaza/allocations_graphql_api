@@ -16,7 +16,6 @@ class Deals extends MongoDataSource {
   }
 
   async getAllDeals({ query }) {
-    console.log(query);
     const legacyDeals = await this.collection.find(query).toArray();
     return legacyDeals;
   }

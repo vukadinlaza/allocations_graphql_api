@@ -1,13 +1,13 @@
+const { logger } = require("@allocations/api-common");
 const { ApolloServer, PubSub } = require("apollo-server-express");
 const { authenticate } = require("../auth");
-const { logger } = require("../utils/logger");
 const { typeDefs, resolvers } = require("../graphql/resolvers");
 const Deals = require("./datasources/Deals");
 const Investments = require("./datasources/Investments");
 const pubsub = new PubSub();
 
 function authedServer(db) {
-  const publicEndpoints = ["PublicDeal"];
+  const publicEndpoints = ["PublicDeal", "Search_Auth_users", "reset_password"];
 
   return new ApolloServer({
     introspection: true,
@@ -19,7 +19,9 @@ function authedServer(db) {
         deals: new Deals(db.collection("deals")),
         investments: new Investments(db.collection("investments")),
       };
+
       // public deal endpoint skips authentication
+
       if (
         payload.req &&
         payload.req.body &&
@@ -33,6 +35,21 @@ function authedServer(db) {
         payload.connection.context &&
         payload.connection.context.authToken;
       const user = await authenticate({ req: payload.req, db, authToken });
+
+      //Log for Datadog
+      const {
+        operationName = "N/A",
+        variables = {},
+        query = "",
+      } = payload?.req?.body;
+      if (operationName && operationName !== "IntrospectionQuery")
+        logger.info({
+          user: user.email,
+          user_id: user._id,
+          operationName,
+          type: query.match(/[a-z]+\b/)?.[0] || "N/A",
+          variables: JSON.stringify(variables),
+        });
 
       return { user, db, pubsub, datasources };
     },

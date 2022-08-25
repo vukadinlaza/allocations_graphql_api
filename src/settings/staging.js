@@ -13,5 +13,6 @@ module.exports = {
     "https://mono-tools-test.herokuapp.com",
     "https://allocations-fmdemo-fe.herokuapp.com",
     "https://fmdemo.allocations.com",
+    "https://staging.login.allocations.com",
   ],
 };
