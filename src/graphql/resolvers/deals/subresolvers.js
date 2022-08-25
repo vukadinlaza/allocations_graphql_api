@@ -88,7 +88,9 @@ const Deal = {
       .toArray();
     const aum = wiredInvestments.length
       ? wiredInvestments
-          .map((inv) => inv.amount ?? 0)
+          .map((inv) =>
+            inv.capitalWiredAmount ? inv.capitalWiredAmount : inv.amount ?? 0
+          )
           .reduce((acc, n) => Number(acc) + Number(n))
       : 0;
     return aum;
