@@ -5,5 +5,6 @@ module.exports = {
     "https://tools.allocations.com",
     "https://mono-fe-test.herokuapp.com",
     "https://mono-tools-test.herokuapp.com",
+    "https://login.allocations.com",
   ],
 };
