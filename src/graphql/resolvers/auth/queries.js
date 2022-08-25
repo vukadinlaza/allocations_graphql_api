@@ -12,7 +12,7 @@ const Queries = {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: `grant_type=client_credentials&client_id=${process.env.AUTH0_RWA_CLIENT_ID}&client_secret=${process.env.AUTH0_RWA_CLIENT_SECRET}`,
+          body: `grant_type=client_credentials&client_id=${process.env.AUTH0_RWA_CLIENT_ID}&client_secret=${process.env.AUTH0_RWA_CLIENT_SECRET}&audience=https://${process.env.AUTH0_DOMAIN}/api/v2/`,
         }
       );
       const { access_token } = await response.json();
@@ -54,6 +54,31 @@ const Queries = {
     } catch (e) {
       throwApolloError(e, "auth0 user search query");
     }
+  },
+  reset_password: async (_, { email }) => {
+    const response = await fetch(
+      `https://${process.env.AUTH0_DOMAIN}/dbconnections/change_password`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_id: process.env.AUTH0_RWA_CLIENT_ID,
+          email: email,
+          connection: "Username-Password-Authentication",
+        }),
+      }
+    );
+
+    if (response.status !== 200) {
+      const { error, errorCode, message } = response;
+      throw new ApolloError(error, errorCode || "INTERNAL_SERVER_ERROR", {
+        message: message || "Auth0 request failed",
+      });
+    }
+
+    return { success: true };
   },
 };
 
