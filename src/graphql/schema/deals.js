@@ -108,8 +108,6 @@ type DealParams {
   allocation: String
   is3c7: Boolean
 
-
-  #TO BE DELETED AUG 9th 2022
   keyHighlights: [String] @deprecated(reason: "In the process of adopting snake_cased version")
   termsAndConditions: [String] @deprecated(reason: "In the process of adopting snake_cased version")
   runRate: String @deprecated(reason: "In the process of adopting snake_cased version")
@@ -289,35 +287,36 @@ input DealParamsInput {
   allocation: String
   is3c7: Boolean
 
-  dealType: String @deprecated(reason: "In the process of adopting snake_cased version")
-  dealMultiple: String @deprecated(reason: "In the process of adopting snake_cased version")
-  totalRoundSize: String @deprecated(reason: "In the process of adopting snake_cased version")
-  totalCarry: String @deprecated(reason: "In the process of adopting snake_cased version")
-  totalManagementFee: String @deprecated(reason: "In the process of adopting snake_cased version")
-  minimumInvestment: String @deprecated(reason: "In the process of adopting snake_cased version")
-  signDeadline: String @deprecated(reason: "In the process of adopting snake_cased version")
-  wireDeadline: String @deprecated(reason: "In the process of adopting snake_cased version")
-  estimatedSetupCosts: String @deprecated(reason: "In the process of adopting snake_cased version")
-  estimatedSetupCostsDollar: String @deprecated(reason: "In the process of adopting snake_cased version")
-  estimatedTerm: String @deprecated(reason: "In the process of adopting snake_cased version")
-  managementFees: String @deprecated(reason: "In the process of adopting snake_cased version")
-  managementFeesDollar: String @deprecated(reason: "In the process of adopting snake_cased version")
-  managementFeeType: String @deprecated(reason: "In the process of adopting snake_cased version")
-  portfolioTotalCarry: String @deprecated(reason: "In the process of adopting snake_cased version")
-  portfolioEstimatedSetupCosts: String @deprecated(reason: "In the process of adopting snake_cased version")
-  portfolioEstimatedSetupCostsDollar: String @deprecated(reason: "In the process of adopting snake_cased version")
-  portfolioManagementFees: String @deprecated(reason: "In the process of adopting snake_cased version")
-  portfolioManagementFeesDollar: String @deprecated(reason: "In the process of adopting snake_cased version")
-  portfolioManagementFeeType: String @deprecated(reason: "In the process of adopting snake_cased version")
-  fundTotalCarry: String @deprecated(reason: "In the process of adopting snake_cased version")
-  fundEstimatedSetupCosts: String @deprecated(reason: "In the process of adopting snake_cased version")
-  fundEstimatedSetupCostsDollar: String @deprecated(reason: "In the process of adopting snake_cased version")
-  fundManagementFees: String @deprecated(reason: "In the process of adopting snake_cased version")
-  fundManagementFeesDollar: String @deprecated(reason: "In the process of adopting snake_cased version")
-  fundManagementFeeType: String @deprecated(reason: "In the process of adopting snake_cased version")
-  fundGeneralPartner: String @deprecated(reason: "In the process of adopting snake_cased version")
-  fundEstimatedTerm: String @deprecated(reason: "In the process of adopting snake_cased version")
-  dealLogo: String @deprecated(reason: "In the process of adopting snake_cased version")
+  #DEPRECATED 
+  dealType: String
+  dealMultiple: String
+  totalRoundSize: String
+  totalCarry: String
+  totalManagementFee: String
+  minimumInvestment: String
+  signDeadline: String
+  wireDeadline: String
+  estimatedSetupCosts: String
+  estimatedSetupCostsDollar: String
+  estimatedTerm: String
+  managementFees: String
+  managementFeesDollar: String
+  managementFeeType: String
+  portfolioTotalCarry: String
+  portfolioEstimatedSetupCosts: String
+  portfolioEstimatedSetupCostsDollar: String
+  portfolioManagementFees: String
+  portfolioManagementFeesDollar: String
+  portfolioManagementFeeType: String
+  fundTotalCarry: String
+  fundEstimatedSetupCosts: String
+  fundEstimatedSetupCostsDollar: String
+  fundManagementFees: String
+  fundManagementFeesDollar: String
+  fundManagementFeeType: String
+  fundGeneralPartner: String
+  fundEstimatedTerm: String
+  dealLogo: String
 
 #SNAKE-CASED
   deal_type: String
@@ -381,16 +380,17 @@ input DealInput {
   subscription_agreement: SubscriptionAgreementInput
   slug: String
   
-  allInvited: Boolean @deprecated(reason: "In the process of adopting snake_cased version")
-  differentPortfolioTerms: Boolean @deprecated(reason: "In the process of adopting snake_cased version")
-  wireDoc: Upload @deprecated(reason: "In the process of adopting snake_cased version")
-  investmentType: String @deprecated(reason: "In the process of adopting snake_cased version")
-  dealDetails: [DealDetailInput] @deprecated(reason: "In the process of adopting snake_cased version")
-  dealParams: DealParamsInput @deprecated(reason: "In the process of adopting snake_cased version")
-  airtableId: String @deprecated(reason: "In the process of adopting snake_cased version")
-  docSpringTemplateId: String @deprecated(reason: "In the process of adopting snake_cased version")
-  spvAgreementKey: String @deprecated(reason: "In the process of adopting snake_cased version")
-  isPostingComment: Boolean @deprecated(reason: "In the process of adopting snake_cased version")
+  #DEPRECATED
+  allInvited: Boolean
+  differentPortfolioTerms: Boolean
+  wireDoc: Upload
+  investmentType: String
+  dealDetails: [DealDetailInput]
+  dealParams: DealParamsInput
+  airtableId: String
+  docSpringTemplateId: String
+  spvAgreementKey: String
+  isPostingComment: Boolean
 
   #SNAKE-CASED
   all_invited: Boolean
