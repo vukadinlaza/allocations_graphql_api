@@ -1,5 +1,4 @@
 const { ObjectId } = require("mongodb");
-const _ = require("lodash");
 const fetch = require("node-fetch");
 const moment = require("moment");
 const { v4: uuid } = require("uuid");
@@ -16,12 +15,10 @@ const Mutations = {
   /** create deal ensures there isn't already a deal form org with same name **/
   createDeal: async (_parent, { deal, org: orgSlug }, ctx) => {
     const org = await ensureFundAdmin(orgSlug, ctx);
-    const slug = _.kebabCase(deal.company_name);
 
     const res = await ctx.datasources.deals.createDeal({
       user_id: ctx.user._id,
       deal: {
-        slug,
         ...deal,
         _id: ObjectId(deal._id) || undefined,
         organization: org._id,
