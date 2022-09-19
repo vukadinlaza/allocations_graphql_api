@@ -14,5 +14,6 @@ module.exports = {
     "https://allocations-fmdemo-fe.herokuapp.com",
     "https://fmdemo.allocations.com",
     "https://staging.login.allocations.com",
+    "https://dashboard.allocations.space",
   ],
 };

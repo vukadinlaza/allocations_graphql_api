@@ -26,6 +26,7 @@ const { SlackService } = require("@allocations/slack-service");
 const { createCapitalAccountDoc } = require("../../docspring/index");
 const Uploader = require("../../uploaders/investor-docs");
 const { amountFormat } = require("../../utils/common");
+const { formatAmount } = require("../../graphql/helpers/format-amount");
 
 let Bucket =
   process.env.NODE_ENV === "production"
@@ -344,6 +345,8 @@ module.exports = Router()
       const { body } = req;
       const { investmentId, status, wiredAmount, wiredDate } = body;
 
+      const formattedWiredAmount = formatAmount(wiredAmount);
+
       const db = await getDB();
       const legacyInvestment = await db.investments.findOne({
         _id: ObjectId(investmentId),
@@ -374,7 +377,7 @@ module.exports = Router()
           {
             $set: {
               status: status,
-              capitalWiredAmount: wiredAmount,
+              capitalWiredAmount: formattedWiredAmount,
               wired_at: epochWireDate,
             },
           }
@@ -397,7 +400,7 @@ module.exports = Router()
 
         const investmentData = {
           phase: "wired",
-          wired_amount: wiredAmount,
+          wired_amount: formattedWiredAmount,
           wired_date: wiredDate,
         };
 

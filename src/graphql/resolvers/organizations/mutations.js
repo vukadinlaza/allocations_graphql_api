@@ -23,12 +23,8 @@ const Mutations = {
         });
       }
 
-      // make slug unique from any other organization
-      const slug = `${organization.name.split(" ").join("-")}-${Date.now()}`;
-
       const { insertedId: _id } = await ctx.db.organizations.insertOne({
         ...organization,
-        slug,
         created_at: Date.now(),
       });
 
@@ -37,7 +33,7 @@ const Mutations = {
         { _id: ctx.user._id },
         { $push: { organizations_admin: _id } }
       );
-      return { ...organization, slug, _id };
+      return { ...organization, _id };
     } catch (err) {
       throwApolloError(err, "createOrganization");
     }
