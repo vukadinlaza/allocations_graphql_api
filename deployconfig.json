@@ -1,0 +1,15 @@
+{
+  "name": "allocations-graphql-api",
+  "root": ".",
+  "staging_url": "gql.allocations.space",
+  "production_url": "gql.allocations.app",
+  "port": "4000",
+  "staging_scheme": "internal",
+  "production_scheme": "internet-facing",
+  "staging_ssl": "arn:aws:acm:us-east-1:046746691294:certificate/4f7c96da-2284-49d2-8ead-11cde98be5a1",
+  "production_ssl": "arn:aws:acm:us-east-1:046746691294:certificate/db910969-9087-4ab7-a252-b37ae7d565e1",
+  "type": "api",
+  "owner": "product",
+  "repo_name": "allocations_graphql_api",
+  "aws_secret_name": "allocation_graphql_api"
+}

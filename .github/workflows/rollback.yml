@@ -1,0 +1,25 @@
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "Define env name"
+        required: true
+        type: choice
+        default: "staging"
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy:
+    name: Rollback
+    env:
+      STAGE: ${{ github.event.inputs.stage }}
+    runs-on: self-hosted
+    steps:
+      - run: |
+          chmod +x ./.github/scripts/rollback.sh
+          ./.github/scripts/rollback.sh
+        shell: bash
