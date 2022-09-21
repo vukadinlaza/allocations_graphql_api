@@ -56,6 +56,44 @@ const Mutations = {
 
     return newInvestment;
   },
+  /** creates investment in legacy db **/
+  createLegacyInvestment: async (
+    _,
+    { investment: { user_id, deal_id, ...investment } },
+    { db }
+  ) => {
+    let deal = await db.collection("deals").findOne({ _id: ObjectId(deal_id) });
+
+    if (!deal) {
+      deal = await DealService.get(deal_id);
+    }
+
+    let user = await db.collection("users").findOne({ _id: ObjectId(user_id) });
+
+    const newInvestment = {
+      created_at: Date.now(),
+      [`${investment.status}_at`]: Date.now(),
+      ...investment,
+      _id: ObjectId(investment._id),
+      user_id: ObjectId(user_id),
+      deal_id: ObjectId(deal_id),
+      organization: ObjectId(deal.organization),
+      submissionData: {
+        investmentAmount: investment.amount,
+        fullName: user.first_name
+          ? `${user.first_name} ${user.last_name}`
+          : user.email,
+        legalName: user.legalName,
+        investor_type: investment.type,
+      },
+    };
+
+    const legacyInvestment = await db
+      .collection("investments")
+      .insertOne(newInvestment);
+
+    return legacyInvestment;
+  },
 
   /** updates investment and tracks the status change **/
   updateInvestment: async (

@@ -89,6 +89,7 @@ extend type Query {
 
 extend type Mutation {
   createInvestment(investment: InvestmentInput!): Investment!
+  createLegacyInvestment(investment: Object!): Investment!
   updateInvestment(investment: InvestmentInput!): Investment!
   getInvestmentPreview(payload: Object): Investment!
   confirmInvestment(payload: Object): Investment!
