@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb");
 const Cloudfront = require("../../../cloudfront");
-// const fetch = require("node-fetch");
+const fetch = require("node-fetch");
 
 const Investment = {
   deal: (investment, _, { datasources }) => {
@@ -15,20 +15,20 @@ const Investment = {
         return { link: Cloudfront.getSignedUrl(path), path };
       });
     } else {
-      // const investmentDocumentsRes = await fetch(
-      //   `${process.env.CORE_API}/api/v2/investments/${investment._id}/agreements`,
-      //   {
-      //     method: "GET",
-      //     headers: { "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN },
-      //     credentials: "include",
-      //   }
-      // );
-      // const investmentDocuments = await investmentDocumentsRes.json();
-      // if (investmentDocuments)
-      //   return investmentDocuments.map((i) => ({
-      //     path: i.type,
-      //     link: i.link,
-      //   }));
+      const investmentDocumentsRes = await fetch(
+        `${process.env.CORE_API}/api/v2/investments/${investment._id}/agreements`,
+        {
+          method: "GET",
+          headers: { "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN },
+          credentials: "include",
+        }
+      );
+      const investmentDocuments = await investmentDocumentsRes.json();
+      if (investmentDocuments)
+        return investmentDocuments.map((i) => ({
+          path: i.type,
+          link: i.link,
+        }));
       return [];
     }
   },
