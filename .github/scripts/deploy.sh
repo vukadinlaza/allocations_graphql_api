@@ -7,7 +7,7 @@ then
   export base_url=https://static.allocations.sh
   export branch=staging
 else
-  export base_url=https://static.allocations.
+  export base_url=https://static.allocations.dev
   export branch=master
 fi
 
