@@ -70,7 +70,11 @@ const getTemplateData = (input, user, templateId) => {
   const countryWithState =
     country + (country === "United States" ? `, ${state}` : "");
   const nameToUse = isTypeIndividual ? legalName : fullName;
-  const communeDeals = ["tpl_hK65xPJdKpgTPyks9H", "tpl_Y6hNCEc6CqzNkqpyPp"];
+  const communeDeals = [
+    "tpl_hK65xPJdKpgTPyks9H",
+    "tpl_Y6hNCEc6CqzNkqpyPp",
+    "tpl_KkdhKCxJfDFJ5Qy2pr",
+  ];
   const communeDealsLong = ["tpl_h3J77pz5RxMPbtRJD4"];
 
   const irishAngelsDeals = [
@@ -103,6 +107,7 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_QfPJCm237trkjEPsay",
     "tpl_c53jCSxbZEq9mdDkCA",
     "tpl_QG3aK6LCEhAzzr63Sb",
+    "tpl_9KMF9czg3QRCsYjHTt",
   ];
 
   const kunalDeals = [
