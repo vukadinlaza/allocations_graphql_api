@@ -1,0 +1,21 @@
+name: Promote
+on:
+  workflow_dispatch:
+    inputs:
+      custom-sha:
+        description: "Promote specific sha to prod, default is latest commit on main (leave blank)"
+        required: false
+
+jobs:
+  build:
+    name: Promote & Push Image
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Promote Image
+        run: |
+          chmod +x ./.github/scripts/promote.sh
+          ./.github/scripts/promote.sh
+        shell: bash

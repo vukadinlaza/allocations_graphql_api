@@ -1,0 +1,25 @@
+name: Redeploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "Define env name"
+        required: true
+        type: choice
+        default: "staging"
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy:
+    name: Redeploy
+    env:
+      STAGE: ${{ github.event.inputs.stage }}
+    runs-on: self-hosted
+    steps:
+      - run: |
+          chmod +x ./.github/scripts/redeploy.sh
+          ./.github/scripts/redeploy.sh
+        shell: bash

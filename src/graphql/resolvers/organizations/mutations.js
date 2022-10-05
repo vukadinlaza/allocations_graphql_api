@@ -23,6 +23,10 @@ const Mutations = {
         });
       }
 
+      if (organization._id) {
+        organization._id = new ObjectId(organization._id);
+      }
+
       const { insertedId: _id } = await ctx.db.organizations.insertOne({
         ...organization,
         created_at: Date.now(),

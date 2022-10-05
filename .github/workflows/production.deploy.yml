@@ -1,0 +1,22 @@
+name: Deploy Production
+
+on: workflow_dispatch
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Deploy Pod
+        env:
+          STAGE: production
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPO: ${{ github.repository }}
+          ACL_ARN: ${{ secrets.ACL_ARN }}
+        run: |
+          chmod +x ./.github/scripts/deploy.sh
+          ./.github/scripts/deploy.sh
+        shell: bash

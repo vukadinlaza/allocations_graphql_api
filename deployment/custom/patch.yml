@@ -1,0 +1,5 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: allocations-graphql-api
+  #add custom deployment fields here following the same pattern as the base deployment yml
