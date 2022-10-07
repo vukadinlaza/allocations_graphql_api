@@ -358,7 +358,7 @@ input DealDetailInput {
 
 input SubscriptionAgreementInput { 
   investor_docspring_template_id: String
-  investor_template_approved: String
+  investor_template_approved: Boolean
 }
 
 input DealInput {
