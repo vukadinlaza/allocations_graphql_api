@@ -1,5 +1,6 @@
 const { CryptoService } = require("@allocations/crypto-service");
 const { ObjectId } = require("mongodb");
+const { default: fetch } = require("node-fetch");
 const Cloudfront = require("../../../cloudfront");
 const { requestBuild } = require("../../../utils/build-api");
 
@@ -156,6 +157,27 @@ const Deal = {
     });
 
     return dealOnboarding;
+  },
+  subscription_agreement: async (deal) => {
+    const dealRes = await fetch(
+      `${process.env.CORE_API}/api/v1/deals/${deal._id}`,
+      {
+        method: "GET",
+        headers: { "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN },
+        credentials: "include",
+      }
+    );
+    const {
+      subscription_agreement: {
+        investor_docspring_template_id = "",
+        investor_template_approved = false,
+      } = {},
+    } = await dealRes.json();
+    let subAgreement = {
+      investor_docspring_template_id,
+      investor_template_approved,
+    };
+    return subAgreement;
   },
 };
 
