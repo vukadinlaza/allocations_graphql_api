@@ -108,6 +108,7 @@ const getTemplateData = (input, user, templateId) => {
     "tpl_c53jCSxbZEq9mdDkCA",
     "tpl_QG3aK6LCEhAzzr63Sb",
     "tpl_9KMF9czg3QRCsYjHTt",
+    "tpl_epyHeKnAbtmpNcAXgP",
   ];
 
   const kunalDeals = [
