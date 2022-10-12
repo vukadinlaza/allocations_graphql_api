@@ -33,11 +33,15 @@ function verifyWebhook(token) {
 }
 
 async function verify(token) {
+  console.log({ token });
   return new Promise((resolve, reject) => {
     jwt.verify(token, getKey, options, (err, decoded) => {
+      console.log({ token });
       if (err) {
+        console.log({ err });
         return reject(new AuthenticationError("verify err statement"));
       }
+      console.log({ decoded });
       return resolve(decoded);
     });
   });
