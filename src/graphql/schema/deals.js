@@ -423,7 +423,7 @@ type Mutation {
   createDeal(org: String!, deal: DealInput!): Deal
   updateDeal(org: String!, deal: DealInput!): Deal
   deleteDeal(_id: String!): Boolean
-  addDealDoc(deal_id: String!, title: String!, doc: Upload!): Deal
+  addDealDoc(deal_id: String!, title: String, doc: Upload, key: String): Deal
   addDealLogo(deal_id: String!, title: String!, logo: Upload!): Deal
   rmDealLogo(deal_id: String!): Deal
   rmDealDoc(deal_id: String!, title: String!): Deal
