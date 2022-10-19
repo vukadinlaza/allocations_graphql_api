@@ -13,7 +13,7 @@ const Investment = {
     if (Array.isArray(investment.documents)) {
       return investment.documents.map((path) => {
         return {
-          link: Cloudfront.getSignedUrl(encodeURIComponent(path)),
+          link: Cloudfront.getSignedUrl(path),
           path,
         };
       });
