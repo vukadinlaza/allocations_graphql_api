@@ -13,9 +13,16 @@ const Investment = {
     if (Array.isArray(investment.documents)) {
       return investment.documents.map((path) => {
         const pathArray = path.split("/");
-        const docPath = encodeURIComponent(pathArray[pathArray.length - 1]);
+
+        const docPath = encodeURIComponent(
+          pathArray[pathArray.length - 1]
+        ).replace(/[!'()*]/g, function (c) {
+          return "%" + c.charCodeAt(0).toString(16);
+        });
+
         pathArray[pathArray.length - 1] = docPath;
         const newPath = pathArray.join("/");
+
         return { link: Cloudfront.getSignedUrl(newPath), path };
       });
     } else {
