@@ -12,7 +12,10 @@ const Investment = {
   documents: async (investment) => {
     if (Array.isArray(investment.documents)) {
       return investment.documents.map((path) => {
-        return { link: Cloudfront.getSignedUrl(path), path };
+        return {
+          link: Cloudfront.getSignedUrl(encodeURIComponent(path)),
+          path,
+        };
       });
     } else {
       const investmentDocumentsRes = await fetch(
