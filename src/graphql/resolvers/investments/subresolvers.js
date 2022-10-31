@@ -23,7 +23,10 @@ const Investment = {
         pathArray[pathArray.length - 1] = docPath;
         const newPath = pathArray.join("/");
 
-        return { link: Cloudfront.getSignedUrl(newPath), path };
+        return {
+          link: Cloudfront.getSignedUrl(newPath),
+          path,
+        };
       });
     } else {
       const investmentDocumentsRes = await fetch(
