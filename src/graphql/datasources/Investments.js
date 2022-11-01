@@ -56,18 +56,6 @@ class Investments extends MongoDataSource {
     const carryFeeIsNumber = !Number.isNaN(
       parseInt(deal.dealParams.totalCarry)
     );
-    console.log("mgmt", mgmtFeeIsNumber);
-    console.log("carrys", carryFeeIsNumber);
-    console.log(
-      "value",
-      parseInt(deal.dealParams.managementFees),
-      mgmtFeeIsNumber ? parseInt(deal.dealParams.managementFees) / 100 : 0
-    );
-    console.log(
-      "carryFeeIsNumber",
-      parseInt(deal.dealParams.managementFees),
-      carryFeeIsNumber ? parseInt(deal.dealParams.managementFees) / 100 : 0
-    );
 
     try {
       const serviceInvestment = {
@@ -104,19 +92,20 @@ class Investments extends MongoDataSource {
         metadata: {
           deal_id: legacyInvestment.deal_id,
         },
+        deal_id: legacyInvestment.deal_id,
+        title: legacyInvestment.submissionData.title,
+        submission_data: legacyInvestment.submissionData,
+        management_fee_frequency: deal.dealParams.managementFeeType,
       };
 
-      const res = await fetch(
-        `${process.env.INVEST_API_URL}/api/v1/investments`,
-        {
-          method: "POST",
-          headers: {
-            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(serviceInvestment),
-        }
-      );
+      const res = await fetch(`${process.env.CORE_API}/api/v1/investments`, {
+        method: "POST",
+        headers: {
+          "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(serviceInvestment),
+      });
 
       if (!res.ok) throw new Error("Unable to create service investment");
     } catch (e) {

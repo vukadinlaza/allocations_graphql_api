@@ -33,15 +33,11 @@ function verifyWebhook(token) {
 }
 
 async function verify(token) {
-  console.log({ token });
   return new Promise((resolve, reject) => {
     jwt.verify(token, getKey, options, (err, decoded) => {
-      console.log({ token });
       if (err) {
-        console.log({ err });
         return reject(new AuthenticationError("verify err statement"));
       }
-      console.log({ decoded });
       return resolve(decoded);
     });
   });
@@ -49,16 +45,13 @@ async function verify(token) {
 
 async function authenticate({ req, db, authToken }) {
   try {
-    console.log("AUTHENTICATE");
     const token = authToken
       ? authToken
       : (req.headers.authorization || "").slice(7);
-    console.log("BEFORE");
     const data = await verify(token);
-    console.log("AFTER");
     const email = data[`${process.env.AUTH0_NAMESPACE}/email`].toLowerCase();
     const user = await db.users.findOne({ email: email });
-    console.log({ user });
+
     if (user) {
       // attaches .orgs to org admins
       if (user.organizations_admin) {
@@ -69,7 +62,7 @@ async function authenticate({ req, db, authToken }) {
 
       return user;
     }
-    console.log("NO USER");
+
     // else create user
     // else create user
     const { insertedId } = await db.users.insertOne({ email: email });
