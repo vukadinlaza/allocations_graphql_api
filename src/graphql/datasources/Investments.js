@@ -92,20 +92,26 @@ class Investments extends MongoDataSource {
         metadata: {
           deal_id: legacyInvestment.deal_id,
         },
-        deal_id: legacyInvestment.deal_id,
-        title: legacyInvestment.submissionData.title,
-        submission_data: legacyInvestment.submissionData,
-        management_fee_frequency: deal.dealParams.managementFeeType,
+        deal_id: legacyInvestment.deal_id, // for core investments
+        title: legacyInvestment.submissionData.title, // for core investments
+        submission_data: legacyInvestment.submissionData, // for core investments
+        management_fee_frequency:
+          deal.dealParams.managementFeeType === "Annual"
+            ? "Annually"
+            : "One-Time", // for core investments
       };
 
-      const res = await fetch(`${process.env.CORE_API}/api/v1/investments`, {
-        method: "POST",
-        headers: {
-          "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(serviceInvestment),
-      });
+      const res = await fetch(
+        `${process.env.INVEST_API_URL}/api/v1/investments`,
+        {
+          method: "POST",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(serviceInvestment),
+        }
+      );
 
       if (!res.ok) throw new Error("Unable to create service investment");
     } catch (e) {
