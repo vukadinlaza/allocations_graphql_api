@@ -85,6 +85,9 @@ const Mutations = {
           : user.email,
         legalName: user.legalName,
         investor_type: investment.type,
+        country: investment.investor_country,
+        state: investment.investor_state,
+        accredited_investor_status: investment.accredited_investor_type,
       },
     };
 
