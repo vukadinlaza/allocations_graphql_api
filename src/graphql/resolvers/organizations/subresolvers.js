@@ -53,7 +53,7 @@ const Organization = {
       return parseFloat(org.totalAUM);
     }
 
-    const data = await db.deals
+    const wiredInvestments = await db.deals
       .aggregate([
         { $match: { organization: org._id } },
         {
@@ -66,18 +66,20 @@ const Organization = {
         },
         { $unwind: "$investments" },
         { $match: { "investments.status": { $in: ["complete", "wired"] } } },
-        { $project: { amount: { $toInt: "$investments.amount" } } },
-        {
-          $group: {
-            _id: null,
-            aum: { $sum: "$amount" },
-          },
-        },
       ])
       .toArray();
 
-    return data && data.length ? data[0].aum : 0;
+    const aum = wiredInvestments.length
+      ? wiredInvestments
+          .map(({ investments: inv }) =>
+            inv.capitalWiredAmount ? inv.capitalWiredAmount : inv.amount ?? 0
+          )
+          .reduce((acc, n) => Number(acc) + Number(n))
+      : 0;
+
+    return aum;
   },
+
   totalSPVs: async (org, _, { db }) => {
     const res = await db.deals
       .aggregate([
