@@ -29,7 +29,7 @@ const Mutations = {
     if (!deal) {
       deal = await DealService.get(deal_id);
     }
-
+    console.log({ investment });
     const newInvestment = {
       status: "invited",
       invited_at: Date.now(),

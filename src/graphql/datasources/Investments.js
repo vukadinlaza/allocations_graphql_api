@@ -23,6 +23,7 @@ class Investments extends MongoDataSource {
   }
 
   async createInvestment({ deal, user, investment }) {
+    console.log({ investment });
     const createdLegacyInvestment = await this.collection.insertOne(investment);
 
     await this.#createServiceInvestment({
