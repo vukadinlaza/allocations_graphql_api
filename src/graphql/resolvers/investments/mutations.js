@@ -29,6 +29,7 @@ const Mutations = {
     if (!deal) {
       deal = await DealService.get(deal_id);
     }
+    console.log("CREATE INVESTMENT!");
     console.log({ investment });
     const newInvestment = {
       status: "invited",
