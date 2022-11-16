@@ -29,8 +29,7 @@ const Mutations = {
     if (!deal) {
       deal = await DealService.get(deal_id);
     }
-    console.log("CREATE INVESTMENT!");
-    console.log({ investment });
+
     const newInvestment = {
       status: "invited",
       invited_at: Date.now(),
@@ -84,7 +83,7 @@ const Mutations = {
         fullName: user.first_name
           ? `${user.first_name} ${user.last_name}`
           : user.email,
-        legalName: user.legalName,
+        legalName: investment.legalName,
         investor_type: investment.type,
         country: investment.investor_country,
         state: investment.investor_state,
