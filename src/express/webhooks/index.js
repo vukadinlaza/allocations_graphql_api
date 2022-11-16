@@ -756,13 +756,16 @@ module.exports = Router()
       const db = await getDB();
 
       const { body } = req;
+      console.log(body, "BODY");
 
       //find the matching investment with userId and dealId
       //would like to move away from this by getting the investmentID
       const matchingInvestment = await db.investments.findOne({
-        user_id: ObjectId(body.userId),
-        deal_id: ObjectId(body.dealId),
+        user_id: new ObjectId(body.userId),
+        deal_id: new ObjectId(body.dealId),
       });
+
+      console.log(matchingInvestment, "MATCHING");
 
       //check the db to see if investment has cap account doc
       const hasCapAcctDoc = matchingInvestment?.documents?.find((doc) =>
