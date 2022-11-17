@@ -765,6 +765,10 @@ module.exports = Router()
         deal_id: new ObjectId(body.dealId),
       });
 
+      if (!matchingInvestment) {
+        throw new Error("Matching Investment Not found");
+      }
+
       //check the db to see if investment has cap account doc
       const existingCapAccountDoc = matchingInvestment?.documents?.find((doc) =>
         doc.includes("Capital_Account_Statement")
