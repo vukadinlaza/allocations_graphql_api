@@ -806,24 +806,18 @@ module.exports = Router()
         "Capital Account Statement"
       );
 
-      console.log(existingCapAccountDoc, "EXISTING DOC");
+      const updatedDocuments = [
+        ...(matchingInvestment.documents || []).filter(
+          (doc) => doc !== existingCapAccountDoc
+        ),
+        s3Path,
+      ];
 
-      const updateQuery = {
-        ...(existingCapAccountDoc && {
-          $pull: {
-            documents: existingCapAccountDoc,
-          },
-        }),
-        $push: {
-          documents: `${s3Path}`,
-        },
-      };
-
-      console.log(updateQuery, "UPDATE QUERY");
+      console.log(updatedDocuments, "UPDATED DOCUMENTS");
 
       await db.investments.updateOne(
         { _id: ObjectId(matchingInvestment._id) },
-        updateQuery
+        { documents: updatedDocuments }
       );
 
       const updatedInvestment = await db.investments.findOne({
