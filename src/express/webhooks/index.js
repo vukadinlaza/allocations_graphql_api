@@ -815,14 +815,11 @@ module.exports = Router()
 
       console.log(updatedDocuments, "UPDATED DOCUMENTS");
 
-      await db.investments.updateOne(
+      const updatedInvestment = await db.investments.updateOne(
         { _id: ObjectId(matchingInvestment._id) },
-        { documents: updatedDocuments }
+        { $set: { documents: updatedDocuments } },
+        { new: true }
       );
-
-      const updatedInvestment = await db.investments.findOne({
-        _id: ObjectId(matchingInvestment._id),
-      });
 
       res.send(updatedInvestment);
     } catch (err) {
