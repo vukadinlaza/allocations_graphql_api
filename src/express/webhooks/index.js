@@ -765,19 +765,15 @@ module.exports = Router()
         deal_id: new ObjectId(body.dealId),
       });
 
-      console.log(matchingInvestment, "MATCHING");
-
       //check the db to see if investment has cap account doc
-      const hasCapAcctDoc = matchingInvestment?.documents?.find((doc) =>
+      const existingCapAccountDoc = matchingInvestment?.documents?.find((doc) =>
         doc.includes("Capital_Account_Statement")
       );
 
-      if (hasCapAcctDoc) {
-        return res.send("Already has cap account doc");
-      }
       //append current date to the data to send to docspring
       const formattedData = {
         name: body.name,
+        dealName: body.dealName,
         effectiveDate: moment(body.effectiveDate).format("MMMM DD, YYYY"),
         subscriptionAmount: `$${amountFormat(body.subscriptionAmount)}`,
         privateFundExpenses: `$${amountFormat(body.privateFundExpenses)}`,
@@ -806,14 +802,22 @@ module.exports = Router()
         "Capital Account Statement"
       );
 
+      const updateQuery = {
+        ...(existingCapAccountDoc && {
+          $pull: {
+            documents: existingCapAccountDoc,
+          },
+        }),
+        $push: {
+          documents: `${s3Path}`,
+        },
+      };
+
       await db.investments.updateOne(
         { _id: ObjectId(matchingInvestment._id) },
-        {
-          $push: {
-            documents: `${s3Path}`,
-          },
-        }
+        updateQuery
       );
+
       const updatedInvestment = await db.investments.findOne({
         _id: ObjectId(matchingInvestment._id),
       });
