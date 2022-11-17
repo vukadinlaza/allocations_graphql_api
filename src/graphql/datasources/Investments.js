@@ -179,6 +179,33 @@ class Investments extends MongoDataSource {
           legacyInvestment.submissionData?.accredited_investor_status,
       };
 
+      const coreInvestment = await fetch(
+        `${process.env.CORE_API}/api/v2/investments/${_id}`,
+        {
+          method: "GET",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (coreInvestment) {
+        const coreResponse = await fetch(
+          `${process.env.CORE_API}/api/v2/investments/${_id}`,
+          {
+            method: "PATCH",
+            headers: {
+              "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(serviceInvestment),
+          }
+        );
+        if (!coreResponse.ok)
+          throw new Error("Unable to update core investment");
+      }
+
       const res = await fetch(
         `${process.env.INVEST_API_URL}/api/v1/investments/${_id}`,
         {

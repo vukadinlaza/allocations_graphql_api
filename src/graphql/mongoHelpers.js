@@ -172,7 +172,20 @@ module.exports = {
             {
               $group: {
                 _id: "",
-                total: { $sum: "$investments.amount" },
+                total: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $gte: [
+                          { $toDouble: "$investments.capitalWiredAmount" },
+                          0,
+                        ],
+                      },
+                      { $toDouble: "$investments.capitalWiredAmount" },
+                      "$investments.amount",
+                    ],
+                  },
+                },
               },
             },
           ],
@@ -195,7 +208,20 @@ module.exports = {
             {
               $group: {
                 _id: "",
-                total: { $sum: "$investments.amount" },
+                total: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $gte: [
+                          { $toDouble: "$investments.capitalWiredAmount" },
+                          0,
+                        ],
+                      },
+                      { $toDouble: "$investments.capitalWiredAmount" },
+                      "$investments.amount",
+                    ],
+                  },
+                },
               },
             },
           ],
