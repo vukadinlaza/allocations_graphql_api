@@ -806,6 +806,8 @@ module.exports = Router()
         "Capital Account Statement"
       );
 
+      console.log(existingCapAccountDoc, "EXISTING DOC");
+
       const updateQuery = {
         ...(existingCapAccountDoc && {
           $pull: {
@@ -816,6 +818,8 @@ module.exports = Router()
           documents: `${s3Path}`,
         },
       };
+
+      console.log(updateQuery, "UPDATE QUERY");
 
       await db.investments.updateOne(
         { _id: ObjectId(matchingInvestment._id) },
