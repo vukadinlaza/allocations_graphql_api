@@ -5,7 +5,7 @@ const Queries = {
   cryptoOptions: async (_, { deal_id }) => {
     try {
       const res = await fetch(
-        `${process.env.ALLOCATIONS_CRYPTO_API_URL}/v1/crypto-options/${deal_id}`,
+        `${process.env.CORE_API}/api/v1/crypto-payments/options/${deal_id}`,
         {
           headers: {
             "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,

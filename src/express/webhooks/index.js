@@ -812,9 +812,6 @@ module.exports = Router()
         ),
         s3Path,
       ];
-
-      console.log(updatedDocuments, "UPDATED DOCUMENTS");
-
       const updatedInvestment = await db.investments.updateOne(
         { _id: ObjectId(matchingInvestment._id) },
         { $set: { documents: updatedDocuments } },
@@ -842,6 +839,25 @@ module.exports = Router()
       );
 
       res.end("");
+    } catch (e) {
+      next(e);
+    }
+  })
+  .post("/update-crypto-transaction", async (req, res, next) => {
+    try {
+      const coreResponse = await fetch(
+        `${process.env.CORE_API}/api/v1/crypto-payments/webhooks/transactions`,
+        {
+          method: "POST",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(req.body),
+        }
+      );
+
+      res.send(await coreResponse.json());
     } catch (e) {
       next(e);
     }
