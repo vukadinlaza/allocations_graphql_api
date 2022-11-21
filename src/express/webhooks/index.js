@@ -852,6 +852,7 @@ module.exports = Router()
           headers: {
             "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
             "Content-Type": "application/json",
+            "X-CC-Webhook-Signature": req.header("X-CC-Webhook-Signature"),
           },
           body: JSON.stringify(req.body),
         }
