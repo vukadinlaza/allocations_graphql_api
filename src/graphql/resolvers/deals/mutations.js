@@ -2,6 +2,7 @@ const { ObjectId } = require("mongodb");
 const fetch = require("node-fetch");
 const moment = require("moment");
 const { v4: uuid } = require("uuid");
+const DocSpring = require("docspring");
 const { isAdmin, ensureFundAdmin } = require("../../permissions");
 const DealDocUploader = require("../../../uploaders/deal-docs");
 const Mailer = require("../../../mailers/mailer");
@@ -208,6 +209,84 @@ const Mutations = {
         $pull: { usersViewed: ObjectId(user_id) },
       }
     );
+  },
+  getTransitionDocument: async (_, { payload }, ctx) => {
+    var config = new DocSpring.Configuration();
+    config.apiTokenId = "api_test_yGkbSDbdFF7z4bjjJt";
+    config.apiTokenSecret = "TJaCCy622KKEpDgYHGs76ye7AbsKt3SExpmkPpNNtR";
+
+    let docspring = new DocSpring.Client(config);
+
+    var submission_data = {
+      editable: false,
+      data: { ...payload, date: moment(Date.now()).format("YYYY-MMM-DD") },
+      metadata: {
+        user_email: payload.email,
+      },
+      // data_requests: [
+      //   {
+      //     email: payload.email,
+      //     auth_type: "email_link",
+      //   },
+      // ],
+      wait: true,
+    };
+
+    const download_url = await new Promise((resolve, reject) => {
+      docspring.generatePDF(
+        "tpl_anPALpabDrP9m7xdQx",
+        submission_data,
+        function (error, response) {
+          console.log({ error, response });
+          if (error) {
+            reject(error);
+          } else {
+            resolve(response.submission.download_url);
+          }
+        }
+      );
+    });
+
+    const transfer = await ctx.db
+      .collection("assure_data_transfers")
+      .insertOne({ ...payload, accepted: false });
+
+    return { transfer_id: transfer.insertedId, download_url };
+
+    // const client = new DocSpring.Client(config);
+
+    // return new Promise((resolve, reject) => {
+    //   client.createDataRequestToken(
+    //     submission?.data_requests[0]?.id,
+    //     function (error, token) {
+    //       if (error) reject(error);
+
+    //       console.log(token);
+    //       resolve(token.token.data_request_url);
+    //     }
+    //   );
+    // });
+  },
+  updateDataTransition: async (_, { accepted, transfer_id }, ctx) => {
+    const acknowledged = await ctx.db
+      .collection("assure_data_transfers")
+      .updateOne(
+        { _id: ObjectId(transfer_id) },
+        {
+          $set: {
+            accepted,
+          },
+        }
+      );
+
+    return acknowledged;
+  },
+  acceptTransitionDocument: async (_, { payload }, ctx) => {
+    const transfer = await ctx.db
+      .collection("assure_data_transfers")
+      .insertOne({ ...payload, accepted: true });
+
+    return transfer;
   },
 };
 

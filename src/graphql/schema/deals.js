@@ -428,6 +428,10 @@ type Mutation {
   rmDealLogo(deal_id: String!): Deal
   rmDealDoc(deal_id: String!, title: String!): Deal
   addUserAsViewed(deal_id: String!, user_id: String!): Deal 
-  deleteUserAsViewed(deal_id: String!, user_id: String!): Deal 
+  deleteUserAsViewed(deal_id: String!, user_id: String!): Deal
+
+  getTransitionDocument(payload: Object!): Object
+  updateDataTransition(accepted: Boolean!, transfer_id: String!): Object
+  acceptTransitionDocument(payload: Object!): Object
 }
 `);

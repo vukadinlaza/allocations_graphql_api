@@ -7,7 +7,12 @@ const Investments = require("./datasources/Investments");
 const pubsub = new PubSub();
 
 function authedServer(db) {
-  const publicEndpoints = ["PublicDeal", "Search_Auth_users", "reset_password"];
+  const publicEndpoints = [
+    "PublicDeal",
+    "Search_Auth_users",
+    "reset_password",
+    "AcceptTransitionDocument",
+  ];
 
   return new ApolloServer({
     introspection: true,
