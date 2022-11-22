@@ -7,6 +7,8 @@ const { isAdmin, ensureFundAdmin } = require("../../permissions");
 const DealDocUploader = require("../../../uploaders/deal-docs");
 const Mailer = require("../../../mailers/mailer");
 const txConfirmationTemplate = require("../../../mailers/templates/tx-confirmation-template");
+const dataStorageAcceptedTemplate = require("../../../mailers/templates/data-storage-accepted");
+
 const { nWithCommas } = require("../../../utils/common.js");
 const {
   deallocateReferenceNumbers,
@@ -212,8 +214,6 @@ const Mutations = {
   },
   getTransitionDocument: async (_, { payload }, ctx) => {
     var config = new DocSpring.Configuration();
-    config.apiTokenId = "api_test_yGkbSDbdFF7z4bjjJt";
-    config.apiTokenSecret = "TJaCCy622KKEpDgYHGs76ye7AbsKt3SExpmkPpNNtR";
 
     let docspring = new DocSpring.Client(config);
 
@@ -223,12 +223,6 @@ const Mutations = {
       metadata: {
         user_email: payload.email,
       },
-      // data_requests: [
-      //   {
-      //     email: payload.email,
-      //     auth_type: "email_link",
-      //   },
-      // ],
       wait: true,
     };
 
@@ -237,7 +231,6 @@ const Mutations = {
         "tpl_anPALpabDrP9m7xdQx",
         submission_data,
         function (error, response) {
-          console.log({ error, response });
           if (error) {
             reject(error);
           } else {
@@ -252,20 +245,6 @@ const Mutations = {
       .insertOne({ ...payload, accepted: false });
 
     return { transfer_id: transfer.insertedId, download_url };
-
-    // const client = new DocSpring.Client(config);
-
-    // return new Promise((resolve, reject) => {
-    //   client.createDataRequestToken(
-    //     submission?.data_requests[0]?.id,
-    //     function (error, token) {
-    //       if (error) reject(error);
-
-    //       console.log(token);
-    //       resolve(token.token.data_request_url);
-    //     }
-    //   );
-    // });
   },
   updateDataTransition: async (_, { accepted, transfer_id }, ctx) => {
     const acknowledged = await ctx.db
@@ -282,9 +261,45 @@ const Mutations = {
     return acknowledged;
   },
   acceptTransitionDocument: async (_, { payload }, ctx) => {
+    const accepted_timestamp = new Date();
     const transfer = await ctx.db
       .collection("assure_data_transfers")
-      .insertOne({ ...payload, accepted: true });
+      .insertOne({
+        ...payload,
+        accepted: true,
+        accepted_timestamp,
+      });
+
+    const { organization_name, full_name, email, title, phone, spv_count } =
+      payload;
+    const emailData = {
+      mainData: {
+        to: ["migrations@allocations.com", "support@assure.co"],
+        from: "support@allocations.com",
+        subject: `Data Storage Request`,
+      },
+      template: dataStorageAcceptedTemplate,
+      templateData: {
+        client_name: organization_name,
+        full_name,
+        email,
+      },
+    };
+    await Mailer.sendEmail(emailData);
+
+    await fetch("https://hooks.zapier.com/hooks/catch/10079476/bpn90qd/", {
+      method: "post",
+      body: JSON.stringify({
+        organization_name,
+        full_name,
+        email,
+        title,
+        phone,
+        spv_count,
+        accepted_timestamp,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
 
     return transfer;
   },
