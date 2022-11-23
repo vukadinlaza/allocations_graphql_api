@@ -274,7 +274,7 @@ const Mutations = {
       payload;
     const emailData = {
       mainData: {
-        to: ["migrations@allocations.com", "support@assure.co"],
+        to: ["assuremigrations@allocations.com", "support@assure.co"],
         from: "support@allocations.com",
         subject: `Data Storage Request`,
       },
