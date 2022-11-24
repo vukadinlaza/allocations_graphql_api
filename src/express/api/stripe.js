@@ -34,7 +34,7 @@ module.exports = Router()
 
       const sub = await stripe.subscriptions.create({
         customer: matchingCustomer.data[0].id,
-        items: [{ price: prices.data[0].id, quantity: 1 }],
+        items: [{ price: prices.data[0].id, quantity: req.body.quantity }],
         default_payment_method: paymentMethod.id,
       });
 
