@@ -63,6 +63,7 @@ async function run() {
   app.use("/api/webhooks", require("./express/webhooks/index"));
   app.use("/api/users", require("./express/api/user"));
   app.use("/api/deal", require("./express/api/deal"));
+  app.use("/api/stripe", require("./express/api/stripe"));
 
   // connect to MongoDB
   const db = await getDB();
