@@ -1,7 +1,9 @@
+const { checkToken } = require("@allocations/api-common");
 const { Router } = require("express");
 const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 
 module.exports = Router()
+  .use(checkToken())
   .post("/create-checkout-session", async (req, res, next) => {
     try {
       const prices = await stripe.prices.list();
