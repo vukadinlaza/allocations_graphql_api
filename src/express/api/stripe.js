@@ -37,6 +37,20 @@ module.exports = Router()
         });
       }
 
+      if (req.body.payment_type === "us_bank_account") {
+        paymentMethod = await stripe.paymentMethods.create({
+          type: "us_bank_account",
+          us_bank_account: {
+            account_number: req.body.us_bank_account.account_number,
+            account_holder_name: req.body.us_bank_account.account_holder_name,
+          },
+        });
+
+        await stripe.paymentMethods.attach(paymentMethod.id, {
+          customer: customer.id,
+        });
+      }
+
       const sub = await stripe.subscriptions.create({
         customer: customer.id,
         items: [{ price: prices.data[0].id, quantity: req.body.quantity }],
@@ -51,14 +65,27 @@ module.exports = Router()
   .post("/create-payment-intent", async (req, res, next) => {
     // tbd
     try {
-      const { amount } = req.body;
+      const { amount, email } = req.body;
+
+      let customer;
+      const matchingCustomer = await stripe.customers.list({
+        email: email,
+      });
+
+      customer = matchingCustomer.data[0];
 
       // Create a PaymentIntent with the order amount and currency
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
-        automatic_payment_methods: {
-          enabled: true,
+        customer: customer.id,
+        payment_method_types: ["us_bank_account"],
+        payment_method_options: {
+          us_bank_account: {
+            financial_connections: {
+              permissions: ["payment_method", "balances"],
+            },
+          },
         },
       });
 
