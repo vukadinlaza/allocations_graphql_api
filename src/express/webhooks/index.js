@@ -756,25 +756,28 @@ module.exports = Router()
       const db = await getDB();
 
       const { body } = req;
+      console.log(body, "BODY");
 
       //find the matching investment with userId and dealId
       //would like to move away from this by getting the investmentID
       const matchingInvestment = await db.investments.findOne({
-        user_id: ObjectId(body.userId),
-        deal_id: ObjectId(body.dealId),
+        user_id: new ObjectId(body.userId),
+        deal_id: new ObjectId(body.dealId),
       });
 
+      if (!matchingInvestment) {
+        throw new Error("Matching Investment Not found");
+      }
+
       //check the db to see if investment has cap account doc
-      const hasCapAcctDoc = matchingInvestment?.documents?.find((doc) =>
+      const existingCapAccountDoc = matchingInvestment?.documents?.find((doc) =>
         doc.includes("Capital_Account_Statement")
       );
 
-      if (hasCapAcctDoc) {
-        return res.send("Already has cap account doc");
-      }
       //append current date to the data to send to docspring
       const formattedData = {
         name: body.name,
+        dealName: body.dealName,
         effectiveDate: moment(body.effectiveDate).format("MMMM DD, YYYY"),
         subscriptionAmount: `$${amountFormat(body.subscriptionAmount)}`,
         privateFundExpenses: `$${amountFormat(body.privateFundExpenses)}`,
@@ -803,17 +806,17 @@ module.exports = Router()
         "Capital Account Statement"
       );
 
-      await db.investments.updateOne(
+      const updatedDocuments = [
+        ...(matchingInvestment.documents || []).filter(
+          (doc) => doc !== existingCapAccountDoc
+        ),
+        s3Path,
+      ];
+      const updatedInvestment = await db.investments.updateOne(
         { _id: ObjectId(matchingInvestment._id) },
-        {
-          $push: {
-            documents: `${s3Path}`,
-          },
-        }
+        { $set: { documents: updatedDocuments } },
+        { new: true }
       );
-      const updatedInvestment = await db.investments.findOne({
-        _id: ObjectId(matchingInvestment._id),
-      });
 
       res.send(updatedInvestment);
     } catch (err) {
@@ -836,6 +839,26 @@ module.exports = Router()
       );
 
       res.end("");
+    } catch (e) {
+      next(e);
+    }
+  })
+  .post("/update-crypto-transaction", async (req, res, next) => {
+    try {
+      const coreResponse = await fetch(
+        `${process.env.CORE_API}/api/v1/crypto-payments/webhooks/transactions`,
+        {
+          method: "POST",
+          headers: {
+            "X-API-TOKEN": process.env.ALLOCATIONS_TOKEN,
+            "Content-Type": "application/json",
+            "X-CC-Webhook-Signature": req.header("X-CC-Webhook-Signature"),
+          },
+          body: JSON.stringify(req.body),
+        }
+      );
+
+      res.send(await coreResponse.json());
     } catch (e) {
       next(e);
     }
