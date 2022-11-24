@@ -7,16 +7,19 @@ module.exports = Router()
   .post("/create-checkout-session", async (req, res, next) => {
     try {
       const prices = await stripe.prices.list();
-
-      let matchingCustomer = await stripe.customers.list({
+      let customer;
+      const matchingCustomer = await stripe.customers.list({
         email: req.body.email,
       });
 
       if (!matchingCustomer?.data[0]) {
-        matchingCustomer = await stripe.customers.create({
+        customer = await stripe.customers.create({
           email: req.body.email,
         });
+      } else {
+        customer = matchingCustomer.data[0];
       }
+
       let paymentMethod;
       if (req.body.payment_type === "card") {
         paymentMethod = await stripe.paymentMethods.create({
@@ -30,12 +33,12 @@ module.exports = Router()
         });
 
         await stripe.paymentMethods.attach(paymentMethod.id, {
-          customer: matchingCustomer.data[0].id,
+          customer: customer.id,
         });
       }
 
       const sub = await stripe.subscriptions.create({
-        customer: matchingCustomer.data[0].id,
+        customer: customer.id,
         items: [{ price: prices.data[0].id, quantity: req.body.quantity }],
         default_payment_method: paymentMethod.id,
       });
