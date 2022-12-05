@@ -61,6 +61,7 @@ async function run() {
   app.use(express.json({ verify: rawBodyBuffer }));
   app.use(graphqlUploadExpress({ maxFileSize: 1000000000, maxFiles: 10 }));
   app.use(cors());
+  app.use("/health", require("./express/api/health"));
   app.use("/api/webhooks", require("./express/webhooks/index"));
   app.use("/api/users", require("./express/api/user"));
   app.use("/api/deal", require("./express/api/deal"));
