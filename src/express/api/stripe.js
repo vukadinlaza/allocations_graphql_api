@@ -1,7 +1,9 @@
+const { checkToken } = require("@allocations/api-common");
 const { Router } = require("express");
 const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 
 module.exports = Router()
+  .use(checkToken())
   .post("/create-checkout-session", async (req, res, next) => {
     try {
       const prices = await stripe.prices.list();
@@ -47,16 +49,34 @@ module.exports = Router()
     }
   })
   .post("/create-payment-intent", async (req, res, next) => {
-    // tbd
     try {
-      const { amount } = req.body;
+      const { amount, email } = req.body;
+
+      let customer;
+      const matchingCustomer = await stripe.customers.list({
+        email: email,
+      });
+
+      if (!matchingCustomer?.data[0]) {
+        customer = await stripe.customers.create({
+          email: email,
+        });
+      } else {
+        customer = matchingCustomer.data[0];
+      }
 
       // Create a PaymentIntent with the order amount and currency
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
-        automatic_payment_methods: {
-          enabled: true,
+        customer: customer.id,
+        payment_method_types: ["us_bank_account"],
+        payment_method_options: {
+          us_bank_account: {
+            financial_connections: {
+              permissions: ["payment_method", "balances", "ownership"],
+            },
+          },
         },
       });
 

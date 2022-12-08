@@ -80,7 +80,7 @@ module.exports = Router()
       const emailfield = fieldData.find(
         (f) => f._attributes.name === "userEmail"
       );
-      const dealId = get(dealFeild, "value._text");
+      let dealId = get(dealFeild, "value._text");
       const userEmail = get(emailfield, "value._text");
 
       if (documentName.includes("Allocations Services Agreement")) {
@@ -121,6 +121,7 @@ module.exports = Router()
         }
       }
       if (dealId) {
+        dealId = dealId.trim();
         if (userEmail) {
           user = await db.users.findOne({ email: userEmail });
         }
