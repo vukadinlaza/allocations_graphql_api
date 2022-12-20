@@ -378,7 +378,9 @@ module.exports = Router()
           {
             $set: {
               status: status,
-              capitalWiredAmount: formattedWiredAmount,
+              capitalWiredAmount:
+                formattedWiredAmount +
+                Number(legacyInvestment?.capitalWiredAmount || 0),
               wired_at: epochWireDate,
             },
           }
