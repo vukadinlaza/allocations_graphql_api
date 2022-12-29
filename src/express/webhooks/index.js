@@ -428,8 +428,8 @@ module.exports = Router()
             body: JSON.stringify(investmentData),
           }
         );
-        const serviceInvestment = await serviceResponse.json();
-        await res.send(serviceInvestment);
+        const serviceInv = await serviceResponse.json();
+        res.send(serviceInv);
       }
     } catch (err) {
       console.log("wire-status-update :>> ", err);
