@@ -347,7 +347,7 @@ module.exports = Router()
       const { investmentId, status, wiredAmount, wiredDate } = body;
 
       const formattedWiredAmount = formatAmount(wiredAmount);
-
+      console.log(formattedWiredAmount, "FORMATTED WIRED AMOUNT");
       const db = await getDB();
       const legacyInvestment = await db.investments.findOne({
         _id: ObjectId(investmentId),
@@ -372,12 +372,17 @@ module.exports = Router()
       }
 
       if (legacyInvestment) {
+        console.log(
+          formattedWiredAmount +
+            Number(legacyInvestment?.capitalWiredAmount || 0),
+          "NEW WIRED AMOUNT"
+        );
         const epochWireDate = new Date(wiredDate).getTime();
         await db.investments.updateOne(
           { _id: ObjectId(investmentId) },
           {
             $set: {
-              status: status,
+              status,
               capitalWiredAmount:
                 formattedWiredAmount +
                 Number(legacyInvestment?.capitalWiredAmount || 0),
@@ -401,9 +406,14 @@ module.exports = Router()
           `No legacy investment found with _id:${investmentId}. Attempting to update service investment.`
         );
 
+        const transactionsSum = serviceInvestment?.transactions.reduce(
+          (acc, curr) => (acc += curr?.committed_amount || 0),
+          0
+        );
+
         const investmentData = {
           phase: "wired",
-          wired_amount: formattedWiredAmount,
+          wired_amount: formattedWiredAmount + transactionsSum,
           wired_date: wiredDate,
         };
 
