@@ -13,6 +13,7 @@ const { authedServer } = require("./graphql/server");
 const { getDB, endDBConnection } = require("./mongo");
 const { graphqlUploadExpress } = require("graphql-upload");
 const http = require("http");
+const { errorMiddleware } = require("@allocations/api-common");
 const { NODE_ENV } = process.env;
 
 /**
@@ -60,9 +61,12 @@ async function run() {
   app.use(express.json({ verify: rawBodyBuffer }));
   app.use(graphqlUploadExpress({ maxFileSize: 1000000000, maxFiles: 10 }));
   app.use(cors());
+  app.use("/health", require("./express/api/health"));
   app.use("/api/webhooks", require("./express/webhooks/index"));
   app.use("/api/users", require("./express/api/user"));
   app.use("/api/deal", require("./express/api/deal"));
+  app.use("/api/stripe", require("./express/api/stripe"));
+  app.use(errorMiddleware());
 
   // connect to MongoDB
   const db = await getDB();
@@ -95,7 +99,6 @@ async function run() {
 process.on("unhandledRejection", (error) => {
   // Will print "unhandledRejection err is not defined"
   console.log("unhandledRejection :>>", error);
-  throw new Error(error);
 });
 process.on("SIGTERM", endDBConnection);
 

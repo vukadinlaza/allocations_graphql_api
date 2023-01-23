@@ -8,6 +8,7 @@ const DealDocUploader = require("../../../uploaders/deal-docs");
 const Mailer = require("../../../mailers/mailer");
 const txConfirmationTemplate = require("../../../mailers/templates/tx-confirmation-template");
 const dataStorageAcceptedTemplate = require("../../../mailers/templates/data-storage-accepted");
+const migrationOnboarding = require("../../../mailers/templates/migration-onboarding");
 
 const { nWithCommas } = require("../../../utils/common.js");
 const {
@@ -302,6 +303,32 @@ const Mutations = {
     });
 
     return transfer;
+  },
+  migrationOnboarding: async (_, { payload }, ctx) => {
+    const accepted_timestamp = new Date();
+    await ctx.db.collection("assure_data_transfers").insertOne({
+      ...payload,
+      accepted: true,
+      accepted_timestamp,
+    });
+    const emailData = {
+      mainData: {
+        to: ["assuremigrations@allocations.com"],
+        from: "support@allocations.com",
+        subject: `New Migration Onboarding Form Submitted`,
+      },
+      template: migrationOnboarding,
+      templateData: payload,
+    };
+    await Mailer.sendEmail(emailData);
+
+    await fetch("https://hooks.zapier.com/hooks/catch/10079476/bn9bcv7/", {
+      method: "post",
+      body: JSON.stringify(payload),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    return payload;
   },
 };
 

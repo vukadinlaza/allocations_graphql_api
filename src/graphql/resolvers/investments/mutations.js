@@ -31,7 +31,7 @@ const Mutations = {
     }
 
     const newInvestment = {
-      status: "invited",
+      status: investment?.status || "invited",
       invited_at: Date.now(),
       created_at: Date.now(),
       [`${investment.status}_at`]: Date.now(),

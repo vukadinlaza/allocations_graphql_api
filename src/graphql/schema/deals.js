@@ -433,5 +433,6 @@ type Mutation {
   getTransitionDocument(payload: Object!): Object
   updateDataTransition(accepted: Boolean!, transfer_id: String!): Object
   acceptTransitionDocument(payload: Object!): Object
+  migrationOnboarding(payload: Object!): Object
 }
 `);
