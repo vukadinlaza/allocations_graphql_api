@@ -304,7 +304,13 @@ const Mutations = {
 
     return transfer;
   },
-  migrationOnboarding: async (_, { payload }) => {
+  migrationOnboarding: async (_, { payload }, ctx) => {
+    const accepted_timestamp = new Date();
+    await ctx.db.collection("assure_data_transfers").insertOne({
+      ...payload,
+      accepted: true,
+      accepted_timestamp,
+    });
     const emailData = {
       mainData: {
         to: ["assuremigrations@allocations.com"],
