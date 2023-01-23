@@ -80,7 +80,7 @@ module.exports = Router()
       const emailfield = fieldData.find(
         (f) => f._attributes.name === "userEmail"
       );
-      const dealId = get(dealFeild, "value._text");
+      let dealId = get(dealFeild, "value._text");
       const userEmail = get(emailfield, "value._text");
 
       if (documentName.includes("Allocations Services Agreement")) {
@@ -121,6 +121,7 @@ module.exports = Router()
         }
       }
       if (dealId) {
+        dealId = dealId.trim();
         if (userEmail) {
           user = await db.users.findOne({ email: userEmail });
         }
@@ -346,7 +347,7 @@ module.exports = Router()
       const { investmentId, status, wiredAmount, wiredDate } = body;
 
       const formattedWiredAmount = formatAmount(wiredAmount);
-
+      console.log(formattedWiredAmount, "FORMATTED WIRED AMOUNT");
       const db = await getDB();
       const legacyInvestment = await db.investments.findOne({
         _id: ObjectId(investmentId),
@@ -371,13 +372,20 @@ module.exports = Router()
       }
 
       if (legacyInvestment) {
+        console.log(
+          formattedWiredAmount +
+            Number(legacyInvestment?.capitalWiredAmount || 0),
+          "NEW WIRED AMOUNT"
+        );
         const epochWireDate = new Date(wiredDate).getTime();
         await db.investments.updateOne(
           { _id: ObjectId(investmentId) },
           {
             $set: {
-              status: status,
-              capitalWiredAmount: formattedWiredAmount,
+              status,
+              capitalWiredAmount:
+                formattedWiredAmount +
+                Number(legacyInvestment?.capitalWiredAmount || 0),
               wired_at: epochWireDate,
             },
           }
@@ -398,9 +406,14 @@ module.exports = Router()
           `No legacy investment found with _id:${investmentId}. Attempting to update service investment.`
         );
 
+        const transactionsSum = serviceInvestment?.transactions.reduce(
+          (acc, curr) => (acc += curr?.committed_amount || 0),
+          0
+        );
+
         const investmentData = {
           phase: "wired",
-          wired_amount: formattedWiredAmount,
+          wired_amount: formattedWiredAmount + transactionsSum,
           wired_date: wiredDate,
         };
 
@@ -415,8 +428,8 @@ module.exports = Router()
             body: JSON.stringify(investmentData),
           }
         );
-        const serviceInvestment = await serviceResponse.json();
-        await res.send(serviceInvestment);
+        const serviceInv = await serviceResponse.json();
+        res.send(serviceInv);
       }
     } catch (err) {
       console.log("wire-status-update :>> ", err);

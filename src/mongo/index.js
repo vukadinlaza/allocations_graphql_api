@@ -42,7 +42,9 @@ const getDB = async () => {
 };
 
 const endDBConnection = async () => {
-  if (client.isConnected()) await client.close();
+  // is a no-op if the client is already connected;
+  await client.connect();
+  await client.close();
 };
 
 async function drop(db) {
