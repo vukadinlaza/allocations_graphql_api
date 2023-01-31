@@ -13,5 +13,6 @@ type SuccessBoolean {
 extend type Query {
     search_auth_users(email: String!): Auth0AuthReponse
     reset_password(email: String!): SuccessBoolean
+    retoolEmbedUrl(app: String!):String
 }
 `);

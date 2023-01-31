@@ -1,6 +1,7 @@
 const fetch = require("node-fetch");
 const { ApolloError } = require("apollo-server");
 const { throwApolloError } = require("../../../utils/common.js");
+const { retoolApps } = require("../../helpers/retool.js");
 
 const Queries = {
   search_auth_users: async (_, { email }) => {
@@ -79,6 +80,30 @@ const Queries = {
     }
 
     return { success: true };
+  },
+  retoolEmbedUrl: async (_, { app }, { user }) => {
+    const { apiUrl, landingPageUuid, groupIds, sessionDurationMinutes } =
+      retoolApps[app];
+
+    const options = {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer retool_01gr28vay1te4zgscrb4sxmtsm`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        landingPageUuid,
+        externalIdentifier: user._id.toString(),
+        groupIds,
+        sessionDurationMinutes,
+      }),
+    };
+
+    const response = await fetch(apiUrl, options);
+
+    const data = await response.json();
+
+    return data?.embedUrl;
   },
 };
 
