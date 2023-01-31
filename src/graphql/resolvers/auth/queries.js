@@ -102,8 +102,11 @@ const Queries = {
     const response = await fetch(apiUrl, options);
 
     const data = await response.json();
+    const url = data?.embedUrl.includes("https")
+      ? data.embedUrl
+      : data.embedUrl.replace("http", "https");
 
-    return data?.embedUrl;
+    return url;
   },
 };
 
