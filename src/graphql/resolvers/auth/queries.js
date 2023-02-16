@@ -88,7 +88,7 @@ const Queries = {
     const options = {
       method: "POST",
       headers: {
-        Authorization: `Bearer retool_01gr28vay1te4zgscrb4sxmtsm`,
+        Authorization: `Bearer ${process.env.RETOOL_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
