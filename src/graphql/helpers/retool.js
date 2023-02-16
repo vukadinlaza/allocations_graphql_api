@@ -8,18 +8,20 @@ const retoolApps = {
     groupIds: [2],
     sessionDurationMinutes: 100,
   },
-  taxExternalStaging: {
-    apiUrl:
-      "https://external-retool-staging.allocations.com/api/embed-url/external-user",
-    landingPageUuid: "5ed2f2b2-7bc8-11ed-b184-1b27922e49dc",
-    groupIds: [2],
-    sessionDurationMinutes: 100,
-  },
   taxExternal: {
-    apiUrl: "https://beta.allocations.com/api/embed-url/external-user",
-    landingPageUuid: "5ed2f2b2-7bc8-11ed-b184-1b27922e49dc",
-    groupIds: [2],
-    sessionDurationMinutes: 100,
+    staging: {
+      apiUrl:
+        "https://external-retool-staging.allocations.com/api/embed-url/external-user",
+      landingPageUuid: "5ed2f2b2-7bc8-11ed-b184-1b27922e49dc",
+      groupIds: [2],
+      sessionDurationMinutes: 100,
+    },
+    production: {
+      apiUrl: "https://beta.allocations.com/api/embed-url/external-user",
+      landingPageUuid: "5ed2f2b2-7bc8-11ed-b184-1b27922e49dc",
+      groupIds: [2],
+      sessionDurationMinutes: 100,
+    },
   },
 };
 

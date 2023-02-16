@@ -83,7 +83,7 @@ const Queries = {
   },
   retoolEmbedUrl: async (_, { app }, { user }) => {
     const { apiUrl, landingPageUuid, groupIds, sessionDurationMinutes } =
-      retoolApps[app];
+      retoolApps[app][process.env.RETOOL_ENV];
 
     const options = {
       method: "POST",
