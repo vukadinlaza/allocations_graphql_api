@@ -98,7 +98,7 @@ const Queries = {
         sessionDurationMinutes,
       }),
     };
-
+    //x
     const response = await fetch(apiUrl, options);
 
     const data = await response.json();
