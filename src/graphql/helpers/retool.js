@@ -23,6 +23,21 @@ const retoolApps = {
       sessionDurationMinutes: 100,
     },
   },
+  taxUpdate: {
+    staging: {
+      apiUrl:
+        "https://external-retool-staging.allocations.com/api/embed-url/external-user",
+      landingPageUuid: "e22ab0fa-b6dd-11ed-a68a-07bd1c7611c1",
+      groupIds: [2],
+      sessionDurationMinutes: 100,
+    },
+    production: {
+      apiUrl: "https://beta.allocations.com/api/embed-url/external-user",
+      landingPageUuid: "e22ab0fa-b6dd-11ed-a68a-07bd1c7611c1",
+      groupIds: [2],
+      sessionDurationMinutes: 100,
+    },
+  },
 };
 
 module.exports = { retoolApps };

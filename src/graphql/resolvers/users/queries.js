@@ -1,6 +1,7 @@
 const { ObjectId } = require("mongodb");
 const { isAdmin, isOrgAdmin } = require("../../permissions");
 const { customUserPagination } = require("../../pagHelpers");
+const { default: fetch } = require("node-fetch");
 
 const Queries = {
   /** admin or investor themselves can query **/
@@ -103,6 +104,21 @@ const Queries = {
       .toArray();
 
     return users;
+  },
+
+  passportMissingInformation: async (_, { email }, ctx) => {
+    isAdmin(ctx);
+    const res = await fetch(
+      `${process.env.NEW_CORE_API}/api/v1/passports/taxes?email=${
+        email || ctx.user.email
+      }`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${process.env.NEW_CORE_API_TOKEN}` },
+      }
+    );
+    const response = await res.json();
+    return response;
   },
 };
 

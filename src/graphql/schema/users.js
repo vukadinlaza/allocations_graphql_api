@@ -103,6 +103,7 @@ extend type Query {
   usersById(userIds: [String]): [User]
   searchUsers(fields: [String]!, searchTerm: String): [User]
   allUsers(pagination: PaginationInput!, additionalFilter: Object): UserPagination
+  passportMissingInformation(email: String): [Object]
   
   #TO BE DELETED AUG 4th 2022
   investor(email: String, _id: String, deal_id: String): User
@@ -128,5 +129,6 @@ extend type Mutation {
   createInvestor(user: UserInput): User
   updateInvestorLinkedin(email: String!, linkedinUrl: String): User
   addFirstAndLastName(email: String!, first_name: String, last_name: String): User
+  
 }
 `);
