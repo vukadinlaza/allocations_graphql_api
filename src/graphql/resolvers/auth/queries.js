@@ -82,13 +82,18 @@ const Queries = {
     return { success: true };
   },
   retoolEmbedUrl: async (_, { app }, { user }) => {
-    const { apiUrl, landingPageUuid, groupIds, sessionDurationMinutes } =
-      retoolApps[app][process.env.RETOOL_ENV];
+    const {
+      apiUrl,
+      landingPageUuid,
+      groupIds,
+      sessionDurationMinutes,
+      apiKey,
+    } = retoolApps[app][process.env.RETOOL_ENV];
 
     const options = {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.RETOOL_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
