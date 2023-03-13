@@ -589,8 +589,6 @@ module.exports = Router()
         throw new Error("No Virtual Account Number");
       const { virtual_account_number } = deal;
 
-      console.log("AMOUNT", amount);
-
       await newDirectionTransactionsAddRow({
         virtualAccountNumber: virtual_account_number,
         amount,
