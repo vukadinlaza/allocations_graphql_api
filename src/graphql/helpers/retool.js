@@ -9,7 +9,8 @@ const retoolApps = {
       apiKey: process.env.RETOOL_INTERNAL_API_KEY,
     },
     production: {
-      apiUrl: "https://beta.allocations.com/api/embed-url/external-user",
+      apiUrl:
+        "https://internal-retool.allocations.com/api/embed-url/external-user",
       landingPageUuid: "8c41a1d8-9cd6-11ed-87ee-333d48a5b286",
       groupIds: [2],
       sessionDurationMinutes: 100,
