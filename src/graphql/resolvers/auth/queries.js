@@ -88,7 +88,7 @@ const Queries = {
       groupIds,
       sessionDurationMinutes,
       apiKey,
-    } = retoolApps[app][process.env.RETOOL_ENV];
+    } = retoolApps[app];
 
     const options = {
       method: "POST",
@@ -104,7 +104,7 @@ const Queries = {
       }),
     };
     //x
-    const response = await fetch(apiUrl, options);
+    const response = await fetch(apiUrl[process.env.RETOOL_ENV], options);
 
     const data = await response.json();
     const url = data?.embedUrl.includes("https")
