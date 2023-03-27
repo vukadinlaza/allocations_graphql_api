@@ -50,6 +50,16 @@ const retoolApps = {
       production: apiUrls.EXTERNAL_PROD,
     },
   },
+  taxManagement: {
+    landingPageUuid: "02bc8c06-c97d-11ed-807e-a369743ee6d3",
+    groupIds: [2],
+    sessionDurationMinutes: 100,
+    apiKey: process.env.RETOOL_API_KEY,
+    apiUrl: {
+      staging: apiUrls.INTERNAL_STAGING,
+      production: apiUrls.INTERNAL_PROD,
+    },
+  },
   taxUpdate: {
     landingPageUuid: "e22ab0fa-b6dd-11ed-a68a-07bd1c7611c1",
     groupIds: [2],
