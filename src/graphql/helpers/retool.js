@@ -54,7 +54,7 @@ const retoolApps = {
     landingPageUuid: "02bc8c06-c97d-11ed-807e-a369743ee6d3",
     groupIds: [2],
     sessionDurationMinutes: 100,
-    apiKey: process.env.RETOOL_API_KEY,
+    apiKey: process.env.RETOOL_INTERNAL_API_KEY,
     apiUrl: {
       staging: apiUrls.INTERNAL_STAGING,
       production: apiUrls.INTERNAL_PROD,
