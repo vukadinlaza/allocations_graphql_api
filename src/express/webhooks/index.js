@@ -345,6 +345,7 @@ module.exports = Router()
       }
       const { body } = req;
       const { investmentId, status, wiredAmount, wiredDate } = body;
+      console.log("INVESTMENT ID", investmentId);
 
       const formattedWiredAmount = formatAmount(wiredAmount);
       console.log(formattedWiredAmount, "FORMATTED WIRED AMOUNT");
