@@ -3,8 +3,24 @@ const { ObjectId } = require("mongodb");
 const { default: fetch } = require("node-fetch");
 const Cloudfront = require("../../../cloudfront");
 const { requestBuild } = require("../../../utils/build-api");
+const { DealService } = require("@allocations/deal-service");
 
 const Deal = {
+  banking: async (deal, _, { user, datasources }) => {
+    const account = await DealService.getBankAccountByDealId(deal._id);
+    let transactions = [];
+    if (account && account._id) {
+      transactions =
+        (await DealService.getTransactionsByAccountId(account._id)) ?? [];
+    }
+
+    return {
+      balance: 0,
+      routing_number: account?.routing_number ?? "",
+      account_number: account?.account_number ?? "",
+      transactions: transactions,
+    };
+  },
   // investment denotes the `ctx.user` investment in this deal (can only be one)
   investment: (deal, _, { user, datasources }) => {
     return datasources.investments.getOneInvestment({

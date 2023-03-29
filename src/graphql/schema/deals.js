@@ -25,6 +25,7 @@ type Deal {
   amount_raised: String
   investment: Investment
   investments: [Investment]
+  banking: Banking
   memo: String
   documents: [Document]
   last_valuation: String
@@ -415,7 +416,6 @@ type Query {
   publicDeal(deal_slug: String!, fund_slug: String!, invite_code: String): Deal
   fundAdminHighlights: Object
   fundAdminTables(filter: Object, pagination: PaginationInput!): DealPagination
-
   getCryptoWalletAddress(deal_id: String): String  @deprecated(reason: "In the process of adopting snake_cased version")
 }
 
