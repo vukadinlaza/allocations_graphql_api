@@ -1,4 +1,5 @@
-const { isAdmin } = require("../../permissions");
+const { isAdmin, isOrgAdmin } = require("../../permissions");
+const { default: fetch } = require("node-fetch");
 
 const Organization = {
   deals: async (org, _, { datasources }) => {
@@ -128,6 +129,20 @@ const Organization = {
   members: async (organization, _, { user, db }) => {
     isAdmin({ user, db });
     return db.users.find({ organizations_admin: organization._id }).toArray();
+  },
+  taxInformation: async (organization, _, ctx) => {
+    isOrgAdmin(organization._id, ctx);
+
+    const res = await fetch(
+      `${process.env.NEW_CORE_API}/api/v1/taxes/tax-deals?organizationId=${organization._id}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${ctx.authToken}` },
+      }
+    );
+    const response = await res.json();
+
+    return response;
   },
 };
 

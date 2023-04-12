@@ -57,7 +57,13 @@ function authedServer(db) {
           variables: JSON.stringify(variables),
         });
 
-      return { user, db, pubsub, datasources };
+      return {
+        user,
+        db,
+        pubsub,
+        datasources,
+        authToken: authToken || payload.req.headers.authorization,
+      };
     },
     plugins: [
       {

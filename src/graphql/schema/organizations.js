@@ -32,6 +32,7 @@ type Organization {
   high_volume_partner: Boolean
   masterEntity: MasterEntity
   members: [User]
+  taxInformation: Object
 }
 
 type MasterEntity {
